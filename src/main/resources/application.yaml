@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/spring
+    username: alvaro-star
+    password: Ava24815032006*
+  h2:
+    console:
+      enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+api:
+  security:
+    token:
+      secret: ${JWT_SECRET:pastaMasterChef}
