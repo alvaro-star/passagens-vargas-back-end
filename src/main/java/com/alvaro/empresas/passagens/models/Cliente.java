@@ -13,9 +13,9 @@ public class Cliente {
     private String carnet;
     private String email;
 
-    public Cliente(String nombre, String carnet, String email){
-            this.nombre = nombre;
-            this.carnet = carnet;
-            this.email = email;
+    public Cliente(String nombre, String carnet, String email) {
+        this.nombre = nombre;
+        this.carnet = carnet;
+        this.email = email;
     }
 }
