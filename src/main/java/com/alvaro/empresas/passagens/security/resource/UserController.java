@@ -45,7 +45,7 @@ public class UserController {
             return ResponseEntity.badRequest().build();
 
         String encriptedPassword = new BCryptPasswordEncoder().encode(registerDto.contrasena());
-        UserModel newUser = new UserModel(registerDto.login(), encriptedPassword, registerDto.carnet(), registerDto.role());
+        UserModel newUser = new UserModel(registerDto.login(), encriptedPassword, registerDto.nombre(), registerDto.role());
 
         userRepository.save(newUser);
         return ResponseEntity.ok().build();

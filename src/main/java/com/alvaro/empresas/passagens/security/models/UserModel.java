@@ -1,5 +1,7 @@
 package com.alvaro.empresas.passagens.security.models;
 
+import com.alvaro.empresas.passagens.models.EmpresaModel;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,7 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
-@Table(name = "tb_usuarios")
+@Table(name = "tb_usuario")
 @Entity
 @Getter
 @Setter
@@ -21,17 +23,18 @@ public class UserModel implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "idtb_usuarios")
+    @Column(name = "idtb_usuario")
     private String id;
+    @Column(name = "email", nullable = false)
     private String login;
+    private String nombre;
     private String contrasena;
-    private String carnet;
     private UserRole role;
 
-    public UserModel(String login, String contrasena, String carnet, UserRole role) {
+    public UserModel(String login, String contrasena, String nombre, UserRole role) {
         this.login = login;
+        this.nombre = nombre;
         this.contrasena = contrasena;
-        this.carnet = carnet;
         this.role = role;
     }
 
