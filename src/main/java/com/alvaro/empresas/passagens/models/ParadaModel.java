@@ -29,12 +29,12 @@ public class ParadaModel {
     @Enumerated(EnumType.STRING)
     private EnumParada estado;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_viaje")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private ViajeModel viaje;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_lugar")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private LugarModel lugar;

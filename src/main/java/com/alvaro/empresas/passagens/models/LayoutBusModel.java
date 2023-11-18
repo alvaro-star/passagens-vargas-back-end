@@ -33,5 +33,5 @@ public class LayoutBusModel {
     private ArrayList<AutobusModel> autobuses = new ArrayList<AutobusModel>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "layout")
-    private ArrayList<AsientoBoqueadoModel> asientoBoqueado = new ArrayList<AsientoBoqueadoModel>();
+    private ArrayList<AsientoBloqueadoModel> asientoBoqueado = new ArrayList<AsientoBloqueadoModel>();
 }

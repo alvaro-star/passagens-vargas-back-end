@@ -21,18 +21,18 @@ public class AutobusModel {
     @Column(unique = true, nullable = false)
     private String codigo;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "autobus")
-    private ArrayList<ViajeModel> viajes = new ArrayList<ViajeModel>();
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_layout_bus")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private LayoutBusModel layout;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_empresa")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private EmpresaModel empresa;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "autobus")
+    private ArrayList<ViajeModel> viajes = new ArrayList<ViajeModel>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "autobus")
     private ArrayList<AsientoModel> assientos = new ArrayList<AsientoModel>();

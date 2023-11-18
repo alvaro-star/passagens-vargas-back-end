@@ -13,7 +13,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class AsientoBoqueadoModel {
+public class AsientoBloqueadoModel {
     @Id
     @Column(name = "idtb_asiento_bloqueado")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,7 +21,7 @@ public class AsientoBoqueadoModel {
     private int linha;
     private int coluna;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_layout_bus")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private LayoutBusModel layout;

@@ -22,7 +22,7 @@ public class PasajeModel {
     @Column(name = "comprado_na_web?")
     private boolean compradoWeb;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_asiento")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private AsientoModel asiento;
