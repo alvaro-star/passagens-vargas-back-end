@@ -1,9 +1,9 @@
 package com.alvaro.empresas.passagens.security.models;
 
-import com.alvaro.empresas.passagens.models.EmpresaModel;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,7 +12,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Table(name = "tb_usuario")
 @Entity
@@ -27,33 +29,28 @@ public class UserModel implements UserDetails {
     private String id;
     @Column(name = "email", nullable = false)
     private String login;
+    private String carnet;
     private String nombre;
     private String contrasena;
-    private UserRole role;
 
-    public UserModel(String login, String contrasena, String nombre, UserRole role) {
+    @NotNull
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "tb_usuario_role",
+            joinColumns = @JoinColumn(name = "idtb_usuario", referencedColumnName = "idtb_usuario"),
+            inverseJoinColumns = @JoinColumn(name = "idtb_role", referencedColumnName = "idtb_role"))
+    private Set<RoleModel> roles = new HashSet<>();
+
+    public UserModel(String login, String nombre, String carnet, String contrasena, Set<RoleModel> roles) {
         this.login = login;
         this.nombre = nombre;
+        this.carnet = carnet;
         this.contrasena = contrasena;
-        this.role = role;
+        this.roles = roles;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        if (this.role == UserRole.ADMIN) {
-            return List.of(
-                    new SimpleGrantedAuthority("ROLE_ADMIN"),
-                    new SimpleGrantedAuthority("ROLE_USER")
-            );
-        } else if (this.role == UserRole.USER) {
-            return List.of(
-                    new SimpleGrantedAuthority("ROLE_USER")
-            );
-        } else {
-            return List.of(
-                    new SimpleGrantedAuthority("ROLE_USER")
-            );
-        }
+        return roles;
     }
 
     @Override

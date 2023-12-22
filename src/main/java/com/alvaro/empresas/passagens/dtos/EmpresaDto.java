@@ -10,6 +10,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
+@NoArgsConstructor
 public class EmpresaDto {
 
     private int id;
@@ -19,6 +20,12 @@ public class EmpresaDto {
     private String logo;
     @NotBlank
     private String numeroCuenta;
+
+    public EmpresaDto(String nombre, String logo, String numeroCuenta) {
+        this.nombre = nombre;
+        this.logo = logo;
+        this.numeroCuenta = numeroCuenta;
+    }
 
     public EmpresaDto(EmpresaModel model) {
         id = model.getId();

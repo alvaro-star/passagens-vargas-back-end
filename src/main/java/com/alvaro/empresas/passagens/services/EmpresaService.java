@@ -8,6 +8,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,29 +28,20 @@ public class EmpresaService {
         return empresaRepository.findAll();
     }
 
-    public List<EmpresaDto> modelsDtoToListDtos() {
-        List<EmpresaDto> dtos = new ArrayList<EmpresaDto>();
-        List<EmpresaModel> models = findAll();
-        if (!models.isEmpty()) {
-            for (EmpresaModel model : models) {
-                dtos.add(new EmpresaDto(model));
-            }
-        }
-        return dtos;
-    }
-
+    @Transactional
     public EmpresaModel save(EmpresaDto dto) {
         var model = new EmpresaModel();
-        BeanUtils.copyProperties(model, dto, "id");
+        BeanUtils.copyProperties(dto, model, "id", "autobuses");
         return empresaRepository.save(model);
     }
 
     public EmpresaModel update(EmpresaDto dto, Integer id) {
         var model = this.findById(id);
-        BeanUtils.copyProperties(model, dto, "id");
+        BeanUtils.copyProperties(dto, model, "id", "autobuses");
         return empresaRepository.save(model);
     }
 
+    @Transactional
     public void delete(Integer id) {
         var model = this.findById(id);
         empresaRepository.delete(model);

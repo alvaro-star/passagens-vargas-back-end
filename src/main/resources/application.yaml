@@ -1,14 +1,14 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/spring
-    username: alvaro-star
-    password: Ava24815032006*
+    url: jdbc:mysql://localhost:3311/spring
+    username: root
+    password: StrTit24815032006*
   h2:
     console:
       enabled: false
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
 api:
   security:
     token:

@@ -4,12 +4,12 @@ package com.alvaro.empresas.passagens.security.models;
 import lombok.Getter;
 
 @Getter
-public enum UserRole {
-    ADMIN("admin"), USER("user");
+public enum RoleList {
+    ADMIN("admin"), USER("user"), INVALIDO("invalido");
 
     private String role;
 
-    UserRole(String role) {
+    RoleList(String role) {
         this.role = role;
     }
 }
