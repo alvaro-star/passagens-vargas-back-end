@@ -1,6 +1,7 @@
 package com.alvaro.empresas.passagens.resources;
 
 import com.alvaro.empresas.passagens.dtos.EmpresaDto;
+import com.alvaro.empresas.passagens.dtos.Mensaje;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.services.EmpresaService;
 import jakarta.validation.Valid;
@@ -51,8 +52,8 @@ public class EmpresaResource {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> delete(@PathVariable(value = "id") Integer id, @RequestBody @Valid EmpresaDto dto) {
-        EmpresaModel model = empresaService.update(dto, id);
-        return ResponseEntity.status(HttpStatus.OK).body(model);
+    public ResponseEntity<Object> delete(@PathVariable(value = "id") Integer id) {
+        empresaService.delete(id);
+        return ResponseEntity.status(HttpStatus.OK).body(new Mensaje("Eliminado"));
     }
 }
