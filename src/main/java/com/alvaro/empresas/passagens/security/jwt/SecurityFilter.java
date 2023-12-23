@@ -2,7 +2,6 @@ package com.alvaro.empresas.passagens.security.jwt;
 
 import com.alvaro.empresas.passagens.security.repositories.UserRepository;
 import com.alvaro.empresas.passagens.security.services.TokenService;
-import com.alvaro.empresas.passagens.security.services.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

@@ -2,7 +2,6 @@ package com.alvaro.empresas.passagens.models;
 
 
 import com.alvaro.empresas.passagens.enums.EnumParada;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -10,7 +9,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 
 @Entity
 @Table(name = "tb_parada")

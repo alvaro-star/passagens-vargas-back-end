@@ -1,7 +1,6 @@
 package com.alvaro.empresas.passagens.models;
 
 import com.alvaro.empresas.passagens.dtos.EmpresaDto;
-import com.alvaro.empresas.passagens.security.models.UserModel;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

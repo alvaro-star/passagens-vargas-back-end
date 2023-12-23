@@ -1,7 +1,7 @@
 package com.alvaro.empresas.passagens.models;
 
-import com.alvaro.empresas.passagens.enums.autobus.EnumTipoBus;
 import com.alvaro.empresas.passagens.enums.autobus.EnumPosicao;
+import com.alvaro.empresas.passagens.enums.autobus.EnumTipoBus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

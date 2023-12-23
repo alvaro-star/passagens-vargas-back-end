@@ -8,14 +8,11 @@ import com.alvaro.empresas.passagens.models.AsientoBloqueadoModel;
 import com.alvaro.empresas.passagens.models.LayoutBusModel;
 import com.alvaro.empresas.passagens.repositories.AsientoBloqueadoRepository;
 import com.alvaro.empresas.passagens.repositories.LayoutBusRepository;
-import jakarta.persistence.EnumType;
 import org.hibernate.ObjectNotFoundException;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 

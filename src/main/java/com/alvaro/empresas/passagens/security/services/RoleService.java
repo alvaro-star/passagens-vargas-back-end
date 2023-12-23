@@ -3,7 +3,6 @@ package com.alvaro.empresas.passagens.security.services;
 import com.alvaro.empresas.passagens.security.models.RoleList;
 import com.alvaro.empresas.passagens.security.models.RoleModel;
 import com.alvaro.empresas.passagens.security.repositories.RoleRepository;
-import com.alvaro.empresas.passagens.security.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

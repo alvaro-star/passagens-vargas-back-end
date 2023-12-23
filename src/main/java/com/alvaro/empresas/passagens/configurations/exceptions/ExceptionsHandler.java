@@ -1,10 +1,7 @@
 package com.alvaro.empresas.passagens.configurations.exceptions;
 
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hibernate.ObjectNotFoundException;
-import org.springframework.boot.context.properties.bind.validation.ValidationErrors;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
