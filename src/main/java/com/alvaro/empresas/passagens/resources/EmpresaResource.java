@@ -46,9 +46,9 @@ public class EmpresaResource {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> update(@PathVariable(value = "id") Integer id, @RequestBody @Valid EmpresaDto dto) {
+    public ResponseEntity<EmpresaDto> update(@PathVariable(value = "id") Integer id, @RequestBody @Valid EmpresaDto dto) {
         EmpresaModel model = empresaService.update(dto, id);
-        return ResponseEntity.status(HttpStatus.OK).body(model);
+        return ResponseEntity.status(HttpStatus.OK).body(new EmpresaDto(model));
     }
 
     @DeleteMapping("/{id}")

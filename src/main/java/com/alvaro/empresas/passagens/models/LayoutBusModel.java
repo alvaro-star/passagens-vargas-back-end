@@ -1,5 +1,6 @@
 package com.alvaro.empresas.passagens.models;
 
+import com.alvaro.empresas.passagens.dtos.LayoutBusDTO;
 import com.alvaro.empresas.passagens.enums.autobus.EnumPosicao;
 import com.alvaro.empresas.passagens.enums.autobus.EnumTipoBus;
 import jakarta.persistence.*;
@@ -35,4 +36,39 @@ public class LayoutBusModel {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "layout")
     private List<AsientoBloqueadoModel> asientosBloqueados = new ArrayList<AsientoBloqueadoModel>();
+
+    public void llenarSinVector(LayoutBusDTO dto) {
+        nSillas = dto.getNSillas();
+        nFilas = dto.getNFilas();
+
+        switch (dto.getPosicionPasillo()) {
+            case "medio":
+                posicionPasillo = EnumPosicao.MEDIO;
+                break;
+            case "izquierda":
+                posicionPasillo = EnumPosicao.IZQUIERDA;
+                break;
+            case "derecha":
+                posicionPasillo = EnumPosicao.DERECHA;
+                break;
+        }
+
+        switch (dto.getTipo()) {
+            case "leito":
+                tipo = EnumTipoBus.LEITO;
+                break;
+            case "tradicional":
+                tipo = EnumTipoBus.TRADICIONAL;
+                break;
+        }
+
+        switch (dto.getInicioContagem()) {
+            case "izquierda":
+                inicioContagem = EnumPosicao.DERECHA;
+                break;
+            case "derecha":
+                inicioContagem = EnumPosicao.IZQUIERDA;
+                break;
+        }
+    }
 }

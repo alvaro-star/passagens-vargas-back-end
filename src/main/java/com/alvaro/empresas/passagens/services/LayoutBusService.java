@@ -9,10 +9,12 @@ import com.alvaro.empresas.passagens.models.LayoutBusModel;
 import com.alvaro.empresas.passagens.repositories.AsientoBloqueadoRepository;
 import com.alvaro.empresas.passagens.repositories.LayoutBusRepository;
 import org.hibernate.ObjectNotFoundException;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +22,8 @@ import java.util.Optional;
 public class LayoutBusService {
     @Autowired
     private LayoutBusRepository layoutBusRepository;
+    @Autowired
+    private AsientoBloqueadosService asientoBloqueadosService;
     @Autowired
     private AsientoBloqueadoRepository asientoBloqueadoRepository;
 
@@ -34,48 +38,32 @@ public class LayoutBusService {
 
     @Transactional
     public LayoutBusModel save(LayoutBusDTO dto) {
-        List<AsientoBloqueadoDTO> asientosBloqueados = dto.getAsientosBloqueados();
+
         var layoutModel = new LayoutBusModel();
-        layoutModel.setNSillas(dto.getNSillas());
-        layoutModel.setNFilas(dto.getNFilas());
-
-        switch (dto.getPosicionPasillo()) {
-            case "medio":
-                layoutModel.setPosicionPasillo(EnumPosicao.MEDIO);
-                break;
-            case "izquierda":
-                layoutModel.setPosicionPasillo(EnumPosicao.IZQUIERDA);
-                break;
-            case "derecha":
-                layoutModel.setPosicionPasillo(EnumPosicao.DERECHA);
-                break;
-        }
-
-        switch (dto.getTipo()) {
-            case "leito":
-                layoutModel.setTipo(EnumTipoBus.LEITO);
-                break;
-            case "tradicional":
-                layoutModel.setTipo(EnumTipoBus.TRADICIONAL);
-                break;
-        }
-
-        switch (dto.getInicioContagem()) {
-            case "izquierda":
-                layoutModel.setInicioContagem(EnumPosicao.DERECHA);
-                break;
-            case "derecha":
-                layoutModel.setInicioContagem(EnumPosicao.IZQUIERDA);
-                break;
-        }
-
+        layoutModel.llenarSinVector(dto);
         var layoutModelSave = layoutBusRepository.save(layoutModel);
-        for (AsientoBloqueadoDTO asientoDto : asientosBloqueados) {
-            var asientoModel = new AsientoBloqueadoModel(asientoDto);
-            asientoModel.setLayout(layoutModelSave);
-            asientoBloqueadoRepository.save(asientoModel);
-        }
+        asientoBloqueadosService.saveAll(dto.getAsientosBloqueados(), layoutModelSave);
 
         return layoutModelSave;
+    }
+
+    @Transactional
+    public LayoutBusModel update(LayoutBusDTO dto, Integer id) {
+        var model = this.findById(id);
+        model.llenarSinVector(dto);
+
+        asientoBloqueadosService.deleteAll(model.getAsientosBloqueados());
+        model.setAsientosBloqueados(new ArrayList<AsientoBloqueadoModel>());
+
+        var modelUpdate = layoutBusRepository.save(model);
+        List<AsientoBloqueadoModel> asientoBloqueadoModels = asientoBloqueadosService.saveAll(dto.getAsientosBloqueados(), modelUpdate);
+        modelUpdate.setAsientosBloqueados(asientoBloqueadoModels);
+        return modelUpdate;
+    }
+
+    public void delete(Integer id) {
+        var model = this.findById(id);
+        asientoBloqueadosService.deleteAll(model.getAsientosBloqueados());
+        layoutBusRepository.delete(model);
     }
 }
