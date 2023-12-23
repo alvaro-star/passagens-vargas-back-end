@@ -26,13 +26,17 @@ public class RoleService {
 
     public Set<RoleModel> loadRole(String role) {
         Set<RoleModel> roles = new HashSet<>();
-        if (role.equals(RoleList.ADMIN.getRole())) {
-            roles.add(this.getByRoleName(RoleList.ADMIN).get());
-            roles.add(this.getByRoleName(RoleList.USER).get());
-        } else if (role.equals(RoleList.USER.getRole())) {
-            roles.add(this.getByRoleName(RoleList.USER).get());
-        } else {
-            roles.add(this.getByRoleName(RoleList.INVALIDO).get());
+        switch (role) {
+            case "admin":
+                roles.add(this.getByRoleName(RoleList.ADMIN).get());
+                roles.add(this.getByRoleName(RoleList.USER).get());
+                break;
+            case "user":
+                roles.add(this.getByRoleName(RoleList.USER).get());
+                break;
+            default:
+                roles.add(this.getByRoleName(RoleList.INVALIDO).get());
+                break;
         }
         return roles;
 

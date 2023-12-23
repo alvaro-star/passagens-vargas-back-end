@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 @Entity
@@ -30,8 +31,8 @@ public class LayoutBusModel {
     private EnumPosicao inicioContagem;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "layout")
-    private ArrayList<AutobusModel> autobuses = new ArrayList<AutobusModel>();
+    private List<AutobusModel> autobuses = new ArrayList<AutobusModel>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "layout")
-    private ArrayList<AsientoBloqueadoModel> asientoBoqueado = new ArrayList<AsientoBloqueadoModel>();
+    private List<AsientoBloqueadoModel> asientosBloqueados = new ArrayList<AsientoBloqueadoModel>();
 }

@@ -1,6 +1,7 @@
 package com.alvaro.empresas.passagens.models;
 
 
+import com.alvaro.empresas.passagens.dtos.AsientoBloqueadoDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -25,4 +26,9 @@ public class AsientoBloqueadoModel {
     @JoinColumn(name = "fk_idtb_layout_bus")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private LayoutBusModel layout;
+
+    public AsientoBloqueadoModel(AsientoBloqueadoDTO dto) {
+        linha = dto.getLinha();
+        coluna = dto.getColuna();
+    }
 }

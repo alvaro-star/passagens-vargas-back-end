@@ -21,10 +21,11 @@ public class PasajeModel {
     private String nombre;
     @Column(name = "comprado_na_web?")
     private boolean compradoWeb;
+    private int numeroAsiento;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "fk_idtb_asiento")
+    @JoinColumn(name = "fk_idtb_autobus")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private AsientoModel asiento;
+    private AutobusModel autobus;
 
 }

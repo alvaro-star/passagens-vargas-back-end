@@ -34,6 +34,4 @@ public class AutobusModel {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "autobus")
     private ArrayList<ViajeModel> viajes = new ArrayList<ViajeModel>();
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "autobus")
-    private ArrayList<AsientoModel> assientos = new ArrayList<AsientoModel>();
 }
