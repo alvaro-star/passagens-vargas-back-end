@@ -1,6 +1,6 @@
-package com.alvaro.empresas.passagens.dtos;
+package com.alvaro.empresas.passagens.autobuses.dtos;
 
-import com.alvaro.empresas.passagens.models.LayoutBusModel;
+import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -13,13 +13,17 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class LayoutBusDTO {
+public class PisoDTO {
 
     private int id;
     @NotNull
     private int nSillas;
     @NotNull
     private int nFilas;
+    @NotNull
+    private int nPiso;
+    @NotNull
+    private int primeraSilla;
     @NotBlank
     private String posicionPasillo;
     @NotBlank
@@ -28,10 +32,12 @@ public class LayoutBusDTO {
     private String inicioContagem;
     private List<AsientoBloqueadoDTO> asientosBloqueados = new ArrayList<>();
 
-    public LayoutBusDTO(LayoutBusModel model) {
+    public PisoDTO(PisoModel model) {
         id = model.getId();
         nSillas = model.getNSillas();
         nFilas = model.getNFilas();
+        nPiso = model.getNPiso();
+        primeraSilla = model.getPrimeraSilla();
         posicionPasillo = model.getPosicionPasillo().toString();
         tipo = model.getTipo().toString();
         inicioContagem = model.getInicioContagem().toString();

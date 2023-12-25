@@ -1,5 +1,7 @@
-package com.alvaro.empresas.passagens.models;
+package com.alvaro.empresas.passagens.autobuses.models;
 
+import com.alvaro.empresas.passagens.models.EmpresaModel;
+import com.alvaro.empresas.passagens.models.TrayectoModel;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -7,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "tb_autobus")
@@ -19,12 +22,7 @@ public class AutobusModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @Column(unique = true, nullable = false)
-    private String codigo;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "fk_idtb_layout_bus")
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private LayoutBusModel layout;
+    private String placa;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_empresa")
@@ -32,6 +30,9 @@ public class AutobusModel {
     private EmpresaModel empresa;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "autobus")
-    private ArrayList<ViajeModel> viajes = new ArrayList<ViajeModel>();
+    private List<PisoModel> pisos = new ArrayList<PisoModel>();
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "autobus")
+    private List<TrayectoModel> trayectos = new ArrayList<TrayectoModel>();
 
 }

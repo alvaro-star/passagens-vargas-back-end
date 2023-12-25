@@ -1,6 +1,6 @@
-package com.alvaro.empresas.passagens.dtos;
+package com.alvaro.empresas.passagens.autobuses.dtos;
 
-import com.alvaro.empresas.passagens.models.AsientoBloqueadoModel;
+import com.alvaro.empresas.passagens.autobuses.models.AsientoBloqueadoModel;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

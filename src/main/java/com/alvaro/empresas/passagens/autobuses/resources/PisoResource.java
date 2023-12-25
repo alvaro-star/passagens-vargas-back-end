@@ -1,12 +1,12 @@
-package com.alvaro.empresas.passagens.resources;
+package com.alvaro.empresas.passagens.autobuses.resources;
 
-import com.alvaro.empresas.passagens.dtos.AsientoBloqueadoDTO;
-import com.alvaro.empresas.passagens.dtos.LayoutBusDTO;
+import com.alvaro.empresas.passagens.autobuses.dtos.AsientoBloqueadoDTO;
+import com.alvaro.empresas.passagens.autobuses.dtos.PisoDTO;
 import com.alvaro.empresas.passagens.dtos.Mensaje;
-import com.alvaro.empresas.passagens.models.AsientoBloqueadoModel;
-import com.alvaro.empresas.passagens.models.LayoutBusModel;
-import com.alvaro.empresas.passagens.services.AsientoBloqueadosService;
-import com.alvaro.empresas.passagens.services.LayoutBusService;
+import com.alvaro.empresas.passagens.autobuses.models.AsientoBloqueadoModel;
+import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
+import com.alvaro.empresas.passagens.autobuses.services.AsientoBloqueadosService;
+import com.alvaro.empresas.passagens.autobuses.services.PisoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,16 +18,16 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/layout")
-public class LayoutBusResource {
+public class PisoResource {
     @Autowired
-    private LayoutBusService layoutBusService;
+    private PisoService pisoService;
     @Autowired
     private AsientoBloqueadosService asientoBloqueadosService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<LayoutBusDTO> getOne(@PathVariable(value = "id") Integer id) {
-        var model = layoutBusService.findById(id);
-        var dto = new LayoutBusDTO(model);
+    public ResponseEntity<PisoDTO> getOne(@PathVariable(value = "id") Integer id) {
+        var model = pisoService.findById(id);
+        var dto = new PisoDTO(model);
 
         for (AsientoBloqueadoModel asientoModel : model.getAsientosBloqueados()) {
             dto.getAsientosBloqueados().add(new AsientoBloqueadoDTO(asientoModel));
@@ -38,12 +38,12 @@ public class LayoutBusResource {
     }
 
     @GetMapping
-    public ResponseEntity<List<LayoutBusDTO>> findAll() {
-        List<LayoutBusModel> models = layoutBusService.findAll();
-        List<LayoutBusDTO> dtos = new ArrayList<>();
+    public ResponseEntity<List<PisoDTO>> findAll() {
+        List<PisoModel> models = pisoService.findAll();
+        List<PisoDTO> dtos = new ArrayList<>();
 
-        for (LayoutBusModel model : models) {
-            var dto = new LayoutBusDTO(model);
+        for (PisoModel model : models) {
+            var dto = new PisoDTO(model);
             for (AsientoBloqueadoModel bloqueado : model.getAsientosBloqueados()) {
                 dto.getAsientosBloqueados().add(new AsientoBloqueadoDTO(bloqueado));
             }
@@ -55,18 +55,18 @@ public class LayoutBusResource {
 
 
     @PostMapping
-    public ResponseEntity<LayoutBusDTO> save(@RequestBody @Valid LayoutBusDTO dto) {
-        var model = layoutBusService.save(dto);
-        var dtoSave = new LayoutBusDTO(model);
+    public ResponseEntity<PisoDTO> save(@RequestBody @Valid PisoDTO dto) {
+        var model = pisoService.save(dto);
+        var dtoSave = new PisoDTO(model);
         List<AsientoBloqueadoDTO> bloqueadoDTOS = asientoBloqueadosService.convertModelsToDtos(model.getAsientosBloqueados());
         dtoSave.setAsientosBloqueados(bloqueadoDTOS);
         return ResponseEntity.status(HttpStatus.CREATED).body(dtoSave);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<LayoutBusDTO> update(@PathVariable(value = "id") Integer id, @RequestBody @Valid LayoutBusDTO dto) {
-        var model = layoutBusService.update(dto, id);
-        var dtoSave = new LayoutBusDTO(model);
+    public ResponseEntity<PisoDTO> update(@PathVariable(value = "id") Integer id, @RequestBody @Valid PisoDTO dto) {
+        var model = pisoService.update(dto, id);
+        var dtoSave = new PisoDTO(model);
         List<AsientoBloqueadoDTO> bloqueadoDTOS = asientoBloqueadosService.convertModelsToDtos(model.getAsientosBloqueados());
         dtoSave.setAsientosBloqueados(bloqueadoDTOS);
         return ResponseEntity.ok().body(dtoSave);
@@ -74,7 +74,7 @@ public class LayoutBusResource {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> delete(@PathVariable(value = "id") Integer id) {
-        layoutBusService.delete(id);
+        pisoService.delete(id);
         return ResponseEntity.ok().body(new Mensaje("Eliminado"));
 
     }

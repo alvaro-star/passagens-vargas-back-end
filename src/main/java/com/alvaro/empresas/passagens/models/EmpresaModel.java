@@ -1,5 +1,6 @@
 package com.alvaro.empresas.passagens.models;
 
+import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.dtos.EmpresaDto;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -24,7 +25,7 @@ public class EmpresaModel {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "empresa")
     private List<AutobusModel> autobuses = new ArrayList<AutobusModel>();
-
+    //Funcionarios
     public EmpresaModel() {
     }
 

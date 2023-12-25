@@ -1,10 +1,9 @@
-package com.alvaro.empresas.passagens.services;
+package com.alvaro.empresas.passagens.autobuses.services;
 
-import com.alvaro.empresas.passagens.dtos.AsientoBloqueadoDTO;
-import com.alvaro.empresas.passagens.dtos.LayoutBusDTO;
-import com.alvaro.empresas.passagens.models.AsientoBloqueadoModel;
-import com.alvaro.empresas.passagens.models.LayoutBusModel;
-import com.alvaro.empresas.passagens.repositories.AsientoBloqueadoRepository;
+import com.alvaro.empresas.passagens.autobuses.dtos.AsientoBloqueadoDTO;
+import com.alvaro.empresas.passagens.autobuses.models.AsientoBloqueadoModel;
+import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
+import com.alvaro.empresas.passagens.autobuses.repositories.AsientoBloqueadoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +15,7 @@ public class AsientoBloqueadosService {
     @Autowired
     private AsientoBloqueadoRepository asientoBloqueadoRepository;
 
-    public List<AsientoBloqueadoModel> saveAll(List<AsientoBloqueadoDTO> dtos, LayoutBusModel layout) {
+    public List<AsientoBloqueadoModel> saveAll(List<AsientoBloqueadoDTO> dtos, PisoModel layout) {
         List<AsientoBloqueadoModel> models = new ArrayList<>();
         dtos.forEach(dto -> {
             var model = new AsientoBloqueadoModel(dto);

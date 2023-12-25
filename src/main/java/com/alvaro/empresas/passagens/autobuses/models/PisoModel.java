@@ -1,9 +1,11 @@
-package com.alvaro.empresas.passagens.models;
+package com.alvaro.empresas.passagens.autobuses.models;
 
-import com.alvaro.empresas.passagens.dtos.LayoutBusDTO;
-import com.alvaro.empresas.passagens.enums.autobus.EnumPosicao;
-import com.alvaro.empresas.passagens.enums.autobus.EnumTipoBus;
+import com.alvaro.empresas.passagens.autobuses.dtos.PisoDTO;
+import com.alvaro.empresas.passagens.autobuses.enums.EnumPosicao;
+import com.alvaro.empresas.passagens.autobuses.enums.EnumTipoBus;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,17 +15,20 @@ import java.util.List;
 
 
 @Entity
-@Table(name = "tb_layout_bus")
+@Table(name = "tb_piso")
 @Getter
 @Setter
 @NoArgsConstructor
-public class LayoutBusModel {
+public class PisoModel {
     @Id
-    @Column(name = "idtb_layout_bus")
+    @Column(name = "idtb_piso")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
     private int nSillas;
     private int nFilas;
+    private int nPiso;
+    private int primeraSilla;
     @Enumerated(EnumType.STRING)
     private EnumPosicao posicionPasillo;
     @Enumerated(EnumType.STRING)
@@ -31,15 +36,30 @@ public class LayoutBusModel {
     @Enumerated(EnumType.STRING)
     private EnumPosicao inicioContagem;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "layout")
-    private List<AutobusModel> autobuses = new ArrayList<AutobusModel>();
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "fk_idtb_autobus")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private AutobusModel autobus;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "layout")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "piso")
     private List<AsientoBloqueadoModel> asientosBloqueados = new ArrayList<AsientoBloqueadoModel>();
 
-    public void llenarSinVector(LayoutBusDTO dto) {
+    public void llenarSinVector(PisoDTO dto) {
         nSillas = dto.getNSillas();
         nFilas = dto.getNFilas();
+        nPiso = dto.getNPiso();
+        primeraSilla = dto.getPrimeraSilla();
+
+        switch (dto.getTipo()) {
+            case "leito":
+                tipo = EnumTipoBus.LEITO;
+                dto.setPosicionPasillo("");
+                break;
+            case "tradicional":
+                dto.setPosicionPasillo("medio");
+                tipo = EnumTipoBus.TRADICIONAL;
+                break;
+        }
 
         switch (dto.getPosicionPasillo()) {
             case "medio":
@@ -50,15 +70,6 @@ public class LayoutBusModel {
                 break;
             case "derecha":
                 posicionPasillo = EnumPosicao.DERECHA;
-                break;
-        }
-
-        switch (dto.getTipo()) {
-            case "leito":
-                tipo = EnumTipoBus.LEITO;
-                break;
-            case "tradicional":
-                tipo = EnumTipoBus.TRADICIONAL;
                 break;
         }
 

@@ -1,6 +1,6 @@
-package com.alvaro.empresas.passagens.repositories;
+package com.alvaro.empresas.passagens.lugares.repositories;
 
-import com.alvaro.empresas.passagens.models.LugarModel;
+import com.alvaro.empresas.passagens.lugares.models.LugarModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
