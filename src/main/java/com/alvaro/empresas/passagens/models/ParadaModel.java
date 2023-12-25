@@ -38,9 +38,9 @@ public class ParadaModel {
     private TrayectoModel trayecto;
 
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "salida")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "salida")
     private List<ViajeModel> salidas = new ArrayList<ViajeModel>();
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "destino")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "destino")
     private List<ViajeModel> destinos = new ArrayList<ViajeModel>();
 
 

@@ -28,6 +28,6 @@ public class CiudadModel {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private DepartamentoModel departamento;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "ciudad")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "ciudad")
     private List<LugarModel> lugares = new ArrayList<>();
 }

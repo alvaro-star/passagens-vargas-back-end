@@ -23,6 +23,6 @@ public class DepartamentoModel {
     @NotBlank
     private String nombre;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "departamento")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "departamento")
     private List<CiudadModel> ciudades = new ArrayList<>();
 }

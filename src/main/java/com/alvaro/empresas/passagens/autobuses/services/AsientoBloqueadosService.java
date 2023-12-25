@@ -19,7 +19,7 @@ public class AsientoBloqueadosService {
         List<AsientoBloqueadoModel> models = new ArrayList<>();
         dtos.forEach(dto -> {
             var model = new AsientoBloqueadoModel(dto);
-            model.setLayout(layout);
+            model.setPiso(layout);
             models.add(asientoBloqueadoRepository.save(model));
         });
 

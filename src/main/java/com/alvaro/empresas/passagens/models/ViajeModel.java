@@ -41,7 +41,7 @@ public class ViajeModel {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "viaje")
     private List<PrecioModel> precios = new ArrayList<PrecioModel>();
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "viaje")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "viaje")
     private List<SillaModel> sillas = new ArrayList<SillaModel>();
 
 }

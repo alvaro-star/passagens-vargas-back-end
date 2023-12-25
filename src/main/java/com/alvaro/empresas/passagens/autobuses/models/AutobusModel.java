@@ -29,10 +29,10 @@ public class AutobusModel {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private EmpresaModel empresa;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "autobus")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "autobus")
     private List<PisoModel> pisos = new ArrayList<PisoModel>();
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "autobus")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "autobus")
     private List<TrayectoModel> trayectos = new ArrayList<TrayectoModel>();
 
 }

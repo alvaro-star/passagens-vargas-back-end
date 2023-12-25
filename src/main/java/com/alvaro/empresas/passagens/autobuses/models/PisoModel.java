@@ -41,7 +41,7 @@ public class PisoModel {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private AutobusModel autobus;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "piso")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "piso")
     private List<AsientoBloqueadoModel> asientosBloqueados = new ArrayList<AsientoBloqueadoModel>();
 
     public void llenarSinVector(PisoDTO dto) {

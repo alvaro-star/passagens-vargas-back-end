@@ -28,7 +28,7 @@ public class PasajeModel {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private TrayectoModel trayecto;
 
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "pasaje")
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "pasaje")
     private SillaModel silla;
     //Pagos
 }

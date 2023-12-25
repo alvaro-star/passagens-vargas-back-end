@@ -26,13 +26,13 @@ public class TrayectoModel {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private AutobusModel autobus;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "trayecto")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "trayecto")
     private List<ParadaModel> paradas = new ArrayList<ParadaModel>();
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "trayecto")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "trayecto")
     private List<PasajeModel> pasajes = new ArrayList<PasajeModel>();
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "trayecto")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "trayecto")
     private List<ViajeModel> viejes = new ArrayList<ViajeModel>();
 
 }

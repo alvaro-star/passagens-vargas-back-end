@@ -23,8 +23,9 @@ public class EmpresaModel {
     private String logo;
     private String numeroCuenta;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "empresa")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "empresa")
     private List<AutobusModel> autobuses = new ArrayList<AutobusModel>();
+
     //Funcionarios
     public EmpresaModel() {
     }
