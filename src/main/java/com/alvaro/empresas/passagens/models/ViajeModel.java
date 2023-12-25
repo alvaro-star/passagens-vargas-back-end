@@ -1,6 +1,5 @@
 package com.alvaro.empresas.passagens.models;
 
-import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -36,7 +35,7 @@ public class ViajeModel {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_trayecto")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private AutobusModel trayecto;
+    private TrayectoModel trayecto;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "viaje")
     private List<PrecioModel> precios = new ArrayList<PrecioModel>();

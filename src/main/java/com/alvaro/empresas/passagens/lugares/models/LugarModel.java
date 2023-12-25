@@ -29,7 +29,7 @@ public class LugarModel {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_ciudad")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private DepartamentoModel ciudad;
+    private CiudadModel ciudad;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "lugar")
     private List<ParadaModel> paradas = new ArrayList<ParadaModel>();
