@@ -30,5 +30,7 @@ public class PasajeModel {
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "pasaje")
     private SillaModel silla;
+
+    //Comprador
     //Pagos
 }

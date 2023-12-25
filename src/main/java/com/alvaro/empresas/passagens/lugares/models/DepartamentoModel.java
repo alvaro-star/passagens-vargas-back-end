@@ -1,5 +1,6 @@
 package com.alvaro.empresas.passagens.lugares.models;
 
+import com.alvaro.empresas.passagens.lugares.dtos.DepartamentoDTO;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -25,4 +26,8 @@ public class DepartamentoModel {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "departamento")
     private List<CiudadModel> ciudades = new ArrayList<>();
+
+    public DepartamentoModel(DepartamentoDTO dto) {
+        nombre = dto.getNombre();
+    }
 }

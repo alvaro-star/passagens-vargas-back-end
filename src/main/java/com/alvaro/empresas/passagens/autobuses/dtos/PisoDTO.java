@@ -30,7 +30,8 @@ public class PisoDTO {
     private String tipo;
     @NotBlank
     private String inicioContagem;
-    private List<AsientoBloqueadoDTO> asientosBloqueados = new ArrayList<>();
+
+    private List<AsientoBloqueadoDTO> asientosBloqueados = new ArrayList<AsientoBloqueadoDTO>();
 
     public PisoDTO(PisoModel model) {
         id = model.getId();
