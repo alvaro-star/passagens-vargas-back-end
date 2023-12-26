@@ -1,12 +1,12 @@
 package com.alvaro.empresas.passagens.lugares.resources;
 
 import com.alvaro.empresas.passagens.dtos.Mensaje;
+import com.alvaro.empresas.passagens.lugares.dtos.CiudadDTO;
 import com.alvaro.empresas.passagens.lugares.dtos.DepartamentoDTO;
 import com.alvaro.empresas.passagens.lugares.models.DepartamentoModel;
 import com.alvaro.empresas.passagens.lugares.services.DepartamentoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,7 +32,16 @@ public class DepartamentoResource {
     @GetMapping("/{id}")
     public ResponseEntity<DepartamentoDTO> getOne(@PathVariable(value = "id") Integer id) {
         DepartamentoModel model = departamentoService.findById(id);
-        return ResponseEntity.ok().body(new DepartamentoDTO(model));
+        List<CiudadDTO> ciudades = new ArrayList<>();
+
+        model.getCiudades().forEach(ciudadModel -> {
+            var ciudadDto = new CiudadDTO(ciudadModel);
+            ciudadDto.setIdDepartamento(model.getId());
+            ciudades.add(ciudadDto);
+        });
+        var dto = new DepartamentoDTO(model);
+        dto.setCiudades(ciudades);
+        return ResponseEntity.ok().body(dto);
     }
 
     @PostMapping
@@ -50,9 +59,6 @@ public class DepartamentoResource {
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> delete(@PathVariable(value = "id") Integer id) {
         DepartamentoModel model = departamentoService.findById(id);
-        if (!model.getCiudades().isEmpty()) {
-            return ResponseEntity.ok().body(new Mensaje("El departamento tiene ciudades registradas"));
-        }
         departamentoService.eliminar(model);
         return ResponseEntity.ok().body(new Mensaje("El departamento fue eliminado"));
     }

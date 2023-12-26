@@ -1,5 +1,6 @@
 package com.alvaro.empresas.passagens.lugares.models;
 
+import com.alvaro.empresas.passagens.lugares.dtos.CiudadDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -28,6 +29,10 @@ public class CiudadModel {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private DepartamentoModel departamento;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "ciudad")
+    @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "ciudad")
     private List<LugarModel> lugares = new ArrayList<>();
+
+    public CiudadModel(CiudadDTO dto) {
+        nombre = dto.getNombre();
+    }
 }

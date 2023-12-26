@@ -24,7 +24,7 @@ public class DepartamentoModel {
     @NotBlank
     private String nombre;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "departamento")
+    @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "departamento")
     private List<CiudadModel> ciudades = new ArrayList<>();
 
     public DepartamentoModel(DepartamentoDTO dto) {
