@@ -1,10 +1,10 @@
-package com.alvaro.empresas.passagens.lugares.services;
+package com.alvaro.empresas.passagens.paradas.services;
 
-import com.alvaro.empresas.passagens.lugares.dtos.CiudadDTO;
-import com.alvaro.empresas.passagens.lugares.dtos.CiudadDtoUpdate;
-import com.alvaro.empresas.passagens.lugares.models.CiudadModel;
-import com.alvaro.empresas.passagens.lugares.models.DepartamentoModel;
-import com.alvaro.empresas.passagens.lugares.repositories.CiudadRepository;
+import com.alvaro.empresas.passagens.paradas.dtos.CiudadDTO;
+import com.alvaro.empresas.passagens.paradas.dtos.CiudadDtoUpdate;
+import com.alvaro.empresas.passagens.paradas.models.CiudadModel;
+import com.alvaro.empresas.passagens.paradas.models.DepartamentoModel;
+import com.alvaro.empresas.passagens.paradas.repositories.CiudadRepository;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

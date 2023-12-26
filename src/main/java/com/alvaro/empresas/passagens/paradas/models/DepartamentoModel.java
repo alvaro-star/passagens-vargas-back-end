@@ -1,6 +1,6 @@
-package com.alvaro.empresas.passagens.lugares.models;
+package com.alvaro.empresas.passagens.paradas.models;
 
-import com.alvaro.empresas.passagens.lugares.dtos.DepartamentoDTO;
+import com.alvaro.empresas.passagens.paradas.dtos.DepartamentoDTO;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;

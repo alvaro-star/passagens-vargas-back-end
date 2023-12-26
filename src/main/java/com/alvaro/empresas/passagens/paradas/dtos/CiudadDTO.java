@@ -1,7 +1,8 @@
-package com.alvaro.empresas.passagens.lugares.dtos;
+package com.alvaro.empresas.passagens.paradas.dtos;
 
-import com.alvaro.empresas.passagens.lugares.models.CiudadModel;
+import com.alvaro.empresas.passagens.paradas.models.CiudadModel;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -9,12 +10,14 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class CiudadDtoUpdate {
+public class CiudadDTO {
     private int id;
     @NotBlank
     private String nombre;
+    @NotNull
+    private int idDepartamento;
 
-    public CiudadDtoUpdate(CiudadModel model) {
+    public CiudadDTO(CiudadModel model) {
         id = model.getId();
         nombre = model.getNombre();
     }

@@ -1,6 +1,6 @@
-package com.alvaro.empresas.passagens.lugares.repositories;
+package com.alvaro.empresas.passagens.paradas.repositories;
 
-import com.alvaro.empresas.passagens.lugares.models.CiudadModel;
+import com.alvaro.empresas.passagens.paradas.models.CiudadModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

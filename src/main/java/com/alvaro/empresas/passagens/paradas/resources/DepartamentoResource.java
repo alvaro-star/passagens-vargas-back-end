@@ -1,10 +1,10 @@
-package com.alvaro.empresas.passagens.lugares.resources;
+package com.alvaro.empresas.passagens.paradas.resources;
 
 import com.alvaro.empresas.passagens.dtos.Mensaje;
-import com.alvaro.empresas.passagens.lugares.dtos.CiudadDTO;
-import com.alvaro.empresas.passagens.lugares.dtos.DepartamentoDTO;
-import com.alvaro.empresas.passagens.lugares.models.DepartamentoModel;
-import com.alvaro.empresas.passagens.lugares.services.DepartamentoService;
+import com.alvaro.empresas.passagens.paradas.dtos.CiudadDTO;
+import com.alvaro.empresas.passagens.paradas.dtos.DepartamentoDTO;
+import com.alvaro.empresas.passagens.paradas.models.DepartamentoModel;
+import com.alvaro.empresas.passagens.paradas.services.DepartamentoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

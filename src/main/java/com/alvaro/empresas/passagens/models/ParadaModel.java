@@ -1,7 +1,7 @@
 package com.alvaro.empresas.passagens.models;
 
 
-import com.alvaro.empresas.passagens.lugares.models.LugarModel;
+import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
