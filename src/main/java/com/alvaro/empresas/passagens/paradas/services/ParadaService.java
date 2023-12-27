@@ -1,6 +1,6 @@
-package com.alvaro.empresas.passagens.services;
+package com.alvaro.empresas.passagens.paradas.services;
 
-import com.alvaro.empresas.passagens.repositories.ParadaRepository;
+import com.alvaro.empresas.passagens.paradas.repositories.ParadaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

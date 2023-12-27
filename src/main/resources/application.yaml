@@ -9,6 +9,8 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+  jackson:
+    time-zone: America/La_Paz
 api:
   security:
     token:

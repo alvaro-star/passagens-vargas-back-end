@@ -1,7 +1,6 @@
 package com.alvaro.empresas.passagens.paradas.models;
 
 import com.alvaro.empresas.passagens.paradas.dtos.LugarDTO;
-import com.alvaro.empresas.passagens.models.ParadaModel;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;

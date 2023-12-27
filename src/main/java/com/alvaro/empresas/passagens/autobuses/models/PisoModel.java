@@ -1,11 +1,11 @@
 package com.alvaro.empresas.passagens.autobuses.models;
 
 import com.alvaro.empresas.passagens.autobuses.dtos.PisoDTO;
+import com.alvaro.empresas.passagens.autobuses.dtos.PisoDtoUpdate;
 import com.alvaro.empresas.passagens.autobuses.enums.EnumPosicao;
 import com.alvaro.empresas.passagens.autobuses.enums.EnumTipoBus;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -44,7 +44,46 @@ public class PisoModel {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "piso")
     private List<AsientoBloqueadoModel> asientosBloqueados = new ArrayList<AsientoBloqueadoModel>();
 
-    public void llenarSinVector(PisoDTO dto) {
+    public PisoModel(PisoDTO dto) {
+        nSillas = dto.getNSillas();
+        nFilas = dto.getNFilas();
+        nPiso = dto.getNPiso();
+        primeraSilla = dto.getPrimeraSilla();
+
+        switch (dto.getTipo()) {
+            case "leito":
+                tipo = EnumTipoBus.LEITO;
+                dto.setPosicionPasillo("");
+                break;
+            case "tradicional":
+                dto.setPosicionPasillo("medio");
+                tipo = EnumTipoBus.TRADICIONAL;
+                break;
+        }
+
+        switch (dto.getPosicionPasillo()) {
+            case "medio":
+                posicionPasillo = EnumPosicao.MEDIO;
+                break;
+            case "izquierda":
+                posicionPasillo = EnumPosicao.IZQUIERDA;
+                break;
+            case "derecha":
+                posicionPasillo = EnumPosicao.DERECHA;
+                break;
+        }
+
+        switch (dto.getInicioContagem()) {
+            case "izquierda":
+                inicioContagem = EnumPosicao.DERECHA;
+                break;
+            case "derecha":
+                inicioContagem = EnumPosicao.IZQUIERDA;
+                break;
+        }
+    }
+
+    public void llenarSinVector(PisoDtoUpdate dto) {
         nSillas = dto.getNSillas();
         nFilas = dto.getNFilas();
         nPiso = dto.getNPiso();

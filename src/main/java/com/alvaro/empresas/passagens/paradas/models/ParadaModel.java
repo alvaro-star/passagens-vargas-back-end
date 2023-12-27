@@ -1,6 +1,8 @@
-package com.alvaro.empresas.passagens.models;
+package com.alvaro.empresas.passagens.paradas.models;
 
 
+import com.alvaro.empresas.passagens.models.TrayectoModel;
+import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
@@ -36,7 +38,6 @@ public class ParadaModel {
     @JoinColumn(name = "fk_idtb_trayecto")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private TrayectoModel trayecto;
-
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "salida")
     private List<ViajeModel> salidas = new ArrayList<ViajeModel>();

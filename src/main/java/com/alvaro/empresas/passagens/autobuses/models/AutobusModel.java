@@ -1,5 +1,7 @@
 package com.alvaro.empresas.passagens.autobuses.models;
 
+import com.alvaro.empresas.passagens.autobuses.dtos.AutobusDTO;
+import com.alvaro.empresas.passagens.autobuses.dtos.AutobusDTOUpdate;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.models.TrayectoModel;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -35,4 +37,11 @@ public class AutobusModel {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "autobus")
     private List<TrayectoModel> trayectos = new ArrayList<TrayectoModel>();
 
+    public AutobusModel(AutobusDTO dto) {
+        placa = dto.getPlaca();
+    }
+
+    public void updateValues(AutobusDTOUpdate dto) {
+        placa = dto.getPlaca();
+    }
 }

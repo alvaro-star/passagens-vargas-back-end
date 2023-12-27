@@ -21,6 +21,7 @@ public class DepartamentoModel {
     @Column(name = "idtb_departamento")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
     @NotBlank
     private String nombre;
 

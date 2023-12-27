@@ -2,11 +2,13 @@ package com.alvaro.empresas.passagens.autobuses.resources;
 
 import com.alvaro.empresas.passagens.autobuses.dtos.AsientoBloqueadoDTO;
 import com.alvaro.empresas.passagens.autobuses.dtos.PisoDTO;
-import com.alvaro.empresas.passagens.dtos.Mensaje;
+import com.alvaro.empresas.passagens.autobuses.dtos.PisoDtoUpdate;
 import com.alvaro.empresas.passagens.autobuses.models.AsientoBloqueadoModel;
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import com.alvaro.empresas.passagens.autobuses.services.AsientoBloqueadosService;
+import com.alvaro.empresas.passagens.autobuses.services.AutobusService;
 import com.alvaro.empresas.passagens.autobuses.services.PisoService;
+import com.alvaro.empresas.passagens.dtos.Mensaje;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,6 +25,8 @@ public class PisoResource {
     private PisoService pisoService;
     @Autowired
     private AsientoBloqueadosService asientoBloqueadosService;
+    @Autowired
+    private AutobusService autobusService;
 
     @GetMapping("/{id}")
     public ResponseEntity<PisoDTO> getOne(@PathVariable(value = "id") Integer id) {
@@ -32,6 +36,7 @@ public class PisoResource {
         for (AsientoBloqueadoModel asientoModel : model.getAsientosBloqueados()) {
             dto.getAsientosBloqueados().add(new AsientoBloqueadoDTO(asientoModel));
         }
+        dto.setIdAutobus(model.getAutobus().getId());
 
         return ResponseEntity.ok().body(dto);
 
@@ -44,6 +49,7 @@ public class PisoResource {
 
         for (PisoModel model : models) {
             var dto = new PisoDTO(model);
+            dto.setIdAutobus(model.getAutobus().getId());
             for (AsientoBloqueadoModel bloqueado : model.getAsientosBloqueados()) {
                 dto.getAsientosBloqueados().add(new AsientoBloqueadoDTO(bloqueado));
             }
@@ -56,19 +62,22 @@ public class PisoResource {
 
     @PostMapping
     public ResponseEntity<PisoDTO> save(@RequestBody @Valid PisoDTO dto) {
-        var model = pisoService.save(dto);
+        var autobus = autobusService.findById(dto.getIdAutobus());
+        var model = pisoService.save(dto, autobus);
         var dtoSave = new PisoDTO(model);
         List<AsientoBloqueadoDTO> bloqueadoDTOS = asientoBloqueadosService.convertModelsToDtos(model.getAsientosBloqueados());
+        dtoSave.setIdAutobus(autobus.getId());
         dtoSave.setAsientosBloqueados(bloqueadoDTOS);
         return ResponseEntity.status(HttpStatus.CREATED).body(dtoSave);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PisoDTO> update(@PathVariable(value = "id") Integer id, @RequestBody @Valid PisoDTO dto) {
+    public ResponseEntity<PisoDTO> update(@PathVariable(value = "id") Integer id, @RequestBody @Valid PisoDtoUpdate dto) {
         var model = pisoService.update(dto, id);
         var dtoSave = new PisoDTO(model);
         List<AsientoBloqueadoDTO> bloqueadoDTOS = asientoBloqueadosService.convertModelsToDtos(model.getAsientosBloqueados());
         dtoSave.setAsientosBloqueados(bloqueadoDTOS);
+        dtoSave.setIdAutobus(model.getAutobus().getId());
         return ResponseEntity.ok().body(dtoSave);
     }
 
