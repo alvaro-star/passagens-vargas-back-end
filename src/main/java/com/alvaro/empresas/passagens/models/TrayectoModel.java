@@ -36,5 +36,5 @@ public class TrayectoModel {
     private List<PasajeModel> pasajes = new ArrayList<PasajeModel>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "trayecto")
-    private List<ViajeModel> viejes = new ArrayList<ViajeModel>();
+    private List<ViajeModel> viajes = new ArrayList<ViajeModel>();
 }

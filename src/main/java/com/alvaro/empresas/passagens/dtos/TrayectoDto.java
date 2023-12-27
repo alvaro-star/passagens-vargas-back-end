@@ -16,6 +16,11 @@ public class TrayectoDto {
     @NotBlank
     private int idAutobus;
 
+    /*
+    private List<PasajeDto> pasajes;
+    private List<ViajeDto> viajes;
+    private List<ParadaDto> paradas;
+*/
     public TrayectoDto(TrayectoModel model) {
         codigo = model.getCodigo();
     }

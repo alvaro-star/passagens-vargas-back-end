@@ -1,18 +1,13 @@
 package com.alvaro.empresas.passagens.resources;
 
-import com.alvaro.empresas.passagens.autobuses.services.AutobusService;
+import com.alvaro.empresas.passagens.dtos.Mensaje;
 import com.alvaro.empresas.passagens.dtos.TrayectoDto;
-import com.alvaro.empresas.passagens.models.TrayectoModel;
-import com.alvaro.empresas.passagens.repositories.TrayectoRepository;
-import org.hibernate.ObjectNotFoundException;
+import com.alvaro.empresas.passagens.services.TrayectoService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,36 +15,41 @@ import java.util.UUID;
 @RequestMapping("/trayectos")
 public class TrayectoResource {
     @Autowired
-    private TrayectoRepository trayectoRepository;
-    @Autowired
-    private AutobusService autobusService;
-
-    @GetMapping("/{id}")
-    public ResponseEntity<TrayectoDto> getOne(@PathVariable(value = "id") UUID id) {
-        var optional = trayectoRepository.findById(id);
-        var model = optional.orElseThrow(() -> new ObjectNotFoundException(id, TrayectoModel.class.getName()));
-        var dto = new TrayectoDto(model);
-        dto.setIdAutobus(model.getAutobus().getId());
-        return ResponseEntity.ok().body(dto);
-    }
+    private TrayectoService trayectoService;
 
     @GetMapping
     public ResponseEntity<List<TrayectoDto>> getAll() {
-        List<TrayectoModel> models = trayectoRepository.findAll();
-        List<TrayectoDto> dtos = new ArrayList<>();
-        models.forEach(model -> {
-            var dto = new TrayectoDto(model);
-            dto.setIdAutobus(model.getAutobus().getId());
-            dtos.add(dto);
-        });
-        return ResponseEntity.ok().body(dtos);
+        return ResponseEntity.ok().body(trayectoService.getAll());
     }
 
-    /*@PostMapping//inconcluso
+    @GetMapping("/{id}")
+    public ResponseEntity<TrayectoDto> getOne(@PathVariable(value = "id") UUID id) {
+        return ResponseEntity.ok().body(trayectoService.getOne(id));
+    }
+
+    @PostMapping
     public ResponseEntity<TrayectoDto> save(@RequestBody @Valid TrayectoDto dto) {
-        //var autobus = autobusService.find
-        var model = new TrayectoModel();
+        return ResponseEntity.ok().body(trayectoService.save(dto));
+    }
 
-    }*/
+    @PutMapping("/{id}")
+    public ResponseEntity<TrayectoDto> update(@PathVariable(value = "id") UUID id, @RequestBody @Valid TrayectoDto dto) {
+        return ResponseEntity.ok().body(trayectoService.update(dto, id));
+    }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Mensaje> delete(@PathVariable(value = "id") UUID id) {
+        var model = trayectoService.findById(id);
+        if (!model.getViajes().isEmpty()) {
+            return ResponseEntity.badRequest().body(new Mensaje("El trayecto tiene viajes associados"));
+        }
+        if (!model.getPasajes().isEmpty()) {
+            return ResponseEntity.badRequest().body(new Mensaje("El trayecto tiene pasajes associados"));
+        }
+        if (!model.getParadas().isEmpty()) {
+            return ResponseEntity.badRequest().body(new Mensaje("El trayecto tiene paradas associados"));
+        }
+        trayectoService.delete(model);
+        return ResponseEntity.ok().body(new Mensaje("El trayecto fue eliminado"));
+    }
 }
