@@ -53,7 +53,6 @@ public class PisoModel {
         switch (dto.getTipo()) {
             case "leito":
                 tipo = EnumTipoBus.LEITO;
-                dto.setPosicionPasillo("");
                 break;
             case "tradicional":
                 dto.setPosicionPasillo("medio");
@@ -92,7 +91,6 @@ public class PisoModel {
         switch (dto.getTipo()) {
             case "leito":
                 tipo = EnumTipoBus.LEITO;
-                dto.setPosicionPasillo("");
                 break;
             case "tradicional":
                 dto.setPosicionPasillo("medio");

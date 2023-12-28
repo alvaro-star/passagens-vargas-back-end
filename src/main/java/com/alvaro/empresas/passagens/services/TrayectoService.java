@@ -3,6 +3,8 @@ package com.alvaro.empresas.passagens.services;
 import com.alvaro.empresas.passagens.autobuses.services.AutobusService;
 import com.alvaro.empresas.passagens.dtos.TrayectoDto;
 import com.alvaro.empresas.passagens.models.TrayectoModel;
+import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTO;
+import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.alvaro.empresas.passagens.repositories.TrayectoRepository;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +30,13 @@ public class TrayectoService {
         var model = this.findById(id);
         var dto = new TrayectoDto(model);
         dto.setIdAutobus(model.getAutobus().getId());
+
+        List<ParadaDTO> paradasDTOs = new ArrayList<>();
+        for (ParadaModel paradasModel : model.getParadas()) {
+            paradasDTOs.add(new ParadaDTO(paradasModel, paradasModel.getLugar().getId(), model.getCodigo()));
+        }
+        dto.setParadas(paradasDTOs);
+
         return dto;
     }
 

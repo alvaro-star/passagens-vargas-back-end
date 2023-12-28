@@ -51,6 +51,6 @@ public class ParadaModel {
     }
 
     public void updateValues(ParadaDTOUpdate dtoUpdate) {
-        dataHora = dtoUpdate.getDataHora();
+        dataHora = dtoUpdate.dataHora();
     }
 }

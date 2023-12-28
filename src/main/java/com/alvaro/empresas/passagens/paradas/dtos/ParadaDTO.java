@@ -1,6 +1,7 @@
 package com.alvaro.empresas.passagens.paradas.dtos;
 
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
+import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
@@ -9,6 +10,7 @@ import java.util.UUID;
 public record ParadaDTO(
         Integer id,
         @NotNull
+        @Future
         LocalDateTime dataHora,
         @NotNull
         Integer idLugar,

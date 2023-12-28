@@ -31,11 +31,11 @@ public class LugarModel {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private CiudadModel ciudad;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "lugar")
+    @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "lugar")
     private List<ParadaModel> paradas = new ArrayList<ParadaModel>();
 
     public LugarModel(LugarDTO dto) {
-        nombre = dto.getNombre();
+        nombre = dto.nombre();
     }
 
 }

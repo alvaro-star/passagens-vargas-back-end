@@ -27,9 +27,8 @@ public class LugarResource {
         List<LugarModel> models = lugarService.findAll();
         List<LugarDTO> dtos = new ArrayList<>();
         models.forEach(model -> {
-            var dto = new LugarDTO(model);
-            dto.setIdCiudad(model.getCiudad().getId());
-            dtos.add(dto);
+            int idCiudad = model.getCiudad().getId();
+            dtos.add(new LugarDTO(model, idCiudad));
         });
         return ResponseEntity.ok().body(dtos);
     }
@@ -37,26 +36,23 @@ public class LugarResource {
     @GetMapping("/{id}")
     public ResponseEntity<LugarDTO> getOne(@PathVariable(value = "id") Integer id) {
         var model = lugarService.findById(id);
-        var dto = new LugarDTO(model);
-        dto.setIdCiudad(model.getCiudad().getId());
-        return ResponseEntity.ok().body(dto);
+        int idCiudad = model.getCiudad().getId();
+        return ResponseEntity.ok().body(new LugarDTO(model, idCiudad));
     }
 
     @PostMapping
     public ResponseEntity<LugarDTO> save(@RequestBody @Valid LugarDTO dto) {
-        var ciudad = ciudadService.findById(dto.getIdCiudad());
+        var ciudad = ciudadService.findById(dto.idCiudad());
         var model = lugarService.save(dto, ciudad);
-        var dtoResponse = new LugarDTO(model);
-        dtoResponse.setIdCiudad(ciudad.getId());
-        return ResponseEntity.ok().body(dtoResponse);
+        int idCiudad = model.getCiudad().getId();
+        return ResponseEntity.ok().body(new LugarDTO(model, idCiudad));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<LugarDTO> update(@PathVariable(value = "id") Integer id, @RequestBody @Valid LugarDtoUpdate dto) {
         var model = lugarService.update(dto, id);
-        var dtoResponse = new LugarDTO(model);
-        dtoResponse.setIdCiudad(model.getCiudad().getId());
-        return ResponseEntity.ok().body(dtoResponse);
+        int idCiudad = model.getCiudad().getId();
+        return ResponseEntity.ok().body(new LugarDTO(model, idCiudad));
     }
 
     @DeleteMapping("/{id}")

@@ -43,7 +43,7 @@ public class CiudadResource {
     }
 
     @PostMapping
-    public ResponseEntity<CiudadDTO> save(@RequestBody @Valid CiudadDTO dto) {
+    public ResponseEntity<CiudadDTO> save(@Valid @RequestBody CiudadDTO dto) {
         var departamento = departamentoService.findById(dto.getIdDepartamento());
         var model = ciudadService.save(dto, departamento);
         var dtoResponse = new CiudadDTO(model);
@@ -52,7 +52,7 @@ public class CiudadResource {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CiudadDTO> update(@RequestBody @Valid CiudadDtoUpdate dto, @PathVariable(value = "id") Integer id) {
+    public ResponseEntity<CiudadDTO> update(@Valid @RequestBody CiudadDtoUpdate dto, @PathVariable(value = "id") Integer id) {
         var model = ciudadService.update(dto, id);
         var dtoResponse = new CiudadDTO(model);
         dtoResponse.setIdDepartamento(model.getDepartamento().getId());
