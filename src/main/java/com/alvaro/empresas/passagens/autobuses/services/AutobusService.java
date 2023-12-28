@@ -6,13 +6,17 @@ import com.alvaro.empresas.passagens.autobuses.dtos.PisoDTO;
 import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import com.alvaro.empresas.passagens.autobuses.repositories.AutobusRepository;
+import com.alvaro.empresas.passagens.configurations.exceptions.ValidationError;
 import com.alvaro.empresas.passagens.dtos.TrayectoDto;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.models.TrayectoModel;
 import com.alvaro.empresas.passagens.services.EmpresaService;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +39,7 @@ public class AutobusService {
         models.forEach(model -> {
             var dto = new AutobusDTO(model);
             dto.setIdEmpresa(model.getEmpresa().getId());
+            dtos.add(dto);
         });
         return dtos;
     }
@@ -59,6 +64,26 @@ public class AutobusService {
         dto.setTrayectos(trayectosDto);
         dto.setPisos(pisosDto);
         return dto;
+    }
+
+    public ValidationError validar(BindingResult bindingResult, AutobusDTO dto) {
+        ValidationError err = new ValidationError(
+                System.currentTimeMillis(),
+                HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                "Erro de Validacao",
+                "Erro durante a validacao",
+                "/autobuses");
+        for (FieldError erro : bindingResult.getFieldErrors()) {
+            err.addError(erro.getField(), erro.getDefaultMessage());
+            System.out.println("\n" + erro.getField() + "Steve" + erro.getDefaultMessage());
+        }
+        if (!bindingResult.hasFieldErrors("placa")) {
+            if (autobusRepository.existsByPlaca(dto.getPlaca())) {
+                err.addError("placa", "La placa ya esta registrada");
+            }
+        }
+
+        return err;
     }
 
     public AutobusDTO save(AutobusDTO dto) {

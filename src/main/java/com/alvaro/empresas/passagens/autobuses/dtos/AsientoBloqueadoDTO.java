@@ -1,7 +1,7 @@
 package com.alvaro.empresas.passagens.autobuses.dtos;
 
 import com.alvaro.empresas.passagens.autobuses.models.AsientoBloqueadoModel;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,11 +10,11 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class AsientoBloqueadoDTO {
-    private int id;
-    @NotBlank
-    private int linha;
-    @NotBlank
-    private int coluna;
+    private Integer id;
+    @NotNull
+    private Integer linha;
+    @NotNull
+    private Integer coluna;
 
     public AsientoBloqueadoDTO(AsientoBloqueadoModel model) {
         id = model.getId();

@@ -11,11 +11,11 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 public class LugarDTO {
-    private int id;
+    private Integer id;
     @NotBlank
     private String nombre;
     @NotNull
-    private int idCiudad;
+    private Integer idCiudad;
 
     public LugarDTO(LugarModel model) {
         nombre = model.getNombre();

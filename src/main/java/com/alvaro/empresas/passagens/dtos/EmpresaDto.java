@@ -11,7 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class EmpresaDto {
 
-    private int id;
+    private Integer id;
     @NotBlank
     private String nombre;
     @NotBlank

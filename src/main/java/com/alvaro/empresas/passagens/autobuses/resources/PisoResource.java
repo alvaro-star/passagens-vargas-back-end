@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping("/layout")
+@RequestMapping("/pisos")
 public class PisoResource {
     @Autowired
     private PisoService pisoService;

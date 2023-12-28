@@ -14,17 +14,18 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 public class AutobusDTO {
-    private int id;
-    @NotBlank
+    private Integer id;
+    @NotBlank(message = "no puede ser nulo")
     private String placa;
-    @NotNull
-    private int idEmpresa;
+
+    @NotNull(message = "nao pode ser nulo")
+    private Integer idEmpresa;
 
     private List<PisoDTO> pisos;
     private List<TrayectoDto> trayectos;
 
     public AutobusDTO(AutobusModel model) {
+        id = model.getId();
         placa = model.getPlaca();
     }
-
 }

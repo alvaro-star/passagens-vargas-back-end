@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class LugarDtoUpdate {
-    private int id;
+    private Integer id;
     @NotBlank
     private String nombre;
 }

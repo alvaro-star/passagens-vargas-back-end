@@ -12,7 +12,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 public class DepartamentoDTO {
-    private int id;
+    private Integer id;
     @NotBlank(message = "Escriba un nombre valido")
     private String nombre;
     private List<CiudadDTO> ciudades;

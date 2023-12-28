@@ -42,6 +42,6 @@ public class AutobusModel {
     }
 
     public void updateValues(AutobusDTOUpdate dto) {
-        placa = dto.getPlaca();
+        placa = dto.placa();
     }
 }

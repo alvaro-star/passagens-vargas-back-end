@@ -11,11 +11,11 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class CiudadDTO {
-    private int id;
+    private Integer id;
     @NotBlank
     private String nombre;
     @NotNull
-    private int idDepartamento;
+    private Integer idDepartamento;
 
     public CiudadDTO(CiudadModel model) {
         id = model.getId();

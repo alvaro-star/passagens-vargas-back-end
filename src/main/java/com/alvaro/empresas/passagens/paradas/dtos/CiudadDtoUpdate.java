@@ -10,7 +10,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class CiudadDtoUpdate {
-    private int id;
+    private Integer id;
     @NotBlank
     private String nombre;
 

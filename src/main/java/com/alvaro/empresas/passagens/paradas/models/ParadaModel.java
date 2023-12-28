@@ -3,7 +3,8 @@ package com.alvaro.empresas.passagens.paradas.models;
 
 import com.alvaro.empresas.passagens.models.TrayectoModel;
 import com.alvaro.empresas.passagens.models.ViajeModel;
-import com.alvaro.empresas.passagens.paradas.models.LugarModel;
+import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTO;
+import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOUpdate;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -41,8 +42,15 @@ public class ParadaModel {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "salida")
     private List<ViajeModel> salidas = new ArrayList<ViajeModel>();
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "destino")
     private List<ViajeModel> destinos = new ArrayList<ViajeModel>();
 
+    public ParadaModel(ParadaDTO dto) {
+        dataHora = dto.dataHora();
+    }
 
+    public void updateValues(ParadaDTOUpdate dtoUpdate) {
+        dataHora = dtoUpdate.getDataHora();
+    }
 }

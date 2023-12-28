@@ -3,10 +3,12 @@ package com.alvaro.empresas.passagens.autobuses.resources;
 import com.alvaro.empresas.passagens.autobuses.dtos.AutobusDTO;
 import com.alvaro.empresas.passagens.autobuses.dtos.AutobusDTOUpdate;
 import com.alvaro.empresas.passagens.autobuses.services.AutobusService;
+import com.alvaro.empresas.passagens.configurations.exceptions.ValidationError;
 import com.alvaro.empresas.passagens.dtos.Mensaje;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,12 +30,22 @@ public class AutobusResource {
     }
 
     @PostMapping
-    public ResponseEntity<AutobusDTO> save(@RequestBody @Valid AutobusDTO dto) {
+    public ResponseEntity<Object> save(@Valid @RequestBody AutobusDTO dto, BindingResult bindingResult) {
+        ValidationError validacao = autobusService.validar(bindingResult, dto);
+        if (!validacao.getErrors().isEmpty()) {
+            return ResponseEntity.unprocessableEntity().body(validacao);
+        }
         return ResponseEntity.ok().body(autobusService.save(dto));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AutobusDTO> update(@PathVariable(value = "id") Integer id, @RequestBody @Valid AutobusDTOUpdate dto) {
+    public ResponseEntity<Object> update(@PathVariable(value = "id") Integer id, @Valid @RequestBody AutobusDTOUpdate dto, BindingResult bindingResult) {
+        var transform = new AutobusDTO();
+        transform.setPlaca(dto.placa());
+        ValidationError validacao = autobusService.validar(bindingResult, transform);
+        if (!validacao.getErrors().isEmpty()) {
+            return ResponseEntity.unprocessableEntity().body(validacao);
+        }
         return ResponseEntity.ok().body(autobusService.update(dto, id));
     }
 

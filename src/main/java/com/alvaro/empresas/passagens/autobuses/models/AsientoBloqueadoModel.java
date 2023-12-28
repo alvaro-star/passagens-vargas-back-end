@@ -18,9 +18,9 @@ public class AsientoBloqueadoModel {
     @Id
     @Column(name = "idtb_asiento_bloqueado")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-    private int linha;
-    private int coluna;
+    private Integer id;
+    private Integer linha;
+    private Integer coluna;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_piso")

@@ -15,15 +15,15 @@ import java.util.List;
 @NoArgsConstructor
 public class PisoDTO {
 
-    private int id;
+    private Integer id;
     @NotNull
-    private int nSillas;
+    private Integer nSillas;
     @NotNull
-    private int nFilas;
+    private Integer nFilas;
     @NotNull
-    private int nPiso;
+    private Integer nPiso;
     @NotNull
-    private int primeraSilla;
+    private Integer primeraSilla;
     @NotBlank
     private String posicionPasillo;
     @NotBlank
@@ -32,7 +32,7 @@ public class PisoDTO {
     private String inicioContagem;
 
     @NotNull
-    private int idAutobus;
+    private Integer idAutobus;
 
     private List<AsientoBloqueadoDTO> asientosBloqueados = new ArrayList<AsientoBloqueadoDTO>();
 
