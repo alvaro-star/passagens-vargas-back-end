@@ -47,4 +47,13 @@ public class TrayectoModel {
         return null;
     }
 
+    public boolean posseeViaje(Integer idSalida, Integer idDestino) {
+        for (ViajeModel viaje : this.viajes) {
+            if (viaje.getSalida().getId() == idSalida && viaje.getDestino().getId() == idDestino) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

@@ -75,6 +75,12 @@ public class ViajeService {
             return null;
         }
 
+        if (trayecto.posseeViaje(salida.getId(), destino.getId())) {
+            return null;
+        }
+
+        //COmparar as horas
+
         var model = new ViajeModel(dto);
         model.setTrayecto(trayecto);
         model.setSalida(salida);
