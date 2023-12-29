@@ -56,7 +56,7 @@ public class ViajeService {
 
         List<PrecioDTO> precios = new ArrayList<>();
         for (PrecioModel precioModel : model.getPrecios()) {
-            precios.add(new PrecioDTO(precioModel));
+            precios.add(new PrecioDTO(precioModel, model.getId()));
         }
 
         return new ViajeDTOResponse(model, precios, codigoTrayecto, salidaResponse, destinoResponse);
@@ -96,7 +96,7 @@ public class ViajeService {
             }
         }
 
-        List<PrecioDTO> preciosSalvos = precioService.saveAll(precios);
+        List<PrecioDTO> preciosSalvos = precioService.saveAll(precios, save.getId());
         //Preparando o dto
         var salidaResponse = new ParadaDTO(salida, salida.getLugar().getId(), trayecto.getCodigo());
         var destinoResponse = new ParadaDTO(destino, destino.getLugar().getId(), trayecto.getCodigo());

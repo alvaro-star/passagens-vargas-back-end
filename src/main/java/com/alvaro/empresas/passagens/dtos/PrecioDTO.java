@@ -10,9 +10,11 @@ public record PrecioDTO(
         @NotNull
         Float precio,
         @NotNull
-        Integer nPiso
+        Integer nPiso,
+        @NotNull
+        Integer idViaje
 ) {
-    public PrecioDTO(PrecioModel model) {
-        this(model.getId(), model.getPrecio(), model.getNPiso());
+    public PrecioDTO(PrecioModel model, Integer idViaje) {
+        this(model.getId(), model.getPrecio(), model.getNPiso(), idViaje);
     }
 }
