@@ -1,5 +1,7 @@
 package com.alvaro.empresas.passagens.models;
 
+import com.alvaro.empresas.passagens.dtos.ViajeDTO;
+import com.alvaro.empresas.passagens.dtos.ViajeDTOUpdate;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
@@ -20,8 +22,9 @@ public class ViajeModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idtb_viaje")
-    private int id;
-    private int plataforma;
+    private Integer id;
+
+    private Integer plataforma;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_salida")
@@ -44,4 +47,11 @@ public class ViajeModel {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "viaje")
     private List<SillaModel> sillas = new ArrayList<SillaModel>();
 
+    public ViajeModel(ViajeDTO dto) {
+        plataforma = dto.plataforma();
+    }
+
+    public void updateValues(ViajeDTOUpdate dto) {
+        plataforma = dto.plataforma();
+    }
 }

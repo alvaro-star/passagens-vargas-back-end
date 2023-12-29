@@ -25,8 +25,8 @@ public class TrayectoDto {
     /*
     private List<PasajeDto> pasajes;
     private List<ViajeDto> viajes;
-
     */
+
     public TrayectoDto(TrayectoModel model) {
         codigo = model.getCodigo();
     }

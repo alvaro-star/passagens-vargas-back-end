@@ -32,8 +32,8 @@ public class TrayectoService {
         dto.setIdAutobus(model.getAutobus().getId());
 
         List<ParadaDTO> paradasDTOs = new ArrayList<>();
-        for (ParadaModel paradasModel : model.getParadas()) {
-            paradasDTOs.add(new ParadaDTO(paradasModel, paradasModel.getLugar().getId(), model.getCodigo()));
+        for (ParadaModel paradaModel : model.getParadas()) {
+            paradasDTOs.add(new ParadaDTO(paradaModel, paradaModel.getLugar().getId(), model.getCodigo()));
         }
         dto.setParadas(paradasDTOs);
 
@@ -71,6 +71,12 @@ public class TrayectoService {
         var update = trayectoRepository.save(model);
         var updateDto = new TrayectoDto(update);
         updateDto.setIdAutobus(autobus.getId());
+
+        List<ParadaDTO> paradasDTOs = new ArrayList<>();
+        for (ParadaModel paradaModel : update.getParadas()) {
+            paradasDTOs.add(new ParadaDTO(paradaModel, paradaModel.getLugar().getId(), update.getCodigo()));
+        }
+        updateDto.setParadas(paradasDTOs);
         return updateDto;
     }
 

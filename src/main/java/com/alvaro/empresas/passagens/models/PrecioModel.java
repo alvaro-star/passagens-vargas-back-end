@@ -1,5 +1,6 @@
 package com.alvaro.empresas.passagens.models;
 
+import com.alvaro.empresas.passagens.dtos.PrecioDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -20,12 +21,23 @@ public class PrecioModel {
     @Column(name = "idtb_precio")
     private UUID id;
     @NotNull
-    private float precio;
+    private Float precio;
     @NotNull
-    private float nPiso;
+    private Integer nPiso;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_viaje")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private ViajeModel viaje;
+
+    public PrecioModel(PrecioDTO dto) {
+        precio = dto.precio();
+        nPiso = dto.nPiso();
+    }
+
+    public PrecioModel(Float precio, Integer nPiso, ViajeModel viaje) {
+        this.precio = precio;
+        this.nPiso = nPiso;
+        this.viaje = viaje;
+    }
 }

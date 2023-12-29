@@ -18,7 +18,7 @@ public record ParadaDTO(
         UUID idTrayecto
 ) {
 
-    public ParadaDTO(ParadaModel model, int idLugar, UUID idTrayecto) {
+    public ParadaDTO(ParadaModel model, Integer idLugar, UUID idTrayecto) {
         this(model.getId(), model.getDataHora(), idLugar, idTrayecto);
     }
 }

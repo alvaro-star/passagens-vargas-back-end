@@ -38,4 +38,13 @@ public class TrayectoModel {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "trayecto")
     private List<PasajeModel> pasajes = new ArrayList<PasajeModel>();
 
+    public ParadaModel getParadaById(Integer id) {
+        for (ParadaModel parada : this.paradas) {
+            if (parada.getId() == id) {
+                return parada;
+            }
+        }
+        return null;
+    }
+
 }
