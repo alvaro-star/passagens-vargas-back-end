@@ -1,7 +1,7 @@
 package com.alvaro.empresas.passagens.autobuses.dtos;
 
 import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
-import com.alvaro.empresas.passagens.dtos.TrayectoDto;
+import com.alvaro.empresas.passagens.dtos.TrayectoDTO;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -22,7 +22,7 @@ public class AutobusDTO {
     private Integer idEmpresa;
 
     private List<PisoDTO> pisos;
-    private List<TrayectoDto> trayectos;
+    private List<TrayectoDTO> trayectos;
 
     public AutobusDTO(AutobusModel model) {
         id = model.getId();

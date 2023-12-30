@@ -1,7 +1,8 @@
 package com.alvaro.empresas.passagens.resources;
 
 import com.alvaro.empresas.passagens.dtos.Mensaje;
-import com.alvaro.empresas.passagens.dtos.TrayectoDto;
+import com.alvaro.empresas.passagens.dtos.TrayectoDTO;
+import com.alvaro.empresas.passagens.dtos.TrayectoDTOResponse;
 import com.alvaro.empresas.passagens.services.TrayectoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,22 +19,22 @@ public class TrayectoResource {
     private TrayectoService trayectoService;
 
     @GetMapping
-    public ResponseEntity<List<TrayectoDto>> getAll() {
+    public ResponseEntity<List<TrayectoDTO>> getAll() {
         return ResponseEntity.ok().body(trayectoService.getAll());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TrayectoDto> getOne(@PathVariable(value = "id") UUID id) {
+    public ResponseEntity<TrayectoDTOResponse> getOne(@PathVariable(value = "id") UUID id) {
         return ResponseEntity.ok().body(trayectoService.getOne(id));
     }
 
     @PostMapping
-    public ResponseEntity<TrayectoDto> save(@RequestBody @Valid TrayectoDto dto) {
+    public ResponseEntity<TrayectoDTO> save(@RequestBody @Valid TrayectoDTO dto) {
         return ResponseEntity.ok().body(trayectoService.save(dto));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TrayectoDto> update(@PathVariable(value = "id") UUID id, @RequestBody @Valid TrayectoDto dto) {
+    public ResponseEntity<TrayectoDTO> update(@PathVariable(value = "id") UUID id, @RequestBody @Valid TrayectoDTO dto) {
         return ResponseEntity.ok().body(trayectoService.update(dto, id));
     }
 

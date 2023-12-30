@@ -7,7 +7,7 @@ import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import com.alvaro.empresas.passagens.autobuses.repositories.AutobusRepository;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationError;
-import com.alvaro.empresas.passagens.dtos.TrayectoDto;
+import com.alvaro.empresas.passagens.dtos.TrayectoDTO;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.models.TrayectoModel;
 import com.alvaro.empresas.passagens.services.EmpresaService;
@@ -48,10 +48,10 @@ public class AutobusService {
         var model = findById(id);
         var dto = new AutobusDTO(model);
         dto.setIdEmpresa(model.getEmpresa().getId());
-        List<TrayectoDto> trayectosDto = new ArrayList<>();
+        List<TrayectoDTO> trayectosDto = new ArrayList<>();
         List<PisoDTO> pisosDto = new ArrayList<>();
         for (TrayectoModel trayecto : model.getTrayectos()) {
-            var trayectoDto = new TrayectoDto(trayecto);
+            var trayectoDto = new TrayectoDTO(trayecto);
             trayectoDto.setIdAutobus(model.getId());
             trayectosDto.add(trayectoDto);
         }
@@ -77,6 +77,7 @@ public class AutobusService {
             err.addError(erro.getField(), erro.getDefaultMessage());
             System.out.println("\n" + erro.getField() + "Steve" + erro.getDefaultMessage());
         }
+
         if (!bindingResult.hasFieldErrors("placa")) {
             if (autobusRepository.existsByPlaca(dto.getPlaca())) {
                 err.addError("placa", "La placa ya esta registrada");
@@ -109,5 +110,4 @@ public class AutobusService {
     public void delete(AutobusModel model) {
         autobusRepository.delete(model);
     }
-
 }

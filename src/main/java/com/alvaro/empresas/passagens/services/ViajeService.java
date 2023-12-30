@@ -93,7 +93,6 @@ public class ViajeService {
         List<PrecioModel> precios = new ArrayList<>();
 
         precios.add(new PrecioModel(dto.precioPiso1(), 1, save));
-
         if (nPisos == 2) {
             if (dto.precioPiso2() == null) {
                 precios.add(new PrecioModel(dto.precioPiso1(), 2, save));
@@ -116,9 +115,9 @@ public class ViajeService {
 
         if (novosDados.salida() != null) {
             var salida = model.getTrayecto().getParadaById(novosDados.salida());
-            if (salida == null) {
+            if (salida == null)
                 return null;
-            }
+
             model.setSalida(salida);
         }
 

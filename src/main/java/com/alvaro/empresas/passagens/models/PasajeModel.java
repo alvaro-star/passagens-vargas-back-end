@@ -1,10 +1,14 @@
 package com.alvaro.empresas.passagens.models;
 
+import com.alvaro.empresas.passagens.dtos.PasajeDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.Date;
+import java.util.UUID;
 
 
 @Entity
@@ -15,13 +19,13 @@ import lombok.Setter;
 public class PasajeModel {
     @Id
     @Column(name = "idtb_pasaje")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
     private String carnet;
     private String nombre;
     @Column(name = "comprado_na_web?")
-    private boolean compradoWeb;
-    private int descuento;
+    private Boolean compradoWeb;
+    private Date nascimento;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_trayecto")
@@ -33,4 +37,10 @@ public class PasajeModel {
 
     //Comprador
     //Pagos
+
+    public PasajeModel(PasajeDTO dto) {
+        carnet = dto.carnet();
+        nombre = dto.nombre();
+        nascimento = dto.nascimento();
+    }
 }

@@ -14,20 +14,17 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
-public class TrayectoDto {
-
+public class TrayectoDTOResponse {
     private UUID codigo;
     @NotNull
     private Integer idAutobus;
 
     private List<ParadaDTO> paradas = new ArrayList<>();
+    private List<ViajeDTOList> viajes;
 
-    /*
-    private List<PasajeDto> pasajes;
-    private List<ViajeDto> viajes;
-    */
+    //private List<PasajeDto> pasajes;
 
-    public TrayectoDto(TrayectoModel model) {
+    public TrayectoDTOResponse(TrayectoModel model) {
         codigo = model.getCodigo();
     }
 }

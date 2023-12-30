@@ -1,8 +1,11 @@
 package com.alvaro.empresas.passagens.services;
 
 import com.alvaro.empresas.passagens.autobuses.services.AutobusService;
-import com.alvaro.empresas.passagens.dtos.TrayectoDto;
+import com.alvaro.empresas.passagens.dtos.TrayectoDTO;
+import com.alvaro.empresas.passagens.dtos.TrayectoDTOResponse;
+import com.alvaro.empresas.passagens.dtos.ViajeDTOList;
 import com.alvaro.empresas.passagens.models.TrayectoModel;
+import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTO;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.alvaro.empresas.passagens.repositories.TrayectoRepository;
@@ -26,57 +29,58 @@ public class TrayectoService {
         return model.orElseThrow(() -> new ObjectNotFoundException(id, TrayectoModel.class.getName()));
     }
 
-    public TrayectoDto getOne(UUID id) {
+    public TrayectoDTOResponse getOne(UUID id) {
         var model = this.findById(id);
-        var dto = new TrayectoDto(model);
+        var dto = new TrayectoDTOResponse(model);
         dto.setIdAutobus(model.getAutobus().getId());
 
         List<ParadaDTO> paradasDTOs = new ArrayList<>();
         for (ParadaModel paradaModel : model.getParadas()) {
             paradasDTOs.add(new ParadaDTO(paradaModel, paradaModel.getLugar().getId(), model.getCodigo()));
         }
+
+        List<ViajeDTOList> viajesDTOs = new ArrayList<>();
+        for (ViajeModel viajeModel : model.getViajes()) {
+            viajesDTOs.add(new ViajeDTOList(viajeModel, model.getCodigo(), viajeModel.getSalida().getId(), viajeModel.getDestino().getId()));
+        }
+
         dto.setParadas(paradasDTOs);
+        dto.setViajes(viajesDTOs);
 
         return dto;
     }
 
-    public List<TrayectoDto> getAll() {
+    public List<TrayectoDTO> getAll() {
         List<TrayectoModel> models = trayectoRepository.findAll();
-        List<TrayectoDto> dtos = new ArrayList<>();
+        List<TrayectoDTO> dtos = new ArrayList<>();
 
         models.forEach(model -> {
-            var dto = new TrayectoDto(model);
+            var dto = new TrayectoDTO(model);
             dto.setIdAutobus(model.getAutobus().getId());
             dtos.add(dto);
         });
         return dtos;
     }
 
-    public TrayectoDto save(TrayectoDto dto) {
+    public TrayectoDTO save(TrayectoDTO dto) {
         var autobus = autobusService.findById(dto.getIdAutobus());
         var model = new TrayectoModel();
         model.setAutobus(autobus);
 
         var save = trayectoRepository.save(model);
 
-        var saveDto = new TrayectoDto(save);
+        var saveDto = new TrayectoDTO(save);
         saveDto.setIdAutobus(autobus.getId());
         return saveDto;
     }
 
-    public TrayectoDto update(TrayectoDto dto, UUID id) {
+    public TrayectoDTO update(TrayectoDTO dto, UUID id) {
         var autobus = autobusService.findById(dto.getIdAutobus());
         var model = this.findById(id);
         model.setAutobus(autobus);
         var update = trayectoRepository.save(model);
-        var updateDto = new TrayectoDto(update);
+        var updateDto = new TrayectoDTO(update);
         updateDto.setIdAutobus(autobus.getId());
-
-        List<ParadaDTO> paradasDTOs = new ArrayList<>();
-        for (ParadaModel paradaModel : update.getParadas()) {
-            paradasDTOs.add(new ParadaDTO(paradaModel, paradaModel.getLugar().getId(), update.getCodigo()));
-        }
-        updateDto.setParadas(paradasDTOs);
         return updateDto;
     }
 

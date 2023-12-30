@@ -18,15 +18,31 @@ public class SillaModel {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "idtb_silla")
     private UUID id;
-    private int numero;
+    @Column(nullable = false)
+    private Integer numero;
+    @Column(nullable = false)
+    private Integer nPiso;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_viaje")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private ViajeModel viaje;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @OneToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "fk_idtb_pasaje")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private PasajeModel pasaje;
+
+    public SillaModel(Integer numero, Integer nPiso, ViajeModel viaje) {
+        this.numero = numero;
+        this.nPiso = nPiso;
+        this.viaje = viaje;
+    }
+
+    public SillaModel(Integer numero, Integer nPiso, ViajeModel viaje, PasajeModel pasaje) {
+        this.numero = numero;
+        this.nPiso = nPiso;
+        this.viaje = viaje;
+        this.pasaje = pasaje;
+    }
 }
