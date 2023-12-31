@@ -3,7 +3,6 @@ package com.alvaro.empresas.passagens.autobuses.resources;
 import com.alvaro.empresas.passagens.autobuses.dtos.PisoDTO;
 import com.alvaro.empresas.passagens.autobuses.dtos.PisoDTOResponse;
 import com.alvaro.empresas.passagens.autobuses.dtos.PisoDTOUpdate;
-import com.alvaro.empresas.passagens.autobuses.services.AsientoBloqueadosService;
 import com.alvaro.empresas.passagens.autobuses.services.PisoService;
 import com.alvaro.empresas.passagens.dtos.Mensaje;
 import jakarta.validation.Valid;
@@ -19,8 +18,6 @@ import java.util.List;
 public class PisoResource {
     @Autowired
     private PisoService pisoService;
-    @Autowired
-    private AsientoBloqueadosService asientoBloqueadosService;
 
     @GetMapping("/{id}")
     public ResponseEntity<PisoDTOResponse> getOne(@PathVariable(value = "id") Integer id) {

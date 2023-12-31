@@ -43,7 +43,7 @@ public class PisoModel {
     private AutobusModel autobus;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "piso")
-    private List<AsientoBloqueadoModel> posicionesIndisponibles = new ArrayList<AsientoBloqueadoModel>();
+    private List<PosicionIndisponibleModel> posicionesIndisponibles = new ArrayList<PosicionIndisponibleModel>();
 
     public PisoModel(PisoDTO dto, Integer nPiso, Integer primeraSilla) {
         nSillas = dto.getNColunas() * dto.getNLinhas() - dto.getPosicoesIndisponiveis().size();

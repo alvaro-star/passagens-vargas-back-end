@@ -1,12 +1,11 @@
 package com.alvaro.empresas.passagens.autobuses.services;
 
-import com.alvaro.empresas.passagens.autobuses.dtos.AsientoBloqueadoDTO;
 import com.alvaro.empresas.passagens.autobuses.dtos.PisoDTO;
 import com.alvaro.empresas.passagens.autobuses.dtos.PisoDTOResponse;
 import com.alvaro.empresas.passagens.autobuses.dtos.PisoDTOUpdate;
-import com.alvaro.empresas.passagens.autobuses.models.AsientoBloqueadoModel;
+import com.alvaro.empresas.passagens.autobuses.dtos.PosicionIndisponibleDTO;
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
-import com.alvaro.empresas.passagens.autobuses.repositories.AsientoBloqueadoRepository;
+import com.alvaro.empresas.passagens.autobuses.models.PosicionIndisponibleModel;
 import com.alvaro.empresas.passagens.autobuses.repositories.PisoRepository;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,11 +20,8 @@ import java.util.Optional;
 public class PisoService {
     @Autowired
     private PisoRepository pisoRepository;
-
     @Autowired
-    private AsientoBloqueadoRepository asientoBloqueadoRepository;
-    @Autowired
-    private AsientoBloqueadosService asientoBloqueadosService;
+    private PosicionIndisponibleService posicionService;
     @Autowired
     private AutobusService autobusService;
 
@@ -36,10 +32,10 @@ public class PisoService {
 
     public PisoDTOResponse getOne(Integer id) {
         var model = this.findById(id);
-        List<AsientoBloqueadoDTO> posicionesBloqueadas = new ArrayList<>();
+        List<PosicionIndisponibleDTO> posicionesBloqueadas = new ArrayList<>();
 
-        for (AsientoBloqueadoModel posicionesIndisponible : model.getPosicionesIndisponibles()) {
-            posicionesBloqueadas.add(new AsientoBloqueadoDTO(posicionesIndisponible));
+        for (PosicionIndisponibleModel posicionIndisponibleModel : model.getPosicionesIndisponibles()) {
+            posicionesBloqueadas.add(new PosicionIndisponibleDTO(posicionIndisponibleModel));
         }
 
         int idAutobus = model.getAutobus().getId();
@@ -52,9 +48,9 @@ public class PisoService {
         List<PisoDTOResponse> pisosDtos = new ArrayList<>();
 
         for (PisoModel pisoModel : pisos) {
-            List<AsientoBloqueadoDTO> posicionesIndisponibles = new ArrayList<>();
-            for (AsientoBloqueadoModel posicionesIndisponible : pisoModel.getPosicionesIndisponibles()) {
-                posicionesIndisponibles.add(new AsientoBloqueadoDTO(posicionesIndisponible));
+            List<PosicionIndisponibleDTO> posicionesIndisponibles = new ArrayList<>();
+            for (PosicionIndisponibleModel posicionesIndisponible : pisoModel.getPosicionesIndisponibles()) {
+                posicionesIndisponibles.add(new PosicionIndisponibleDTO(posicionesIndisponible));
             }
             pisosDtos.add(new PisoDTOResponse(pisoModel, pisoModel.getAutobus().getId(), posicionesIndisponibles));
         }
@@ -69,6 +65,13 @@ public class PisoService {
         //Poco eficiente, pueden traer muchos!!!! trayectos
         if (!autobus.getTrayectos().isEmpty()) {
             return null;
+        }
+
+        int produto = dto.getNLinhas() * dto.getNColunas();
+        for (PosicionIndisponibleDTO posicionDTO : dto.getPosicoesIndisponiveis()) {
+            if (posicionDTO.numero() > produto) {
+                return null;
+            }
         }
         //En caso de que el autobus ya haya hecho algun trayecto, no se podran aumentar pisos
         int novoNumeroPiso;
@@ -90,7 +93,7 @@ public class PisoService {
         pisoModel.setAutobus(autobus);
         var saved = pisoRepository.save(pisoModel);
 
-        List<AsientoBloqueadoDTO> bloqueadoDTOS = asientoBloqueadosService.saveAll(dto.getPosicoesIndisponiveis(), saved);
+        List<PosicionIndisponibleDTO> bloqueadoDTOS = posicionService.saveAll(dto.getPosicoesIndisponiveis(), saved);
 
         //List<AsientoBloqueadoDTO> bloqueadoDTOS = asientoBloqueadosService.convertModelsToDtos(saved.getPosicionesIndisponibles());
         return new PisoDTOResponse(saved, autobus.getId(), bloqueadoDTOS);
@@ -103,6 +106,13 @@ public class PisoService {
         if (!model.getAutobus().getTrayectos().isEmpty()) {
             return null;
         }
+
+        int produto = dto.getNLinhas() * dto.getNColunas();
+        for (PosicionIndisponibleDTO posicionDTO : dto.getPosicoesIndisponiveis()) {
+            if (posicionDTO.numero() > produto) {
+                return null;
+            }
+        }
         model.updateValues(dto);
 
         if (model.getAutobus().getPisos().size() == 2) {
@@ -114,15 +124,16 @@ public class PisoService {
             }
         }
 
-        asientoBloqueadosService.deleteAll(model.getPosicionesIndisponibles());
-        model.setPosicionesIndisponibles(new ArrayList<AsientoBloqueadoModel>());
+        posicionService.deleteAll(model.getPosicionesIndisponibles());
+        model.setPosicionesIndisponibles(new ArrayList<PosicionIndisponibleModel>());
 
         var modelUpdate = pisoRepository.save(model);
-        List<AsientoBloqueadoDTO> bloqueadoDTOS = asientoBloqueadosService.saveAll(dto.getPosicoesIndisponiveis(), modelUpdate);
+        List<PosicionIndisponibleDTO> bloqueadoDTOS = posicionService.saveAll(dto.getPosicoesIndisponiveis(), modelUpdate);
 
         return new PisoDTOResponse(modelUpdate, modelUpdate.getAutobus().getId(), bloqueadoDTOS);
     }
 
+    @Transactional
     public void delete(PisoModel model) {
         //Este Metodo devido ao efeito cascada elimina os assientos bloqueados
         pisoRepository.delete(model);

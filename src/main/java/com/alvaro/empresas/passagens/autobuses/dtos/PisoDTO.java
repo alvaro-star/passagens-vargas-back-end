@@ -28,6 +28,6 @@ public class PisoDTO {
     @NotNull
     private Integer idAutobus;
 
-    private List<AsientoBloqueadoDTO> posicoesIndisponiveis = new ArrayList<AsientoBloqueadoDTO>();
+    private List<PosicionIndisponibleDTO> posicoesIndisponiveis = new ArrayList<PosicionIndisponibleDTO>();
 
 }

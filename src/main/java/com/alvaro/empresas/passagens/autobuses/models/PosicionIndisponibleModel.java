@@ -1,7 +1,7 @@
 package com.alvaro.empresas.passagens.autobuses.models;
 
 
-import com.alvaro.empresas.passagens.autobuses.dtos.AsientoBloqueadoDTO;
+import com.alvaro.empresas.passagens.autobuses.dtos.PosicionIndisponibleDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -14,21 +14,19 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class AsientoBloqueadoModel {
+public class PosicionIndisponibleModel {
     @Id
     @Column(name = "idtb_asiento_bloqueado")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    private Integer linha;
-    private Integer coluna;
+    private Integer numero;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_piso")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private PisoModel piso;
 
-    public AsientoBloqueadoModel(AsientoBloqueadoDTO dto) {
-        linha = dto.getLinha();
-        coluna = dto.getColuna();
+    public PosicionIndisponibleModel(PosicionIndisponibleDTO dto) {
+        numero = dto.numero();
     }
 }
