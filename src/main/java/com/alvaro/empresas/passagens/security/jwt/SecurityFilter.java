@@ -6,6 +6,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,7 +18,7 @@ import java.io.IOException;
 
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
-
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(SecurityFilter.class);
     @Autowired
     TokenService tokenService;
     @Autowired
@@ -25,21 +26,27 @@ public class SecurityFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        var token = this.recoveryToken(request);
-        if (token != null) {
+
+        try {
+            var token = this.getToken(request);
             var subject = tokenService.validateToken(token);
             UserDetails user = userRepository.findByLogin(subject);
-
-            var authenticate = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(authenticate);
+            if (user != null) {
+                var authenticate = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(authenticate);
+            } else {
+                System.out.println("Sem Usuario logado");
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
         }
         filterChain.doFilter(request, response);
     }
 
-    private String recoveryToken(HttpServletRequest request) {
+    private String getToken(HttpServletRequest request) {
         var authheader = request.getHeader("Authorization");
-        if (authheader == null)
-            return null;
-        return authheader.replace("Bearer ", "");
+        if (authheader != null && authheader.startsWith("Bearer"))
+            return authheader.replace("Bearer ", "");
+        return null;
     }
 }

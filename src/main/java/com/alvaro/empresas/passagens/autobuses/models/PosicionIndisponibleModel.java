@@ -10,13 +10,13 @@ import lombok.Setter;
 
 
 @Entity
-@Table(name = "tb_asiento_bloqueado")
+@Table(name = "tb_posicion_indisponible")
 @Getter
 @Setter
 @NoArgsConstructor
 public class PosicionIndisponibleModel {
     @Id
-    @Column(name = "idtb_asiento_bloqueado")
+    @Column(name = "idtb_posicion_indisponible")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private Integer numero;

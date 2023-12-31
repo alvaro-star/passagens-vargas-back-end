@@ -1,12 +1,12 @@
 package com.alvaro.empresas.passagens.security.resource;
 
+import com.alvaro.empresas.passagens.dtos.Mensaje;
 import com.alvaro.empresas.passagens.security.dtos.LoginDto;
 import com.alvaro.empresas.passagens.security.dtos.LoginResponseDto;
 import com.alvaro.empresas.passagens.security.dtos.RegisterDto;
 import com.alvaro.empresas.passagens.security.models.RoleModel;
 import com.alvaro.empresas.passagens.security.models.UserModel;
 import com.alvaro.empresas.passagens.security.repositories.UserRepository;
-import com.alvaro.empresas.passagens.security.services.AuthorizationService;
 import com.alvaro.empresas.passagens.security.services.RoleService;
 import com.alvaro.empresas.passagens.security.services.TokenService;
 import jakarta.validation.Valid;
@@ -25,10 +25,10 @@ import java.util.Set;
 
 @RestController
 @RequestMapping("/auth")
-public class UserController {
+public class UserResource {
 
-    @Autowired
-    private AuthorizationService authorizationService;
+
+    //private AuthorizationService authorizationService;
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -40,11 +40,15 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<Object> login(@RequestBody @Valid LoginDto loginDto) {
+        try {
+            var usernamePassword = new UsernamePasswordAuthenticationToken(loginDto.login(), loginDto.contrasena());
+            var auth = authenticationManager.authenticate(usernamePassword);
+            var token = tokenService.generateToken((UserModel) auth.getPrincipal());
+            return ResponseEntity.ok(new LoginResponseDto(token));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new Mensaje("Credenciais Invalidos"));
+        }
 
-        var usernamePassword = new UsernamePasswordAuthenticationToken(loginDto.login(), loginDto.contrasena());
-        var auth = authenticationManager.authenticate(usernamePassword);
-        var token = tokenService.generateToken((UserModel) auth.getPrincipal());
-        return ResponseEntity.ok(new LoginResponseDto(token));
     }
 
     @PostMapping("/register")

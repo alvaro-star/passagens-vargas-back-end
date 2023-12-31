@@ -23,7 +23,7 @@ public class PisoDTO {
     @NotBlank
     private String distribuicaoFileira;
 
-    private String inicioContagem;
+    private String inicioContagem = "";
 
     @NotNull
     private Integer idAutobus;

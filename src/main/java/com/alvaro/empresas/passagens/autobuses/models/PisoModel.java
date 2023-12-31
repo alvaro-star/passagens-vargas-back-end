@@ -24,17 +24,22 @@ public class PisoModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-
+    @Column(nullable = false)
     private Integer nLinhas;
+    @Column(nullable = false)
     private Integer nColunas;
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private EnumPosicao distribuicaoFileira;
+    @Column(nullable = false)
     private Integer nPiso;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private EnumPosicao inicioContagem;
-
+    @Column(nullable = false)
     private Integer nSillas;
+    @Column(nullable = false)
     private Integer primeraSilla;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
