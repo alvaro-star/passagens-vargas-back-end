@@ -16,8 +16,6 @@ import java.util.UUID;
 public class PrecioService {
     @Autowired
     private PrecioRepository precioRepository;
-    @Autowired
-    private ViajeService viajeService;
 
     public PrecioModel findById(UUID id) {
         var model = precioRepository.findById(id);
@@ -38,18 +36,22 @@ public class PrecioService {
         return new PrecioDTO(model, model.getViaje().getId());
     }
 
+    //No se podran salvar precios por separado
+    /*
     public PrecioDTO save(PrecioDTO dto) {
         var viaje = viajeService.findById(dto.idViaje());
         //Maximo 2
         int nPisos = viaje.getTrayecto().getAutobus().getPisos().size();
         int nPrecios = viaje.getPrecios().size();
+
+        viaje.setPrecios(new ArrayList<PrecioModel>());
         if (nPisos > nPrecios) {
             var model = new PrecioModel(dto.precio(), 2, viaje);
             var save = precioRepository.save(model);
             return new PrecioDTO(save, viaje.getId());
         }
         return null;
-    }
+    }*/
 
     public PrecioDTO update(PrecioDTOUpdate dto, UUID id) {
         var model = findById(id);

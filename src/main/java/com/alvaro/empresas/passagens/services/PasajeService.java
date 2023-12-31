@@ -2,10 +2,7 @@ package com.alvaro.empresas.passagens.services;
 
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import com.alvaro.empresas.passagens.dtos.PasajeDTO;
-import com.alvaro.empresas.passagens.models.PasajeModel;
-import com.alvaro.empresas.passagens.models.SillaModel;
-import com.alvaro.empresas.passagens.models.TrayectoModel;
-import com.alvaro.empresas.passagens.models.ViajeModel;
+import com.alvaro.empresas.passagens.models.*;
 import com.alvaro.empresas.passagens.repositories.PasajeRepository;
 import com.alvaro.empresas.passagens.repositories.SillaRepository;
 import org.hibernate.ObjectNotFoundException;
@@ -49,7 +46,12 @@ public class PasajeService {
         pasajeModel.setTrayecto(trayecto);
         var pasajeSaved = pasajeRepository.save(pasajeModel);
         //Pasaje salvado
-        boolean salvado = salvarSilla(trayecto, dto.nSilla(), viaje, pasajeSaved);
+        Integer nPiso = calcularNPiso(trayecto, dto.nSilla());
+        if (nPiso == null) {
+            return false;
+        }
+
+        boolean salvado = salvarSilla(trayecto, dto.nSilla(), nPiso, viaje, pasajeSaved);
         if (!salvado) {
             return false;
         }
@@ -57,34 +59,38 @@ public class PasajeService {
         /************
          Falta o Pago
          ************/
+        for (PrecioModel precioModel : viaje.getPrecios()) {
+        }
 
         return null;
     }
 
-    public boolean salvarSilla(TrayectoModel trayecto, Integer nSilla, ViajeModel viaje, PasajeModel pasajeSaved) {
+    public Integer calcularNPiso(TrayectoModel trayecto, Integer nSilla) {
         List<PisoModel> pisos = trayecto.getAutobus().getPisos();
-        int SillaNPiso;
         if (pisos.size() == 1) {
             if (nSilla > pisos.get(0).getNSillas()) {
-                return false;
+                return null;
             }
-            SillaNPiso = 1;
+            return 1;
         } else {
             int indiceSegundoPiso = (pisos.get(0).getNPiso() == 2) ? 0 : 1;
             int nUltimaSilla = pisos.get(indiceSegundoPiso).getNSillas() + pisos.get(indiceSegundoPiso).getPrimeraSilla() - 1;
 
             if (nSilla > nUltimaSilla) {
-                return false;
+                return null;
             }
             if (nSilla < pisos.get(indiceSegundoPiso).getPrimeraSilla()) {
-                SillaNPiso = 1;
+                return 1;
             } else {
-                SillaNPiso = 2;
+                return 2;
             }
         }
+    }
+
+    public boolean salvarSilla(TrayectoModel trayecto, Integer nSilla, Integer SillaNPiso, ViajeModel viaje, PasajeModel pasajeSaved) {
+        List<PisoModel> pisos = trayecto.getAutobus().getPisos();
 
         sillaRepository.save(new SillaModel(nSilla, SillaNPiso, viaje, pasajeSaved));
-
 
         var viajeDestino = viaje.getDestino().getDataHora();
         var viajeSalida = viaje.getSalida().getDataHora();

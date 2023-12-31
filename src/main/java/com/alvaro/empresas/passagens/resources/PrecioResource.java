@@ -1,12 +1,11 @@
 package com.alvaro.empresas.passagens.resources;
 
-import com.alvaro.empresas.passagens.dtos.Mensaje;
 import com.alvaro.empresas.passagens.dtos.PrecioDTO;
 import com.alvaro.empresas.passagens.dtos.PrecioDTOUpdate;
 import com.alvaro.empresas.passagens.services.PrecioService;
+import com.alvaro.empresas.passagens.services.ViajeService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,20 +16,12 @@ import java.util.UUID;
 public class PrecioResource {
     @Autowired
     private PrecioService precioService;
+    @Autowired
+    private ViajeService viajeService;
 
     @GetMapping("/{id}")
     public ResponseEntity<PrecioDTO> getOne(@PathVariable(value = "id") UUID id) {
         return ResponseEntity.ok(precioService.getOne(id));
-    }
-
-    @PostMapping
-    public ResponseEntity<Object> save(@Valid @RequestBody PrecioDTO dto) {
-        var response = precioService.save(dto);
-        if (response == null) {
-            return ResponseEntity.unprocessableEntity().body(new Mensaje("No se pueden agragar mas precios"));
-        } else {
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        }
     }
 
     @PutMapping("/{id}")

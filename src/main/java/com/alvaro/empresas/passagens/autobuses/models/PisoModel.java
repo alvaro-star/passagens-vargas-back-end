@@ -1,9 +1,8 @@
 package com.alvaro.empresas.passagens.autobuses.models;
 
 import com.alvaro.empresas.passagens.autobuses.dtos.PisoDTO;
-import com.alvaro.empresas.passagens.autobuses.dtos.PisoDtoUpdate;
+import com.alvaro.empresas.passagens.autobuses.dtos.PisoDTOUpdate;
 import com.alvaro.empresas.passagens.autobuses.enums.EnumPosicao;
-import com.alvaro.empresas.passagens.autobuses.enums.EnumTipoBus;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -23,18 +22,20 @@ public class PisoModel {
     @Id
     @Column(name = "idtb_piso")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
-    private int nSillas;
-    private int nFilas;
-    private int nPiso;
-    private int primeraSilla;
+
+    private Integer nLinhas;
+    private Integer nColunas;
     @Enumerated(EnumType.STRING)
-    private EnumPosicao posicionPasillo;
-    @Enumerated(EnumType.STRING)
-    private EnumTipoBus tipo;
+    private EnumPosicao distribuicaoFileira;
+    private Integer nPiso;
+
     @Enumerated(EnumType.STRING)
     private EnumPosicao inicioContagem;
+
+    private Integer nSillas;
+    private Integer primeraSilla;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_autobus")
@@ -42,81 +43,49 @@ public class PisoModel {
     private AutobusModel autobus;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "piso")
-    private List<AsientoBloqueadoModel> asientosBloqueados = new ArrayList<AsientoBloqueadoModel>();
+    private List<AsientoBloqueadoModel> posicionesIndisponibles = new ArrayList<AsientoBloqueadoModel>();
 
-    public PisoModel(PisoDTO dto) {
-        nSillas = dto.getNSillas();
-        nFilas = dto.getNFilas();
-        nPiso = dto.getNPiso();
-        primeraSilla = dto.getPrimeraSilla();
+    public PisoModel(PisoDTO dto, Integer nPiso, Integer primeraSilla) {
+        nSillas = dto.getNColunas() * dto.getNLinhas() - dto.getPosicoesIndisponiveis().size();
+        nLinhas = dto.getNLinhas();
+        nColunas = dto.getNColunas();
+        this.nPiso = nPiso;
+        this.primeraSilla = primeraSilla;
 
-        switch (dto.getTipo()) {
-            case "leito":
-                tipo = EnumTipoBus.LEITO;
+        switch (dto.getDistribuicaoFileira()) {
+            case "izquierda":
+                distribuicaoFileira = EnumPosicao.IZQUIERDA;
                 break;
-            case "tradicional":
-                dto.setPosicionPasillo("medio");
-                tipo = EnumTipoBus.TRADICIONAL;
+            case "derecha":
+                distribuicaoFileira = EnumPosicao.DERECHA;
                 break;
         }
 
-        switch (dto.getPosicionPasillo()) {
-            case "medio":
-                posicionPasillo = EnumPosicao.MEDIO;
-                break;
-            case "izquierda":
-                posicionPasillo = EnumPosicao.IZQUIERDA;
-                break;
-            case "derecha":
-                posicionPasillo = EnumPosicao.DERECHA;
-                break;
-        }
-
-        switch (dto.getInicioContagem()) {
-            case "izquierda":
-                inicioContagem = EnumPosicao.DERECHA;
-                break;
-            case "derecha":
-                inicioContagem = EnumPosicao.IZQUIERDA;
-                break;
+        if (dto.getInicioContagem().equals("izquierda")) {
+            inicioContagem = EnumPosicao.IZQUIERDA;
+        } else {
+            inicioContagem = EnumPosicao.DERECHA;
         }
     }
 
-    public void llenarSinVector(PisoDtoUpdate dto) {
-        nSillas = dto.getNSillas();
-        nFilas = dto.getNFilas();
-        nPiso = dto.getNPiso();
-        primeraSilla = dto.getPrimeraSilla();
+    public void updateValues(PisoDTOUpdate dto) {
+        nSillas = dto.getNColunas() * dto.getNLinhas() - dto.getPosicoesIndisponiveis().size();
+        nLinhas = dto.getNLinhas();
+        nColunas = dto.getNColunas();
 
-        switch (dto.getTipo()) {
-            case "leito":
-                tipo = EnumTipoBus.LEITO;
+        switch (dto.getDistribuicaoFileira()) {
+            case "izquierda":
+                distribuicaoFileira = EnumPosicao.IZQUIERDA;
                 break;
-            case "tradicional":
-                dto.setPosicionPasillo("medio");
-                tipo = EnumTipoBus.TRADICIONAL;
+            case "derecha":
+                distribuicaoFileira = EnumPosicao.DERECHA;
                 break;
         }
 
-        switch (dto.getPosicionPasillo()) {
-            case "medio":
-                posicionPasillo = EnumPosicao.MEDIO;
-                break;
-            case "izquierda":
-                posicionPasillo = EnumPosicao.IZQUIERDA;
-                break;
-            case "derecha":
-                posicionPasillo = EnumPosicao.DERECHA;
-                break;
-        }
-
-        switch (dto.getInicioContagem()) {
-            case "izquierda":
-                inicioContagem = EnumPosicao.DERECHA;
-                break;
-            case "derecha":
-                inicioContagem = EnumPosicao.IZQUIERDA;
-                break;
+        if (dto.getInicioContagem().equals("izquierda")) {
+            inicioContagem = EnumPosicao.IZQUIERDA;
+        } else {
+            inicioContagem = EnumPosicao.DERECHA;
         }
     }
 }

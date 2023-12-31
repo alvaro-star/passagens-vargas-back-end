@@ -4,7 +4,6 @@ import com.alvaro.empresas.passagens.dtos.*;
 import com.alvaro.empresas.passagens.models.PrecioModel;
 import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTO;
-import com.alvaro.empresas.passagens.paradas.services.ParadaService;
 import com.alvaro.empresas.passagens.repositories.ViajeRepository;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +20,6 @@ public class ViajeService {
     private ViajeRepository viajeRepository;
     @Autowired
     private TrayectoService trayectoService;
-    @Autowired
-    private ParadaService paradaService;
-
     @Autowired
     private PrecioService precioService;
 
@@ -72,6 +68,10 @@ public class ViajeService {
         var destino = trayecto.getParadaById(dto.destino());
 
         if (destino == null) {
+            return null;
+        }
+
+        if (!destino.getDataHora().isAfter(salida.getDataHora())) {
             return null;
         }
 

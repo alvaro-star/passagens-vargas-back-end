@@ -15,15 +15,20 @@ public class AsientoBloqueadosService {
     @Autowired
     private AsientoBloqueadoRepository asientoBloqueadoRepository;
 
-    public List<AsientoBloqueadoModel> saveAll(List<AsientoBloqueadoDTO> dtos, PisoModel layout) {
+    public List<AsientoBloqueadoDTO> saveAll(List<AsientoBloqueadoDTO> dtos, PisoModel piso) {
         List<AsientoBloqueadoModel> models = new ArrayList<>();
         dtos.forEach(dto -> {
             var model = new AsientoBloqueadoModel(dto);
-            model.setPiso(layout);
+            model.setPiso(piso);
             models.add(asientoBloqueadoRepository.save(model));
         });
+        //Converte em DTO os asientos salvos
+        List<AsientoBloqueadoDTO> bloqueadoDTOS = new ArrayList<>();
+        for (AsientoBloqueadoModel model : models) {
+            bloqueadoDTOS.add(new AsientoBloqueadoDTO(model));
+        }
 
-        return models;
+        return bloqueadoDTOS;
     }
 
     public void deleteAll(List<AsientoBloqueadoModel> list) {

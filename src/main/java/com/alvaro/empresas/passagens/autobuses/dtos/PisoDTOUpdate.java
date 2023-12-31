@@ -1,6 +1,5 @@
 package com.alvaro.empresas.passagens.autobuses.dtos;
 
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -13,20 +12,16 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class PisoDTO {
+public class PisoDTOUpdate {
 
     @NotNull
     private Integer nLinhas;
     @NotNull
-    @Max(value = 4)
-    private Integer nColunas;//Tipo Onibus
+    private Integer nColunas;
     @NotBlank
     private String distribuicaoFileira;
 
     private String inicioContagem;
-
-    @NotNull
-    private Integer idAutobus;
 
     private List<AsientoBloqueadoDTO> posicoesIndisponiveis = new ArrayList<AsientoBloqueadoDTO>();
 

@@ -2,7 +2,7 @@ package com.alvaro.empresas.passagens.autobuses.services;
 
 import com.alvaro.empresas.passagens.autobuses.dtos.AutobusDTO;
 import com.alvaro.empresas.passagens.autobuses.dtos.AutobusDTOUpdate;
-import com.alvaro.empresas.passagens.autobuses.dtos.PisoDTO;
+import com.alvaro.empresas.passagens.autobuses.dtos.PisoDTOResponse;
 import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import com.alvaro.empresas.passagens.autobuses.repositories.AutobusRepository;
@@ -49,7 +49,7 @@ public class AutobusService {
         var dto = new AutobusDTO(model);
         dto.setIdEmpresa(model.getEmpresa().getId());
         List<TrayectoDTO> trayectosDto = new ArrayList<>();
-        List<PisoDTO> pisosDto = new ArrayList<>();
+        List<PisoDTOResponse> pisosDto = new ArrayList<>();
         for (TrayectoModel trayecto : model.getTrayectos()) {
             var trayectoDto = new TrayectoDTO(trayecto);
             trayectoDto.setIdAutobus(model.getId());
@@ -57,9 +57,7 @@ public class AutobusService {
         }
 
         for (PisoModel piso : model.getPisos()) {
-            var pisoDTO = new PisoDTO(piso);
-            pisoDTO.setIdAutobus(model.getId());
-            pisosDto.add(pisoDTO);
+            pisosDto.add(new PisoDTOResponse(piso, model.getId()));
         }
         dto.setTrayectos(trayectosDto);
         dto.setPisos(pisosDto);

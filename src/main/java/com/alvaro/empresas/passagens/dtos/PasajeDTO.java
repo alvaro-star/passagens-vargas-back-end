@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 
 import java.util.Date;
+import java.util.List;
 
 public record PasajeDTO(
         Integer id,

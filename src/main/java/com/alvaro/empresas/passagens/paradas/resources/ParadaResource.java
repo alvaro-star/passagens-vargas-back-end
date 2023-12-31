@@ -37,7 +37,7 @@ public class ParadaResource {
         return ResponseEntity.ok(paradaService.update(dto, id));
     }
 
-    @PutMapping("/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Mensaje> delete(@PathVariable Integer id) {
         var model = paradaService.findById(id);
         if (!model.getSalidas().isEmpty() || !model.getDestinos().isEmpty()) {
