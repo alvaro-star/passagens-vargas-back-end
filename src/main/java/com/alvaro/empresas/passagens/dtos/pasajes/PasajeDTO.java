@@ -1,12 +1,12 @@
-package com.alvaro.empresas.passagens.dtos;
+package com.alvaro.empresas.passagens.dtos.pasajes;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 
 import java.util.Date;
-import java.util.List;
 
+//Las sillas necessitan estar en el mismo piso
 public record PasajeDTO(
         Integer id,
         @NotBlank
@@ -15,10 +15,6 @@ public record PasajeDTO(
         String nombre,
         @Past
         Date nascimento,
-        @NotNull
-        Float descuento,
-        @NotNull
-        Integer idViaje,
         @NotNull
         Integer nSilla
 ) {

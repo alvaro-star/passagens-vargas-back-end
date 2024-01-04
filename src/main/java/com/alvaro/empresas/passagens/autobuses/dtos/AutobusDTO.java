@@ -14,6 +14,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 public class AutobusDTO {
+
     private Integer id;
 
     @NotBlank(message = "no puede ser nulo")
@@ -21,12 +22,18 @@ public class AutobusDTO {
 
     @NotNull(message = "nao pode ser nulo")
     private Integer idEmpresa;
-
+    /*@Size(min = 1, max = 2)*/
     private List<PisoDTOResponse> pisos;
     private List<TrayectoDTO> trayectos;
 
     public AutobusDTO(AutobusModel model) {
         id = model.getId();
         placa = model.getPlaca();
+    }
+
+    public AutobusDTO(AutobusModel model, Integer idEmpresa) {
+        id = model.getId();
+        placa = model.getPlaca();
+        this.idEmpresa = idEmpresa;
     }
 }

@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.models;
 
-import com.alvaro.empresas.passagens.dtos.PasajeDTO;
+import com.alvaro.empresas.passagens.dtos.pasajes.PasajeDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -25,6 +25,7 @@ public class PasajeModel {
     private String nombre;
     @Column(name = "comprado_na_web?")
     private Boolean compradoWeb;
+
     private Date nascimento;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

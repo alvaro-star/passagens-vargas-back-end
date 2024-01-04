@@ -35,9 +35,7 @@ public class DepartamentoResource {
         List<CiudadDTO> ciudades = new ArrayList<>();
 
         model.getCiudades().forEach(ciudadModel -> {
-            var ciudadDto = new CiudadDTO(ciudadModel);
-            ciudadDto.setIdDepartamento(model.getId());
-            ciudades.add(ciudadDto);
+            ciudades.add(new CiudadDTO(ciudadModel, model.getId()));
         });
         var dto = new DepartamentoDTO(model);
         dto.setCiudades(ciudades);

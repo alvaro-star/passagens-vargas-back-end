@@ -8,7 +8,6 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.sql.SQLOutput;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -22,15 +21,14 @@ public class TokenService {
     public String generateToken(UserModel userModel) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
-            String token = JWT
-                    .create()
-                    .withIssuer("auth-api")
+            String token = JWT.create()
+                    .withIssuer("API passagens-back")
                     .withSubject(userModel.getLogin())
                     .withExpiresAt(this.getExpirationDate())
                     .sign(algorithm);
             return token;
         } catch (JWTCreationException exception) {
-            throw new RuntimeException("Erro while generation token", exception);
+            throw new RuntimeException("Erro na geracao do token", exception);
         }
     }
 
@@ -38,7 +36,7 @@ public class TokenService {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             return JWT.require(algorithm)
-                    .withIssuer("auth-api")
+                    .withIssuer("API passagens-back")
                     .build()
                     .verify(token)
                     .getSubject();

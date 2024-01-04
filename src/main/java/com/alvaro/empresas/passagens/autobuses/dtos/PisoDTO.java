@@ -1,5 +1,6 @@
 package com.alvaro.empresas.passagens.autobuses.dtos;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -28,6 +29,7 @@ public class PisoDTO {
     @NotNull
     private Integer idAutobus;
 
+    @Valid
     private List<PosicionIndisponibleDTO> posicoesIndisponiveis = new ArrayList<PosicionIndisponibleDTO>();
 
 }

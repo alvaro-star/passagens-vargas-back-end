@@ -13,6 +13,8 @@ import com.alvaro.empresas.passagens.models.TrayectoModel;
 import com.alvaro.empresas.passagens.services.EmpresaService;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
@@ -33,15 +35,16 @@ public class AutobusService {
         return model.orElseThrow(() -> new ObjectNotFoundException(id, AutobusModel.class.getName()));
     }
 
-    public List<AutobusDTO> findAll() {
-        List<AutobusDTO> dtos = new ArrayList<>();
-        List<AutobusModel> models = autobusRepository.findAll();
-        models.forEach(model -> {
-            var dto = new AutobusDTO(model);
-            dto.setIdEmpresa(model.getEmpresa().getId());
-            dtos.add(dto);
-        });
+    public Page<AutobusDTO> findAll(Pageable pageable) {
+        Page<AutobusModel> models = autobusRepository.findAll(pageable);
+        Page<AutobusDTO> dtos = models.map(model -> new AutobusDTO(model, model.getEmpresa().getId()));
         return dtos;
+    }
+
+    public Page<AutobusDTO> findAllFromEmpresa(Integer idEmpresa, Pageable pageable) {
+        var empresa = empresaService.findById(idEmpresa);
+        Page<AutobusModel> autobuses = autobusRepository.findByEmpresa(empresa, pageable);
+        return autobuses.map((autobus) -> new AutobusDTO(autobus, empresa.getId()));
     }
 
     public AutobusDTO getOne(Integer id) {
@@ -73,7 +76,6 @@ public class AutobusService {
                 "/autobuses");
         for (FieldError erro : bindingResult.getFieldErrors()) {
             err.addError(erro.getField(), erro.getDefaultMessage());
-            System.out.println("\n" + erro.getField() + "Steve" + erro.getDefaultMessage());
         }
 
         if (!bindingResult.hasFieldErrors("placa")) {
@@ -81,6 +83,23 @@ public class AutobusService {
                 err.addError("placa", "La placa ya esta registrada");
             }
         }
+        /*
+        int counter = 1;
+        for (PisoDTOResponse pisoDto : dto.getPisos()) {
+            if (pisoDto.nLinhas() == null) {
+                err.addError("nLinhas" + counter, "No puede ser nulo");
+            }
+            if (pisoDto.nColunas() == null) {
+                err.addError("nColunas" + counter, "No puede ser nulo");
+            } else {
+                if (pisoDto.nColunas() > 4)
+                    err.addError("nColunas" + counter, "No puede ser maior que 4");
+            }
+            if (pisoDto.distribuicaoFileira() == null || pisoDto.distribuicaoFileira() == "") {
+                err.addError("distribuicaoFileira" + counter, "No puede ser vazio");
+            }
+            counter++;
+        }*/
 
         return err;
     }

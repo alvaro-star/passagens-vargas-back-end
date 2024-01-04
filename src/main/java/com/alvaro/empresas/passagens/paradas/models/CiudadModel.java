@@ -1,6 +1,7 @@
 package com.alvaro.empresas.passagens.paradas.models;
 
 import com.alvaro.empresas.passagens.paradas.dtos.CiudadDTO;
+import com.alvaro.empresas.passagens.paradas.dtos.CiudadDtoUpdate;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -33,6 +34,10 @@ public class CiudadModel {
     private List<LugarModel> lugares = new ArrayList<>();
 
     public CiudadModel(CiudadDTO dto) {
-        nombre = dto.getNombre();
+        nombre = dto.nombre();
+    }
+
+    public void updateValues(CiudadDtoUpdate dto) {
+        nombre = dto.nombre();
     }
 }

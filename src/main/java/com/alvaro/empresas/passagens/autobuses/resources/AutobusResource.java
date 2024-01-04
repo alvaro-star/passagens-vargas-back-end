@@ -7,11 +7,12 @@ import com.alvaro.empresas.passagens.configurations.exceptions.ValidationError;
 import com.alvaro.empresas.passagens.dtos.Mensaje;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/autobuses")
@@ -20,8 +21,14 @@ public class AutobusResource {
     private AutobusService autobusService;
 
     @GetMapping
-    public ResponseEntity<List<AutobusDTO>> getAll() {
-        return ResponseEntity.ok().body(autobusService.findAll());
+    public ResponseEntity<Page<AutobusDTO>> getAll(@PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok().body(autobusService.findAll(pageable));
+    }
+
+    @GetMapping("/from/{idEmpresa}")
+    public ResponseEntity<Page<AutobusDTO>> getAutobusesFromEmpresa(@PathVariable(value = "idEmpresa") Integer id,
+                                                                    @PageableDefault(size = 10, sort = {"placa"}) Pageable pageable) {
+        return ResponseEntity.ok().body(autobusService.findAllFromEmpresa(id, pageable));
     }
 
     @GetMapping("/{id}")

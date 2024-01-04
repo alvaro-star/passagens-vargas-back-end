@@ -3,6 +3,7 @@ package com.alvaro.empresas.passagens.services;
 import com.alvaro.empresas.passagens.dtos.PrecioDTO;
 import com.alvaro.empresas.passagens.dtos.PrecioDTOUpdate;
 import com.alvaro.empresas.passagens.models.PrecioModel;
+import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.repositories.PrecioRepository;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,11 +23,12 @@ public class PrecioService {
         return model.orElseThrow(() -> new ObjectNotFoundException(id, PrecioModel.class.getName()));
     }
 
-    public List<PrecioDTO> saveAll(List<PrecioModel> dtoModels, Integer idViaje) {
+    public List<PrecioDTO> saveAll(List<PrecioModel> dtoModels, ViajeModel viaje) {
         List<PrecioDTO> salvos = new ArrayList<>();
         for (PrecioModel precioModel : dtoModels) {
+            precioModel.setViaje(viaje);
             var save = precioRepository.save(precioModel);
-            salvos.add(new PrecioDTO(save, idViaje));
+            salvos.add(new PrecioDTO(save, viaje.getId()));
         }
         return salvos;
     }

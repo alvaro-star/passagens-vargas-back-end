@@ -3,16 +3,16 @@ package com.alvaro.empresas.passagens.paradas.resources;
 import com.alvaro.empresas.passagens.dtos.Mensaje;
 import com.alvaro.empresas.passagens.paradas.dtos.CiudadDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.CiudadDtoUpdate;
-import com.alvaro.empresas.passagens.paradas.models.CiudadModel;
 import com.alvaro.empresas.passagens.paradas.services.CiudadService;
 import com.alvaro.empresas.passagens.paradas.services.DepartamentoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RequestMapping("/ciudades")
@@ -23,40 +23,23 @@ public class CiudadResource {
     private DepartamentoService departamentoService;
 
     @GetMapping
-    public ResponseEntity<List<CiudadDTO>> getAll() {//Incompleto
-        List<CiudadModel> models = ciudadService.findAll();
-        List<CiudadDTO> dtos = new ArrayList<>();
-        models.forEach(model -> {
-            var dto = new CiudadDTO(model);
-            dto.setIdDepartamento(model.getDepartamento().getId());
-            dtos.add(dto);
-        });
-        return ResponseEntity.ok().body(dtos);
+    public ResponseEntity<Page<CiudadDTO>> getAll(@PageableDefault(size = 20) Pageable pageable) {
+        return ResponseEntity.ok().body(ciudadService.findAll(pageable));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<CiudadDTO> getOne(@PathVariable(value = "id") Integer id) {
-        var model = ciudadService.findById(id);
-        var dto = new CiudadDTO(model);
-        dto.setIdDepartamento(model.getDepartamento().getId());
-        return ResponseEntity.ok().body(dto);
+        return ResponseEntity.ok().body(ciudadService.getOne(id));
     }
 
     @PostMapping
     public ResponseEntity<CiudadDTO> save(@Valid @RequestBody CiudadDTO dto) {
-        var departamento = departamentoService.findById(dto.getIdDepartamento());
-        var model = ciudadService.save(dto, departamento);
-        var dtoResponse = new CiudadDTO(model);
-        dtoResponse.setIdDepartamento(model.getDepartamento().getId());
-        return ResponseEntity.ok().body(dtoResponse);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ciudadService.save(dto));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<CiudadDTO> update(@Valid @RequestBody CiudadDtoUpdate dto, @PathVariable(value = "id") Integer id) {
-        var model = ciudadService.update(dto, id);
-        var dtoResponse = new CiudadDTO(model);
-        dtoResponse.setIdDepartamento(model.getDepartamento().getId());
-        return ResponseEntity.ok().body(dtoResponse);
+        return ResponseEntity.ok().body(ciudadService.update(dto, id));
     }
 
     @DeleteMapping("/{id}")

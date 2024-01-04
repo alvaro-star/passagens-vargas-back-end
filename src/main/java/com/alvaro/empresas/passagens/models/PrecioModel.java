@@ -36,10 +36,9 @@ public class PrecioModel {
         nPiso = dto.nPiso();
     }
 
-    public PrecioModel(Float precio, Integer nPiso, ViajeModel viaje) {
+    public PrecioModel(Float precio, Integer nPiso) {
         this.precio = precio;
         this.nPiso = nPiso;
-        this.viaje = viaje;
     }
 
     public void updateValues(PrecioDTOUpdate dto) {

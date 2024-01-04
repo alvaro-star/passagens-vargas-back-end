@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -39,6 +40,10 @@ public class ViajeService {
             dtos.add(new ViajeDTOList(model, idTrayecto, salida, destino));
         }
         return dtos;
+    }
+
+    public List<ViajeModel> findViajesBeteween(UUID codigoTrayecto, LocalDateTime salida, LocalDateTime destino) {
+        return viajeRepository.cargarViajesConIntervalosComunes(codigoTrayecto, salida, destino);
     }
 
     public ViajeDTOResponse getOne(Integer id) {
@@ -86,29 +91,30 @@ public class ViajeService {
         model.setSalida(salida);
         model.setDestino(destino);
 
-        var save = viajeRepository.save(model);
+        var saved = viajeRepository.save(model);
 
         //Tratando os precos da viajem
         int nPisos = trayecto.getAutobus().getPisos().size();
         List<PrecioModel> precios = new ArrayList<>();
 
-        precios.add(new PrecioModel(dto.precioPiso1(), 1, save));
+        precios.add(new PrecioModel(dto.precioPiso1(), 1));
         if (nPisos == 2) {
             if (dto.precioPiso2() == null) {
-                precios.add(new PrecioModel(dto.precioPiso1(), 2, save));
+                precios.add(new PrecioModel(dto.precioPiso1(), 2));
             } else {
-                precios.add(new PrecioModel(dto.precioPiso2(), 2, save));
+                precios.add(new PrecioModel(dto.precioPiso2(), 2));
             }
         }
-
-        List<PrecioDTO> preciosSalvos = precioService.saveAll(precios, save.getId());
+        //Guardando los precios
+        List<PrecioDTO> preciosSalvos = precioService.saveAll(precios, saved);
         //Preparando o dto
         var salidaResponse = new ParadaDTO(salida, salida.getLugar().getId(), trayecto.getCodigo());
         var destinoResponse = new ParadaDTO(destino, destino.getLugar().getId(), trayecto.getCodigo());
 
-        return new ViajeDTOResponse(save, preciosSalvos, trayecto.getCodigo(), salidaResponse, destinoResponse);
+        return new ViajeDTOResponse(saved, preciosSalvos, trayecto.getCodigo(), salidaResponse, destinoResponse);
     }
 
+    @Transactional
     public ViajeDTOResponse update(ViajeDTOUpdate novosDados, Integer id) {
         var model = this.findById(id);
         model.updateValues(novosDados);
