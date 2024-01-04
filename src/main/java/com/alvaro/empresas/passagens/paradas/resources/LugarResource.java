@@ -3,16 +3,15 @@ package com.alvaro.empresas.passagens.paradas.resources;
 import com.alvaro.empresas.passagens.dtos.Mensaje;
 import com.alvaro.empresas.passagens.paradas.dtos.LugarDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.LugarDtoUpdate;
-import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import com.alvaro.empresas.passagens.paradas.services.CiudadService;
 import com.alvaro.empresas.passagens.paradas.services.LugarService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RequestMapping("/lugares")
@@ -23,14 +22,8 @@ public class LugarResource {
     private CiudadService ciudadService;
 
     @GetMapping
-    public ResponseEntity<List<LugarDTO>> getAll() {
-        List<LugarModel> models = lugarService.findAll();
-        List<LugarDTO> dtos = new ArrayList<>();
-        models.forEach(model -> {
-            int idCiudad = model.getCiudad().getId();
-            dtos.add(new LugarDTO(model, idCiudad));
-        });
-        return ResponseEntity.ok().body(dtos);
+    public ResponseEntity<Page<LugarDTO>> getAll(@PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok().body(lugarService.findAll(pageable));
     }
 
     @GetMapping("/{id}")

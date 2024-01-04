@@ -7,9 +7,9 @@ import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import com.alvaro.empresas.passagens.paradas.repositories.LugarRepository;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class LugarService {
@@ -21,8 +21,9 @@ public class LugarService {
         return model.orElseThrow(() -> new ObjectNotFoundException(id, LugarModel.class.getName()));
     }
 
-    public List<LugarModel> findAll() {
-        return lugarRepository.findAll();
+    public Page<LugarDTO> findAll(Pageable pageable) {
+        Page<LugarModel> models = lugarRepository.findAll(pageable);
+        return models.map(model -> new LugarDTO(model, model.getCiudad().getId()));
     }
 
     public LugarModel save(LugarDTO dto, CiudadModel ciudad) {

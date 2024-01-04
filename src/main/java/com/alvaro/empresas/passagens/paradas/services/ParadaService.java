@@ -9,10 +9,10 @@ import com.alvaro.empresas.passagens.paradas.repositories.ParadaRepository;
 import com.alvaro.empresas.passagens.services.TrayectoService;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -36,15 +36,13 @@ public class ParadaService {
         return new ParadaDTO(model, idLugar, idTrayecto);
     }
 
-    public List<ParadaDTO> getAll() {
-        List<ParadaModel> models = paradaRepository.findAll();
-        List<ParadaDTO> dtos = new ArrayList<>();
-        for (ParadaModel model : models) {
+    public Page<ParadaDTO> getAll(Pageable pageable) {
+        Page<ParadaModel> models = paradaRepository.findAll(pageable);
+        return models.map(model -> {
             int idLugar = model.getLugar().getId();
             UUID idTrayecto = model.getTrayecto().getCodigo();
-            dtos.add(new ParadaDTO(model, idLugar, idTrayecto));
-        }
-        return dtos;
+            return new ParadaDTO(model, idLugar, idTrayecto);
+        });
     }
 
     public ParadaDTO save(ParadaDTO dtoSended) {

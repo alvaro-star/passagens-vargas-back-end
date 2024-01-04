@@ -1,6 +1,5 @@
 package com.alvaro.empresas.passagens.paradas.resources;
 
-import com.alvaro.empresas.passagens.dtos.Mensaje;
 import com.alvaro.empresas.passagens.paradas.dtos.CiudadDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.CiudadDtoUpdate;
 import com.alvaro.empresas.passagens.paradas.services.CiudadService;
@@ -46,7 +45,7 @@ public class CiudadResource {
     public ResponseEntity<Object> delete(@PathVariable(value = "id") Integer id) {
         var model = ciudadService.findById(id);
         ciudadService.delete(model);
-        return ResponseEntity.badRequest().body(new Mensaje("La ciudad fue eliminada con exito"));
+        return ResponseEntity.noContent().build();
     }
 
 

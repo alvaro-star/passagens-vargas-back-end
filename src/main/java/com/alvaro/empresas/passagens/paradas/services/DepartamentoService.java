@@ -5,9 +5,10 @@ import com.alvaro.empresas.passagens.paradas.models.DepartamentoModel;
 import com.alvaro.empresas.passagens.paradas.repositories.DepartamentoRepository;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -15,8 +16,9 @@ public class DepartamentoService {
     @Autowired
     private DepartamentoRepository departamentoRepository;
 
-    public List<DepartamentoModel> findAll() {
-        return departamentoRepository.findAll();
+    public Page<DepartamentoDTO> findAll(Pageable pageable) {
+        Page<DepartamentoModel> models = departamentoRepository.findAll(pageable);
+        return models.map(DepartamentoDTO::new);
     }
 
     public DepartamentoModel findById(Integer id) {
@@ -31,7 +33,7 @@ public class DepartamentoService {
 
     public DepartamentoModel update(DepartamentoDTO dto, Integer id) {
         DepartamentoModel model = this.findById(id);
-        model.setNombre(dto.getNombre());
+        model.setNombre(dto.nombre());
         return departamentoRepository.save(model);
     }
 

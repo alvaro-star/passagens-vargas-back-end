@@ -7,6 +7,9 @@ import com.alvaro.empresas.passagens.paradas.models.DepartamentoModel;
 import com.alvaro.empresas.passagens.paradas.services.DepartamentoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,26 +23,19 @@ public class DepartamentoResource {
     private DepartamentoService departamentoService;
 
     @GetMapping
-    public ResponseEntity<List<DepartamentoDTO>> getAll() {
-        List<DepartamentoModel> models = departamentoService.findAll();
-        List<DepartamentoDTO> dtos = new ArrayList<>();
-        models.forEach(model -> {
-            dtos.add(new DepartamentoDTO(model));
-        });
-        return ResponseEntity.ok().body(dtos);
+    public ResponseEntity<Page<DepartamentoDTO>> getAll(@PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok().body(departamentoService.findAll(pageable));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<DepartamentoDTO> getOne(@PathVariable(value = "id") Integer id) {
         DepartamentoModel model = departamentoService.findById(id);
-        List<CiudadDTO> ciudades = new ArrayList<>();
 
+        List<CiudadDTO> ciudades = new ArrayList<>();
         model.getCiudades().forEach(ciudadModel -> {
             ciudades.add(new CiudadDTO(ciudadModel, model.getId()));
         });
-        var dto = new DepartamentoDTO(model);
-        dto.setCiudades(ciudades);
-        return ResponseEntity.ok().body(dto);
+        return ResponseEntity.ok().body(new DepartamentoDTO(model, ciudades));
     }
 
     @PostMapping

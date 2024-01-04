@@ -9,6 +9,8 @@ import com.alvaro.empresas.passagens.autobuses.models.PosicionIndisponibleModel;
 import com.alvaro.empresas.passagens.autobuses.repositories.PisoRepository;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,21 +45,16 @@ public class PisoService {
         return new PisoDTOResponse(model, idAutobus, posicionesBloqueadas);
     }
 
-    public List<PisoDTOResponse> findAll() {
-        List<PisoModel> pisos = pisoRepository.findAll();
-        List<PisoDTOResponse> pisosDtos = new ArrayList<>();
-
-        for (PisoModel pisoModel : pisos) {
+    public Page<PisoDTOResponse> findAll(Pageable pageable) {
+        Page<PisoModel> pisos = pisoRepository.findAll(pageable);
+        return pisos.map(piso -> {
             List<PosicionIndisponibleDTO> posicionesIndisponibles = new ArrayList<>();
-            for (PosicionIndisponibleModel posicionesIndisponible : pisoModel.getPosicionesIndisponibles()) {
+            for (PosicionIndisponibleModel posicionesIndisponible : piso.getPosicionesIndisponibles()) {
                 posicionesIndisponibles.add(new PosicionIndisponibleDTO(posicionesIndisponible));
             }
-            pisosDtos.add(new PisoDTOResponse(pisoModel, pisoModel.getAutobus().getId(), posicionesIndisponibles));
-        }
-
-        return pisosDtos;
+            return new PisoDTOResponse(piso, piso.getAutobus().getId(), posicionesIndisponibles);
+        });
     }
-
 
     @Transactional
     public PisoDTOResponse save(PisoDTO dto) {

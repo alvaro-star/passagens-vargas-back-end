@@ -7,11 +7,12 @@ import com.alvaro.empresas.passagens.autobuses.services.PisoService;
 import com.alvaro.empresas.passagens.dtos.Mensaje;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/pisos")
@@ -25,8 +26,8 @@ public class PisoResource {
     }
 
     @GetMapping
-    public ResponseEntity<List<PisoDTOResponse>> findAll() {
-        return ResponseEntity.ok().body(pisoService.findAll());
+    public ResponseEntity<Page<PisoDTOResponse>> findAll(@PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok().body(pisoService.findAll(pageable));
     }
 
     @PostMapping
