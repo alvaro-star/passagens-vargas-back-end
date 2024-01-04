@@ -4,9 +4,11 @@ import com.alvaro.empresas.passagens.autobuses.dtos.PisoDTO;
 import com.alvaro.empresas.passagens.autobuses.dtos.PisoDTOResponse;
 import com.alvaro.empresas.passagens.autobuses.dtos.PisoDTOUpdate;
 import com.alvaro.empresas.passagens.autobuses.dtos.PosicionIndisponibleDTO;
+import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import com.alvaro.empresas.passagens.autobuses.models.PosicionIndisponibleModel;
 import com.alvaro.empresas.passagens.autobuses.repositories.PisoRepository;
+import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -24,8 +26,6 @@ public class PisoService {
     private PisoRepository pisoRepository;
     @Autowired
     private PosicionIndisponibleService posicionService;
-    @Autowired
-    private AutobusService autobusService;
 
     public PisoModel findById(Integer id) {
         Optional<PisoModel> model = pisoRepository.findById(id);
@@ -55,45 +55,23 @@ public class PisoService {
             return new PisoDTOResponse(piso, piso.getAutobus().getId(), posicionesIndisponibles);
         });
     }
-
-    @Transactional
-    public PisoDTOResponse save(PisoDTO dto) {
-        var autobus = autobusService.findById(dto.getIdAutobus());
-        //Poco eficiente, pueden traer muchos!!!! trayectos
-        if (!autobus.getTrayectos().isEmpty()) {
-            return null;
-        }
+    public PisoDTOResponse salvar(PisoDTO dto, AutobusModel autobusModel, Integer nPiso, Integer nPrimeraSilla) {
 
         int produto = dto.getNLinhas() * dto.getNColunas();
         for (PosicionIndisponibleDTO posicionDTO : dto.getPosicoesIndisponiveis()) {
             if (posicionDTO.numero() > produto) {
-                return null;
+                throw new ValidationException("Las posiciones indisponibles son invalidas");
             }
         }
-        //En caso de que el autobus ya haya hecho algun trayecto, no se podran aumentar pisos
-        int novoNumeroPiso;
-        int nPrimeraSilla;
-        switch (autobus.getPisos().size()) {
-            case 0:
-                novoNumeroPiso = 1;
-                nPrimeraSilla = 1;
-                break;
-            case 1:
-                novoNumeroPiso = 2;
-                nPrimeraSilla = autobus.getPisos().get(0).getNSillas();
-                break;
-            default:
-                return null;
-        }
 
-        var pisoModel = new PisoModel(dto, novoNumeroPiso, nPrimeraSilla);
-        pisoModel.setAutobus(autobus);
+        var pisoModel = new PisoModel(dto, nPiso, nPrimeraSilla);
+        pisoModel.setAutobus(autobusModel);
         var saved = pisoRepository.save(pisoModel);
 
         List<PosicionIndisponibleDTO> bloqueadoDTOS = posicionService.saveAll(dto.getPosicoesIndisponiveis(), saved);
 
         //List<AsientoBloqueadoDTO> bloqueadoDTOS = asientoBloqueadosService.convertModelsToDtos(saved.getPosicionesIndisponibles());
-        return new PisoDTOResponse(saved, autobus.getId(), bloqueadoDTOS);
+        return new PisoDTOResponse(saved, autobusModel.getId(), bloqueadoDTOS);
     }
 
     @Transactional

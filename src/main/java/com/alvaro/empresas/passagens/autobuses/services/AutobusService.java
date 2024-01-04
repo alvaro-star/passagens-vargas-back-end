@@ -1,8 +1,6 @@
 package com.alvaro.empresas.passagens.autobuses.services;
 
-import com.alvaro.empresas.passagens.autobuses.dtos.AutobusDTO;
-import com.alvaro.empresas.passagens.autobuses.dtos.AutobusDTOUpdate;
-import com.alvaro.empresas.passagens.autobuses.dtos.PisoDTOResponse;
+import com.alvaro.empresas.passagens.autobuses.dtos.*;
 import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import com.alvaro.empresas.passagens.autobuses.repositories.AutobusRepository;
@@ -29,28 +27,27 @@ public class AutobusService {
     private AutobusRepository autobusRepository;
     @Autowired
     private EmpresaService empresaService;
+    @Autowired
+    private PisoService pisoService;
 
     public AutobusModel findById(Integer id) {
         var model = autobusRepository.findById(id);
         return model.orElseThrow(() -> new ObjectNotFoundException(id, AutobusModel.class.getName()));
     }
 
-    public Page<AutobusDTO> findAll(Pageable pageable) {
+    public Page<AutobusDTOList> findAll(Pageable pageable) {
         Page<AutobusModel> models = autobusRepository.findAll(pageable);
-        Page<AutobusDTO> dtos = models.map(model -> new AutobusDTO(model, model.getEmpresa().getId()));
-        return dtos;
+        return models.map(model -> new AutobusDTOList(model, model.getEmpresa().getId()));
     }
 
-    public Page<AutobusDTO> findAllFromEmpresa(Integer idEmpresa, Pageable pageable) {
+    public Page<AutobusDTOList> findAllFromEmpresa(Integer idEmpresa, Pageable pageable) {
         var empresa = empresaService.findById(idEmpresa);
         Page<AutobusModel> autobuses = autobusRepository.findByEmpresa(empresa, pageable);
-        return autobuses.map((autobus) -> new AutobusDTO(autobus, empresa.getId()));
+        return autobuses.map((autobus) -> new AutobusDTOList(autobus, empresa.getId()));
     }
 
-    public AutobusDTO getOne(Integer id) {
+    public AutobusDTOResponse getOne(Integer id) {
         var model = findById(id);
-        var dto = new AutobusDTO(model);
-        dto.setIdEmpresa(model.getEmpresa().getId());
         List<TrayectoDTO> trayectosDto = new ArrayList<>();
         List<PisoDTOResponse> pisosDto = new ArrayList<>();
         for (TrayectoModel trayecto : model.getTrayectos()) {
@@ -62,9 +59,8 @@ public class AutobusService {
         for (PisoModel piso : model.getPisos()) {
             pisosDto.add(new PisoDTOResponse(piso, model.getId()));
         }
-        dto.setTrayectos(trayectosDto);
-        dto.setPisos(pisosDto);
-        return dto;
+
+        return new AutobusDTOResponse(model, model.getEmpresa().getId(), pisosDto, trayectosDto);
     }
 
     public ValidationError validar(BindingResult bindingResult, AutobusDTO dto) {
@@ -79,49 +75,52 @@ public class AutobusService {
         }
 
         if (!bindingResult.hasFieldErrors("placa")) {
-            if (autobusRepository.existsByPlaca(dto.getPlaca())) {
+            if (autobusRepository.existsByPlaca(dto.placa())) {
                 err.addError("placa", "La placa ya esta registrada");
             }
         }
-        /*
+
         int counter = 1;
-        for (PisoDTOResponse pisoDto : dto.getPisos()) {
-            if (pisoDto.nLinhas() == null) {
+        for (PisoDTO pisoDto : dto.pisos()) {
+            if (pisoDto.getNLinhas() == null) {
                 err.addError("nLinhas" + counter, "No puede ser nulo");
             }
-            if (pisoDto.nColunas() == null) {
+            if (pisoDto.getNColunas() == null) {
                 err.addError("nColunas" + counter, "No puede ser nulo");
             } else {
-                if (pisoDto.nColunas() > 4)
+                if (pisoDto.getNColunas() > 4)
                     err.addError("nColunas" + counter, "No puede ser maior que 4");
             }
-            if (pisoDto.distribuicaoFileira() == null || pisoDto.distribuicaoFileira() == "") {
+            if (pisoDto.getDistribuicaoFileira() == null || pisoDto.getDistribuicaoFileira() == "") {
                 err.addError("distribuicaoFileira" + counter, "No puede ser vazio");
             }
             counter++;
-        }*/
+        }
 
         return err;
     }
 
-    public AutobusDTO save(AutobusDTO dto) {
-        EmpresaModel empresa = empresaService.findById(dto.getIdEmpresa());
+    public AutobusDTOResponse salvar(AutobusDTO dto) {
+        EmpresaModel empresa = empresaService.findById(dto.idEmpresa());
         var model = new AutobusModel(dto);
         model.setEmpresa(empresa);
-
         var save = autobusRepository.save(model);
-        var dtoSave = new AutobusDTO(save);
-        dtoSave.setIdEmpresa(save.getEmpresa().getId());
-        return dtoSave;
+
+        List<PisoDTOResponse> pisosGuardados = new ArrayList<>();
+        pisosGuardados.add(pisoService.salvar(dto.pisos().get(0), save, 1, 1));
+        if (dto.pisos().size() == 2) {
+            var primeraSilla = pisosGuardados.get(0).nSillas() + 1;
+            pisosGuardados.add(pisoService.salvar(dto.pisos().get(1), save, 2, primeraSilla));
+        }
+
+        return new AutobusDTOResponse(save, save.getEmpresa().getId(), pisosGuardados);
     }
 
-    public AutobusDTO update(AutobusDTOUpdate dto, Integer id) {
+    public AutobusDTOList update(AutobusDTOUpdate dto, Integer id) {
         var model = this.findById(id);
         model.updateValues(dto);
         var update = autobusRepository.save(model);
-        var updateDto = new AutobusDTO(update);
-        updateDto.setIdEmpresa(update.getEmpresa().getId());
-        return updateDto;
+        return new AutobusDTOList(update, update.getEmpresa().getId());
     }
 
     public void delete(AutobusModel model) {

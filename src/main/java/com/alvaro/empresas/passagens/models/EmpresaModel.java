@@ -31,9 +31,9 @@ public class EmpresaModel {
     }
 
     public EmpresaModel(EmpresaDto dto) {
-        nombre = dto.getNombre();
-        logo = dto.getLogo();
-        numeroCuenta = dto.getNumeroCuenta();
+        nombre = dto.nombre();
+        logo = dto.logo();
+        numeroCuenta = dto.numeroCuenta();
     }
 
 

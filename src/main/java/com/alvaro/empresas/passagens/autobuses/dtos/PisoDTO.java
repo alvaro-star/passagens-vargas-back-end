@@ -15,7 +15,6 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 public class PisoDTO {
-
     @NotNull
     private Integer nLinhas;
     @NotNull

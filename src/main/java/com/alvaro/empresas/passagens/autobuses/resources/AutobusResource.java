@@ -1,6 +1,8 @@
 package com.alvaro.empresas.passagens.autobuses.resources;
 
 import com.alvaro.empresas.passagens.autobuses.dtos.AutobusDTO;
+import com.alvaro.empresas.passagens.autobuses.dtos.AutobusDTOList;
+import com.alvaro.empresas.passagens.autobuses.dtos.AutobusDTOResponse;
 import com.alvaro.empresas.passagens.autobuses.dtos.AutobusDTOUpdate;
 import com.alvaro.empresas.passagens.autobuses.services.AutobusService;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationError;
@@ -21,18 +23,18 @@ public class AutobusResource {
     private AutobusService autobusService;
 
     @GetMapping
-    public ResponseEntity<Page<AutobusDTO>> getAll(@PageableDefault(size = 10) Pageable pageable) {
+    public ResponseEntity<Page<AutobusDTOList>> getAll(@PageableDefault(size = 10) Pageable pageable) {
         return ResponseEntity.ok().body(autobusService.findAll(pageable));
     }
 
     @GetMapping("/from/{idEmpresa}")
-    public ResponseEntity<Page<AutobusDTO>> getAutobusesFromEmpresa(@PathVariable(value = "idEmpresa") Integer id,
-                                                                    @PageableDefault(size = 10, sort = {"placa"}) Pageable pageable) {
+    public ResponseEntity<Page<AutobusDTOList>> getAutobusesFromEmpresa(@PathVariable(value = "idEmpresa") Integer id,
+                                                                        @PageableDefault(size = 10, sort = {"placa"}) Pageable pageable) {
         return ResponseEntity.ok().body(autobusService.findAllFromEmpresa(id, pageable));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AutobusDTO> getOne(@PathVariable(value = "id") Integer id) {
+    public ResponseEntity<AutobusDTOResponse> getOne(@PathVariable(value = "id") Integer id) {
         return ResponseEntity.ok().body(autobusService.getOne(id));
     }
 
@@ -42,13 +44,12 @@ public class AutobusResource {
         if (!validacao.getErrors().isEmpty()) {
             return ResponseEntity.unprocessableEntity().body(validacao);
         }
-        return ResponseEntity.ok().body(autobusService.save(dto));
+        return ResponseEntity.ok().body(autobusService.salvar(dto));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Object> update(@PathVariable(value = "id") Integer id, @Valid @RequestBody AutobusDTOUpdate dto, BindingResult bindingResult) {
-        var transform = new AutobusDTO();
-        transform.setPlaca(dto.placa());
+        var transform = new AutobusDTO(dto.placa());
         ValidationError validacao = autobusService.validar(bindingResult, transform);
         if (!validacao.getErrors().isEmpty()) {
             return ResponseEntity.unprocessableEntity().body(validacao);

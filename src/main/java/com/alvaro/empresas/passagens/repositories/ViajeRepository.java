@@ -26,4 +26,15 @@ public interface ViajeRepository extends JpaRepository<ViajeModel, Integer> {
     List<ViajeModel> cargarViajesConIntervalosComunes(@Param("trayectoCodigo") UUID trayectoCodigo,
                                                       @Param("salida") LocalDateTime salida,
                                                       @Param("destino") LocalDateTime destino);
+
+    @Query("""
+            SELECT vm FROM ViajeModel vm, ParadaModel S 
+            WHERE S.lugar.id = :salidaId 
+            AND S.dataHora >= :fechaHoraPartida 
+            AND S.dataHora < :fechaPartida 
+            AND vm.salida.id = S.id
+            """)
+    List<ViajeModel> getViajesDeSalida(@Param("salidaId") Integer idSalida,
+                                       @Param("fechaHoraPartida") LocalDateTime fechaHoraSalida,
+                                       @Param("fechaPartida") LocalDateTime fechaPartida);
 }

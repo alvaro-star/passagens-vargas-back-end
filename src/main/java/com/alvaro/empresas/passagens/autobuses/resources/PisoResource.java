@@ -1,6 +1,5 @@
 package com.alvaro.empresas.passagens.autobuses.resources;
 
-import com.alvaro.empresas.passagens.autobuses.dtos.PisoDTO;
 import com.alvaro.empresas.passagens.autobuses.dtos.PisoDTOResponse;
 import com.alvaro.empresas.passagens.autobuses.dtos.PisoDTOUpdate;
 import com.alvaro.empresas.passagens.autobuses.services.PisoService;
@@ -10,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,17 +26,6 @@ public class PisoResource {
     @GetMapping
     public ResponseEntity<Page<PisoDTOResponse>> findAll(@PageableDefault(size = 10) Pageable pageable) {
         return ResponseEntity.ok().body(pisoService.findAll(pageable));
-    }
-
-    @PostMapping
-    public ResponseEntity<Object> save(@RequestBody @Valid PisoDTO dto) {
-        var saved = pisoService.save(dto);
-        if (saved == null) {
-            return ResponseEntity.unprocessableEntity().body(new Mensaje(
-                    "La flota ya alcanzo el limite de numero de pisos o el autobus ya tiene trayectos guardados"
-            ));
-        }
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @PutMapping("/{id}")

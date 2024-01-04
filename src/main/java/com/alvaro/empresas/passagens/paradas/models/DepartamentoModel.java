@@ -29,6 +29,6 @@ public class DepartamentoModel {
     private List<CiudadModel> ciudades = new ArrayList<>();
 
     public DepartamentoModel(DepartamentoDTO dto) {
-        nombre = dto.getNombre();
+        nombre = dto.nombre();
     }
 }

@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.resources;
 
-import com.alvaro.empresas.passagens.dtos.*;
+import com.alvaro.empresas.passagens.dtos.Mensaje;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTO;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOList;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOResponse;
@@ -40,8 +40,6 @@ public class ViajeResource {
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         }
     }
-
-    @PostMapping
 
     @PutMapping("/{id}")
     public ResponseEntity<Object> update(@PathVariable(value = "id") Integer id, @Valid @RequestBody ViajeDTOUpdate dto) {

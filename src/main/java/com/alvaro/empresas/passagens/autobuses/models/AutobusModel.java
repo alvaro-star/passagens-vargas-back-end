@@ -1,6 +1,7 @@
 package com.alvaro.empresas.passagens.autobuses.models;
 
 import com.alvaro.empresas.passagens.autobuses.dtos.AutobusDTO;
+import com.alvaro.empresas.passagens.autobuses.dtos.AutobusDTOResponse;
 import com.alvaro.empresas.passagens.autobuses.dtos.AutobusDTOUpdate;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.models.TrayectoModel;
@@ -22,7 +23,7 @@ public class AutobusModel {
     @Id
     @Column(name = "idtb_autobus")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
     @Column(unique = true, nullable = false)
     private String placa;
 
@@ -37,8 +38,12 @@ public class AutobusModel {
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "autobus")
     private List<TrayectoModel> trayectos = new ArrayList<TrayectoModel>();
 
+    public AutobusModel(AutobusDTOResponse dto) {
+        placa = dto.placa();
+    }
+
     public AutobusModel(AutobusDTO dto) {
-        placa = dto.getPlaca();
+        placa = dto.placa();
     }
 
     public void updateValues(AutobusDTOUpdate dto) {
