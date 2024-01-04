@@ -6,12 +6,12 @@ import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.services.EmpresaService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RequestMapping("/empresas")
@@ -22,15 +22,8 @@ public class EmpresaResource {
 
 
     @GetMapping
-    public ResponseEntity<List<EmpresaDto>> getAll() {
-        List<EmpresaModel> models = empresaService.findAll();
-        List<EmpresaDto> dtos = new ArrayList<EmpresaDto>();
-
-        models.forEach(model -> {
-            dtos.add(new EmpresaDto(model));
-        });
-
-        return ResponseEntity.status(HttpStatus.OK).body(dtos);
+    public ResponseEntity<Page<EmpresaDto>> getAll(@PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.status(HttpStatus.OK).body(empresaService.findAll(pageable));
     }
 
     @GetMapping("/{id}")

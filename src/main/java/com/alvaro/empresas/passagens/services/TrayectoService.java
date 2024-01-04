@@ -3,7 +3,7 @@ package com.alvaro.empresas.passagens.services;
 import com.alvaro.empresas.passagens.autobuses.services.AutobusService;
 import com.alvaro.empresas.passagens.dtos.TrayectoDTO;
 import com.alvaro.empresas.passagens.dtos.TrayectoDTOResponse;
-import com.alvaro.empresas.passagens.dtos.ViajeDTOList;
+import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOList;
 import com.alvaro.empresas.passagens.models.TrayectoModel;
 import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTO;

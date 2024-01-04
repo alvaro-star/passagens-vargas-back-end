@@ -1,12 +1,18 @@
 package com.alvaro.empresas.passagens.services;
 
 import com.alvaro.empresas.passagens.dtos.*;
+import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTO;
+import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOList;
+import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOResponse;
+import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOUpdate;
 import com.alvaro.empresas.passagens.models.PrecioModel;
 import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTO;
 import com.alvaro.empresas.passagens.repositories.ViajeRepository;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,16 +36,14 @@ public class ViajeService {
         return model.orElseThrow(() -> new ObjectNotFoundException(id, ViajeModel.class.getName()));
     }
 
-    public List<ViajeDTOList> findAll() {
-        List<ViajeModel> models = viajeRepository.findAll();
-        List<ViajeDTOList> dtos = new ArrayList<>();
-        for (ViajeModel model : models) {
+    public Page<ViajeDTOList> findAll(Pageable pageable) {
+        Page<ViajeModel> models = viajeRepository.findAll(pageable);
+        return models.map(model -> {
             UUID idTrayecto = model.getTrayecto().getCodigo();
             Integer salida = model.getSalida().getId();
             Integer destino = model.getDestino().getId();
-            dtos.add(new ViajeDTOList(model, idTrayecto, salida, destino));
-        }
-        return dtos;
+            return new ViajeDTOList(model, idTrayecto, salida, destino);
+        });
     }
 
     public List<ViajeModel> findViajesBeteween(UUID codigoTrayecto, LocalDateTime salida, LocalDateTime destino) {

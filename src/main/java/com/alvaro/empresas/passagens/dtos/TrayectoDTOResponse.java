@@ -1,5 +1,6 @@
 package com.alvaro.empresas.passagens.dtos;
 
+import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOList;
 import com.alvaro.empresas.passagens.models.TrayectoModel;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTO;
 import jakarta.validation.constraints.NotNull;

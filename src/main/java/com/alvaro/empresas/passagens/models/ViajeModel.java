@@ -1,7 +1,7 @@
 package com.alvaro.empresas.passagens.models;
 
-import com.alvaro.empresas.passagens.dtos.ViajeDTO;
-import com.alvaro.empresas.passagens.dtos.ViajeDTOUpdate;
+import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTO;
+import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOUpdate;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;

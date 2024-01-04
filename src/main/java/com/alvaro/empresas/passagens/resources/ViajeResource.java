@@ -1,14 +1,19 @@
 package com.alvaro.empresas.passagens.resources;
 
 import com.alvaro.empresas.passagens.dtos.*;
+import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTO;
+import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOList;
+import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOResponse;
+import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOUpdate;
 import com.alvaro.empresas.passagens.services.ViajeService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/viajes")
@@ -17,8 +22,8 @@ public class ViajeResource {
     private ViajeService viajeService;
 
     @GetMapping
-    public ResponseEntity<List<ViajeDTOList>> getAll() {
-        return ResponseEntity.ok(viajeService.findAll());
+    public ResponseEntity<Page<ViajeDTOList>> getAll(@PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(viajeService.findAll(pageable));
     }
 
     @GetMapping("/{id}")
@@ -35,6 +40,8 @@ public class ViajeResource {
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         }
     }
+
+    @PostMapping
 
     @PutMapping("/{id}")
     public ResponseEntity<Object> update(@PathVariable(value = "id") Integer id, @Valid @RequestBody ViajeDTOUpdate dto) {
