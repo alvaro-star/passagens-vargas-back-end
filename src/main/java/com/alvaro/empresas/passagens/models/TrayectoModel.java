@@ -32,10 +32,10 @@ public class TrayectoModel {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "trayecto")
     private List<ParadaModel> paradas = new ArrayList<ParadaModel>();
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "trayecto")
+    @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "trayecto")
     private List<ViajeModel> viajes = new ArrayList<ViajeModel>();
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "trayecto")
+    @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "trayecto")
     private List<PasajeModel> pasajes = new ArrayList<PasajeModel>();
 
     public ParadaModel getParadaById(Integer id) {

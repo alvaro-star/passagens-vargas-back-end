@@ -1,4 +1,4 @@
-package com.alvaro.empresas.passagens.autobuses.dtos;
+package com.alvaro.empresas.passagens.autobuses.dtos.pisos;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

@@ -1,9 +1,9 @@
 package com.alvaro.empresas.passagens.autobuses.services;
 
-import com.alvaro.empresas.passagens.autobuses.dtos.PisoDTO;
-import com.alvaro.empresas.passagens.autobuses.dtos.PisoDTOResponse;
-import com.alvaro.empresas.passagens.autobuses.dtos.PisoDTOUpdate;
-import com.alvaro.empresas.passagens.autobuses.dtos.PosicionIndisponibleDTO;
+import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTO;
+import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTOResponse;
+import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTOUpdate;
+import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PosicionIndisponibleDTO;
 import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import com.alvaro.empresas.passagens.autobuses.models.PosicionIndisponibleModel;
@@ -55,6 +55,8 @@ public class PisoService {
             return new PisoDTOResponse(piso, piso.getAutobus().getId(), posicionesIndisponibles);
         });
     }
+
+    @Transactional
     public PisoDTOResponse salvar(PisoDTO dto, AutobusModel autobusModel, Integer nPiso, Integer nPrimeraSilla) {
 
         int produto = dto.getNLinhas() * dto.getNColunas();
@@ -106,11 +108,5 @@ public class PisoService {
         List<PosicionIndisponibleDTO> bloqueadoDTOS = posicionService.saveAll(dto.getPosicoesIndisponiveis(), modelUpdate);
 
         return new PisoDTOResponse(modelUpdate, modelUpdate.getAutobus().getId(), bloqueadoDTOS);
-    }
-
-    @Transactional
-    public void delete(PisoModel model) {
-        //Este Metodo devido ao efeito cascada elimina os assientos bloqueados
-        pisoRepository.delete(model);
     }
 }

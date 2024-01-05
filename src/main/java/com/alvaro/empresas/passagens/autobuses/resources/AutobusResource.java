@@ -1,9 +1,9 @@
 package com.alvaro.empresas.passagens.autobuses.resources;
 
-import com.alvaro.empresas.passagens.autobuses.dtos.AutobusDTO;
-import com.alvaro.empresas.passagens.autobuses.dtos.AutobusDTOList;
-import com.alvaro.empresas.passagens.autobuses.dtos.AutobusDTOResponse;
-import com.alvaro.empresas.passagens.autobuses.dtos.AutobusDTOUpdate;
+import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTO;
+import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTOList;
+import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTOResponse;
+import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTOUpdate;
 import com.alvaro.empresas.passagens.autobuses.services.AutobusService;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationError;
 import com.alvaro.empresas.passagens.dtos.Mensaje;
@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -44,9 +45,10 @@ public class AutobusResource {
         if (!validacao.getErrors().isEmpty()) {
             return ResponseEntity.unprocessableEntity().body(validacao);
         }
-        return ResponseEntity.ok().body(autobusService.salvar(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(autobusService.salvar(dto));
     }
 
+    //Solo el administrador
     @PutMapping("/{id}")
     public ResponseEntity<Object> update(@PathVariable(value = "id") Integer id, @Valid @RequestBody AutobusDTOUpdate dto, BindingResult bindingResult) {
         var transform = new AutobusDTO(dto.placa());
@@ -58,7 +60,7 @@ public class AutobusResource {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Mensaje> delete(@PathVariable(value = "id") Integer id) {
+    public ResponseEntity<Object> delete(@PathVariable(value = "id") Integer id) {
         var model = autobusService.findById(id);
         if (!model.getTrayectos().isEmpty()) {
             return ResponseEntity.badRequest().body(new Mensaje("El autobus tiene trayectos registrados"));
@@ -67,6 +69,6 @@ public class AutobusResource {
             return ResponseEntity.badRequest().body(new Mensaje("El autobus tiene pisos registrados"));
         }
         autobusService.delete(model);
-        return ResponseEntity.ok().body(new Mensaje("El autobus fue eliminado"));
+        return ResponseEntity.noContent().build();
     }
 }

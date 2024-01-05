@@ -1,7 +1,7 @@
 package com.alvaro.empresas.passagens.autobuses.models;
 
-import com.alvaro.empresas.passagens.autobuses.dtos.PisoDTO;
-import com.alvaro.empresas.passagens.autobuses.dtos.PisoDTOUpdate;
+import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTO;
+import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTOUpdate;
 import com.alvaro.empresas.passagens.autobuses.enums.EnumPosicao;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;

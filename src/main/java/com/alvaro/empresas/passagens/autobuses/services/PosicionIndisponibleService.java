@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.autobuses.services;
 
-import com.alvaro.empresas.passagens.autobuses.dtos.PosicionIndisponibleDTO;
+import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PosicionIndisponibleDTO;
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import com.alvaro.empresas.passagens.autobuses.models.PosicionIndisponibleModel;
 import com.alvaro.empresas.passagens.autobuses.repositories.PosicionIndisponibleRepository;

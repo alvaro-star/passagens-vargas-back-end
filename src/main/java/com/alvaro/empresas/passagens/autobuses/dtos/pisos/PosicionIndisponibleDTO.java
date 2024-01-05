@@ -1,4 +1,4 @@
-package com.alvaro.empresas.passagens.autobuses.dtos;
+package com.alvaro.empresas.passagens.autobuses.dtos.pisos;
 
 import com.alvaro.empresas.passagens.autobuses.models.PosicionIndisponibleModel;
 import jakarta.validation.constraints.NotNull;

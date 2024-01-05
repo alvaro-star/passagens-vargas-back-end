@@ -1,7 +1,7 @@
 package com.alvaro.empresas.passagens.autobuses.models;
 
 
-import com.alvaro.empresas.passagens.autobuses.dtos.PosicionIndisponibleDTO;
+import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PosicionIndisponibleDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;

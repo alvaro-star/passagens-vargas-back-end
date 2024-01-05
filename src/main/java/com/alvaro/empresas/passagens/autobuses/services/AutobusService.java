@@ -1,8 +1,15 @@
 package com.alvaro.empresas.passagens.autobuses.services;
 
-import com.alvaro.empresas.passagens.autobuses.dtos.*;
+import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTO;
+import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTOList;
+import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTOResponse;
+import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTOUpdate;
+import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTO;
+import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTOResponse;
+import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PosicionIndisponibleDTO;
 import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
+import com.alvaro.empresas.passagens.autobuses.models.PosicionIndisponibleModel;
 import com.alvaro.empresas.passagens.autobuses.repositories.AutobusRepository;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationError;
 import com.alvaro.empresas.passagens.dtos.TrayectoDTO;
@@ -15,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
@@ -50,14 +58,17 @@ public class AutobusService {
         var model = findById(id);
         List<TrayectoDTO> trayectosDto = new ArrayList<>();
         List<PisoDTOResponse> pisosDto = new ArrayList<>();
+
         for (TrayectoModel trayecto : model.getTrayectos()) {
-            var trayectoDto = new TrayectoDTO(trayecto);
-            trayectoDto.setIdAutobus(model.getId());
-            trayectosDto.add(trayectoDto);
+            trayectosDto.add(new TrayectoDTO(trayecto, model.getId()));
         }
 
         for (PisoModel piso : model.getPisos()) {
-            pisosDto.add(new PisoDTOResponse(piso, model.getId()));
+            List<PosicionIndisponibleDTO> bloqueadosDto = new ArrayList<>();
+            for (PosicionIndisponibleModel bloqueado : piso.getPosicionesIndisponibles()) {
+                bloqueadosDto.add(new PosicionIndisponibleDTO(bloqueado));
+            }
+            pisosDto.add(new PisoDTOResponse(piso, model.getId(), bloqueadosDto));
         }
 
         return new AutobusDTOResponse(model, model.getEmpresa().getId(), pisosDto, trayectosDto);
@@ -100,6 +111,7 @@ public class AutobusService {
         return err;
     }
 
+    @Transactional
     public AutobusDTOResponse salvar(AutobusDTO dto) {
         EmpresaModel empresa = empresaService.findById(dto.idEmpresa());
         var model = new AutobusModel(dto);
@@ -123,6 +135,7 @@ public class AutobusService {
         return new AutobusDTOList(update, update.getEmpresa().getId());
     }
 
+    @Transactional
     public void delete(AutobusModel model) {
         autobusRepository.delete(model);
     }

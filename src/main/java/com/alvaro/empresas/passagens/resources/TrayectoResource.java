@@ -6,10 +6,13 @@ import com.alvaro.empresas.passagens.dtos.TrayectoDTOResponse;
 import com.alvaro.empresas.passagens.services.TrayectoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -19,23 +22,23 @@ public class TrayectoResource {
     private TrayectoService trayectoService;
 
     @GetMapping
-    public ResponseEntity<List<TrayectoDTO>> getAll() {
-        return ResponseEntity.ok().body(trayectoService.getAll());
+    public ResponseEntity<Page<TrayectoDTO>> getAll(@PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(trayectoService.getAll(pageable));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<TrayectoDTOResponse> getOne(@PathVariable(value = "id") UUID id) {
-        return ResponseEntity.ok().body(trayectoService.getOne(id));
+        return ResponseEntity.ok(trayectoService.getOne(id));
     }
 
     @PostMapping
     public ResponseEntity<TrayectoDTO> save(@RequestBody @Valid TrayectoDTO dto) {
-        return ResponseEntity.ok().body(trayectoService.save(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(trayectoService.save(dto));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<TrayectoDTO> update(@PathVariable(value = "id") UUID id, @RequestBody @Valid TrayectoDTO dto) {
-        return ResponseEntity.ok().body(trayectoService.update(dto, id));
+        return ResponseEntity.ok(trayectoService.update(dto, id));
     }
 
     @DeleteMapping("/{id}")
@@ -51,6 +54,6 @@ public class TrayectoResource {
             return ResponseEntity.badRequest().body(new Mensaje("El trayecto tiene paradas associados"));
         }
         trayectoService.delete(model);
-        return ResponseEntity.ok().body(new Mensaje("El trayecto fue eliminado"));
+        return ResponseEntity.noContent().build();
     }
 }

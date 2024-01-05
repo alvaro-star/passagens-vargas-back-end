@@ -49,4 +49,16 @@ public class ExceptionsHandler {
                 request.getRequestURI());
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(err);
     }
+
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<Object> erroValidacao(ValidationException e, HttpServletRequest request) {
+        ValidationError err = new ValidationError(
+                System.currentTimeMillis(),
+                HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                "Erro de Validacao",
+                e.getMessage(),
+                request.getRequestURI());
+        err.getErrors().add(e.getCampo());
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(err);
+    }
 }

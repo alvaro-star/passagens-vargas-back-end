@@ -11,7 +11,10 @@ import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.alvaro.empresas.passagens.repositories.TrayectoRepository;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +34,6 @@ public class TrayectoService {
 
     public TrayectoDTOResponse getOne(UUID id) {
         var model = this.findById(id);
-        var dto = new TrayectoDTOResponse(model);
-        dto.setIdAutobus(model.getAutobus().getId());
 
         List<ParadaDTO> paradasDTOs = new ArrayList<>();
         for (ParadaModel paradaModel : model.getParadas()) {
@@ -44,46 +45,33 @@ public class TrayectoService {
             viajesDTOs.add(new ViajeDTOList(viajeModel, model.getCodigo(), viajeModel.getSalida().getId(), viajeModel.getDestino().getId()));
         }
 
-        dto.setParadas(paradasDTOs);
-        dto.setViajes(viajesDTOs);
-
-        return dto;
+        return new TrayectoDTOResponse(model, model.getAutobus().getId(), paradasDTOs, viajesDTOs);
     }
 
-    public List<TrayectoDTO> getAll() {
-        List<TrayectoModel> models = trayectoRepository.findAll();
-        List<TrayectoDTO> dtos = new ArrayList<>();
-
-        models.forEach(model -> {
-            var dto = new TrayectoDTO(model);
-            dto.setIdAutobus(model.getAutobus().getId());
-            dtos.add(dto);
-        });
-        return dtos;
+    public Page<TrayectoDTO> getAll(Pageable pageable) {
+        Page<TrayectoModel> models = trayectoRepository.findAll(pageable);
+        return models.map(model -> new TrayectoDTO(model, model.getAutobus().getId()));
     }
 
+    @Transactional
     public TrayectoDTO save(TrayectoDTO dto) {
-        var autobus = autobusService.findById(dto.getIdAutobus());
+        var autobus = autobusService.findById(dto.idAutobus());
         var model = new TrayectoModel();
         model.setAutobus(autobus);
-
         var save = trayectoRepository.save(model);
-
-        var saveDto = new TrayectoDTO(save);
-        saveDto.setIdAutobus(autobus.getId());
-        return saveDto;
+        return new TrayectoDTO(save, autobus.getId());
     }
 
     public TrayectoDTO update(TrayectoDTO dto, UUID id) {
-        var autobus = autobusService.findById(dto.getIdAutobus());
+        var autobus = autobusService.findById(dto.idAutobus());
         var model = this.findById(id);
         model.setAutobus(autobus);
+
         var update = trayectoRepository.save(model);
-        var updateDto = new TrayectoDTO(update);
-        updateDto.setIdAutobus(autobus.getId());
-        return updateDto;
+        return new TrayectoDTO(update, autobus.getId());
     }
 
+    @Transactional
     public void delete(TrayectoModel model) {
         trayectoRepository.delete(model);
     }

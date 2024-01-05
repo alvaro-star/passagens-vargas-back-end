@@ -1,4 +1,4 @@
-package com.alvaro.empresas.passagens.autobuses.dtos;
+package com.alvaro.empresas.passagens.autobuses.dtos.autobuses;
 
 import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 

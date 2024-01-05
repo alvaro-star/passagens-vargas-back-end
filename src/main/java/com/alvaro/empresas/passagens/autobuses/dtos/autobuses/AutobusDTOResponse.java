@@ -1,5 +1,6 @@
-package com.alvaro.empresas.passagens.autobuses.dtos;
+package com.alvaro.empresas.passagens.autobuses.dtos.autobuses;
 
+import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTOResponse;
 import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.dtos.TrayectoDTO;
 

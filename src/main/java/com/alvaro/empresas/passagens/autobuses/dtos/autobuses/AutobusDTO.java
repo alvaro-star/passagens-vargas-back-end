@@ -1,10 +1,12 @@
-package com.alvaro.empresas.passagens.autobuses.dtos;
+package com.alvaro.empresas.passagens.autobuses.dtos.autobuses;
 
+import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTO;
 import com.alvaro.empresas.passagens.dtos.TrayectoDTO;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public record AutobusDTO(
@@ -22,6 +24,6 @@ public record AutobusDTO(
         List<TrayectoDTO> trayectos
 ) {
     public AutobusDTO(String placa) {
-        this(null, placa, null, null, null);
+        this(null, placa, null, new ArrayList<PisoDTO>(), new ArrayList<TrayectoDTO>());
     }
 }

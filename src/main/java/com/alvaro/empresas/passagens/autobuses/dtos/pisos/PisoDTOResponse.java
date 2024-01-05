@@ -1,4 +1,4 @@
-package com.alvaro.empresas.passagens.autobuses.dtos;
+package com.alvaro.empresas.passagens.autobuses.dtos.pisos;
 
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 
@@ -28,21 +28,6 @@ public record PisoDTOResponse(
                 model.getPrimeraSilla(),
                 idAutobus,
                 posicoesIndisponiveis
-        );
-    }
-
-    public PisoDTOResponse(PisoModel model, Integer idAutobus) {
-        this(
-                model.getId(),
-                model.getNLinhas(),
-                model.getNColunas(),
-                model.getDistribuicaoFileira().toString(),
-                model.getNPiso(),
-                model.getInicioContagem().toString(),
-                model.getNSillas(),
-                model.getPrimeraSilla(),
-                idAutobus,
-                null
         );
     }
 }

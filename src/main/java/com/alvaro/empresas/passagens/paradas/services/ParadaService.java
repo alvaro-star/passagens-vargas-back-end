@@ -1,5 +1,7 @@
 package com.alvaro.empresas.passagens.paradas.services;
 
+import com.alvaro.empresas.passagens.configurations.exceptions.FieldMessage;
+import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
 import com.alvaro.empresas.passagens.models.TrayectoModel;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOUpdate;
@@ -48,6 +50,13 @@ public class ParadaService {
     public ParadaDTO save(ParadaDTO dtoSended) {
         LugarModel lugar = lugarService.findById(dtoSended.idLugar());
         TrayectoModel trayecto = trayectoService.findById(dtoSended.idTrayecto());
+
+        for (ParadaModel parada : trayecto.getParadas()) {
+            if (parada.getDataHora().isEqual(dtoSended.dataHora())) {
+                throw new ValidationException(new FieldMessage("dataHora", "Ya hay una parada registrada en esta fecha"));
+            }
+        }
+
         var model = new ParadaModel(dtoSended);
         model.setLugar(lugar);
         model.setTrayecto(trayecto);

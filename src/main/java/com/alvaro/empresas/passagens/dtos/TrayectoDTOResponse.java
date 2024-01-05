@@ -4,28 +4,19 @@ import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOList;
 import com.alvaro.empresas.passagens.models.TrayectoModel;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTO;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@Getter
-@Setter
-@NoArgsConstructor
-public class TrayectoDTOResponse {
-    private UUID codigo;
-    @NotNull
-    private Integer idAutobus;
-
-    private List<ParadaDTO> paradas = new ArrayList<>();
-    private List<ViajeDTOList> viajes;
-
-    //private List<PasajeDto> pasajes;
-
-    public TrayectoDTOResponse(TrayectoModel model) {
-        codigo = model.getCodigo();
+public record TrayectoDTOResponse(
+        UUID codigo,
+        @NotNull
+        Integer idAutobus,
+        List<ParadaDTO> paradas,
+        List<ViajeDTOList> viajes
+        //private List<PasajeDto> pasajes;
+) {
+    public TrayectoDTOResponse(TrayectoModel model, Integer idAutobus, List<ParadaDTO> paradas, List<ViajeDTOList> viajes) {
+        this(model.getCodigo(), idAutobus, paradas, viajes);
     }
 }

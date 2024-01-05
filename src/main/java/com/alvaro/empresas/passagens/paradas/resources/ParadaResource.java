@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,7 +26,7 @@ public class ParadaResource {
 
     @PostMapping
     public ResponseEntity<ParadaDTO> save(@RequestBody @Valid ParadaDTO dto) {
-        return ResponseEntity.ok(paradaService.save(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(paradaService.save(dto));
     }
 
     @GetMapping("/{id}")
