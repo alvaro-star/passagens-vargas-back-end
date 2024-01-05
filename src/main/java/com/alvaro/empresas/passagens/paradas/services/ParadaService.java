@@ -69,13 +69,21 @@ public class ParadaService {
         var model = this.findById(id);
         model.updateValues(dtoSended);
 
-        LugarModel lugar = lugarService.findById(dtoSended.idLugar());
-        model.setLugar(lugar);
+        for (ParadaModel parada : model.getTrayecto().getParadas()) {
+            if (parada.getDataHora().isEqual(dtoSended.dataHora())) {
+                throw new ValidationException(new FieldMessage("dataHora", "Ya hay una parada registrada en esta fecha"));
+            }
+        }
+
+        if (dtoSended.idLugar() != null) {
+            LugarModel lugar = lugarService.findById(dtoSended.idLugar());
+            model.setLugar(lugar);
+        }
+
 
         var modelUpdated = paradaRepository.save(model);
         UUID idTrayecto = modelUpdated.getTrayecto().getCodigo();
-        int idLugar = lugar.getId();
-        return new ParadaDTO(modelUpdated, idLugar, idTrayecto);
+        return new ParadaDTO(modelUpdated, modelUpdated.getLugar().getId(), idTrayecto);
     }
 
     public void delete(ParadaModel model) {

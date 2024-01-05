@@ -8,6 +8,5 @@ public record ParadaDTOUpdate(
         Integer id,
         @NotNull
         LocalDateTime dataHora,
-        @NotNull
         Integer idLugar) {
 }

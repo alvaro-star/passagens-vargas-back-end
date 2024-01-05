@@ -1,6 +1,8 @@
 package com.alvaro.empresas.passagens.services;
 
-import com.alvaro.empresas.passagens.dtos.*;
+import com.alvaro.empresas.passagens.configurations.exceptions.FieldMessage;
+import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
+import com.alvaro.empresas.passagens.dtos.PrecioDTO;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTO;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOList;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOResponse;
@@ -70,25 +72,26 @@ public class ViajeService {
     @Transactional
     public ViajeDTOResponse save(ViajeDTO dto) {
         var trayecto = trayectoService.findById(dto.idTrayecto());
+        if (dto.salida() == dto.destino()) {
+            throw new ValidationException(new FieldMessage("destino", "El destino no puede ser el mismo que la salida"));
+        }
         var salida = trayecto.getParadaById(dto.salida());
         if (salida == null) {
-            return null;
+            throw new ValidationException(new FieldMessage("salida", "La salida no pertenece al trayecto"));
         }
         var destino = trayecto.getParadaById(dto.destino());
 
         if (destino == null) {
-            return null;
+            throw new ValidationException(new FieldMessage("destino", "El destino no pertenece al trayecto"));
         }
 
         if (!destino.getDataHora().isAfter(salida.getDataHora())) {
-            return null;
+            throw new ValidationException(new FieldMessage("salida", "La salida posee un horario superior al del destino"));
         }
 
         if (trayecto.posseeViaje(salida.getId(), destino.getId())) {
-            return null;
+            throw new ValidationException(new FieldMessage("id", "El viaje ya se encuentra registrado"));
         }
-
-        //COmparar as horas
 
         var model = new ViajeModel(dto);
         model.setTrayecto(trayecto);
@@ -126,17 +129,24 @@ public class ViajeService {
         if (novosDados.salida() != null) {
             var salida = model.getTrayecto().getParadaById(novosDados.salida());
             if (salida == null)
-                return null;
-
+                throw new ValidationException(new FieldMessage("salida", "La salida no pertenece al trayecto"));
             model.setSalida(salida);
         }
 
         if (novosDados.destino() != null) {
             var destino = model.getTrayecto().getParadaById(novosDados.destino());
             if (destino == null) {
-                return null;
+                throw new ValidationException(new FieldMessage("destino", "El destino no pertenece al trayecto"));
             }
             model.setDestino(destino);
+        }
+
+        if (model.getSalida().getId() == model.getDestino().getId()) {
+            throw new ValidationException(new FieldMessage("destino", "El destino no puede ser el mismo que la salida"));
+        }
+
+        if (!model.getDestino().getDataHora().isAfter(model.getSalida().getDataHora())) {
+            throw new ValidationException(new FieldMessage("salida", "La salida posee un horario superior al del destino"));
         }
 
         var updated = viajeRepository.save(model);

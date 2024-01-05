@@ -62,7 +62,8 @@ public class TrayectoService {
         return new TrayectoDTO(save, autobus.getId());
     }
 
-    public TrayectoDTO update(TrayectoDTO dto, UUID id) {
+    public TrayectoDTO update(TrayectoDTO dto, UUID id) {//Validacao para que a mudanca seja feita
+        //O autobus deve ter o mesmo numero de asientos
         var autobus = autobusService.findById(dto.idAutobus());
         var model = this.findById(id);
         model.setAutobus(autobus);
