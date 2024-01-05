@@ -1,7 +1,6 @@
 package com.alvaro.empresas.passagens.autobuses.dtos.autobuses;
 
 import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTO;
-import com.alvaro.empresas.passagens.dtos.TrayectoDTO;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -19,11 +18,9 @@ public record AutobusDTO(
         Integer idEmpresa,
 
         @Size(min = 1, max = 2)
-        List<PisoDTO> pisos,
-
-        List<TrayectoDTO> trayectos
+        List<PisoDTO> pisos
 ) {
     public AutobusDTO(String placa) {
-        this(null, placa, null, new ArrayList<PisoDTO>(), new ArrayList<TrayectoDTO>());
+        this(null, placa, null, new ArrayList<PisoDTO>());
     }
 }

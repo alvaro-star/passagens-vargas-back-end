@@ -25,9 +25,6 @@ public class PisoDTO {
 
     private String inicioContagem = "";
 
-    @NotNull
-    private Integer idAutobus;
-
     @Valid
     private List<PosicionIndisponibleDTO> posicoesIndisponiveis = new ArrayList<PosicionIndisponibleDTO>();
 
