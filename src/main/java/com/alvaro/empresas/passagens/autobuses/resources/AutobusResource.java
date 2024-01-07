@@ -7,6 +7,7 @@ import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTOUpdate;
 import com.alvaro.empresas.passagens.autobuses.services.AutobusService;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationError;
 import com.alvaro.empresas.passagens.dtos.Mensaje;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/autobuses")
+@SecurityRequirement(name = "bearer-key")
 public class AutobusResource {
     @Autowired
     private AutobusService autobusService;

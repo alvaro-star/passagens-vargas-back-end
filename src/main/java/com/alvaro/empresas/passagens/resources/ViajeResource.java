@@ -6,6 +6,7 @@ import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOList;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOResponse;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOUpdate;
 import com.alvaro.empresas.passagens.services.ViajeService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/viajes")
+@SecurityRequirement(name = "bearer-key")
 public class ViajeResource {
     @Autowired
     private ViajeService viajeService;

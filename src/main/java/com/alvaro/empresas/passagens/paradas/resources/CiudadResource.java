@@ -4,6 +4,7 @@ import com.alvaro.empresas.passagens.paradas.dtos.CiudadDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.CiudadDtoUpdate;
 import com.alvaro.empresas.passagens.paradas.services.CiudadService;
 import com.alvaro.empresas.passagens.paradas.services.DepartamentoService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/ciudades")
+@SecurityRequirement(name = "bearer-key")
 public class CiudadResource {
     @Autowired
     private CiudadService ciudadService;

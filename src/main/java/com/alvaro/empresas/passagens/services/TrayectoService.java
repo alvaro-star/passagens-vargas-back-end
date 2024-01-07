@@ -1,6 +1,8 @@
 package com.alvaro.empresas.passagens.services;
 
 import com.alvaro.empresas.passagens.autobuses.services.AutobusService;
+import com.alvaro.empresas.passagens.configurations.exceptions.FieldMessage;
+import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
 import com.alvaro.empresas.passagens.dtos.TrayectoDTO;
 import com.alvaro.empresas.passagens.dtos.TrayectoDTOResponse;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOList;
@@ -66,8 +68,27 @@ public class TrayectoService {
         //O autobus deve ter o mesmo numero de asientos
         var autobus = autobusService.findById(dto.idAutobus());
         var model = this.findById(id);
-        model.setAutobus(autobus);
 
+        int size = model.getAutobus().getPisos().size();
+        if (size != autobus.getPisos().size()) {
+            throw new ValidationException(new FieldMessage("idAutobus", "El autobus no es compatible"));
+        }
+        if (size == 1) {
+            if (model.getAutobus().getPisos().get(0) != autobus.getPisos().get(0)) {
+                throw new ValidationException(new FieldMessage("idAutobus", "El autobus no es compatible"));
+            }
+        } else if (size == 2) {
+            if (model.getAutobus().getPisos().get(0) != autobus.getPisos().get(0)) {
+                throw new ValidationException(new FieldMessage("idAutobus", "El autobus no es compatible"));
+            }
+            if (model.getAutobus().getPisos().get(1) != autobus.getPisos().get(1)) {
+                throw new ValidationException(new FieldMessage("idAutobus", "El autobus no es compatible"));
+            }
+        } else {
+            throw new ValidationException(new FieldMessage("idAutobus", "El autobus no es compatible"));
+        }
+
+        model.setAutobus(autobus);
         var update = trayectoRepository.save(model);
         return new TrayectoDTO(update, autobus.getId());
     }

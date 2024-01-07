@@ -5,6 +5,7 @@ import com.alvaro.empresas.passagens.paradas.dtos.CiudadDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.DepartamentoDTO;
 import com.alvaro.empresas.passagens.paradas.models.DepartamentoModel;
 import com.alvaro.empresas.passagens.paradas.services.DepartamentoService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,6 +19,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/departamentos")
+@SecurityRequirement(name = "bearer-key")
 public class DepartamentoResource {
     @Autowired
     private DepartamentoService departamentoService;

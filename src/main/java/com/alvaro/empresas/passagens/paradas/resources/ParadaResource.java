@@ -4,6 +4,7 @@ import com.alvaro.empresas.passagens.dtos.Mensaje;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOUpdate;
 import com.alvaro.empresas.passagens.paradas.services.ParadaService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/paradas")
+@SecurityRequirement(name = "bearer-key")
 public class ParadaResource {
     @Autowired
     private ParadaService paradaService;

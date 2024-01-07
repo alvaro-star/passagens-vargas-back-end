@@ -4,6 +4,7 @@ import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTOResponse;
 import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTOUpdate;
 import com.alvaro.empresas.passagens.autobuses.services.PisoService;
 import com.alvaro.empresas.passagens.dtos.Mensaje;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/pisos")
+@SecurityRequirement(name = "bearer-key")
 public class PisoResource {
     @Autowired
     private PisoService pisoService;

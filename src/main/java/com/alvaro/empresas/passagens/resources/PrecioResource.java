@@ -4,6 +4,7 @@ import com.alvaro.empresas.passagens.dtos.PrecioDTO;
 import com.alvaro.empresas.passagens.dtos.PrecioDTOUpdate;
 import com.alvaro.empresas.passagens.services.PrecioService;
 import com.alvaro.empresas.passagens.services.ViajeService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/precios")
+@SecurityRequirement(name = "bearer-key")
 public class PrecioResource {
     @Autowired
     private PrecioService precioService;

@@ -4,6 +4,7 @@ import com.alvaro.empresas.passagens.dtos.Mensaje;
 import com.alvaro.empresas.passagens.dtos.TrayectoDTO;
 import com.alvaro.empresas.passagens.dtos.TrayectoDTOResponse;
 import com.alvaro.empresas.passagens.services.TrayectoService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,6 +18,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/trayectos")
+@SecurityRequirement(name = "bearer-key")
 public class TrayectoResource {
     @Autowired
     private TrayectoService trayectoService;

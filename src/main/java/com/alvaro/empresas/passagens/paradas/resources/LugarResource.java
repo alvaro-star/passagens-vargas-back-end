@@ -5,6 +5,7 @@ import com.alvaro.empresas.passagens.paradas.dtos.LugarDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.LugarDtoUpdate;
 import com.alvaro.empresas.passagens.paradas.services.CiudadService;
 import com.alvaro.empresas.passagens.paradas.services.LugarService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/lugares")
+@SecurityRequirement(name = "bearer-key")
 public class LugarResource {
     @Autowired
     private LugarService lugarService;

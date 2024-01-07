@@ -27,7 +27,7 @@ public class ParadaModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "dataHora")
     private LocalDateTime dataHora;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

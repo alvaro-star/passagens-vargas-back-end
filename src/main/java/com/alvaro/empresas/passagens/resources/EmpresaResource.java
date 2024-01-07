@@ -4,6 +4,7 @@ import com.alvaro.empresas.passagens.dtos.EmpresaDto;
 import com.alvaro.empresas.passagens.dtos.Mensaje;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.services.EmpresaService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/empresas")
+@SecurityRequirement(name = "bearer-key")
 public class EmpresaResource {
 
     @Autowired
