@@ -30,6 +30,8 @@ public class ParadaModel {
     @Column(nullable = false, name = "dataHora")
     private LocalDateTime dataHora;
 
+    //private int plataforma;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_lugar")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)

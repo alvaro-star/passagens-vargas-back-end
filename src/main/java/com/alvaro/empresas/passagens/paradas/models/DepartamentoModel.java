@@ -23,6 +23,7 @@ public class DepartamentoModel {
     private int id;
 
     @NotBlank
+    @Column(unique = true)
     private String nombre;
 
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "departamento")

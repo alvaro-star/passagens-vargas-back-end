@@ -23,7 +23,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,17 +61,15 @@ public class ViajeService {
         }
         LocalDateTime hj = LocalDateTime.now();
         LocalDateTime fechaSalida = dto.fechaSalida();
-        LocalDateTime endDay = LocalDateTime.of(fechaSalida.getYear(), fechaSalida.getMonth(), fechaSalida.getDayOfMonth(),
-                23, 59, 59);
+        LocalDateTime endDay = fechaSalida.with(LocalDateTime.MAX);
+
         List<UUID> idCodigos = null;
         List<ViajeDTOListBusqueda> viajesSelecionados = new ArrayList<>();
 
-        if (hj.getYear() == fechaSalida.getYear()
-                && hj.getMonth() == fechaSalida.getMonth()
-                && hj.getDayOfMonth() == fechaSalida.getDayOfMonth()) {
+        if (hj.toLocalDate().isEqual(fechaSalida.toLocalDate())) {
             idCodigos = paradaRepository.cargarSalidasDelDia(dto.idSalida(), hj, endDay);
         } else {
-            LocalDateTime startDay = LocalDate.of(fechaSalida.getYear(), fechaSalida.getMonth(), fechaSalida.getDayOfMonth()).atStartOfDay();
+            LocalDateTime startDay = fechaSalida.with(LocalDateTime.MIN);
             idCodigos = paradaRepository.cargarSalidasDelDia(dto.idSalida(), startDay, endDay);
         }
 
@@ -91,35 +88,45 @@ public class ViajeService {
 
                 String logo = viajeRepository.getLogoEmpresa(codigo);
 
-                List<ViajeModel> viajes = viajeRepository.getFromTrayecto(codigo);
                 ParadaModel salida = paradas.get(salidaIndex);
                 ParadaModel destino = paradas.get(destinoIndex);
+
+                List<ViajeModel> viajes = viajeRepository.getFromTrayecto(codigo, salida.getDataHora(), destino.getDataHora());
+
                 for (ViajeModel viaje : viajes) {
-                    if (!(salida.getDataHora().isBefore(viaje.getSalida().getDataHora()))
+                    /*if (!(salida.getDataHora().isBefore(viaje.getSalida().getDataHora()))
                             && !(destino.getDataHora().isAfter(viaje.getDestino().getDataHora()))) {
 
-                        ParadaDTOList salidaDTO = new ParadaDTOList(
-                                salida,
-                                salida.getLugar().getNombre(),
-                                salida.getLugar().getCiudad().getNombre(),
-                                salida.getLugar().getCiudad().getDepartamento().getNombre());
-                        ParadaDTOList destinoDTO = new ParadaDTOList(
-                                destino,
-                                destino.getLugar().getNombre(),
-                                destino.getLugar().getCiudad().getNombre(),
-                                destino.getLugar().getCiudad().getDepartamento().getNombre());
+                        ParadaDTOList salidaDTO = convertToParadaDTOList(salida);
+                        ParadaDTOList destinoDTO = convertToParadaDTOList(destino);
                         List<PrecioDTO> precios = new ArrayList<>();
                         for (PrecioModel precio : viaje.getPrecios()) {
                             precios.add(new PrecioDTO(precio));
                         }
                         viajesSelecionados.add(new ViajeDTOListBusqueda(viaje, logo, salidaDTO, destinoDTO, precios));
+                    }*/
+                    ParadaDTOList salidaDTO = convertToParadaDTOList(salida);
+                    ParadaDTOList destinoDTO = convertToParadaDTOList(destino);
+                    List<PrecioDTO> precios = new ArrayList<>();
+                    for (PrecioModel precio : viaje.getPrecios()) {
+                        precios.add(new PrecioDTO(precio));
                     }
+                    viajesSelecionados.add(new ViajeDTOListBusqueda(viaje, logo, salidaDTO, destinoDTO, precios));
                 }
             }
         }
 
         return viajesSelecionados;
     }
+
+    public ParadaDTOList convertToParadaDTOList(ParadaModel model) {
+        return new ParadaDTOList(
+                model,
+                model.getLugar().getNombre(),
+                model.getLugar().getCiudad().getNombre(),
+                model.getLugar().getCiudad().getDepartamento().getNombre());
+    }
+
 
     public List<ViajeModel> findViajesBeteween(UUID codigoTrayecto, LocalDateTime salida, LocalDateTime destino) {
         return viajeRepository.cargarViajesConIntervalosComunes(codigoTrayecto, salida, destino);

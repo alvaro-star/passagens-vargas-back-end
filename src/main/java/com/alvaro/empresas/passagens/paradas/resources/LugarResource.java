@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,7 +41,7 @@ public class LugarResource {
         var ciudad = ciudadService.findById(dto.idCiudad());
         var model = lugarService.save(dto, ciudad);
         int idCiudad = model.getCiudad().getId();
-        return ResponseEntity.ok().body(new LugarDTO(model, idCiudad));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new LugarDTO(model, idCiudad));
     }
 
     @PutMapping("/{id}")
@@ -54,7 +55,7 @@ public class LugarResource {
     public ResponseEntity<Mensaje> delete(@PathVariable(value = "id") Integer id) {
         var model = lugarService.findById(id);
         lugarService.delete(model);
-        return ResponseEntity.ok().body(new Mensaje("El lugar fue eliminado conexito"));
+        return ResponseEntity.noContent().build();
     }
 
 }

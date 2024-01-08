@@ -49,6 +49,6 @@ public class ParadaResource {
         }
 
         paradaService.delete(model);
-        return ResponseEntity.ok(new Mensaje("La parada fue eliminado con exito"));
+        return ResponseEntity.noContent().build();
     }
 }

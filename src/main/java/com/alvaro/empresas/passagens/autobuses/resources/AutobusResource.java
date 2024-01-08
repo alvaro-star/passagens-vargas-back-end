@@ -67,9 +67,6 @@ public class AutobusResource {
         if (!model.getTrayectos().isEmpty()) {
             return ResponseEntity.badRequest().body(new Mensaje("El autobus tiene trayectos registrados"));
         }
-        if (!model.getPisos().isEmpty()) {
-            return ResponseEntity.badRequest().body(new Mensaje("El autobus tiene pisos registrados"));
-        }
         autobusService.delete(model);
         return ResponseEntity.noContent().build();
     }
