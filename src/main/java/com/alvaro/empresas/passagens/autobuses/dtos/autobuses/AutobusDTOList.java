@@ -4,9 +4,7 @@ import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 
 public record AutobusDTOList(
         Integer id,
-
         String placa,
-
         Integer idEmpresa
 ) {
 

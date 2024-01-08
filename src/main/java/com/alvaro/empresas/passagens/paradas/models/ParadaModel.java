@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "tb_parada")
+@Table(name = "tb_parada", indexes = @Index(name = "idx_dataHora", columnList = "dataHora"))
 @Getter
 @Setter
 @NoArgsConstructor

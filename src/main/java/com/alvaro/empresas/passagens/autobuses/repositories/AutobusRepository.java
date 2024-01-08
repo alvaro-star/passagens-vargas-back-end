@@ -10,6 +10,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AutobusRepository extends JpaRepository<AutobusModel, Integer> {
     boolean existsByPlaca(String placa);
-
     Page<AutobusModel> findByEmpresa(EmpresaModel empresaModel, Pageable pageable);
 }

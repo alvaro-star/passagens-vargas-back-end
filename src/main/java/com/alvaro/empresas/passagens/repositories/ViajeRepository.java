@@ -37,4 +37,15 @@ public interface ViajeRepository extends JpaRepository<ViajeModel, Integer> {
     List<ViajeModel> getViajesDeSalida(@Param("salidaId") Integer idSalida,
                                        @Param("fechaHoraPartida") LocalDateTime fechaHoraSalida,
                                        @Param("fechaPartida") LocalDateTime fechaPartida);
+
+    @Query(value = "SELECT * FROM tb_viaje WHERE fk_idtb_trayecto = :codigo", nativeQuery = true)
+    List<ViajeModel> getFromTrayecto(UUID codigo);
+
+    @Query(value = "SELECT e.logo FROM tb_empresa as e, tb_autobus as a, tb_trayecto as t " +
+            "WHERE t.idtb_trayecto = :codigo " +
+            "AND t.fk_idtb_autobus = a.idtb_autobus " +
+            "AND a.fk_idtb_empresa = e.idtb_empresa", nativeQuery = true)
+    String getLogoEmpresa(UUID codigo);
+
+
 }

@@ -17,4 +17,8 @@ public record PrecioDTO(
     public PrecioDTO(PrecioModel model, Integer idViaje) {
         this(model.getId(), model.getPrecio(), model.getNPiso(), idViaje);
     }
+
+    public PrecioDTO(PrecioModel model) {
+        this(model.getId(), model.getPrecio(), model.getNPiso(), null);
+    }
 }

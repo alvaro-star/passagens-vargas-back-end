@@ -1,6 +1,8 @@
 package com.alvaro.empresas.passagens.resources;
 
 import com.alvaro.empresas.passagens.dtos.Mensaje;
+import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOListBusqueda;
+import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacao;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTO;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOList;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOResponse;
@@ -15,6 +17,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/viajes")
@@ -34,6 +38,12 @@ public class ViajeResource {
     }
 
     @PostMapping
+    public ResponseEntity<List<ViajeDTOListBusqueda>> getViajeFromDia(@RequestBody @Valid ViajeDTOSolicitacao dto) {
+        List<ViajeDTOListBusqueda> viajes = viajeService.getViajesFromDia(dto);
+        return ResponseEntity.ok(viajes);
+    }
+
+    @PostMapping("/create")
     public ResponseEntity<Object> save(@Valid @RequestBody ViajeDTO dto) {
         ViajeDTOResponse response = viajeService.save(dto);
         if (response == null) {

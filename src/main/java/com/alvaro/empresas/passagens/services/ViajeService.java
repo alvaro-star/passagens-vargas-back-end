@@ -3,6 +3,9 @@ package com.alvaro.empresas.passagens.services;
 import com.alvaro.empresas.passagens.configurations.exceptions.FieldMessage;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
 import com.alvaro.empresas.passagens.dtos.PrecioDTO;
+import com.alvaro.empresas.passagens.dtos.viajes.Busca.ParadaDTOList;
+import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOListBusqueda;
+import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacao;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTO;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOList;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOResponse;
@@ -10,6 +13,8 @@ import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOUpdate;
 import com.alvaro.empresas.passagens.models.PrecioModel;
 import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTO;
+import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
+import com.alvaro.empresas.passagens.paradas.repositories.ParadaRepository;
 import com.alvaro.empresas.passagens.repositories.ViajeRepository;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +33,8 @@ import java.util.UUID;
 public class ViajeService {
     @Autowired
     private ViajeRepository viajeRepository;
+    @Autowired
+    private ParadaRepository paradaRepository;
     @Autowired
     private TrayectoService trayectoService;
     @Autowired
@@ -46,6 +54,71 @@ public class ViajeService {
             Integer destino = model.getDestino().getId();
             return new ViajeDTOList(model, idTrayecto, salida, destino);
         });
+    }
+
+    public List<ViajeDTOListBusqueda> getViajesFromDia(ViajeDTOSolicitacao dto) {
+        if (dto.idDestino() == dto.idSalida()) {
+            throw new ValidationException(new FieldMessage("idDestino", "El destino no puede ser el mismo que la salida"));
+        }
+        LocalDateTime hj = LocalDateTime.now();
+        LocalDateTime fechaSalida = dto.fechaSalida();
+        LocalDateTime endDay = LocalDateTime.of(fechaSalida.getYear(), fechaSalida.getMonth(), fechaSalida.getDayOfMonth(),
+                23, 59, 59);
+        List<UUID> idCodigos = null;
+        List<ViajeDTOListBusqueda> viajesSelecionados = new ArrayList<>();
+
+        if (hj.getYear() == fechaSalida.getYear()
+                && hj.getMonth() == fechaSalida.getMonth()
+                && hj.getDayOfMonth() == fechaSalida.getDayOfMonth()) {
+            idCodigos = paradaRepository.cargarSalidasDelDia(dto.idSalida(), hj, endDay);
+        } else {
+            LocalDateTime startDay = LocalDate.of(fechaSalida.getYear(), fechaSalida.getMonth(), fechaSalida.getDayOfMonth()).atStartOfDay();
+            idCodigos = paradaRepository.cargarSalidasDelDia(dto.idSalida(), startDay, endDay);
+        }
+
+        if (idCodigos != null) {
+            for (UUID codigo : idCodigos) {
+                List<ParadaModel> paradas = paradaRepository.cargarParadasdoTrayecto(codigo);
+
+                int salidaIndex = buscaBinaria(paradas, dto.idSalida(), 0, paradas.size() - 2);
+                if (salidaIndex == -1) {
+                    continue;
+                }
+                int destinoIndex = buscaBinaria(paradas, dto.idDestino(), salidaIndex + 1, paradas.size() - 1);
+                if (destinoIndex == -1) {
+                    continue;
+                }
+
+                String logo = viajeRepository.getLogoEmpresa(codigo);
+
+                List<ViajeModel> viajes = viajeRepository.getFromTrayecto(codigo);
+                ParadaModel salida = paradas.get(salidaIndex);
+                ParadaModel destino = paradas.get(destinoIndex);
+                for (ViajeModel viaje : viajes) {
+                    if (!(salida.getDataHora().isBefore(viaje.getSalida().getDataHora()))
+                            && !(destino.getDataHora().isAfter(viaje.getDestino().getDataHora()))) {
+
+                        ParadaDTOList salidaDTO = new ParadaDTOList(
+                                salida,
+                                salida.getLugar().getNombre(),
+                                salida.getLugar().getCiudad().getNombre(),
+                                salida.getLugar().getCiudad().getDepartamento().getNombre());
+                        ParadaDTOList destinoDTO = new ParadaDTOList(
+                                destino,
+                                destino.getLugar().getNombre(),
+                                destino.getLugar().getCiudad().getNombre(),
+                                destino.getLugar().getCiudad().getDepartamento().getNombre());
+                        List<PrecioDTO> precios = new ArrayList<>();
+                        for (PrecioModel precio : viaje.getPrecios()) {
+                            precios.add(new PrecioDTO(precio));
+                        }
+                        viajesSelecionados.add(new ViajeDTOListBusqueda(viaje, logo, salidaDTO, destinoDTO, precios));
+                    }
+                }
+            }
+        }
+
+        return viajesSelecionados;
     }
 
     public List<ViajeModel> findViajesBeteween(UUID codigoTrayecto, LocalDateTime salida, LocalDateTime destino) {
@@ -161,5 +234,29 @@ public class ViajeService {
     @Transactional
     public void delete(ViajeModel model) {
         viajeRepository.delete(model);
+    }
+
+    public int buscaBinaria(List<ParadaModel> lista, Integer idAlvo, int inicioBusca, int fimBusca) {
+        int inicio = inicioBusca;
+        int fim = fimBusca;
+
+        while (inicio <= fim) {
+            int meio = inicio + (fim - inicio) / 2;
+
+            // Verifica se o elemento está no meio
+            if (lista.get(meio).getId() == idAlvo) {
+                return meio;
+            }
+
+            // Se o elemento é menor que o meio, busca na metade inferior
+            if (lista.get(meio).getId() > idAlvo) {
+                fim = meio - 1;
+            } else { // Se o elemento é maior que o meio, busca na metade superior
+                inicio = meio + 1;
+            }
+        }
+
+        // Retorna -1 se o elemento não foi encontrado
+        return -1;
     }
 }
