@@ -13,11 +13,14 @@ import java.util.UUID;
 @Repository
 public interface ParadaRepository extends JpaRepository<ParadaModel, Integer> {
     @Query(value = "SELECT fk_idtb_trayecto FROM tb_parada " +
-            "WHERE fk_idtb_lugar = :idLugar " +
-            "AND dataHora BETWEEN :dataStart AND :dataEnd", nativeQuery = true)
-    List<UUID> cargarSalidasDelDia(Integer idLugar, LocalDateTime dataStart, LocalDateTime dataEnd);
+            "WHERE fk_idtb_lugar = :id_lugar " +
+            "AND data_hora BETWEEN :data_start AND :data_end", nativeQuery = true)
+    List<byte[]> cargarSalidasDelDia(@Param("id_lugar") Integer idLugar,
+                                     @Param("data_start") LocalDateTime dataStart,
+                                     @Param("data_end") LocalDateTime dataEnd);
 
-    //Muito cuidado para nao pedir uma sobrecarga, es uma funcao especifica
-    @Query(value = "SELECT * FROM tb_parada WHERE fk_idtb_trayecto = :idtb_trayecto ORDER BY dataHora", nativeQuery = true)
-    List<ParadaModel> cargarParadasdoTrayecto(@Param("idtb_trayecto") UUID codigo);
+    @Query(value = "SELECT * FROM tb_parada WHERE fk_idtb_lugar = :idLugar " +
+            "AND fk_idtb_trayecto = :codigo", nativeQuery = true)
+    List<ParadaModel> nVezesTrayectoPassa(@Param("idLugar") Integer idLugar, @Param("codigo") UUID codigoTrayecto);
+
 }

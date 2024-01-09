@@ -39,11 +39,11 @@ public interface ViajeRepository extends JpaRepository<ViajeModel, Integer> {
                                        @Param("fechaPartida") LocalDateTime fechaPartida);
 
     @Query(value = "SELECT v.* FROM tb_viaje as v, tb_parada as s, tb_parada as d " +
-            "WHERE fk_idtb_trayecto = :codigo " +
-            "AND v.salida = s.idtb_parada " +
-            "AND :startViaje >= s.dataHora " +
-            "AND v.destino = d.idtb_parada " +
-            "AND :endViaje <= d.dataHora", nativeQuery = true)
+            "WHERE v.fk_idtb_trayecto = :codigo " +
+            "AND v.id_salida = s.idtb_parada " +
+            "AND :startViaje >= s.data_hora " +
+            "AND v.id_destino = d.idtb_parada " +
+            "AND :endViaje <= d.data_hora", nativeQuery = true)
     List<ViajeModel> getFromTrayecto(UUID codigo, LocalDateTime startViaje, LocalDateTime endViaje);
 
     @Query(value = "SELECT e.logo FROM tb_empresa as e, tb_autobus as a, tb_trayecto as t " +

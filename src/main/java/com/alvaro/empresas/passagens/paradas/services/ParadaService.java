@@ -55,6 +55,9 @@ public class ParadaService {
             if (parada.getDataHora().isEqual(dtoSended.dataHora())) {
                 throw new ValidationException(new FieldMessage("dataHora", "Ya hay una parada registrada en esta fecha"));
             }
+            if (parada.getLugar().getId() == dtoSended.idLugar()) {
+                throw new ValidationException(new FieldMessage("idLugar", "Ya hay una parada registrada que passara por este lugar"));
+            }
         }
 
         var model = new ParadaModel(dtoSended);
@@ -72,6 +75,10 @@ public class ParadaService {
         for (ParadaModel parada : model.getTrayecto().getParadas()) {
             if (parada.getDataHora().isEqual(dtoSended.dataHora())) {
                 throw new ValidationException(new FieldMessage("dataHora", "Ya hay una parada registrada en esta fecha"));
+            }
+            System.out.println("\n" + parada.getLugar().getId()+" - "+dtoSended.idLugar());
+            if (parada.getLugar().getId() == dtoSended.idLugar()) {
+                throw new ValidationException(new FieldMessage("idLugar", "Ya hay una parada registrada que passara por este lugar"));
             }
         }
 

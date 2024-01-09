@@ -23,7 +23,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.ByteBuffer;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -56,44 +58,48 @@ public class ViajeService {
     }
 
     public List<ViajeDTOListBusqueda> getViajesFromDia(ViajeDTOSolicitacao dto) {
-        if (dto.idDestino() == dto.idSalida()) {
+        if (dto.idLugarDestino() == dto.idLugarSalida()) {
             throw new ValidationException(new FieldMessage("idDestino", "El destino no puede ser el mismo que la salida"));
         }
         LocalDateTime hj = LocalDateTime.now();
         LocalDateTime fechaSalida = dto.fechaSalida();
-        LocalDateTime endDay = fechaSalida.with(LocalDateTime.MAX);
+        LocalDateTime endDay = fechaSalida.with(LocalTime.MAX);
 
-        List<UUID> idCodigos = null;
+        List<UUID> codigos = new ArrayList<>();
+        List<byte[]> codigosBytes;
         List<ViajeDTOListBusqueda> viajesSelecionados = new ArrayList<>();
 
         if (hj.toLocalDate().isEqual(fechaSalida.toLocalDate())) {
-            idCodigos = paradaRepository.cargarSalidasDelDia(dto.idSalida(), hj, endDay);
+            codigosBytes = paradaRepository.cargarSalidasDelDia(dto.idLugarSalida(), hj, endDay);
         } else {
-            LocalDateTime startDay = fechaSalida.with(LocalDateTime.MIN);
-            idCodigos = paradaRepository.cargarSalidasDelDia(dto.idSalida(), startDay, endDay);
+            LocalDateTime startDay = fechaSalida.with(LocalTime.MIN);
+            codigosBytes = paradaRepository.cargarSalidasDelDia(dto.idLugarSalida(), startDay, endDay);
         }
 
-        if (idCodigos != null) {
-            for (UUID codigo : idCodigos) {
-                List<ParadaModel> paradas = paradaRepository.cargarParadasdoTrayecto(codigo);
+        if (codigosBytes != null) {
+            for (byte[] idCodigo : codigosBytes) {
+                codigos.add(convertBytesToUUID(idCodigo));
+            }
+            for (UUID codigo : codigos) {
+                List<ParadaModel> nVezesTrayectoPassaSalida = paradaRepository.nVezesTrayectoPassa(dto.idLugarSalida(), codigo);
 
-                int salidaIndex = buscaBinaria(paradas, dto.idSalida(), 0, paradas.size() - 2);
-                if (salidaIndex == -1) {
+                if (nVezesTrayectoPassaSalida.size() != 1) {
                     continue;
                 }
-                int destinoIndex = buscaBinaria(paradas, dto.idDestino(), salidaIndex + 1, paradas.size() - 1);
-                if (destinoIndex == -1) {
+
+                List<ParadaModel> nVezesTrayectoPassaDestino = paradaRepository.nVezesTrayectoPassa(dto.idLugarDestino(), codigo);
+                if (nVezesTrayectoPassaDestino.size() != 1) {
                     continue;
                 }
 
                 String logo = viajeRepository.getLogoEmpresa(codigo);
 
-                ParadaModel salida = paradas.get(salidaIndex);
-                ParadaModel destino = paradas.get(destinoIndex);
-
-                List<ViajeModel> viajes = viajeRepository.getFromTrayecto(codigo, salida.getDataHora(), destino.getDataHora());
-
-                for (ViajeModel viaje : viajes) {
+                ParadaModel salida = nVezesTrayectoPassaSalida.get(0);
+                ParadaModel destino = nVezesTrayectoPassaDestino.get(0);
+                if (destino.getDataHora().isAfter(salida.getDataHora())) {
+                    List<ViajeModel> viajes = viajeRepository.getFromTrayecto(codigo, salida.getDataHora(), destino.getDataHora());
+                    System.out.println(viajes.size() + "tamanho");
+                    for (ViajeModel viaje : viajes) {
                     /*if (!(salida.getDataHora().isBefore(viaje.getSalida().getDataHora()))
                             && !(destino.getDataHora().isAfter(viaje.getDestino().getDataHora()))) {
 
@@ -105,13 +111,14 @@ public class ViajeService {
                         }
                         viajesSelecionados.add(new ViajeDTOListBusqueda(viaje, logo, salidaDTO, destinoDTO, precios));
                     }*/
-                    ParadaDTOList salidaDTO = convertToParadaDTOList(salida);
-                    ParadaDTOList destinoDTO = convertToParadaDTOList(destino);
-                    List<PrecioDTO> precios = new ArrayList<>();
-                    for (PrecioModel precio : viaje.getPrecios()) {
-                        precios.add(new PrecioDTO(precio));
+                        ParadaDTOList salidaDTO = convertToParadaDTOList(salida);
+                        ParadaDTOList destinoDTO = convertToParadaDTOList(destino);
+                        List<PrecioDTO> precios = new ArrayList<>();
+                        for (PrecioModel precio : viaje.getPrecios()) {
+                            precios.add(new PrecioDTO(precio));
+                        }
+                        viajesSelecionados.add(new ViajeDTOListBusqueda(viaje, logo, salidaDTO, destinoDTO, precios));
                     }
-                    viajesSelecionados.add(new ViajeDTOListBusqueda(viaje, logo, salidaDTO, destinoDTO, precios));
                 }
             }
         }
@@ -127,6 +134,18 @@ public class ViajeService {
                 model.getLugar().getCiudad().getDepartamento().getNombre());
     }
 
+    private UUID convertBytesToUUID(byte[] bytes) {
+        if (bytes.length < 16) {
+            throw new IllegalArgumentException("A array de bytes deve ter pelo menos 16 bytes.");
+        }
+
+        ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
+
+        long mostSignificantBits = byteBuffer.getLong();
+        long leastSignificantBits = byteBuffer.getLong();
+
+        return new UUID(mostSignificantBits, leastSignificantBits);
+    }
 
     public List<ViajeModel> findViajesBeteween(UUID codigoTrayecto, LocalDateTime salida, LocalDateTime destino) {
         return viajeRepository.cargarViajesConIntervalosComunes(codigoTrayecto, salida, destino);
@@ -241,29 +260,5 @@ public class ViajeService {
     @Transactional
     public void delete(ViajeModel model) {
         viajeRepository.delete(model);
-    }
-
-    public int buscaBinaria(List<ParadaModel> lista, Integer idAlvo, int inicioBusca, int fimBusca) {
-        int inicio = inicioBusca;
-        int fim = fimBusca;
-
-        while (inicio <= fim) {
-            int meio = inicio + (fim - inicio) / 2;
-
-            // Verifica se o elemento está no meio
-            if (lista.get(meio).getId() == idAlvo) {
-                return meio;
-            }
-
-            // Se o elemento é menor que o meio, busca na metade inferior
-            if (lista.get(meio).getId() > idAlvo) {
-                fim = meio - 1;
-            } else { // Se o elemento é maior que o meio, busca na metade superior
-                inicio = meio + 1;
-            }
-        }
-
-        // Retorna -1 se o elemento não foi encontrado
-        return -1;
     }
 }

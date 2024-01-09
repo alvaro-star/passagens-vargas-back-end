@@ -7,9 +7,9 @@ import java.time.LocalDateTime;
 
 public record ViajeDTOSolicitacao(
         @NotNull
-        Integer idSalida,
+        Integer idLugarSalida,
         @NotNull
-        Integer idDestino,
+        Integer idLugarDestino,
         @NotNull
         @Future
         LocalDateTime fechaSalida
