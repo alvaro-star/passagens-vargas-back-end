@@ -1,13 +1,14 @@
 package com.alvaro.empresas.passagens.services;
 
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
+import com.alvaro.empresas.passagens.configurations.exceptions.FieldMessage;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajeDTO;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTO;
 import com.alvaro.empresas.passagens.models.*;
-import com.alvaro.empresas.passagens.repositories.PagoRepository;
+import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.alvaro.empresas.passagens.repositories.PasajeRepository;
-import com.alvaro.empresas.passagens.repositories.SillaRepository;
+import com.alvaro.empresas.passagens.repositories.PasajeroRepository;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,13 +22,11 @@ public class PasajeService {
     @Autowired
     private PasajeRepository pasajeRepository;
     @Autowired
-    private SillaRepository sillaRepository;
+    private PrecioService precioService;
     @Autowired
-    private ViajeService viajeService;
+    private PagoService pagoService;
     @Autowired
-    PrecioService precioService;
-    @Autowired
-    private PagoRepository pagoRepository;
+    private PasajeroRepository pasajeroRepository;
 
     public PasajeModel findById(UUID id) {
         var model = pasajeRepository.findById(id);
@@ -37,107 +36,91 @@ public class PasajeService {
     public void getOne(UUID id) {
         var model = findById(id);
     }
-/*
+
+    //Solo podra salvar pasajes de un mismo piso
     @Transactional
-    public Object save(PasajesDTO dto) {
+    public PagoModel save(PasajesDTO dto) {
         var precio = precioService.findById(dto.idPrecio());
         var trayecto = precio.getViaje().getTrayecto();
-        Float precioTotal = 0.0f;
+        ParadaModel salida = null;
+        ParadaModel destino = null;
 
-        //A gente so verifica nesta passagem, pois na salvacao vamos nos assegurar se ha outras pasagens
-        for (SillaModel silla : precio.getSillas()) {
-            for (PasajeDTO pasajeDTO : dto.pasajes()) {
-                if (silla.getNumero() == pasajeDTO.nSilla()) {
-                    throw new ValidationException("El viaje ya posse un pasaje registrado");
-                }
-            }
+        //Lancara excecoes se algum estiver invalido
+        validarSilla(trayecto, precio, dto.pasajes());
+
+        salida = trayecto.getParadaByLugarId(dto.idLugarSalida());
+
+        if (salida == null) {
+            throw new ValidationException(new FieldMessage("idLugarSalida", "La salida no hace parte del trayecto"));
         }
 
-        //Verifica el numero de sillas del pasaje
+        destino = trayecto.getParadaByLugarId(dto.idLugarDestino());
+
+        if (destino == null) {
+            throw new ValidationException(new FieldMessage("idLugarDestino", "El destino no hace parte del trayecto"));
+        }
+
+        PagoModel pago = pagoService.save(dto, precio.getPrecio());
+
         for (PasajeDTO pasajeDTO : dto.pasajes()) {
             var pasajeModel = new PasajeModel();
-            pasajeModel.setNombre(pasajeDTO.nombre());
-            pasajeModel.setCarnet(pasajeDTO.carnet());
-            pasajeModel.setNascimento(pasajeDTO.nascimento());
-            pasajeModel.setTrayecto(trayecto);
+
             pasajeModel.setCompradoWeb(true);
+            pasajeModel.setEstaPagado(false);
+            pasajeModel.setNumero(pasajeDTO.nSilla());
+
+            pasajeModel.setSalida(salida);
+            pasajeModel.setDestino(destino);
+            pasajeModel.setTrayecto(trayecto);
+            pasajeModel.setDestino(destino);
+            pasajeModel.setPrecio(precio);
+            pasajeModel.setPago(pago);
 
             var pasajeSaved = pasajeRepository.save(pasajeModel);
 
-            Integer nPiso = validarSilla(trayecto, pasajeDTO.nSilla());
-
-            sillaRepository.save(new SillaModel(pasajeDTO.nSilla(), nPiso, viaje, pasajeSaved));
-
-            //Salvar a pasajem em outras listas
-            var viajeDestino = viaje.getDestino().getDataHora();
-            var viajeSalida = viaje.getSalida().getDataHora();
-            List<ViajeModel> viajesEnComun = viajeService.findViajesBeteween(trayecto.getCodigo(), viajeSalida, viajeDestino);
-
-            for (ViajeModel viajeModel : viajesEnComun) {
-                if (viajeModel.getId() != viaje.getId()) {
-                    sillaRepository.save(new SillaModel(pasajeDTO.nSilla(), nPiso, viaje));
-                }
-            }
-            //Calculando a fatura
-            for (PrecioModel precio : viaje.getPrecios()) {
-                if (precio.getNPiso() == nPiso) {
-                    precioTotal += precio.getPrecio();
-                    break;
-                }
-            }
+            var pasajero = new PasajeroModel(pasajeDTO);
+            pasajero.setPasaje(pasajeSaved);
+            var pasajeroSaved = pasajeroRepository.save(pasajero);
         }
-
-        PagoModel pago = new PagoModel();
-        pago.setValor(precioTotal);
-        pago.setDescuento(dto.descuento());
-        var tasa = precioTotal * 0.1f;
-        pago.setTasaServicio(tasa);
-        pago.setEstaPagado(true);
-        pagoRepository.save(pago);
-        //Pasaje salvado
-
-
-        /************
-         Falta o Pago, criar uma fatura
-         boolean salvado = salvarSilla(trayecto, dto.nSilla(), nPiso, viaje, pasajeSaved);
-         if (!salvado) {
-         return false;
-         }
-         var viajeModelSalida = viajeModel.getSalida().getDataHora();
-         var viajeModelDestino = viajeModel.getDestino().getDataHora();
-         boolean juntos = viajeDestino.isAfter(viajeModelSalida) && viajeModelDestino.isAfter(viajeSalida);
-         if (juntos) {
-         sillaRepository.save(new SillaModel(nSilla, SillaNPiso, viaje));
-         }
-         ************
-
-        return true;
-    }*/
-
-    public Integer validarSilla(TrayectoModel trayecto, Integer nSilla) {
-        List<PisoModel> pisos = trayecto.getAutobus().getPisos();
-        if (pisos.size() == 1) {
-            if (nSilla > pisos.get(0).getNSillas()) {
-                throw new ValidationException("El numero dela silla es invalido");
-            }
-            return 1;
-        } else {
-            int indiceSegundoPiso = (pisos.get(0).getNPiso() == 2) ? 0 : 1;
-            int nUltimaSilla = pisos.get(indiceSegundoPiso).getNSillas() + pisos.get(indiceSegundoPiso).getPrimeraSilla() - 1;
-
-
-            if (nSilla > nUltimaSilla) {
-                throw new ValidationException("El numero dela silla es invalido");
-            }
-            if (nSilla < pisos.get(indiceSegundoPiso).getPrimeraSilla()) {
-                return 1;
-            } else {
-                return 2;
-            }
-        }
+        precioService.updateFromService(precio);
+        return pago;
     }
 
-    public void salvarSilla(TrayectoModel trayecto, Integer nSilla, Integer SillaNPiso, ViajeModel viaje, PasajeModel pasajeSaved) {
+    public void validarSilla(TrayectoModel trayecto, PrecioModel precio, List<PasajeDTO> pasajesDTO) {
+        List<PisoModel> pisos = trayecto.getAutobus().getPisos();
+        int nPisos = pisos.size();
+        int numeroMaximo = 0;
+        int numeroMinimo = 0;
+        if (precio.getNSillasDisponibles() < pasajesDTO.size()) {
+            throw new ValidationException(new FieldMessage("pasajes", "No hay tantas sillas disponibles"));
+        }
 
+        switch (nPisos) {
+            case 1:
+                numeroMaximo = pisos.get(0).getNSillas();
+                numeroMinimo = 1;
+                break;
+            case 2:
+                PisoModel pisoElegido;
+                if (pisos.get(0).getNPiso().equals(precio.getNPiso())) {
+                    pisoElegido = pisos.get(0);
+                } else {
+                    pisoElegido = pisos.get(1);
+                }
+                numeroMaximo = pisoElegido.getNSillas() + pisoElegido.getPrimeraSilla() - 1;
+                numeroMinimo = pisoElegido.getPrimeraSilla();
+                break;
+        }
+
+        for (PasajeDTO pasajeDTO : pasajesDTO) {
+            for (PasajeModel pasajeModel : precio.getPasajes()) {
+                if (pasajeModel.getNumero().equals(pasajeDTO.nSilla())) {//Erro
+                    throw new ValidationException("El viaje ya posse un pasaje registrado");
+                }
+            }
+            if (pasajeDTO.nSilla() < numeroMinimo && pasajeDTO.nSilla() > numeroMaximo) {
+                throw new ValidationException(new FieldMessage("nSilla", "El numero de Silla informado es invalido"));
+            }
+        }
     }
 }

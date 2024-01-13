@@ -17,7 +17,7 @@ import java.util.Set;
 @Getter
 @Setter
 @NoArgsConstructor
-public class UserModel implements UserDetails {
+public class UsuarioModel implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -36,7 +36,7 @@ public class UserModel implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "idtb_role", referencedColumnName = "idtb_role"))
     private Set<RoleModel> roles = new HashSet<>();
 
-    public UserModel(String login, String nombre, String carnet, String contrasena, Set<RoleModel> roles) {
+    public UsuarioModel(String login, String nombre, String carnet, String contrasena, Set<RoleModel> roles) {
         this.login = login;
         this.nombre = nombre;
         this.carnet = carnet;

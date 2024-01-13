@@ -57,6 +57,15 @@ public class TrayectoModel {
         return false;
     }
 
+    public ParadaModel getParadaByLugarId(Integer idLugar) {
+        for (ParadaModel parada : this.getParadas()) {
+            if (parada.getLugar().getId() == idLugar) {
+                return parada;
+            }
+        }
+        return null;
+    }
+
     public boolean dataHoraValido(LocalDateTime dtoTime) {
         if (this.getParadas().size() >= 2) {
             LocalDateTime maior = this.getParadas().get(0).getDataHora();

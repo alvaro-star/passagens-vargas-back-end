@@ -7,7 +7,10 @@ import com.alvaro.empresas.passagens.paradas.repositories.CiudadRepository;
 import com.alvaro.empresas.passagens.paradas.repositories.DepartamentoRepository;
 import com.alvaro.empresas.passagens.paradas.repositories.LugarRepository;
 import com.alvaro.empresas.passagens.paradas.repositories.ParadaRepository;
-import com.alvaro.empresas.passagens.repositories.*;
+import com.alvaro.empresas.passagens.repositories.PasajeRepository;
+import com.alvaro.empresas.passagens.repositories.PrecioRepository;
+import com.alvaro.empresas.passagens.repositories.TrayectoRepository;
+import com.alvaro.empresas.passagens.repositories.ViajeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +38,4 @@ public class TestDB {
     private PasajeRepository pasajeRepository;
     @Autowired
     private PrecioRepository precioRepository;
-    @Autowired
-    private SillaRepository sillaRepository;
 }

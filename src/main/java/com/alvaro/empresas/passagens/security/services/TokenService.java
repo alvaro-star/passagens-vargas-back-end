@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.security.services;
 
-import com.alvaro.empresas.passagens.security.models.UserModel;
+import com.alvaro.empresas.passagens.security.models.UsuarioModel;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
@@ -18,12 +18,12 @@ public class TokenService {
     @Value("${api.security.token.secret}")
     private String secret;
 
-    public String generateToken(UserModel userModel) {
+    public String generateToken(UsuarioModel usuarioModel) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             String token = JWT.create()
                     .withIssuer("API passagens-back")
-                    .withSubject(userModel.getLogin())
+                    .withSubject(usuarioModel.getLogin())
                     .withExpiresAt(this.getExpirationDate())
                     .sign(algorithm);
             return token;

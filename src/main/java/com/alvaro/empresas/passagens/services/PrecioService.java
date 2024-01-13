@@ -44,4 +44,8 @@ public class PrecioService {
         var update = precioRepository.save(model);
         return new PrecioDTO(update, model.getViaje().getId());
     }
+
+    public PrecioModel updateFromService(PrecioModel precioModel) {
+        return precioRepository.save(precioModel);
+    }
 }

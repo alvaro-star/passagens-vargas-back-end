@@ -25,7 +25,7 @@ public class ParadaModel {
     @Id
     @Column(name = "idtb_parada", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     @Column(nullable = false, name = "data_hora")
     private LocalDateTime dataHora;

@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -16,16 +17,27 @@ public class PagoModel {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "idtb_pagamento")
     private UUID id;
-    private Float valor;
+    @Column(nullable = false)
+    private Float valorTotal;
+    @Column(nullable = false)
     private Float descuento;
+    @Column(nullable = false)
     private Float tasaServicio;
     @Column(nullable = false, name = "pagado?")
-    private Boolean estaPagado = false;
+    private Boolean estaPagado;
+
+    @Embedded
+    private ContactoHelper contacto;
 
     private LocalDateTime fechaPago;
 
+    private LocalDateTime criatedAt;
+
+    @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "pago")
+    private List<PasajeModel> pasajes;
+
     @PrePersist
     protected void onCreate() {
-        fechaPago = LocalDateTime.now();
+        criatedAt = LocalDateTime.now();
     }
 }

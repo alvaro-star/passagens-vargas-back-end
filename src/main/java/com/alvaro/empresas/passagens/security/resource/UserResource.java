@@ -5,7 +5,7 @@ import com.alvaro.empresas.passagens.security.dtos.LoginDto;
 import com.alvaro.empresas.passagens.security.dtos.LoginResponseDto;
 import com.alvaro.empresas.passagens.security.dtos.RegisterDto;
 import com.alvaro.empresas.passagens.security.models.RoleModel;
-import com.alvaro.empresas.passagens.security.models.UserModel;
+import com.alvaro.empresas.passagens.security.models.UsuarioModel;
 import com.alvaro.empresas.passagens.security.repositories.UserRepository;
 import com.alvaro.empresas.passagens.security.services.RoleService;
 import com.alvaro.empresas.passagens.security.services.TokenService;
@@ -43,7 +43,7 @@ public class UserResource {
         try {
             var usernamePassword = new UsernamePasswordAuthenticationToken(loginDto.login(), loginDto.contrasena());
             var auth = authenticationManager.authenticate(usernamePassword);
-            var token = tokenService.generateToken((UserModel) auth.getPrincipal());
+            var token = tokenService.generateToken((UsuarioModel) auth.getPrincipal());
             return ResponseEntity.ok(new LoginResponseDto(token));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new Mensaje("Credenciais Invalidos"));
@@ -58,7 +58,7 @@ public class UserResource {
 
         Set<RoleModel> roles = roleService.loadRole(registerDto.role());
         String encriptedPassword = new BCryptPasswordEncoder().encode(registerDto.contrasena());
-        UserModel newUser = new UserModel(registerDto.login(), registerDto.nombre(), registerDto.carnet(), encriptedPassword, roles);
+        UsuarioModel newUser = new UsuarioModel(registerDto.login(), registerDto.nombre(), registerDto.carnet(), encriptedPassword, roles);
 
         userRepository.save(newUser);
         return ResponseEntity.ok().build();

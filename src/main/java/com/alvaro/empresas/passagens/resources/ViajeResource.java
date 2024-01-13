@@ -66,9 +66,6 @@ public class ViajeResource {
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> delete(@PathVariable(value = "id") Integer id) {
         var model = viajeService.findById(id);
-        if (!model.getSillas().isEmpty()) {
-            return ResponseEntity.badRequest().body(new Mensaje("El viaje posee pasajes registrados"));
-        }
         viajeService.delete(model);
         return ResponseEntity.noContent().build();
     }

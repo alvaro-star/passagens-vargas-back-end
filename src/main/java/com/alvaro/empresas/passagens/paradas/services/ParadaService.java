@@ -75,7 +75,6 @@ public class ParadaService {
     public ParadaDTO update(ParadaDTOUpdate dtoSended, Integer id) {
         var model = this.findById(id);
 
-
         for (ParadaModel parada : model.getTrayecto().getParadas()) {
             if (parada.getDataHora().isEqual(dtoSended.dataHora())) {
                 throw new ValidationException(new FieldMessage("dataHora", "Ya hay una parada registrada en esta fecha"));
