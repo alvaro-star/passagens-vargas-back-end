@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -26,19 +28,26 @@ public class PrecioModel {
     @NotNull
     private Integer nPiso;
 
+    private Boolean lleno = false;
+    private Integer nSillasDisponibles;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_viaje")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private ViajeModel viaje;
+
+    @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "precio")
+    private List<SillaModel> sillas = new ArrayList<SillaModel>();
 
     public PrecioModel(PrecioDTO dto) {
         precio = dto.precio();
         nPiso = dto.nPiso();
     }
 
-    public PrecioModel(Float precio, Integer nPiso) {
+    public PrecioModel(Float precio, Integer nPiso, Integer nSillasDisponibles) {
         this.precio = precio;
         this.nPiso = nPiso;
+        this.nSillasDisponibles = nSillasDisponibles;
     }
 
     public void updateValues(PrecioDTOUpdate dto) {

@@ -8,8 +8,6 @@ import java.util.UUID;
 public record ViajeDTO(
         Integer id,
         @NotNull
-        Integer plataforma,
-        @NotNull
         UUID idTrayecto,
         @NotNull
         Integer salida,
@@ -20,7 +18,7 @@ public record ViajeDTO(
         Float precioPiso2
 ) {
     public ViajeDTO(ViajeModel model, UUID idTrayecto, Integer salida, Integer destino, Float precio1, Float precio2) {
-        this(model.getId(), model.getPlataforma(), idTrayecto, salida, destino, precio1, precio2);
+        this(model.getId(), idTrayecto, salida, destino, precio1, precio2);
     }
 
 }

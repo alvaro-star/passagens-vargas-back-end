@@ -12,13 +12,17 @@ public record PrecioDTO(
         @NotNull
         Integer nPiso,
         @NotNull
+        Boolean lleno,
+        @NotNull
+        Integer nSillasDisponibles,
+        @NotNull
         Integer idViaje
 ) {
     public PrecioDTO(PrecioModel model, Integer idViaje) {
-        this(model.getId(), model.getPrecio(), model.getNPiso(), idViaje);
+        this(model.getId(), model.getPrecio(), model.getNPiso(), model.getLleno(), model.getNSillasDisponibles(), idViaje);
     }
 
     public PrecioDTO(PrecioModel model) {
-        this(model.getId(), model.getPrecio(), model.getNPiso(), null);
+        this(model.getId(), model.getPrecio(), model.getNPiso(), model.getLleno(), model.getNSillasDisponibles(), null);
     }
 }

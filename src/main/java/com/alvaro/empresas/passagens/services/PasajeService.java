@@ -25,6 +25,8 @@ public class PasajeService {
     @Autowired
     private ViajeService viajeService;
     @Autowired
+    PrecioService precioService;
+    @Autowired
     private PagoRepository pagoRepository;
 
     public PasajeModel findById(UUID id) {
@@ -35,15 +37,15 @@ public class PasajeService {
     public void getOne(UUID id) {
         var model = findById(id);
     }
-
+/*
     @Transactional
     public Object save(PasajesDTO dto) {
-        var viaje = viajeService.findById(dto.idViaje());
-        var trayecto = viaje.getTrayecto();
+        var precio = precioService.findById(dto.idPrecio());
+        var trayecto = precio.getViaje().getTrayecto();
         Float precioTotal = 0.0f;
 
         //A gente so verifica nesta passagem, pois na salvacao vamos nos assegurar se ha outras pasagens
-        for (SillaModel silla : viaje.getSillas()) {
+        for (SillaModel silla : precio.getSillas()) {
             for (PasajeDTO pasajeDTO : dto.pasajes()) {
                 if (silla.getNumero() == pasajeDTO.nSilla()) {
                     throw new ValidationException("El viaje ya posse un pasaje registrado");
@@ -107,10 +109,10 @@ public class PasajeService {
          if (juntos) {
          sillaRepository.save(new SillaModel(nSilla, SillaNPiso, viaje));
          }
-         ************/
+         ************
 
         return true;
-    }
+    }*/
 
     public Integer validarSilla(TrayectoModel trayecto, Integer nSilla) {
         List<PisoModel> pisos = trayecto.getAutobus().getPisos();

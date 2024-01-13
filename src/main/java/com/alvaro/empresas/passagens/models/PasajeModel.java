@@ -23,10 +23,11 @@ public class PasajeModel {
     private UUID id;
     private String carnet;
     private String nombre;
+    private Date nascimento;
+
     @Column(name = "comprado_na_web?")
     private Boolean compradoWeb;
 
-    private Date nascimento;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_trayecto")
@@ -38,10 +39,4 @@ public class PasajeModel {
 
     //Comprador
     //Pagos
-
-    public PasajeModel(PasajeDTO dto) {
-        carnet = dto.carnet();
-        nombre = dto.nombre();
-        nascimento = dto.nascimento();
-    }
 }

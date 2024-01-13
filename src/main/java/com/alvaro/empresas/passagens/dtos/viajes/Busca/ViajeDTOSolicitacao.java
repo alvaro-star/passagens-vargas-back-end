@@ -1,9 +1,10 @@
 package com.alvaro.empresas.passagens.dtos.viajes.Busca;
 
 import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 public record ViajeDTOSolicitacao(
         @NotNull
@@ -11,7 +12,7 @@ public record ViajeDTOSolicitacao(
         @NotNull
         Integer idLugarDestino,
         @NotNull
-        @Future
-        LocalDateTime fechaSalida
+        @FutureOrPresent
+        LocalDate fechaSalida
 ) {
 }

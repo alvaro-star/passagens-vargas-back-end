@@ -8,8 +8,6 @@ import java.util.UUID;
 public record ViajeDTOList(
         Integer id,
         @NotNull
-        Integer plataforma,
-        @NotNull
         UUID idTrayecto,
         @NotNull
         Integer salida,
@@ -17,6 +15,6 @@ public record ViajeDTOList(
         Integer destino
 ) {
     public ViajeDTOList(ViajeModel model, UUID idTrayecto, Integer salida, Integer destino) {
-        this(model.getId(), model.getPlataforma(), idTrayecto, salida, destino);
+        this(model.getId(), idTrayecto, salida, destino);
     }
 }

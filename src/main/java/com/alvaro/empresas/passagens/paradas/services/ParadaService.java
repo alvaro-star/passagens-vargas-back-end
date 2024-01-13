@@ -60,6 +60,10 @@ public class ParadaService {
             }
         }
 
+        if (!trayecto.dataHoraValido(dtoSended.dataHora())) {
+            throw new ValidationException(new FieldMessage("dataHora", "La parada no puede ser maior o menor que las dos primeras"));
+        }
+
         var model = new ParadaModel(dtoSended);
         model.setLugar(lugar);
         model.setTrayecto(trayecto);
@@ -76,10 +80,13 @@ public class ParadaService {
             if (parada.getDataHora().isEqual(dtoSended.dataHora())) {
                 throw new ValidationException(new FieldMessage("dataHora", "Ya hay una parada registrada en esta fecha"));
             }
-            System.out.println("\n" + parada.getLugar().getId()+" - "+dtoSended.idLugar());
+            System.out.println("\n" + parada.getLugar().getId() + " - " + dtoSended.idLugar());
             if (parada.getLugar().getId() == dtoSended.idLugar()) {
                 throw new ValidationException(new FieldMessage("idLugar", "Ya hay una parada registrada que passara por este lugar"));
             }
+        }
+        if (!model.getTrayecto().dataHoraValido(dtoSended.dataHora())) {
+            throw new ValidationException(new FieldMessage("dataHora", "La parada no puede ser maior o menor que las paradas extremas"));
         }
 
         model.updateValues(dtoSended);

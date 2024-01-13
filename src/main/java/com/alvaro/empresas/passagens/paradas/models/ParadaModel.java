@@ -30,7 +30,8 @@ public class ParadaModel {
     @Column(nullable = false, name = "data_hora")
     private LocalDateTime dataHora;
 
-    //private int plataforma;
+    @Column(nullable = false)
+    private int plataforma;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_lugar")
@@ -50,9 +51,14 @@ public class ParadaModel {
 
     public ParadaModel(ParadaDTO dto) {
         dataHora = dto.dataHora();
+        plataforma = dto.plataforma();
     }
 
     public void updateValues(ParadaDTOUpdate dtoUpdate) {
         dataHora = dtoUpdate.dataHora();
+        if (dtoUpdate.plataforma() != null) {
+            plataforma = dtoUpdate.plataforma();
+        }
+
     }
 }

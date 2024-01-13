@@ -9,13 +9,12 @@ import java.util.UUID;
 
 public record ViajeDTOResponse(
         Integer id,
-        Integer plataforma,
         UUID idTrayecto,
         ParadaDTO salida,
         ParadaDTO destino,
         List<PrecioDTO> precios
 ) {
     public ViajeDTOResponse(ViajeModel model, List<PrecioDTO> precios, UUID idTrayecto, ParadaDTO salida, ParadaDTO destino) {
-        this(model.getId(), model.getPlataforma(), idTrayecto, salida, destino, precios);
+        this(model.getId(), idTrayecto, salida, destino, precios);
     }
 }

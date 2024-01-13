@@ -1,6 +1,7 @@
 package com.alvaro.empresas.passagens.repositories;
 
 import com.alvaro.empresas.passagens.models.ViajeModel;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -50,7 +51,20 @@ public interface ViajeRepository extends JpaRepository<ViajeModel, Integer> {
             "WHERE t.idtb_trayecto = :codigo " +
             "AND t.fk_idtb_autobus = a.idtb_autobus " +
             "AND a.fk_idtb_empresa = e.idtb_empresa", nativeQuery = true)
-    String getLogoEmpresa(UUID codigo);
+    String getLogoEmpresaFromTrayecto(UUID codigo);
 
+    @Query(value = "SELECT e.logo FROM tb_empresa as e, tb_autobus as a, tb_trayecto as t, tb_viaje as v " +
+            "WHERE v.idtb_viaje = :id" +
+            "AND t.idtb_trayecto = v.fk_idtb_trayecto " +
+            "AND t.fk_idtb_autobus = a.idtb_autobus " +
+            "AND a.fk_idtb_empresa = e.idtb_empresa", nativeQuery = true)
+    String getLogoEmpresaFromViaje(Integer id);
 
+    @Query(value = "SELECT count(v.idtb_viaje) FROM tb_viaje as v, tb_parada as s, tb_parada as d " +
+            "WHERE v.fk_idtb_trayecto = :codigo " +
+            "AND v.id_salida = s.idtb_parada " +
+            "AND s.fk_idtb_lugar = :idParadaSalida " +
+            "AND v.id_destino = d.idtb_parada " +
+            "AND d.fk_idtb_lugar = :idParadaDestino ", nativeQuery = true)
+    Integer getViajesIguais(UUID codigo, Integer idParadaSalida, Integer idParadaDestino);
 }
