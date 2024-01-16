@@ -5,6 +5,7 @@ import com.alvaro.empresas.passagens.configurations.exceptions.FieldMessage;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajeDTO;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTO;
+import com.alvaro.empresas.passagens.enums.MetodoPagamentoEnum;
 import com.alvaro.empresas.passagens.models.*;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.alvaro.empresas.passagens.repositories.PasajeRepository;
@@ -42,9 +43,17 @@ public class PasajeService {
     public PagoModel save(PasajesDTO dto) {
         var precio = precioService.findById(dto.idPrecio());
         var trayecto = precio.getViaje().getTrayecto();
-        ParadaModel salida = null;
-        ParadaModel destino = null;
+        ParadaModel salida;
+        ParadaModel destino;
+        /*
+        //Tratando diferentes tipos de usuarios
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) {
 
+        } else {
+            var first = auth.getAuthorities().stream().findFirst();
+        }
+       */
         //Lancara excecoes se algum estiver invalido
         validarSilla(trayecto, precio, dto.pasajes());
 
@@ -60,7 +69,7 @@ public class PasajeService {
             throw new ValidationException(new FieldMessage("idLugarDestino", "El destino no hace parte del trayecto"));
         }
 
-        PagoModel pago = pagoService.save(dto, precio.getPrecio());
+        PagoModel pago = pagoService.save(dto, precio.getPrecio(), MetodoPagamentoEnum.QR);
 
         for (PasajeDTO pasajeDTO : dto.pasajes()) {
             var pasajeModel = new PasajeModel();

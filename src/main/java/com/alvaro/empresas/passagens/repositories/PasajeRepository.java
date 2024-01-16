@@ -10,6 +10,6 @@ import java.util.UUID;
 
 @Repository
 public interface PasajeRepository extends JpaRepository<PasajeModel, UUID> {
-    @Query(value = "UPDATE tb_pasaje SET pagado? = :pagado WHERE idtb_pasaje = :id", nativeQuery = true)
+    @Query(value = "UPDATE tb_pasaje SET pagado = :pagado WHERE idtb_pasaje = :id", nativeQuery = true)
     void updateValuePagado(@Param("id") UUID id, @Param("pagado") Boolean pagado);
 }

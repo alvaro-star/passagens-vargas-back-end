@@ -19,12 +19,14 @@ public class RoleResource {
 
     @GetMapping("/load")
     public ResponseEntity<Object> loadRoles() {
-        var admin = new RoleModel(RoleList.ADMIN);
+        var admin = new RoleModel(RoleList.ROLE_ADMIN);
         roleService.save(admin);
-        var user = new RoleModel(RoleList.USER);
+        var user = new RoleModel(RoleList.ROLE_CLIENTE);
         roleService.save(user);
-        var invalido = new RoleModel(RoleList.INVALIDO);
-        roleService.save(invalido);
+        var empresaAdmin = new RoleModel(RoleList.ROLE_EMPRESA_ADMIN);
+        roleService.save(empresaAdmin);
+        var empresaFuncionario = new RoleModel(RoleList.ROLE_EMPRESA_FUNCIONARIO);
+        roleService.save(empresaFuncionario);
         return ResponseEntity.status(HttpStatus.CREATED).body(new Mensaje("Criado"));
     }
 }

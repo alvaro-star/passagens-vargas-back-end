@@ -1,16 +1,16 @@
 package com.alvaro.empresas.passagens.security.services;
 
 import com.alvaro.empresas.passagens.security.models.UsuarioModel;
-import com.alvaro.empresas.passagens.security.repositories.UserRepository;
+import com.alvaro.empresas.passagens.security.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UserService {
+public class UsuarioService {
     @Autowired
-    private UserRepository userRepository;
+    private UsuarioRepository usuarioRepository;
 
     public UsuarioModel save(UsuarioModel usuarioModel) {
-        return userRepository.save(usuarioModel);
+        return usuarioRepository.save(usuarioModel);
     }
 }

@@ -23,9 +23,9 @@ public class PasajeModel {
 
     @Column(nullable = false)
     private Integer numero;
-    @Column(name = "comprado_na_web?", nullable = false)
+    @Column(name = "comprado_na_web", nullable = false)
     private Boolean compradoWeb;
-    @Column(name = "pagado?", nullable = false)
+    @Column(name = "pagado", nullable = false)
     private Boolean estaPagado = false;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

@@ -12,13 +12,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class EmpresaService {
     @Autowired
     private EmpresaRepository empresaRepository;
 
-    public EmpresaModel findById(Integer id) {
+    public EmpresaModel findById(UUID id) {
         Optional<EmpresaModel> model = empresaRepository.findById(id);
         return model.orElseThrow(() -> new ObjectNotFoundException(id, EmpresaModel.class.getName()));
     }
@@ -34,14 +35,14 @@ public class EmpresaService {
         return empresaRepository.save(model);
     }
 
-    public EmpresaModel update(EmpresaDto dto, Integer id) {
+    public EmpresaModel update(EmpresaDto dto, UUID id) {
         var model = this.findById(id);
         BeanUtils.copyProperties(dto, model, "id", "autobuses");
         return empresaRepository.save(model);
     }
 
     @Transactional
-    public void delete(Integer id) {
+    public void delete(UUID id) {
         var model = this.findById(id);
         empresaRepository.delete(model);
     }

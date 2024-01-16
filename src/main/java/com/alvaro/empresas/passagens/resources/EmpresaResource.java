@@ -14,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/empresas")
 @SecurityRequirement(name = "bearer-key")
@@ -29,7 +31,7 @@ public class EmpresaResource {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<EmpresaDto> getOne(@PathVariable(value = "id") Integer id) {
+    public ResponseEntity<EmpresaDto> getOne(@PathVariable(value = "id") UUID id) {
         EmpresaModel model = empresaService.findById(id);
         return ResponseEntity.status(HttpStatus.OK).body(new EmpresaDto(model));
     }
@@ -41,13 +43,13 @@ public class EmpresaResource {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EmpresaDto> update(@PathVariable(value = "id") Integer id, @RequestBody @Valid EmpresaDto dto) {
+    public ResponseEntity<EmpresaDto> update(@PathVariable(value = "id") UUID id, @RequestBody @Valid EmpresaDto dto) {
         EmpresaModel model = empresaService.update(dto, id);
         return ResponseEntity.status(HttpStatus.OK).body(new EmpresaDto(model));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> delete(@PathVariable(value = "id") Integer id) {
+    public ResponseEntity<Object> delete(@PathVariable(value = "id") UUID id) {
         empresaService.delete(id);
         return ResponseEntity.status(HttpStatus.OK).body(new Mensaje("Eliminado"));
     }

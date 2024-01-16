@@ -1,5 +1,6 @@
 package com.alvaro.empresas.passagens.security.models;
 
+import com.alvaro.empresas.passagens.models.PagoModel;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -8,9 +9,7 @@ import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Table(name = "tb_usuario")
 @Entity
@@ -22,12 +21,16 @@ public class UsuarioModel implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "idtb_usuario")
-    private String id;
+    private UUID id;
     @Column(name = "email", nullable = false)
     private String login;
-    private String carnet;
     private String nombre;
     private String contrasena;
+
+    private UUID idEmpresa;
+
+    @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "usuario")
+    private List<PagoModel> pagos;
 
     @NotNull
     @ManyToMany(fetch = FetchType.EAGER)
@@ -36,12 +39,10 @@ public class UsuarioModel implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "idtb_role", referencedColumnName = "idtb_role"))
     private Set<RoleModel> roles = new HashSet<>();
 
-    public UsuarioModel(String login, String nombre, String carnet, String contrasena, Set<RoleModel> roles) {
+    public UsuarioModel(String login, String nombre, String contrasena) {
         this.login = login;
         this.nombre = nombre;
-        this.carnet = carnet;
         this.contrasena = contrasena;
-        this.roles = roles;
     }
 
     @Override

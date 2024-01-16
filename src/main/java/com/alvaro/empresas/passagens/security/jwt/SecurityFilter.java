@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.security.jwt;
 
-import com.alvaro.empresas.passagens.security.repositories.UserRepository;
+import com.alvaro.empresas.passagens.security.repositories.UsuarioRepository;
 import com.alvaro.empresas.passagens.security.services.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -22,7 +22,7 @@ public class SecurityFilter extends OncePerRequestFilter {
     @Autowired
     TokenService tokenService;
     @Autowired
-    UserRepository userRepository;
+    UsuarioRepository usuarioRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -30,7 +30,7 @@ public class SecurityFilter extends OncePerRequestFilter {
         try {
             var token = this.getToken(request);
             var subject = tokenService.validateToken(token);
-            UserDetails user = userRepository.findByLogin(subject);
+            UserDetails user = usuarioRepository.findByLogin(subject);
             if (user != null) {
                 var authenticate = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(authenticate);

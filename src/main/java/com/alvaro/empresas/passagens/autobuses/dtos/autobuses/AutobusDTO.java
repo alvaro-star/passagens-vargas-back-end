@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public record AutobusDTO(
         Integer id,
@@ -15,7 +16,7 @@ public record AutobusDTO(
         String placa,
 
         @NotNull(message = "nao pode ser nulo")
-        Integer idEmpresa,
+        UUID idEmpresa,
 
         @Size(min = 1, max = 2)
         List<PisoDTO> pisos

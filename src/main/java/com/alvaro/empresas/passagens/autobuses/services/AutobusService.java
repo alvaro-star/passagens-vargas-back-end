@@ -28,6 +28,7 @@ import org.springframework.validation.FieldError;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class AutobusService {
@@ -48,7 +49,7 @@ public class AutobusService {
         return models.map(model -> new AutobusDTOList(model, model.getEmpresa().getId()));
     }
 
-    public Page<AutobusDTOList> findAllFromEmpresa(Integer idEmpresa, Pageable pageable) {
+    public Page<AutobusDTOList> findAllFromEmpresa(UUID idEmpresa, Pageable pageable) {
         var empresa = empresaService.findById(idEmpresa);
         Page<AutobusModel> autobuses = autobusRepository.findByEmpresa(empresa, pageable);
         return autobuses.map((autobus) -> new AutobusDTOList(autobus, empresa.getId()));

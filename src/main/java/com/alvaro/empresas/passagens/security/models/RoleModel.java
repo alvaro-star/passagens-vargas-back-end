@@ -13,7 +13,7 @@ import org.springframework.security.core.GrantedAuthority;
 @Setter
 @NoArgsConstructor
 public class RoleModel implements GrantedAuthority {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     @Id
     @Column(name = "idtb_role")
@@ -23,14 +23,14 @@ public class RoleModel implements GrantedAuthority {
     @NotNull
     @Column(unique = true)
     @Enumerated(EnumType.STRING)
-    private RoleList nome;
+    private RoleList nombre;
 
-    public RoleModel(@NotNull RoleList nome) {
-        this.nome = nome;
+    public RoleModel(@NotNull RoleList nombre) {
+        this.nombre = nombre;
     }
 
     @Override
     public String getAuthority() {
-        return nome.toString();
+        return nombre.toString();
     }
 }

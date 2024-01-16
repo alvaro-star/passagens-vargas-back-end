@@ -5,7 +5,10 @@ import lombok.Getter;
 
 @Getter
 public enum RoleList {
-    ADMIN("admin"), USER("user"), INVALIDO("invalido");
+    ROLE_ADMIN("admin"),
+    ROLE_CLIENTE("cliente"),
+    ROLE_EMPRESA_ADMIN("empresa-admin"),
+    ROLE_EMPRESA_FUNCIONARIO("empresa-funcionario");
 
     private String role;
 

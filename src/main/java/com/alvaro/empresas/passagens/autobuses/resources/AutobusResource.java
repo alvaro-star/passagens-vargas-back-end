@@ -18,6 +18,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/autobuses")
 @SecurityRequirement(name = "bearer-key")
@@ -31,7 +33,7 @@ public class AutobusResource {
     }
 
     @GetMapping("/from/{idEmpresa}")
-    public ResponseEntity<Page<AutobusDTOList>> getAutobusesFromEmpresa(@PathVariable(value = "idEmpresa") Integer id,
+    public ResponseEntity<Page<AutobusDTOList>> getAutobusesFromEmpresa(@PathVariable(value = "idEmpresa") UUID id,
                                                                         @PageableDefault(size = 10, sort = {"placa"}) Pageable pageable) {
         return ResponseEntity.ok().body(autobusService.findAllFromEmpresa(id, pageable));
     }

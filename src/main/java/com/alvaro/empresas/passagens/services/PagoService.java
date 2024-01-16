@@ -1,6 +1,7 @@
 package com.alvaro.empresas.passagens.services;
 
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTO;
+import com.alvaro.empresas.passagens.enums.MetodoPagamentoEnum;
 import com.alvaro.empresas.passagens.models.PagoModel;
 import com.alvaro.empresas.passagens.models.PasajeModel;
 import com.alvaro.empresas.passagens.repositories.PagoRepository;
@@ -20,7 +21,7 @@ public class PagoService {
     @Autowired
     private PasajeRepository pasajeRepository;
 
-    public PagoModel save(PasajesDTO dto, Float precio) {
+    public PagoModel save(PasajesDTO dto, Float precio, MetodoPagamentoEnum metodo) {
         Float precioTotal = dto.pasajes().size() * precio;
         PagoModel pago = new PagoModel();
         pago.setValorTotal(precioTotal);
@@ -34,6 +35,7 @@ public class PagoService {
         pago.setTasaServicio(tasa);
         pago.setEstaPagado(true);
 
+        pago.setMetodoPago(metodo);
         return pagoRepository.save(pago);
     }
 
