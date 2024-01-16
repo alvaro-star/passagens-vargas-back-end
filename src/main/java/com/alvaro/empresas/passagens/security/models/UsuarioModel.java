@@ -24,6 +24,8 @@ public class UsuarioModel implements UserDetails {
     private UUID id;
     @Column(name = "email", nullable = false)
     private String login;
+    @Column(nullable = false)
+    private String telefono;
     private String nombre;
     private String contrasena;
 

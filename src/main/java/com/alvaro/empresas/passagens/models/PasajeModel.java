@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Date;
 import java.util.UUID;
 
 
@@ -22,7 +23,7 @@ public class PasajeModel {
     private UUID id;
 
     @Column(nullable = false)
-    private Integer numero;
+    private Integer nSilla;
     @Column(name = "comprado_na_web", nullable = false)
     private Boolean compradoWeb;
     @Column(name = "pagado", nullable = false)
@@ -55,5 +56,16 @@ public class PasajeModel {
     @JoinColumn(name = "fk_idtb_pago")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private PagoModel pago;
-    //Pagos
+
+    public PasajeModel(Integer nSilla, Boolean compradoWeb, Boolean estaPagado,
+                       ParadaModel salida, ParadaModel destino, TrayectoModel trayecto, PrecioModel precio, PagoModel pago) {
+        this.nSilla = nSilla;
+        this.compradoWeb = compradoWeb;
+        this.estaPagado = estaPagado;
+        this.salida = salida;
+        this.destino = destino;
+        this.trayecto = trayecto;
+        this.precio = precio;
+        this.pago = pago;
+    }
 }

@@ -1,9 +1,13 @@
 package com.alvaro.empresas.passagens.services;
 
+import com.alvaro.empresas.passagens.configurations.exceptions.FieldMessage;
+import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTO;
 import com.alvaro.empresas.passagens.enums.MetodoPagamentoEnum;
+import com.alvaro.empresas.passagens.models.ContactoModel;
 import com.alvaro.empresas.passagens.models.PagoModel;
 import com.alvaro.empresas.passagens.models.PasajeModel;
+import com.alvaro.empresas.passagens.models.PrecioModel;
 import com.alvaro.empresas.passagens.repositories.PagoRepository;
 import com.alvaro.empresas.passagens.repositories.PasajeRepository;
 import org.hibernate.ObjectNotFoundException;
@@ -20,41 +24,73 @@ public class PagoService {
     private PagoRepository pagoRepository;
     @Autowired
     private PasajeRepository pasajeRepository;
+    @Autowired
+    private PrecioService precioService;
 
-    public PagoModel save(PasajesDTO dto, Float precio, MetodoPagamentoEnum metodo) {
+    public PagoModel save(PasajesDTO dto, Float precio, MetodoPagamentoEnum metodo, boolean guardarContacto) {
         Float precioTotal = dto.pasajes().size() * precio;
         PagoModel pago = new PagoModel();
         pago.setValorTotal(precioTotal);
+
         //pago.setDescuento(dto.descuento());
         pago.setDescuento(0f);
-        var tasa = precioTotal / 10;
 
-        pago.getContacto().setEmail(dto.contacto().email());
-        pago.getContacto().setTelefono(dto.contacto().telefono());
+        if (metodo == MetodoPagamentoEnum.QR) {
+            var tasa = precioTotal / 10;
+            pago.setTasaServicio(tasa);
+            pago.setEstaPagado(false);
+        } else if (metodo == MetodoPagamentoEnum.EFECTIVO) {
+            pago.setTasaServicio(0f);
+            pago.setEstaPagado(true);
+            pago.setFechaPago(LocalDateTime.now());
+        } else {
+            throw new ValidationException(new FieldMessage("metodo", "Metodo de Pago invalido"));
+        }
 
-        pago.setTasaServicio(tasa);
-        pago.setEstaPagado(true);
+        if (guardarContacto) {
+            ContactoModel contactoModel = new ContactoModel(dto.contacto().email(), dto.contacto().telefono());
+            pago.setContacto(contactoModel);
+        }
 
         pago.setMetodoPago(metodo);
+
         return pagoRepository.save(pago);
     }
 
+    //En desarrollo
     @Transactional
     public void pagarQr(UUID idPago) {//
         PagoModel pago = pagoRepository.findById(idPago).orElseThrow(() -> new ObjectNotFoundException(idPago, PagoModel.class.getName()));
         if (pago.getEstaPagado()) {
             rembolso();
             mandarEmail("El precio ya fue pagado");
-            pagoRepository.delete(pago);
+            return;
         }
+        int nPasajes = 0;
         for (PasajeModel pasaje : pago.getPasajes()) {
             if (pasaje.getEstaPagado()) {
                 rembolso();
-                mandarEmail("Una delas sillas ya fue pagado");
+                mandarEmail("Una delas sillas ya fue pagado, el pago fue cancelado");
                 pagoRepository.delete(pago);
-                break;
+                return;
             }
+            nPasajes++;
         }
+        PrecioModel precio = pago.getPasajes().getFirst().getPrecio();
+
+        int nSillasDisponibles = precio.getNSillasDisponibles() - nPasajes;
+        if (nSillasDisponibles == 0) {
+            precio.setNSillasDisponibles(0);
+            precio.setLleno(true);
+        } else if (nSillasDisponibles > 0) {
+            precio.setNSillasDisponibles(nSillasDisponibles);
+        } else {
+            mandarEmail("No hay sillas disponibles");
+            pagoRepository.delete(pago);//Eliminacao do Pago
+            return;
+        }
+
+        precioService.updateFromService(precio);
 
         for (PasajeModel pasaje : pago.getPasajes()) {
             pasajeRepository.updateValuePagado(pasaje.getId(), true);
@@ -71,6 +107,10 @@ public class PagoService {
                 pasajeRepository.delete(pasaje);
             }
         }
+    }
+
+    public void generarQr(Float valor) {
+
     }
 
     public void rembolso() {

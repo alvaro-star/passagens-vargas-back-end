@@ -35,17 +35,17 @@ public class PagoModel {
     @Enumerated(EnumType.STRING)
     private MetodoPagamentoEnum metodoPago;
 
-    @Embedded
-    private ContactoHelper contacto;
-
     private LocalDateTime fechaPago;
 
     private LocalDateTime criatedAt;
 
+    @OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "pago")
+    private ContactoModel contacto;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
-    @JoinColumn(name = "fk_idtb_usuario")
+    @JoinColumn(name = "fk_idtb_cliente")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private UsuarioModel usuario;
+    private UsuarioModel cliente;
 
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "pago")
     private List<PasajeModel> pasajes;

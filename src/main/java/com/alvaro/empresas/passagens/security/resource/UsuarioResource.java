@@ -67,7 +67,13 @@ public class UsuarioResource {
         Set<RoleModel> roles = new HashSet<>();
 
         var usuario = SecurityContextHolder.getContext().getAuthentication();
-        boolean logado = !usuario.getName().equals("anonymousUser");
+        boolean logado;
+
+        if (usuario == null || usuario.getName().equals("anonymousUser")) {
+            logado = false;
+        } else {
+            logado = true;
+        }
 
         String encriptedPassword = new BCryptPasswordEncoder().encode(registerDto.contrasena());
         UsuarioModel newUser = new UsuarioModel(registerDto.login(), registerDto.nombre(), encriptedPassword);

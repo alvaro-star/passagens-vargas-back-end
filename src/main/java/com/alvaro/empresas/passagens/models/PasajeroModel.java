@@ -21,9 +21,9 @@ public class PasajeroModel {
     @Column(name = "idtb_pasajero")
     private UUID id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 9)
     private String carnet;
-    @Column(nullable = false)
+    @Column(nullable = false, length = 70)
     private String nombre;
     @Column(nullable = false)
     private Date nascimento;

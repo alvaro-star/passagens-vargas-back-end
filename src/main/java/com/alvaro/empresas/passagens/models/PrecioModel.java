@@ -23,12 +23,13 @@ public class PrecioModel {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "idtb_precio")
     private UUID id;
-    @NotNull
+    @Column(nullable = false)
     private Float precio;
-    @NotNull
+    @Column(nullable = false)
     private Integer nPiso;
-
+    @Column(nullable = false)
     private Boolean lleno = false;
+    @Column(nullable = false)
     private Integer nSillasDisponibles;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
