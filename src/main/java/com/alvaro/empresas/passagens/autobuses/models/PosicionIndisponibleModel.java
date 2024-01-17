@@ -29,4 +29,8 @@ public class PosicionIndisponibleModel {
     public PosicionIndisponibleModel(PosicionIndisponibleDTO dto) {
         numero = dto.numero();
     }
+
+    public PosicionIndisponibleModel(Integer numero) {
+        this.numero = numero;
+    }
 }

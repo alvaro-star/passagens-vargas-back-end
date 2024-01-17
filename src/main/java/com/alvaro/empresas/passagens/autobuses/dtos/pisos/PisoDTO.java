@@ -26,6 +26,6 @@ public class PisoDTO {
     private String inicioContagem = "";
 
     @Valid
-    private List<PosicionIndisponibleDTO> posicoesIndisponiveis = new ArrayList<PosicionIndisponibleDTO>();
+    private List<Integer> posicoesIndisponiveis = new ArrayList<>();
 
 }

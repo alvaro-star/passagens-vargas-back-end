@@ -31,7 +31,7 @@ public class MainSecurity {
                         .requestMatchers(HttpMethod.GET, "/").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/roles/load").permitAll()
+                        .requestMatchers( "/dados/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/pasajes").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll()
                         .anyRequest().authenticated()

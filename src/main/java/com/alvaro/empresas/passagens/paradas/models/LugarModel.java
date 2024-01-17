@@ -38,4 +38,9 @@ public class LugarModel {
         nombre = dto.nombre();
     }
 
+    public LugarModel(String nombre, CiudadModel ciudad) {
+        this.nombre = nombre;
+        this.ciudad = ciudad;
+    }
+
 }

@@ -23,6 +23,6 @@ public class PisoDTOUpdate {
 
     private String inicioContagem;
 
-    private List<PosicionIndisponibleDTO> posicoesIndisponiveis = new ArrayList<PosicionIndisponibleDTO>();
+    private List<Integer> posicoesIndisponiveis = new ArrayList<Integer>();
 
 }

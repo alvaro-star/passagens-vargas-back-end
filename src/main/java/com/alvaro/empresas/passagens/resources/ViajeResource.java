@@ -6,7 +6,6 @@ import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacao;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTO;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOList;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOResponse;
-import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOUpdate;
 import com.alvaro.empresas.passagens.services.ViajeService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -50,16 +49,6 @@ public class ViajeResource {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Mensaje("Las paradas no son validas"));
         } else {
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        }
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Object> update(@PathVariable(value = "id") Integer id, @Valid @RequestBody ViajeDTOUpdate dto) {
-        ViajeDTOResponse response = viajeService.update(dto, id);
-        if (response == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Mensaje("Las paradas no son validas"));
-        } else {
-            return ResponseEntity.ok(response);
         }
     }
 

@@ -10,15 +10,11 @@ public record ViajeDTO(
         @NotNull
         UUID idTrayecto,
         @NotNull
-        Integer salida,
-        @NotNull
-        Integer destino,
-        @NotNull
         Float precioPiso1,
         Float precioPiso2
 ) {
-    public ViajeDTO(ViajeModel model, UUID idTrayecto, Integer salida, Integer destino, Float precio1, Float precio2) {
-        this(model.getId(), idTrayecto, salida, destino, precio1, precio2);
+    public ViajeDTO(ViajeModel model, UUID idTrayecto, Float precio1, Float precio2) {
+        this(model.getId(), idTrayecto, precio1, precio2);
     }
 
 }

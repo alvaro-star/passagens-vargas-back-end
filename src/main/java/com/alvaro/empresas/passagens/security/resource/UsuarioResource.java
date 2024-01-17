@@ -32,9 +32,6 @@ import java.util.Set;
 @RestController
 @RequestMapping("/auth")
 public class UsuarioResource {
-
-
-    //private AuthorizationService authorizationService;
     @Autowired
     private UsuarioRepository usuarioRepository;
     @Autowired
@@ -76,7 +73,7 @@ public class UsuarioResource {
         }
 
         String encriptedPassword = new BCryptPasswordEncoder().encode(registerDto.contrasena());
-        UsuarioModel newUser = new UsuarioModel(registerDto.login(), registerDto.nombre(), encriptedPassword);
+        UsuarioModel newUser = new UsuarioModel(registerDto.login(), registerDto.nombre(), registerDto.telefono(), encriptedPassword);
 
         switch (registerDto.role()) {
             case ROLE_ADMIN -> {

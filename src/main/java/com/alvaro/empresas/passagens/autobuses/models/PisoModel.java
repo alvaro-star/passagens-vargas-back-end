@@ -73,6 +73,17 @@ public class PisoModel {
         }
     }
 
+    public PisoModel(Integer nLinhas, Integer nColunas, EnumPosicao distribuicaoFileira, Integer nPiso, EnumPosicao inicioContagem, Integer nSillas, Integer primeraSilla, AutobusModel autobus) {
+        this.nLinhas = nLinhas;
+        this.nColunas = nColunas;
+        this.distribuicaoFileira = distribuicaoFileira;
+        this.nPiso = nPiso;
+        this.inicioContagem = inicioContagem;
+        this.nSillas = nSillas;
+        this.primeraSilla = primeraSilla;
+        this.autobus = autobus;
+    }
+
     public void updateValues(PisoDTOUpdate dto) {
         nSillas = dto.getNColunas() * dto.getNLinhas() - dto.getPosicoesIndisponiveis().size();
         nLinhas = dto.getNLinhas();

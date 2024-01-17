@@ -37,5 +37,9 @@ public class EmpresaModel {
         numeroCuenta = dto.numeroCuenta();
     }
 
-
+    public EmpresaModel(String nombre, String logo, String numeroCuenta) {
+        this.nombre = nombre;
+        this.logo = logo;
+        this.numeroCuenta = numeroCuenta;
+    }
 }

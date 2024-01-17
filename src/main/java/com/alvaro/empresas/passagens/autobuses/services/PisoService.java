@@ -60,8 +60,8 @@ public class PisoService {
     public PisoDTOResponse salvar(PisoDTO dto, AutobusModel autobusModel, Integer nPiso, Integer nPrimeraSilla) {
 
         int produto = dto.getNLinhas() * dto.getNColunas();
-        for (PosicionIndisponibleDTO posicionDTO : dto.getPosicoesIndisponiveis()) {
-            if (posicionDTO.numero() > produto) {
+        for (Integer posicion : dto.getPosicoesIndisponiveis()) {
+            if (posicion > produto) {
                 throw new ValidationException("Las posiciones indisponibles son invalidas");
             }
         }
@@ -85,8 +85,8 @@ public class PisoService {
         }
 
         int produto = dto.getNLinhas() * dto.getNColunas();
-        for (PosicionIndisponibleDTO posicionDTO : dto.getPosicoesIndisponiveis()) {
-            if (posicionDTO.numero() > produto) {
+        for (Integer posicion : dto.getPosicoesIndisponiveis()) {
+            if (posicion > produto) {
                 return null;
             }
         }

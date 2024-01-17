@@ -26,12 +26,14 @@ public class UsuarioModel implements UserDetails {
     private String login;
     @Column(nullable = false)
     private String telefono;
+    @Column(nullable = false)
     private String nombre;
+    @Column(nullable = false)
     private String contrasena;
 
     private UUID idEmpresa;
 
-    @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "usuario")
+    @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "cliente")
     private List<PagoModel> pagos;
 
     @NotNull
@@ -41,10 +43,11 @@ public class UsuarioModel implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "idtb_role", referencedColumnName = "idtb_role"))
     private Set<RoleModel> roles = new HashSet<>();
 
-    public UsuarioModel(String login, String nombre, String contrasena) {
+    public UsuarioModel(String login, String nombre, String telefono, String contrasena) {
         this.login = login;
         this.nombre = nombre;
         this.contrasena = contrasena;
+        this.telefono = telefono;
     }
 
     @Override

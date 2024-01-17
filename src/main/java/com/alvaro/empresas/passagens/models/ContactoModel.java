@@ -23,7 +23,7 @@ public class ContactoModel {
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_pago")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private PasajeModel pago;
+    private PagoModel pago;
 
     public ContactoModel(String email, Integer numero) {
         this.email = email;

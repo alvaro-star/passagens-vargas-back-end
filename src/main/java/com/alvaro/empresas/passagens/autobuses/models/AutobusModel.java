@@ -1,7 +1,6 @@
 package com.alvaro.empresas.passagens.autobuses.models;
 
 import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTO;
-import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTOResponse;
 import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTOUpdate;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.models.TrayectoModel;
@@ -32,14 +31,24 @@ public class AutobusModel {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private EmpresaModel empresa;
 
+    public AutobusModel(String placa, EmpresaModel empresa) {
+        this.placa = placa;
+        this.empresa = empresa;
+    }
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "autobus")
     private List<PisoModel> pisos = new ArrayList<PisoModel>();
 
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "autobus")
     private List<TrayectoModel> trayectos = new ArrayList<TrayectoModel>();
 
-    public AutobusModel(AutobusDTOResponse dto) {
-        placa = dto.placa();
+    public PisoModel getPisoByNumero(Integer nPiso) {
+        for (PisoModel piso : this.pisos) {
+            if (piso.getNPiso() == nPiso) {
+                return piso;
+            }
+        }
+        return null;
     }
 
     public AutobusModel(AutobusDTO dto) {

@@ -54,11 +54,17 @@ public class ParadaModel {
         plataforma = dto.plataforma();
     }
 
+    public ParadaModel(LocalDateTime dataHora, int plataforma, LugarModel lugar, TrayectoModel trayecto) {
+        this.dataHora = dataHora;
+        this.plataforma = plataforma;
+        this.lugar = lugar;
+        this.trayecto = trayecto;
+    }
+
     public void updateValues(ParadaDTOUpdate dtoUpdate) {
         dataHora = dtoUpdate.dataHora();
         if (dtoUpdate.plataforma() != null) {
             plataforma = dtoUpdate.plataforma();
         }
-
     }
 }

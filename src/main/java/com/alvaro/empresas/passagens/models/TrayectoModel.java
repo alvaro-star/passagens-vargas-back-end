@@ -48,13 +48,8 @@ public class TrayectoModel {
         return null;
     }
 
-    public boolean posseeViaje(Integer idSalida, Integer idDestino) {
-        for (ViajeModel viaje : this.viajes) {
-            if (viaje.getSalida().getId() == idSalida && viaje.getDestino().getId() == idDestino) {
-                return true;
-            }
-        }
-        return false;
+    public TrayectoModel(AutobusModel autobus) {
+        this.autobus = autobus;
     }
 
     public ParadaModel getParadaByLugarId(Integer idLugar) {
@@ -98,13 +93,29 @@ public class TrayectoModel {
     }
 
     public ParadaModel getMenorParada() {
+        if (paradas.isEmpty()) {
+            return null;
+        }
         int indiceMenor = 0;
-        for (int i = 0; i <= paradas.size(); i++) {
+        for (int i = 0; i < paradas.size(); i++) {
             if (paradas.get(indiceMenor).getDataHora().isAfter(paradas.get(i).getDataHora())) {
                 indiceMenor = i;
             }
         }
         return paradas.get(indiceMenor);
+    }
+
+    public ParadaModel getMaiorParada() {
+        if (paradas.isEmpty()) {
+            return null;
+        }
+        int indiceMaior = 0;
+        for (int i = 0; i < paradas.size(); i++) {
+            if (paradas.get(indiceMaior).getDataHora().isBefore(paradas.get(i).getDataHora())) {
+                indiceMaior = i;
+            }
+        }
+        return paradas.get(indiceMaior);
     }
 
 }

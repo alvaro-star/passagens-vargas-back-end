@@ -12,6 +12,8 @@ public record RegisterDto(
         @Email
         String login,
         @NotBlank
+        String telefono,
+        @NotBlank
         String contrasena,
         @NotBlank
         String nombre,

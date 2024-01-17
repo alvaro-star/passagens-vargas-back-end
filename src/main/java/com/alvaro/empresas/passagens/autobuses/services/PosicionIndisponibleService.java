@@ -15,10 +15,10 @@ public class PosicionIndisponibleService {
     @Autowired
     private PosicionIndisponibleRepository posicionRepository;
 
-    public List<PosicionIndisponibleDTO> saveAll(List<PosicionIndisponibleDTO> dtos, PisoModel piso) {
+    public List<PosicionIndisponibleDTO> saveAll(List<Integer> dtos, PisoModel piso) {
         List<PosicionIndisponibleModel> models = new ArrayList<>();
-        dtos.forEach(dto -> {
-            var model = new PosicionIndisponibleModel(dto);
+        dtos.forEach(numero -> {
+            var model = new PosicionIndisponibleModel(numero);
             model.setPiso(piso);
             models.add(posicionRepository.save(model));
         });

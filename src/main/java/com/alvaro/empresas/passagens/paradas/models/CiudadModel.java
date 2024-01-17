@@ -5,6 +5,7 @@ import com.alvaro.empresas.passagens.paradas.dtos.CiudadDtoUpdate;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -39,5 +40,10 @@ public class CiudadModel {
 
     public void updateValues(CiudadDtoUpdate dto) {
         nombre = dto.nombre();
+    }
+
+    public CiudadModel(String nombre, DepartamentoModel departamento) {
+        this.nombre = nombre;
+        this.departamento = departamento;
     }
 }

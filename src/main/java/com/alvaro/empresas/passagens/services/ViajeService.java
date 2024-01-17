@@ -10,7 +10,6 @@ import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacao;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTO;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOList;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOResponse;
-import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOUpdate;
 import com.alvaro.empresas.passagens.models.PrecioModel;
 import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTO;
@@ -62,6 +61,7 @@ public class ViajeService {
         if (dto.idLugarDestino().equals(dto.idLugarSalida())) {
             throw new ValidationException(new FieldMessage("idDestino", "El destino no puede ser el mismo que la salida"));
         }
+
         LocalDateTime hj = LocalDateTime.now();
         LocalDateTime startDay;
         LocalDateTime endDay = dto.fechaSalida().atTime(LocalTime.MAX);
@@ -102,8 +102,8 @@ public class ViajeService {
                 if (destino.getDataHora().isAfter(salida.getDataHora())) {
                     List<ViajeModel> viajes = viajeRepository.getFromTrayecto(codigo, salida.getDataHora(), destino.getDataHora());
                     for (ViajeModel viaje : viajes) {
-                        ParadaDTOList salidaDTO = convertToParadaDTOList(salida);
-                        ParadaDTOList destinoDTO = convertToParadaDTOList(destino);
+                        ParadaDTOList salidaDTO = convertToParadaDTOList(viaje.getSalida());
+                        ParadaDTOList destinoDTO = convertToParadaDTOList(viaje.getDestino());
                         List<PrecioDTO> precios = new ArrayList<>();
                         for (PrecioModel precio : viaje.getPrecios()) {
                             if (!precio.getLleno()) {
@@ -144,36 +144,21 @@ public class ViajeService {
             throw new ValidationException(new FieldMessage("id", "El trayecto ya posee un viaje"));
         }
 
-        if (dto.salida().equals(dto.destino())) {
-            throw new ValidationException(new FieldMessage("destino", "El destino no puede ser el mismo que la salida"));
-        }
-        var salida = trayecto.getParadaById(dto.salida());
-
-        if (salida == null) {
-            throw new ValidationException(new FieldMessage("salida", "La salida no pertenece al trayecto"));
-        }
-
-        var destino = trayecto.getParadaById(dto.destino());
-
-        if (destino == null) {
-            throw new ValidationException(new FieldMessage("destino", "El destino no pertenece al trayecto"));
-        }
         //En este punto queda claro que hay minimo dos paradas
+        if (trayecto.getParadas().size() < 2) {
+            throw new ValidationException(new FieldMessage("paradas", "El trayecto no posee suficientes paradas"));
+        }
+        var salida = trayecto.getMenorParada();
+        var destino = trayecto.getMaiorParada();
 
         if (!destino.getDataHora().isAfter(salida.getDataHora())) {
             throw new ValidationException(new FieldMessage("salida", "La salida posee un horario superior al del destino"));
         }
-        Integer viajesIguais = viajeRepository.getViajesIguais(trayecto.getCodigo(), salida.getId(), destino.getId());
-        if (viajesIguais > 0) {
-            throw new ValidationException(new FieldMessage("id", "El viaje ya se encuentra registrado"));
-        }
-
 
         var model = new ViajeModel();
         model.setTrayecto(trayecto);
         model.setSalida(salida);
         model.setDestino(destino);
-
 
         var saved = viajeRepository.save(model);
 
@@ -215,7 +200,41 @@ public class ViajeService {
     }
 
     @Transactional
-    public ViajeDTOResponse update(ViajeDTOUpdate novosDados, Integer id) {
+    public void delete(ViajeModel model) {
+        for (PrecioModel precio : model.getPrecios()) {
+            if (!precio.getPasajes().isEmpty()) {
+                throw new ValidationException("El viaje no pudo ser Eliminado");
+            }
+        }
+        viajeRepository.delete(model);
+    }
+
+    public ParadaDTOList convertToParadaDTOList(ParadaModel model) {
+        return new ParadaDTOList(
+                model,
+                model.getLugar().getNombre(),
+                model.getLugar().getCiudad().getNombre(),
+                model.getLugar().getCiudad().getDepartamento().getNombre());
+    }
+
+    private UUID convertBytesToUUID(byte[] bytes) {
+        if (bytes.length < 16) {
+            throw new IllegalArgumentException("A array de bytes deve ter pelo menos 16 bytes.");
+        }
+
+        ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
+
+        long mostSignificantBits = byteBuffer.getLong();
+        long leastSignificantBits = byteBuffer.getLong();
+
+        return new UUID(mostSignificantBits, leastSignificantBits);
+    }
+
+    public List<ViajeModel> findViajesBeteween(UUID codigoTrayecto, LocalDateTime salida, LocalDateTime destino) {
+        return viajeRepository.cargarViajesConIntervalosComunes(codigoTrayecto, salida, destino);
+    }
+}
+/*public ViajeDTOResponse update(ViajeDTOUpdate novosDados, Integer id) {
         var model = this.findById(id);
 
         if (novosDados.salida() != null) {
@@ -248,35 +267,31 @@ public class ViajeService {
         var destinoResponse = new ParadaDTO(updated.getDestino(), updated.getDestino().getLugar().getId(), trayecto);
 
         return new ViajeDTOResponse(updated, null, trayecto, salidaResponse, destinoResponse);
-    }
+    }*/
+/*
+//Restos
+//Save
+        if (dto.salida().equals(dto.destino())) {
+            throw new ValidationException(new FieldMessage("destino", "El destino no puede ser el mismo que la salida"));
+        }
+        var salida = trayecto.getParadaById(dto.salida());
 
-    @Transactional
-    public void delete(ViajeModel model) {
-        viajeRepository.delete(model);
-    }
-
-    public ParadaDTOList convertToParadaDTOList(ParadaModel model) {
-        return new ParadaDTOList(
-                model,
-                model.getLugar().getNombre(),
-                model.getLugar().getCiudad().getNombre(),
-                model.getLugar().getCiudad().getDepartamento().getNombre());
-    }
-
-    private UUID convertBytesToUUID(byte[] bytes) {
-        if (bytes.length < 16) {
-            throw new IllegalArgumentException("A array de bytes deve ter pelo menos 16 bytes.");
+        if (salida == null) {
+            throw new ValidationException(new FieldMessage("salida", "La salida no pertenece al trayecto"));
         }
 
-        ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
+        var destino = trayecto.getParadaById(dto.destino());
 
-        long mostSignificantBits = byteBuffer.getLong();
-        long leastSignificantBits = byteBuffer.getLong();
+        if (destino == null) {
+            throw new ValidationException(new FieldMessage("destino", "El destino no pertenece al trayecto"));
+        }
 
-        return new UUID(mostSignificantBits, leastSignificantBits);
-    }
 
-    public List<ViajeModel> findViajesBeteween(UUID codigoTrayecto, LocalDateTime salida, LocalDateTime destino) {
-        return viajeRepository.cargarViajesConIntervalosComunes(codigoTrayecto, salida, destino);
-    }
-}
+ //
+
+        Como solo se podra registrar un viaje, no es necessario ver si hay viajes iguales
+        Integer viajesIguais = viajeRepository.getViajesIguais(trayecto.getCodigo(), salida.getId(), destino.getId());
+        if (viajesIguais > 0) {
+            throw new ValidationException(new FieldMessage("id", "El viaje ya se encuentra registrado"));
+        }
+ */

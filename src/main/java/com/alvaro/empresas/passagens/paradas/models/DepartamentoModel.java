@@ -32,4 +32,8 @@ public class DepartamentoModel {
     public DepartamentoModel(DepartamentoDTO dto) {
         nombre = dto.nombre();
     }
+
+    public DepartamentoModel(String nombre) {
+        this.nombre = nombre;
+    }
 }

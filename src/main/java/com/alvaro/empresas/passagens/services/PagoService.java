@@ -28,8 +28,8 @@ public class PagoService {
     private PrecioService precioService;
 
     public PagoModel save(PasajesDTO dto, Float precio, MetodoPagamentoEnum metodo, boolean guardarContacto) {
-        Float precioTotal = dto.pasajes().size() * precio;
         PagoModel pago = new PagoModel();
+        Float precioTotal = dto.pasajes().size() * precio;
         pago.setValorTotal(precioTotal);
 
         //pago.setDescuento(dto.descuento());
@@ -71,12 +71,12 @@ public class PagoService {
             if (pasaje.getEstaPagado()) {
                 rembolso();
                 mandarEmail("Una delas sillas ya fue pagado, el pago fue cancelado");
-                pagoRepository.delete(pago);
                 return;
             }
             nPasajes++;
         }
-        PrecioModel precio = pago.getPasajes().getFirst().getPrecio();
+
+        PrecioModel precio = pago.getPasajes().get(0).getPrecio();
 
         int nSillasDisponibles = precio.getNSillasDisponibles() - nPasajes;
         if (nSillasDisponibles == 0) {
@@ -86,7 +86,6 @@ public class PagoService {
             precio.setNSillasDisponibles(nSillasDisponibles);
         } else {
             mandarEmail("No hay sillas disponibles");
-            pagoRepository.delete(pago);//Eliminacao do Pago
             return;
         }
 
@@ -95,6 +94,7 @@ public class PagoService {
         for (PasajeModel pasaje : pago.getPasajes()) {
             pasajeRepository.updateValuePagado(pasaje.getId(), true);
         }
+
         pago.setEstaPagado(true);
         pago.setFechaPago(LocalDateTime.now());
         pagoRepository.save(pago);
