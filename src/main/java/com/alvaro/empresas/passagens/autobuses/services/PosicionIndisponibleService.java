@@ -1,6 +1,5 @@
 package com.alvaro.empresas.passagens.autobuses.services;
 
-import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PosicionIndisponibleDTO;
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import com.alvaro.empresas.passagens.autobuses.models.PosicionIndisponibleModel;
 import com.alvaro.empresas.passagens.autobuses.repositories.PosicionIndisponibleRepository;
@@ -15,21 +14,16 @@ public class PosicionIndisponibleService {
     @Autowired
     private PosicionIndisponibleRepository posicionRepository;
 
-    public List<PosicionIndisponibleDTO> saveAll(List<Integer> dtos, PisoModel piso) {
-        List<PosicionIndisponibleModel> models = new ArrayList<>();
+    public List<Integer> saveAll(List<Integer> dtos, PisoModel piso) {
+        List<Integer> sillas = new ArrayList<>();
         dtos.forEach(numero -> {
             var model = new PosicionIndisponibleModel(numero);
             model.setPiso(piso);
-            models.add(posicionRepository.save(model));
+            var modelSaved = posicionRepository.save(model);
+            sillas.add(modelSaved.getNumero());
         });
 
-        //Converte em DTO os asientos salvos
-        List<PosicionIndisponibleDTO> bloqueadoDTOS = new ArrayList<>();
-        for (PosicionIndisponibleModel model : models) {
-            bloqueadoDTOS.add(new PosicionIndisponibleDTO(model));
-        }
-
-        return bloqueadoDTOS;
+        return sillas;
     }
 
     public void deleteAll(List<PosicionIndisponibleModel> list) {

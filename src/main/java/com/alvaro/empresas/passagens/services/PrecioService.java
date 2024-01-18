@@ -1,9 +1,14 @@
 package com.alvaro.empresas.passagens.services;
 
-import com.alvaro.empresas.passagens.dtos.PrecioDTO;
-import com.alvaro.empresas.passagens.dtos.PrecioDTOUpdate;
+import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTOResponse;
+import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
+import com.alvaro.empresas.passagens.autobuses.models.PosicionIndisponibleModel;
+import com.alvaro.empresas.passagens.dtos.precios.PrecioDTO;
+import com.alvaro.empresas.passagens.dtos.precios.PrecioDTOResponseViaje;
+import com.alvaro.empresas.passagens.dtos.precios.PrecioDTOUpdate;
 import com.alvaro.empresas.passagens.models.PrecioModel;
 import com.alvaro.empresas.passagens.models.ViajeModel;
+import com.alvaro.empresas.passagens.repositories.PasajeRepository;
 import com.alvaro.empresas.passagens.repositories.PrecioRepository;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +22,8 @@ import java.util.UUID;
 public class PrecioService {
     @Autowired
     private PrecioRepository precioRepository;
+    @Autowired
+    private PasajeRepository pasajeRepository;
 
     public PrecioModel findById(UUID id) {
         var model = precioRepository.findById(id);
@@ -36,6 +43,27 @@ public class PrecioService {
     public PrecioDTO getOne(UUID id) {
         var model = findById(id);
         return new PrecioDTO(model, model.getViaje().getId());
+    }
+
+    public PrecioDTOResponseViaje vender(UUID id) {
+        var model = findById(id);
+        List<PisoModel> pisos = model.getViaje().getTrayecto().getAutobus().getPisos();
+        var pisoElegido = new PisoModel();
+        for (PisoModel piso : pisos) {
+            if (piso.getNPiso() == model.getNPiso()) {
+                pisoElegido = piso;
+            }
+        }
+
+        List<Integer> bloqueados = new ArrayList<>();
+        for (PosicionIndisponibleModel posicionesIndisponible : pisoElegido.getPosicionesIndisponibles()) {
+            bloqueados.add(posicionesIndisponible.getNumero());
+        }
+
+        PisoDTOResponse pisoDto = new PisoDTOResponse(pisoElegido, model.getViaje().getTrayecto().getAutobus().getId(), bloqueados);
+
+        List<Integer> ocupados = pasajeRepository.getPasajesVendidos(model.getId());
+        return new PrecioDTOResponseViaje(model, pisoDto, ocupados);
     }
 
     public PrecioDTO update(PrecioDTOUpdate dto, UUID id) {

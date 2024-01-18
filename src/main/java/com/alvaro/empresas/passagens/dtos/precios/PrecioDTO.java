@@ -1,4 +1,4 @@
-package com.alvaro.empresas.passagens.dtos;
+package com.alvaro.empresas.passagens.dtos.precios;
 
 import com.alvaro.empresas.passagens.models.PrecioModel;
 import jakarta.validation.constraints.NotNull;

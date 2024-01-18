@@ -8,6 +8,7 @@ import com.alvaro.empresas.passagens.models.ContactoModel;
 import com.alvaro.empresas.passagens.models.PagoModel;
 import com.alvaro.empresas.passagens.models.PasajeModel;
 import com.alvaro.empresas.passagens.models.PrecioModel;
+import com.alvaro.empresas.passagens.repositories.ContactoRepository;
 import com.alvaro.empresas.passagens.repositories.PagoRepository;
 import com.alvaro.empresas.passagens.repositories.PasajeRepository;
 import org.hibernate.ObjectNotFoundException;
@@ -26,6 +27,8 @@ public class PagoService {
     private PasajeRepository pasajeRepository;
     @Autowired
     private PrecioService precioService;
+    @Autowired
+    private ContactoRepository contactoRepository;
 
     public PagoModel save(PasajesDTO dto, Float precio, MetodoPagamentoEnum metodo, boolean guardarContacto) {
         PagoModel pago = new PagoModel();
@@ -47,14 +50,15 @@ public class PagoService {
             throw new ValidationException(new FieldMessage("metodo", "Metodo de Pago invalido"));
         }
 
+        pago.setMetodoPago(metodo);
+        var pagoModel = pagoRepository.save(pago);
         if (guardarContacto) {
             ContactoModel contactoModel = new ContactoModel(dto.contacto().email(), dto.contacto().telefono());
-            pago.setContacto(contactoModel);
+            contactoModel.setPago(pagoModel);
+            contactoRepository.save(contactoModel);
         }
 
-        pago.setMetodoPago(metodo);
-
-        return pagoRepository.save(pago);
+        return pagoModel;
     }
 
     //En desarrollo

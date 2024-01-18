@@ -1,7 +1,8 @@
 package com.alvaro.empresas.passagens.resources;
 
-import com.alvaro.empresas.passagens.dtos.PrecioDTO;
-import com.alvaro.empresas.passagens.dtos.PrecioDTOUpdate;
+import com.alvaro.empresas.passagens.dtos.precios.PrecioDTO;
+import com.alvaro.empresas.passagens.dtos.precios.PrecioDTOResponseViaje;
+import com.alvaro.empresas.passagens.dtos.precios.PrecioDTOUpdate;
 import com.alvaro.empresas.passagens.services.PrecioService;
 import com.alvaro.empresas.passagens.services.ViajeService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -24,6 +25,11 @@ public class PrecioResource {
     @GetMapping("/{id}")
     public ResponseEntity<PrecioDTO> getOne(@PathVariable(value = "id") UUID id) {
         return ResponseEntity.ok(precioService.getOne(id));
+    }
+
+    @GetMapping("/{id}/vender")
+    public ResponseEntity<PrecioDTOResponseViaje> vender(@PathVariable(value = "id") UUID id) {
+        return ResponseEntity.ok().body(precioService.vender(id));
     }
 
     @PutMapping("/{id}")

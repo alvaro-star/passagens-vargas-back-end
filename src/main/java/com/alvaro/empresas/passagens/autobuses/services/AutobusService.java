@@ -6,7 +6,6 @@ import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTOResponse
 import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTOUpdate;
 import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTO;
 import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTOResponse;
-import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PosicionIndisponibleDTO;
 import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import com.alvaro.empresas.passagens.autobuses.models.PosicionIndisponibleModel;
@@ -65,9 +64,9 @@ public class AutobusService {
         }
 
         for (PisoModel piso : model.getPisos()) {
-            List<PosicionIndisponibleDTO> bloqueadosDto = new ArrayList<>();
+            List<Integer> bloqueadosDto = new ArrayList<>();
             for (PosicionIndisponibleModel bloqueado : piso.getPosicionesIndisponibles()) {
-                bloqueadosDto.add(new PosicionIndisponibleDTO(bloqueado));
+                bloqueadosDto.add(bloqueado.getNumero());
             }
             pisosDto.add(new PisoDTOResponse(piso, model.getId(), bloqueadosDto));
         }

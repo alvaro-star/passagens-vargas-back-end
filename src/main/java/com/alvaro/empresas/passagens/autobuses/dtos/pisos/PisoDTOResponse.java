@@ -2,6 +2,7 @@ package com.alvaro.empresas.passagens.autobuses.dtos.pisos;
 
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public record PisoDTOResponse(
@@ -14,9 +15,9 @@ public record PisoDTOResponse(
         Integer nSillas,
         Integer primeraSilla,
         Integer idAutobus,
-        List<PosicionIndisponibleDTO> posicoesIndisponiveis
+        List<Integer> posicoesIndisponiveis
 ) {
-    public PisoDTOResponse(PisoModel model, Integer idAutobus, List<PosicionIndisponibleDTO> posicoesIndisponiveis) {
+    public PisoDTOResponse(PisoModel model, Integer idAutobus, List<Integer> posicoesIndisponiveis) {
         this(
                 model.getId(),
                 model.getNLinhas(),

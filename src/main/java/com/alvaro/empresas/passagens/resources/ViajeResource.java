@@ -32,7 +32,7 @@ public class ViajeResource {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ViajeDTOResponse> getOne(@PathVariable(value = "id") Integer id) {
+    public ResponseEntity<ViajeDTOListBusqueda> getOne(@PathVariable(value = "id") Integer id) {
         return ResponseEntity.ok(viajeService.getOne(id));
     }
 

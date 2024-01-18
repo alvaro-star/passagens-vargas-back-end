@@ -3,7 +3,7 @@ package com.alvaro.empresas.passagens.services;
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import com.alvaro.empresas.passagens.configurations.exceptions.FieldMessage;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
-import com.alvaro.empresas.passagens.dtos.PrecioDTO;
+import com.alvaro.empresas.passagens.dtos.precios.PrecioDTO;
 import com.alvaro.empresas.passagens.dtos.viajes.Busca.ParadaDTOList;
 import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOListBusqueda;
 import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacao;
@@ -119,21 +119,21 @@ public class ViajeService {
         return viajesSelecionados;
     }
 
-    public ViajeDTOResponse getOne(Integer id) {
+    public ViajeDTOListBusqueda getOne(Integer id) {
         var model = this.findById(id);
         UUID codigoTrayecto = model.getTrayecto().getCodigo();
-        var salida = model.getSalida();
-        var destino = model.getDestino();
 
-        var salidaResponse = new ParadaDTO(salida, salida.getLugar().getId(), codigoTrayecto);
-        var destinoResponse = new ParadaDTO(destino, destino.getLugar().getId(), codigoTrayecto);
+        var salida = convertToParadaDTOList(model.getSalida());
+        var destino = convertToParadaDTOList(model.getDestino());
 
         List<PrecioDTO> precios = new ArrayList<>();
         for (PrecioModel precioModel : model.getPrecios()) {
             precios.add(new PrecioDTO(precioModel, model.getId()));
         }
 
-        return new ViajeDTOResponse(model, precios, codigoTrayecto, salidaResponse, destinoResponse);
+        String logo = viajeRepository.getLogoEmpresaFromTrayecto(codigoTrayecto);
+
+        return new ViajeDTOListBusqueda(model, logo, salida, destino, precios);
     }
 
     @Transactional

@@ -3,6 +3,7 @@ package com.alvaro.empresas.passagens.dtos.pasajes;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Size;
 
 import java.util.Date;
 
@@ -12,6 +13,7 @@ public record PasajeDTO(
         @NotBlank
         String carnet,
         @NotBlank
+        @Size(max = 50)
         String nombre,
         @Past
         Date nascimento,

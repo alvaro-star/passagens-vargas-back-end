@@ -34,10 +34,10 @@ public class PisoService {
 
     public PisoDTOResponse getOne(Integer id) {
         var model = this.findById(id);
-        List<PosicionIndisponibleDTO> posicionesBloqueadas = new ArrayList<>();
+        List<Integer> posicionesBloqueadas = new ArrayList<>();
 
         for (PosicionIndisponibleModel posicionIndisponibleModel : model.getPosicionesIndisponibles()) {
-            posicionesBloqueadas.add(new PosicionIndisponibleDTO(posicionIndisponibleModel));
+            posicionesBloqueadas.add(posicionIndisponibleModel.getNumero());
         }
 
         int idAutobus = model.getAutobus().getId();
@@ -48,9 +48,9 @@ public class PisoService {
     public Page<PisoDTOResponse> findAll(Pageable pageable) {
         Page<PisoModel> pisos = pisoRepository.findAll(pageable);
         return pisos.map(piso -> {
-            List<PosicionIndisponibleDTO> posicionesIndisponibles = new ArrayList<>();
+            List<Integer> posicionesIndisponibles = new ArrayList<>();
             for (PosicionIndisponibleModel posicionesIndisponible : piso.getPosicionesIndisponibles()) {
-                posicionesIndisponibles.add(new PosicionIndisponibleDTO(posicionesIndisponible));
+                posicionesIndisponibles.add(posicionesIndisponible.getNumero());
             }
             return new PisoDTOResponse(piso, piso.getAutobus().getId(), posicionesIndisponibles);
         });
@@ -70,9 +70,7 @@ public class PisoService {
         pisoModel.setAutobus(autobusModel);
         var saved = pisoRepository.save(pisoModel);
 
-        List<PosicionIndisponibleDTO> bloqueadoDTOS = posicionService.saveAll(dto.getPosicoesIndisponiveis(), saved);
-
-        //List<AsientoBloqueadoDTO> bloqueadoDTOS = asientoBloqueadosService.convertModelsToDtos(saved.getPosicionesIndisponibles());
+        List<Integer> bloqueadoDTOS = posicionService.saveAll(dto.getPosicoesIndisponiveis(), saved);
         return new PisoDTOResponse(saved, autobusModel.getId(), bloqueadoDTOS);
     }
 
@@ -105,8 +103,7 @@ public class PisoService {
         model.setPosicionesIndisponibles(new ArrayList<PosicionIndisponibleModel>());
 
         var modelUpdate = pisoRepository.save(model);
-        List<PosicionIndisponibleDTO> bloqueadoDTOS = posicionService.saveAll(dto.getPosicoesIndisponiveis(), modelUpdate);
-
+        List<Integer> bloqueadoDTOS = posicionService.saveAll(dto.getPosicoesIndisponiveis(), modelUpdate);
         return new PisoDTOResponse(modelUpdate, modelUpdate.getAutobus().getId(), bloqueadoDTOS);
     }
 }

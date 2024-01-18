@@ -1,10 +1,9 @@
 package com.alvaro.empresas.passagens.models;
 
-import com.alvaro.empresas.passagens.dtos.PrecioDTO;
-import com.alvaro.empresas.passagens.dtos.PrecioDTOUpdate;
+import com.alvaro.empresas.passagens.dtos.precios.PrecioDTO;
+import com.alvaro.empresas.passagens.dtos.precios.PrecioDTOUpdate;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
