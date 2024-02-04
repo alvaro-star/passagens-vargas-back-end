@@ -4,7 +4,7 @@ import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import com.alvaro.empresas.passagens.configurations.exceptions.FieldMessage;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
 import com.alvaro.empresas.passagens.dtos.precios.PrecioDTO;
-import com.alvaro.empresas.passagens.dtos.viajes.Busca.ParadaDTOList;
+import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOList;
 import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOListBusqueda;
 import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacao;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTO;

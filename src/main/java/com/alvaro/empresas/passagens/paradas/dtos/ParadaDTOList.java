@@ -1,4 +1,4 @@
-package com.alvaro.empresas.passagens.dtos.viajes.Busca;
+package com.alvaro.empresas.passagens.paradas.dtos;
 
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 
