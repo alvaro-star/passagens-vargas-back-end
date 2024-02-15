@@ -76,7 +76,7 @@ public class DadosResource {
         List<String> nombresDepartamentos = Arrays.asList("Santa Cruz", "La Paz", "Cochabamba", "Oruro", "Potosí", "Tarija", "Chuquisaca", "Pando", "Beni");
 
         for (String nombreDepartamento : nombresDepartamentos) {
-            var depModel = departamentoRepository.save(new DepartamentoModel(nombreDepartamento));
+            var depModel = departamentoRepository.save(new DepartamentoModel(nombreDepartamento, "SC"));
             var ciudadu = ciudadRepository.save(new CiudadModel(nombreDepartamento, depModel));
             lugarRepository.save(new LugarModel("Terminal " + nombreDepartamento, ciudadu));
         }

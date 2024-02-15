@@ -4,7 +4,6 @@ import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import com.alvaro.empresas.passagens.configurations.exceptions.FieldMessage;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
 import com.alvaro.empresas.passagens.dtos.precios.PrecioDTO;
-import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOList;
 import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOListBusqueda;
 import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacao;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTO;
@@ -13,6 +12,7 @@ import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOResponse;
 import com.alvaro.empresas.passagens.models.PrecioModel;
 import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTO;
+import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOList;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.alvaro.empresas.passagens.paradas.repositories.ParadaRepository;
 import com.alvaro.empresas.passagens.repositories.ViajeRepository;
@@ -57,7 +57,7 @@ public class ViajeService {
         });
     }
 
-    public List<ViajeDTOListBusqueda> getViajesFromDiaQuePassaPorDoisPontos(ViajeDTOSolicitacao dto) {
+    public List<ViajeDTOListBusqueda> getViajesFromDia(ViajeDTOSolicitacao dto) {
         if (dto.idLugarDestino().equals(dto.idLugarSalida())) {
             throw new ValidationException(new FieldMessage("idDestino", "El destino no puede ser el mismo que la salida"));
         }
@@ -140,20 +140,18 @@ public class ViajeService {
     public ViajeDTOResponse save(ViajeDTO dto) {
         var trayecto = trayectoService.findById(dto.idTrayecto());
 
-        if (!trayecto.getViajes().isEmpty()) {
+        if (!trayecto.getViajes().isEmpty())
             throw new ValidationException(new FieldMessage("id", "El trayecto ya posee un viaje"));
-        }
 
         //En este punto queda claro que hay minimo dos paradas
-        if (trayecto.getParadas().size() < 2) {
+        if (trayecto.getParadas().size() < 2)
             throw new ValidationException(new FieldMessage("paradas", "El trayecto no posee suficientes paradas"));
-        }
+
         var salida = trayecto.getMenorParada();
         var destino = trayecto.getMaiorParada();
 
-        if (!destino.getDataHora().isAfter(salida.getDataHora())) {
+        if (!destino.getDataHora().isAfter(salida.getDataHora()))
             throw new ValidationException(new FieldMessage("salida", "La salida posee un horario superior al del destino"));
-        }
 
         var model = new ViajeModel();
         model.setTrayecto(trayecto);
@@ -167,11 +165,12 @@ public class ViajeService {
 
         List<PrecioModel> precios = new ArrayList<>();
 
+        //So podem existir dois pisos
         switch (pisos.size()) {
-            case 1:
+            case 1 -> {
                 precios.add(new PrecioModel(dto.precioPiso1(), 1, pisos.get(0).getNSillas()));
-                break;
-            case 2://So podem existir dois pisos
+            }
+            case 2 -> {
                 if (pisos.get(0).getNPiso() == 1) {
                     precios.add(new PrecioModel(dto.precioPiso1(), 1, pisos.get(0).getNSillas()));
                     if (dto.precioPiso2() == null) {
@@ -187,8 +186,7 @@ public class ViajeService {
                         precios.add(new PrecioModel(dto.precioPiso2(), 2, pisos.get(0).getNSillas()));
                     }
                 }
-
-                break;
+            }
         }
         //Guardando los precios
         List<PrecioDTO> preciosSalvos = precioService.saveAll(precios, saved);

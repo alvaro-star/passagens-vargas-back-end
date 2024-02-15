@@ -33,7 +33,7 @@ public class DepartamentoService {
 
     public DepartamentoModel update(DepartamentoDTO dto, Integer id) {
         DepartamentoModel model = this.findById(id);
-        model.setNombre(dto.nombre());
+        model.updateValues(dto);
         return departamentoRepository.save(model);
     }
 

@@ -38,6 +38,7 @@ public class PasajeService {
         return model.orElseThrow(() -> new ObjectNotFoundException(id, PasajeModel.class.getName()));
     }
 
+    //En desarrollo
     public void getOne(UUID id) {
         var model = findById(id);
     }
@@ -49,8 +50,9 @@ public class PasajeService {
         var trayecto = precio.getViaje().getTrayecto();
         ParadaModel salida;
         ParadaModel destino;
+        List<Integer> ocupados = pasajeRepository.getPasajesVendidos(precio.getId());
 
-        validarSilla(trayecto, precio, dto.pasajes());
+        validarSilla(trayecto, precio, dto.pasajes(), ocupados);
 
         salida = trayecto.getParadaByLugarId(dto.idLugarSalida());
 
@@ -103,7 +105,7 @@ public class PasajeService {
         return pago;
     }
 
-    public void validarSilla(TrayectoModel trayecto, PrecioModel precio, List<PasajeDTO> pasajesDTO) {
+    public void validarSilla(TrayectoModel trayecto, PrecioModel precio, List<PasajeDTO> pasajesDTO, List<Integer> ocupados) {
         PisoModel piso = trayecto.getAutobus().getPisoByNumero(precio.getNPiso());
         if (piso == null) {
             throw new ValidationException(new FieldMessage("piso", "El piso informado no existe"));
@@ -114,11 +116,12 @@ public class PasajeService {
             throw new ValidationException(new FieldMessage("pasajes", "No hay tantas sillas disponibles"));
 
         for (PasajeDTO pasajeDTO : pasajesDTO) {
-            for (PasajeModel pasajeModel : precio.getPasajes()) {
-                if (pasajeModel.getNSilla().equals(pasajeDTO.nSilla())) {//Erro
+            for (Integer ocupado : ocupados) {
+                if (ocupado.equals(pasajeDTO.nSilla())) {//Erro
                     throw new ValidationException("El viaje ya posse un pasaje registrado");
                 }
             }
+
             if (pasajeDTO.nSilla() < numeroMinimo && pasajeDTO.nSilla() > numeroMaximo) {
                 throw new ValidationException(new FieldMessage("nSilla", "El numero de Silla informado es invalido"));
             }

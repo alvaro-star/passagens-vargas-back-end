@@ -25,15 +25,25 @@ public class DepartamentoModel {
     @NotBlank
     @Column(unique = true)
     private String nombre;
+    @NotBlank
+    @Column(length = 4)
+    private String abreviacion;
 
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "departamento")
     private List<CiudadModel> ciudades = new ArrayList<>();
 
     public DepartamentoModel(DepartamentoDTO dto) {
         nombre = dto.nombre();
+        abreviacion = dto.abreviacion();
     }
 
-    public DepartamentoModel(String nombre) {
+    public DepartamentoModel(String nombre, String abreviacion) {
         this.nombre = nombre;
+        this.abreviacion = abreviacion;
+    }
+
+    public void updateValues(DepartamentoDTO dto) {
+        nombre = dto.nombre();
+        abreviacion = dto.abreviacion();
     }
 }

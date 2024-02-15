@@ -38,7 +38,7 @@ public class ViajeResource {
 
     @PostMapping
     public ResponseEntity<List<ViajeDTOListBusqueda>> getViajeFromDia(@RequestBody @Valid ViajeDTOSolicitacao dto, @PageableDefault(size = 30) Pageable pageable) {
-        List<ViajeDTOListBusqueda> viajes = viajeService.getViajesFromDiaQuePassaPorDoisPontos(dto);
+        List<ViajeDTOListBusqueda> viajes = viajeService.getViajesFromDia(dto);
         return ResponseEntity.ok(viajes);
     }
 
