@@ -34,8 +34,6 @@ public class SecurityFilter extends OncePerRequestFilter {
             if (user != null) {
                 var authenticate = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(authenticate);
-            } else {
-                System.out.println("Sem Usuario logado");
             }
         } catch (Exception e) {
             logger.error(e.getMessage());

@@ -41,7 +41,7 @@ public class TokenService {
                     .verify(token)
                     .getSubject();
         } catch (JWTVerificationException exception) {
-            System.out.println("O token falhou");
+            //System.out.println("O token falhou");
             return "";
         }
     }

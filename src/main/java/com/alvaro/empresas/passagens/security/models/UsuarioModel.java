@@ -25,9 +25,9 @@ public class UsuarioModel implements UserDetails {
     @Column(name = "email", nullable = false)
     private String login;
     @Column(nullable = false)
-    private String telefono;
-    @Column(nullable = false)
     private String nombre;
+    @Column(nullable = false)
+    private String telefono;
     @Column(nullable = false)
     private String contrasena;
 
@@ -48,6 +48,14 @@ public class UsuarioModel implements UserDetails {
         this.nombre = nombre;
         this.contrasena = contrasena;
         this.telefono = telefono;
+    }
+
+    public UsuarioModel(String login, String nombre, String telefono, String contrasena, UUID idEmpresa) {
+        this.login = login;
+        this.nombre = nombre;
+        this.telefono = telefono;
+        this.contrasena = contrasena;
+        this.idEmpresa = idEmpresa;
     }
 
     @Override

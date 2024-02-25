@@ -37,7 +37,7 @@ public class PrecioModel {
     private ViajeModel viaje;
 
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "precio")
-    private List<PasajeModel> pasajes = new ArrayList<PasajeModel>();
+    private List<PasajeModel> pasajes = new ArrayList<>();
 
     public PrecioModel(PrecioDTO dto) {
         precio = dto.precio();
@@ -48,6 +48,13 @@ public class PrecioModel {
         this.precio = precio;
         this.nPiso = nPiso;
         this.nSillasDisponibles = nSillasDisponibles;
+    }
+
+    public PrecioModel(Float precio, Integer nPiso, Integer nSillasDisponibles, ViajeModel viaje) {
+        this.precio = precio;
+        this.nPiso = nPiso;
+        this.nSillasDisponibles = nSillasDisponibles;
+        this.viaje = viaje;
     }
 
     public void updateValues(PrecioDTOUpdate dto) {

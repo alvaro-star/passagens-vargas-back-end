@@ -38,5 +38,11 @@ public class ViajeModel {
     private TrayectoModel trayecto;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "viaje")
-    private List<PrecioModel> precios = new ArrayList<PrecioModel>();
+    private List<PrecioModel> precios = new ArrayList<>();
+
+    public ViajeModel(ParadaModel salida, ParadaModel destino, TrayectoModel trayecto) {
+        this.salida = salida;
+        this.destino = destino;
+        this.trayecto = trayecto;
+    }
 }

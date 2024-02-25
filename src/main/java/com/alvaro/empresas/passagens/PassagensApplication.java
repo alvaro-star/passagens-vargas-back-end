@@ -14,30 +14,7 @@ public class PassagensApplication {
 
     @GetMapping("/")
     public String teste() {
-        return "Chuchu";
-    }
-
-    @GetMapping("/jose")
-    public String jose(){
-        return "El chuchu";
-    }
-
-    @GetMapping("/alvaro")
-    public String alvaro(){
-        return "El Barry";
-    }
-    @GetMapping("/carla")
-    public String carla(){
-        return "El pepe";
-    }
-
-    @GetMapping("/oscar")
-    public String oscar(){
-        return "El Bob";
-    }
-    @GetMapping("/neroly")
-    public String nolas(){
-        return "La nolas";
+        return "Bem vindo à API";
     }
 
 }

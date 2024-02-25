@@ -11,13 +11,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController
-@RequestMapping("/roles")
 public class RoleResource {
     @Autowired
     private RoleService roleService;
 
-    @GetMapping("/load")
     public ResponseEntity<Object> loadRoles() {
         var admin = new RoleModel(RoleList.ROLE_ADMIN);
         roleService.save(admin);
