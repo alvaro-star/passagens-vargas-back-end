@@ -39,6 +39,7 @@ public interface ViajeRepository extends JpaRepository<ViajeModel, Integer> {
                                        @Param("fechaHoraPartida") LocalDateTime fechaHoraSalida,
                                        @Param("fechaPartida") LocalDateTime fechaPartida);
 
+    //Dado a alguns viajes,
     @Query(value = "SELECT v.* FROM tb_viaje as v, tb_parada as s, tb_parada as d " +
             "WHERE v.fk_idtb_trayecto = :codigo " +
             "AND v.id_salida = s.idtb_parada " +

@@ -6,6 +6,7 @@ import lombok.Setter;
 
 public record AutobusDTOUpdate(
         @NotBlank
-        String placa
+        String placa,
+        Boolean enable
 ) {
 }

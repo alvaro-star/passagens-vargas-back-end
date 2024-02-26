@@ -114,11 +114,9 @@ public class PagoService {
     }
 
     public void generarQr(Float valor) {
-
     }
 
     public void rembolso() {
-
     }
 
     public void mandarEmail(String mensaje) {

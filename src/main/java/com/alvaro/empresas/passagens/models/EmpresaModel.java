@@ -4,6 +4,7 @@ import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.dtos.EmpresaDto;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ import java.util.UUID;
 @Table(name = "tb_empresa")
 @Getter
 @Setter
+@NoArgsConstructor
 public class EmpresaModel {
     @Id
     @Column(name = "idtb_empresa")
@@ -25,12 +27,9 @@ public class EmpresaModel {
     private String numeroCuenta;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "empresa")
-    private List<AutobusModel> autobuses = new ArrayList<AutobusModel>();
+    private List<AutobusModel> autobuses = new ArrayList<>();
 
     //Funcionarios
-    public EmpresaModel() {
-    }
-
     public EmpresaModel(EmpresaDto dto) {
         nombre = dto.nombre();
         logo = dto.logo();

@@ -53,7 +53,6 @@ public class UsuarioResource {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new Mensaje("Credenciales Invalidos"));
         }
-
     }
 
     @PostMapping("/register")////Pode haver mais de um administrador
@@ -85,6 +84,7 @@ public class UsuarioResource {
                 }
                 roles.add(roleService.getByRoleName(registerDto.role()));
             }
+
             case ROLE_EMPRESA_ADMIN -> {
                 if (!logado) {
                     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Mensaje("Token Invalido"));
@@ -136,6 +136,7 @@ public class UsuarioResource {
                 roles.add(roleService.getByRoleName(RoleList.ROLE_EMPRESA_ADMIN));
                 newUser.setIdEmpresa(administradorEmpresa.getIdEmpresa());
             }
+
             default -> {
                 return ResponseEntity.unprocessableEntity().body(new FieldMessage("role", "Role invalido"));
             }

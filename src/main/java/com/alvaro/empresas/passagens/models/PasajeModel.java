@@ -30,16 +30,6 @@ public class PasajeModel {
     private Boolean estaPagado = false;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_salida")
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private ParadaModel salida;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_destino")
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private ParadaModel destino;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_trayecto")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private TrayectoModel trayecto;
@@ -57,13 +47,10 @@ public class PasajeModel {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private PagoModel pago;
 
-    public PasajeModel(Integer nSilla, Boolean compradoWeb, Boolean estaPagado,
-                       ParadaModel salida, ParadaModel destino, TrayectoModel trayecto, PrecioModel precio, PagoModel pago) {
+    public PasajeModel(Integer nSilla, Boolean compradoWeb, Boolean estaPagado, TrayectoModel trayecto, PrecioModel precio, PagoModel pago) {
         this.nSilla = nSilla;
         this.compradoWeb = compradoWeb;
         this.estaPagado = estaPagado;
-        this.salida = salida;
-        this.destino = destino;
         this.trayecto = trayecto;
         this.precio = precio;
         this.pago = pago;

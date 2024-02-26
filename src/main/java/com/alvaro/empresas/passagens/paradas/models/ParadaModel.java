@@ -44,10 +44,10 @@ public class ParadaModel {
     private TrayectoModel trayecto;
 
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "salida")
-    private List<ViajeModel> salidas = new ArrayList<ViajeModel>();
+    private List<ViajeModel> salidas = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "destino")
-    private List<ViajeModel> destinos = new ArrayList<ViajeModel>();
+    private List<ViajeModel> destinos = new ArrayList<>();
 
     public ParadaModel(ParadaDTO dto) {
         dataHora = dto.dataHora();

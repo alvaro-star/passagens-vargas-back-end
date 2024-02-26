@@ -7,23 +7,21 @@ import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureDataJpa;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.ActiveProfiles;
-
-import static org.junit.jupiter.api.Assertions.*;
-
 @DataJpaTest
 class ViajeRepositoryTest {
-
     @Autowired
     private ViajeRepository viajeRepository;
     @Autowired
     private EntityManager em;
     @Test
-    @DisplayName("Deveria me listar os trajetos que saem num intervalo...")
-    void getFromTrayecto() {
+    @DisplayName("Deveria mostrar todos los viajes que contengan un intervalo dentro de tiempo dado")
+    /*
+    Sabendo que un trayecto tiene un viaje, mas muchas paradas, si quiero realizar un viaje que pase por dos
+    paradas mas no por la primera ni por la ultima necessáriamente, el viaje deveria contener el itervalo de un trayecto dado
+    * */
+    void getFromTrayectoCenario1() {
+
     }
 
     private void cadastrarEmpresa(String nombre){
@@ -36,5 +34,4 @@ class ViajeRepositoryTest {
     private void cadastrarTrayecto(AutobusModel autobusModel){
         em.persist(new TrayectoModel(autobusModel));
     }
-
 }

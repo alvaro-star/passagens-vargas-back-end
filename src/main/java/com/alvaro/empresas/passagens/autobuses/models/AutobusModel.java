@@ -25,6 +25,7 @@ public class AutobusModel {
     private Integer id;
     @Column(unique = true, nullable = false)
     private String placa;
+    private boolean enable;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_empresa")
@@ -37,25 +38,27 @@ public class AutobusModel {
     }
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "autobus")
-    private List<PisoModel> pisos = new ArrayList<PisoModel>();
+    private List<PisoModel> pisos = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "autobus")
-    private List<TrayectoModel> trayectos = new ArrayList<TrayectoModel>();
+    private List<TrayectoModel> trayectos = new ArrayList<>();
 
     public PisoModel getPisoByNumero(Integer nPiso) {
-        for (PisoModel piso : this.pisos) {
-            if (piso.getNPiso() == nPiso) {
+        for (PisoModel piso : this.pisos)
+            if (piso.getNPiso().equals(nPiso))
                 return piso;
-            }
-        }
         return null;
     }
 
     public AutobusModel(AutobusDTO dto) {
         placa = dto.placa();
+        enable = true;
     }
 
     public void updateValues(AutobusDTOUpdate dto) {
         placa = dto.placa();
+        if (dto.enable() != null){
+            enable = dto.enable();
+        }
     }
 }

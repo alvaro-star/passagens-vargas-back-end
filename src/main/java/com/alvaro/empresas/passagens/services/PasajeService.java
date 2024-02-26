@@ -78,12 +78,10 @@ public class PasajeService {
 
         for (PasajeDTO pasajeDTO : dto.pasajes()) {
             var pasajeModel = new PasajeModel(pasajeDTO.nSilla(), compradoWeb, estaPago,
-                    salida, destino, trayecto, precio, pago);
-
+                    trayecto, precio, pago);
             var pasajeSaved = pasajeRepository.save(pasajeModel);
 
             var pasajero = new PasajeroModel(pasajeDTO);
-
             pasajero.setPasaje(pasajeSaved);
             pasajeroRepository.save(pasajero);
         }
@@ -91,14 +89,15 @@ public class PasajeService {
 
         if (metodo == MetodoPagamentoEnum.EFECTIVO) {
             int nSillasDisponibles = precio.getNSillasDisponibles() - dto.pasajes().size();
-            if (nSillasDisponibles == 0) {
-                precio.setNSillasDisponibles(0);
-                precio.setLleno(true);
-            } else if (nSillasDisponibles > 0) {
-                precio.setNSillasDisponibles(nSillasDisponibles);
-            } else {
+
+            if (nSillasDisponibles < 0)
                 throw new ValidationException(new FieldMessage("pasajes", "No hay sillas disponibles"));
-            }
+
+            precio.setNSillasDisponibles(nSillasDisponibles);
+
+            if (nSillasDisponibles == 0)
+                precio.setLleno(true);
+
             precioService.updateFromService(precio);
         }
 
@@ -107,24 +106,21 @@ public class PasajeService {
 
     public void validarSilla(TrayectoModel trayecto, PrecioModel precio, List<PasajeDTO> pasajesDTO, List<Integer> ocupados) {
         PisoModel piso = trayecto.getAutobus().getPisoByNumero(precio.getNPiso());
-        if (piso == null) {
+        if (piso == null)
             throw new ValidationException(new FieldMessage("piso", "El piso informado no existe"));
-        }
+
         int numeroMinimo = piso.getPrimeraSilla();
         int numeroMaximo = piso.getNSillas() + piso.getPrimeraSilla() - 1;
         if (precio.getNSillasDisponibles() < pasajesDTO.size())
             throw new ValidationException(new FieldMessage("pasajes", "No hay tantas sillas disponibles"));
 
         for (PasajeDTO pasajeDTO : pasajesDTO) {
-            for (Integer ocupado : ocupados) {
-                if (ocupado.equals(pasajeDTO.nSilla())) {//Erro
+            for (Integer ocupado : ocupados)
+                if (ocupado.equals(pasajeDTO.nSilla()))//Erro
                     throw new ValidationException("El viaje ya posse un pasaje registrado");
-                }
-            }
 
-            if (pasajeDTO.nSilla() < numeroMinimo && pasajeDTO.nSilla() > numeroMaximo) {
+            if (pasajeDTO.nSilla() > numeroMaximo || pasajeDTO.nSilla() < numeroMinimo)
                 throw new ValidationException(new FieldMessage("nSilla", "El numero de Silla informado es invalido"));
-            }
         }
     }
 
