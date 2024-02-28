@@ -1,7 +1,6 @@
 package com.alvaro.empresas.passagens.repositories;
 
 import com.alvaro.empresas.passagens.models.ViajeModel;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -39,9 +38,10 @@ public interface ViajeRepository extends JpaRepository<ViajeModel, Integer> {
                                        @Param("fechaHoraPartida") LocalDateTime fechaHoraSalida,
                                        @Param("fechaPartida") LocalDateTime fechaPartida);
 
-    //Dado a alguns viajes,
+    //Dado a alguns viajes, Si se pone el inervalo de tiempo al reves igual te devolvera el mismo registro
     @Query(value = "SELECT v.* FROM tb_viaje as v, tb_parada as s, tb_parada as d " +
             "WHERE v.fk_idtb_trayecto = :codigo " +
+            "AND :startViaje < :endViaje " +
             "AND v.id_salida = s.idtb_parada " +
             "AND :startViaje >= s.data_hora " +
             "AND v.id_destino = d.idtb_parada " +

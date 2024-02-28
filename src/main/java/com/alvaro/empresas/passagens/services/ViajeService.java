@@ -71,12 +71,10 @@ public class ViajeService {
 
         if (hj.toLocalDate().isEqual(dto.fechaSalida())) {
             startDay = hj.plusMinutes(30);
-            if (hj.toLocalTime().isAfter(LocalTime.of(23, 30))) {
+            if (hj.toLocalTime().isAfter(LocalTime.of(23, 30)))
                 return new ArrayList<>();
-            }
-        } else {
+        } else
             startDay = dto.fechaSalida().atTime(LocalTime.MIN);
-        }
 
         codigosBytes = paradaRepository.cargarSalidasDelDia(dto.idLugarSalida(), startDay, endDay);
 
@@ -86,32 +84,27 @@ public class ViajeService {
 
                 List<ParadaModel> nVezesTrayectoPassaSalida = paradaRepository.nVezesTrayectoPassa(dto.idLugarSalida(), codigo);
 
-                if (nVezesTrayectoPassaSalida.size() != 1) {
+                if (nVezesTrayectoPassaSalida.size() != 1)
                     continue;
-                }
 
                 List<ParadaModel> nVezesTrayectoPassaDestino = paradaRepository.nVezesTrayectoPassa(dto.idLugarDestino(), codigo);
-                if (nVezesTrayectoPassaDestino.size() != 1) {
+                if (nVezesTrayectoPassaDestino.size() != 1)
                     continue;
-                }
 
                 String logo = viajeRepository.getLogoEmpresaFromTrayecto(codigo);
 
                 ParadaModel salida = nVezesTrayectoPassaSalida.get(0);
                 ParadaModel destino = nVezesTrayectoPassaDestino.get(0);
-                if (destino.getDataHora().isAfter(salida.getDataHora())) {
-                    List<ViajeModel> viajes = viajeRepository.getFromTrayecto(codigo, salida.getDataHora(), destino.getDataHora());
-                    for (ViajeModel viaje : viajes) {
-                        ParadaDTOList salidaDTO = convertToParadaDTOList(viaje.getSalida());
-                        ParadaDTOList destinoDTO = convertToParadaDTOList(viaje.getDestino());
-                        List<PrecioDTO> precios = new ArrayList<>();
-                        for (PrecioModel precio : viaje.getPrecios()) {
-                            if (!precio.getLleno()) {
-                                precios.add(new PrecioDTO(precio));
-                            }
-                        }
-                        viajesSelecionados.add(new ViajeDTOListBusqueda(viaje, logo, salidaDTO, destinoDTO, precios));
+                List<ViajeModel> viajes = viajeRepository.getFromTrayecto(codigo, salida.getDataHora(), destino.getDataHora());
+                for (ViajeModel viaje : viajes) {
+                    ParadaDTOList salidaDTO = convertToParadaDTOList(viaje.getSalida());
+                    ParadaDTOList destinoDTO = convertToParadaDTOList(viaje.getDestino());
+                    List<PrecioDTO> precios = new ArrayList<>();
+                    for (PrecioModel precio : viaje.getPrecios()) {
+                        if (!precio.getLleno())
+                            precios.add(new PrecioDTO(precio));
                     }
+                    viajesSelecionados.add(new ViajeDTOListBusqueda(viaje, logo, salidaDTO, destinoDTO, precios));
                 }
             }
         }
@@ -167,24 +160,20 @@ public class ViajeService {
 
         //So podem existir dois pisos
         switch (pisos.size()) {
-            case 1 -> {
-                precios.add(new PrecioModel(dto.precioPiso1(), 1, pisos.get(0).getNSillas()));
-            }
+            case 1 -> precios.add(new PrecioModel(dto.precioPiso1(), 1, pisos.get(0).getNSillas()));
             case 2 -> {
                 if (pisos.get(0).getNPiso() == 1) {
                     precios.add(new PrecioModel(dto.precioPiso1(), 1, pisos.get(0).getNSillas()));
-                    if (dto.precioPiso2() == null) {
+                    if (dto.precioPiso2() == null)
                         precios.add(new PrecioModel(dto.precioPiso1(), 2, pisos.get(1).getNSillas()));
-                    } else {
+                    else
                         precios.add(new PrecioModel(dto.precioPiso2(), 2, pisos.get(1).getNSillas()));
-                    }
                 } else {//Numero piso for 2
                     precios.add(new PrecioModel(dto.precioPiso1(), 1, pisos.get(1).getNSillas()));
-                    if (dto.precioPiso2() == null) {
+                    if (dto.precioPiso2() == null)
                         precios.add(new PrecioModel(dto.precioPiso1(), 2, pisos.get(0).getNSillas()));
-                    } else {
+                    else
                         precios.add(new PrecioModel(dto.precioPiso2(), 2, pisos.get(0).getNSillas()));
-                    }
                 }
             }
         }
