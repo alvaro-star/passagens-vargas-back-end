@@ -33,6 +33,11 @@ public class CiudadResource {
         return ResponseEntity.ok().body(ciudadService.getOne(id));
     }
 
+    @GetMapping("/{nombre}/like")
+    public ResponseEntity<Page<CiudadDTO>> getAllLike(@PathVariable(value = "nombre") String nombre, @PageableDefault(size = 8, sort = "nombre") Pageable pageable) {
+        return ResponseEntity.ok().body(ciudadService.findByNombreContaining(nombre, pageable));
+    }
+
     @PostMapping
     public ResponseEntity<CiudadDTO> save(@Valid @RequestBody CiudadDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(ciudadService.save(dto));
@@ -49,6 +54,4 @@ public class CiudadResource {
         ciudadService.delete(model);
         return ResponseEntity.noContent().build();
     }
-
-
 }

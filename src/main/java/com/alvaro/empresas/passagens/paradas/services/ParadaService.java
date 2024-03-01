@@ -102,8 +102,6 @@ public class ParadaService {
     }
 
     public void delete(ParadaModel model) {
-        var viajes = model.getTrayecto().getViajes();
-        if (viajes.isEmpty())
-            paradaRepository.delete(model);
+        paradaRepository.delete(model);
     }
 }

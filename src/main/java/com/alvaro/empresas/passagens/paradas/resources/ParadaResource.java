@@ -44,9 +44,9 @@ public class ParadaResource {
     @DeleteMapping("/{id}")
     public ResponseEntity<Mensaje> delete(@PathVariable Integer id) {
         var model = paradaService.findById(id);
-        if (!model.getSalidas().isEmpty() || !model.getDestinos().isEmpty()) {
-            return ResponseEntity.badRequest().body(new Mensaje("La entidad esta associoado a un pasaje"));
-        }
+        var viajes = model.getTrayecto().getViajes();
+        if (!viajes.isEmpty())
+            return ResponseEntity.badRequest().body(new Mensaje("La parada no puede ser eliminada pues el trayecto ya posse un viaje regsitrado"));
 
         paradaService.delete(model);
         return ResponseEntity.noContent().build();

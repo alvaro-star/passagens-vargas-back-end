@@ -22,6 +22,11 @@ public class CiudadService {
         return models.map(model -> new CiudadDTO(model, model.getDepartamento().getId()));
     }
 
+    public Page<CiudadDTO> findByNombreContaining(String nombre, Pageable pageable) {
+        Page<CiudadModel> models = ciudadRepository.findByNombreContaining(nombre, pageable);
+        return models.map(model -> new CiudadDTO(model, model.getDepartamento().getId()));
+    }
+
     public CiudadModel findById(Integer id) {
         return ciudadRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException(id, CiudadModel.class.getName()));
     }
@@ -35,7 +40,6 @@ public class CiudadService {
         var departamento = departamentoService.findById(dto.idDepartamento());
         CiudadModel model = new CiudadModel(dto);
         model.setDepartamento(departamento);
-
         var saved = ciudadRepository.save(model);
         return new CiudadDTO(saved, departamento.getId());
     }
