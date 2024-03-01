@@ -25,6 +25,8 @@ public class LugarModel {
     private int id;
     @NotBlank
     private String nombre;
+    @Column(nullable = false)
+    private Boolean enable = true;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_ciudad")
@@ -32,7 +34,7 @@ public class LugarModel {
     private CiudadModel ciudad;
 
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "lugar")
-    private List<ParadaModel> paradas = new ArrayList<ParadaModel>();
+    private List<ParadaModel> paradas = new ArrayList<>();
 
     public LugarModel(LugarDTO dto) {
         nombre = dto.nombre();

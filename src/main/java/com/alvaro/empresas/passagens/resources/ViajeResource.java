@@ -35,6 +35,7 @@ public class ViajeResource {
     public ResponseEntity<ViajeDTOListBusqueda> getOne(@PathVariable(value = "id") Integer id) {
         return ResponseEntity.ok(viajeService.getOne(id));
     }
+
     //, @PageableDefault(size = 30) Pageable pageable
     @PostMapping
     public ResponseEntity<List<ViajeDTOListBusqueda>> getViajeFromDia(@RequestBody @Valid ViajeDTOSolicitacao dto) {

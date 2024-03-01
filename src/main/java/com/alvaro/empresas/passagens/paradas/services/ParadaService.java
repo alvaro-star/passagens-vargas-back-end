@@ -49,20 +49,20 @@ public class ParadaService {
 
     public ParadaDTO save(ParadaDTO dtoSended) {
         LugarModel lugar = lugarService.findById(dtoSended.idLugar());
+        if (!lugar.getEnable())
+            throw new ValidationException("idLugar", "El lugar no esta disponible");
+
         TrayectoModel trayecto = trayectoService.findById(dtoSended.idTrayecto());
 
         for (ParadaModel parada : trayecto.getParadas()) {
-            if (parada.getDataHora().isEqual(dtoSended.dataHora())) {
+            if (parada.getDataHora().isEqual(dtoSended.dataHora()))
                 throw new ValidationException(new FieldMessage("dataHora", "Ya hay una parada registrada en esta fecha"));
-            }
-            if (parada.getLugar().getId() == dtoSended.idLugar()) {
-                throw new ValidationException(new FieldMessage("idLugar", "Ya hay una parada registrada que passara por este lugar"));
-            }
+            if (parada.getLugar().getId() == dtoSended.idLugar())
+                throw new ValidationException("idLugar", "Ya hay una parada registrada que passara por este lugar");
         }
 
-        if (!trayecto.dataHoraValido(dtoSended.dataHora())) {
-            throw new ValidationException(new FieldMessage("dataHora", "La parada no puede ser maior o menor que las dos primeras"));
-        }
+        if (!trayecto.dataHoraValido(dtoSended.dataHora()))
+            throw new ValidationException("dataHora", "La parada no puede ser maior o menor que las dos primeras");
 
         var model = new ParadaModel(dtoSended);
         model.setLugar(lugar);
@@ -76,22 +76,22 @@ public class ParadaService {
         var model = this.findById(id);
 
         for (ParadaModel parada : model.getTrayecto().getParadas()) {
-            if (parada.getDataHora().isEqual(dtoSended.dataHora())) {
-                throw new ValidationException(new FieldMessage("dataHora", "Ya hay una parada registrada en esta fecha"));
-            }
+            if (parada.getDataHora().isEqual(dtoSended.dataHora()))
+                throw new ValidationException("dataHora", "Ya hay una parada registrada en esta fecha");
+
             System.out.println("\n" + parada.getLugar().getId() + " - " + dtoSended.idLugar());
-            if (parada.getLugar().getId() == dtoSended.idLugar()) {
-                throw new ValidationException(new FieldMessage("idLugar", "Ya hay una parada registrada que passara por este lugar"));
-            }
+            if (parada.getLugar().getId() == dtoSended.idLugar())
+                throw new ValidationException("idLugar", "Ya hay una parada registrada que passara por este lugar");
         }
-        if (!model.getTrayecto().dataHoraValido(dtoSended.dataHora())) {
-            throw new ValidationException(new FieldMessage("dataHora", "La parada no puede ser maior o menor que las paradas extremas"));
-        }
+        if (!model.getTrayecto().dataHoraValido(dtoSended.dataHora()))
+            throw new ValidationException("dataHora", "La parada no puede ser maior o menor que las paradas extremas");
 
         model.updateValues(dtoSended);
 
         if (dtoSended.idLugar() != null) {
             LugarModel lugar = lugarService.findById(dtoSended.idLugar());
+            if (!lugar.getEnable())
+                throw new ValidationException("idLugar", "El lugar no esta disponible");
             model.setLugar(lugar);
         }
 
@@ -102,6 +102,8 @@ public class ParadaService {
     }
 
     public void delete(ParadaModel model) {
-        paradaRepository.delete(model);
+        var viajes = model.getTrayecto().getViajes();
+        if (viajes.isEmpty())
+            paradaRepository.delete(model);
     }
 }

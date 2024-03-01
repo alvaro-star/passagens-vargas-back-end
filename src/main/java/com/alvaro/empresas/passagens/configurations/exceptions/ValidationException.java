@@ -4,11 +4,16 @@ import lombok.Getter;
 
 @Getter
 public class ValidationException extends RuntimeException {
-    private FieldMessage campo;
+    private final FieldMessage campo;
 
     public ValidationException(String mensaje) {
         super(mensaje);
-        campo.setName("unknow");
+        this.campo = new FieldMessage("unknow", mensaje);
+    }
+
+    public ValidationException(String campo, String mensaje) {
+        super(mensaje);
+        this.campo = new FieldMessage(campo, mensaje);
     }
 
     public ValidationException(FieldMessage campo) {
