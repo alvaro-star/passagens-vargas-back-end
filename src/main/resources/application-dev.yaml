@@ -1,8 +1,9 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/spring
-    username: teste
-    password: root
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:dev
+    username: alvaro
+    password:
   h2:
     console:
       enabled: false

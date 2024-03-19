@@ -3,8 +3,8 @@ package com.alvaro.empresas.passagens.helpers;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-public class Coverts {
-    public static UUID convertBytesToUUID(byte[] bytes) {
+public class ConvertsType {
+    public static UUID convertBytesToUUIDHelper(byte[] bytes) {
         if (bytes.length < 16) {
             throw new IllegalArgumentException("A array de bytes deve ter pelo menos 16 bytes.");
         }

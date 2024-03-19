@@ -39,7 +39,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@Profile("share")
+@Profile({"dev", "share"})
 @Configuration
 public class ShareProfile {
     @Autowired
@@ -68,7 +68,7 @@ public class ShareProfile {
     private UsuarioRepository usuarioRepository;
 
     @Bean
-    public void loadData(){
+    public void loadData() {
         var criptogrador = new BCryptPasswordEncoder();
         //Cadastra os Roles
         var admin = new RoleModel(RoleList.ROLE_ADMIN);
@@ -116,7 +116,7 @@ public class ShareProfile {
             indice++;
 
             //Cria os trayectos y las paradas de cada autobus
-            for (DayOfWeek dia: DayOfWeek.values()){
+            for (DayOfWeek dia : DayOfWeek.values()) {
                 var trayecto = trayectoRepository.save(new TrayectoModel(autobus));
                 var dataInicio = LocalDateTime.now().with(TemporalAdjusters.next(dia)).withHour(8);
                 int nLista = 0;
@@ -138,7 +138,7 @@ public class ShareProfile {
                     }
                 }
                 // Cria a viajem
-                var viajeSaved = viajeRepository.save(new ViajeModel(paradas.get(0), paradas.get(nLista-1), trayecto));
+                var viajeSaved = viajeRepository.save(new ViajeModel(paradas.get(0), paradas.get(nLista - 1), trayecto));
 
                 float precioBruto = 200;
                 for (PisoModel piso : pisos) {

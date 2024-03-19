@@ -15,25 +15,21 @@ public interface ViajeRepository extends JpaRepository<ViajeModel, Integer> {
 
     //viajeDestino.isAfter(viajeModelSalida) &&
     //viajeModelDestino.isAfter(viajeSalida)
-    @Query("""
-            SELECT vm FROM ViajeModel vm, ParadaModel S, ParadaModel D 
-            WHERE vm.trayecto.codigo = :trayectoCodigo 
-            AND vm.salida.id = S.id 
-            AND :destino > S.dataHora 
-            AND vm.destino.id = D.id 
-            AND D.dataHora > :salida
-            """)
+    @Query("SELECT vm FROM ViajeModel vm, ParadaModel S, ParadaModel D " +
+            "WHERE vm.trayecto.codigo = :trayectoCodigo " +
+            "AND vm.salida.id = S.id " +
+            "AND :destino > S.dataHora " +
+            "AND vm.destino.id = D.id " +
+            "AND D.dataHora > :salida")
     List<ViajeModel> cargarViajesConIntervalosComunes(@Param("trayectoCodigo") UUID trayectoCodigo,
                                                       @Param("salida") LocalDateTime salida,
                                                       @Param("destino") LocalDateTime destino);
 
-    @Query("""
-            SELECT vm FROM ViajeModel vm, ParadaModel S 
-            WHERE S.lugar.id = :salidaId 
-            AND S.dataHora >= :fechaHoraPartida 
-            AND S.dataHora < :fechaPartida 
-            AND vm.salida.id = S.id
-            """)
+    @Query("SELECT vm FROM ViajeModel vm, ParadaModel S " +
+            "WHERE S.lugar.id = :salidaId " +
+            "AND S.dataHora >= :fechaHoraPartida " +
+            "AND S.dataHora < :fechaPartida " +
+            "AND vm.salida.id = S.id")
     List<ViajeModel> getViajesDeSalida(@Param("salidaId") Integer idSalida,
                                        @Param("fechaHoraPartida") LocalDateTime fechaHoraSalida,
                                        @Param("fechaPartida") LocalDateTime fechaPartida);
@@ -48,12 +44,16 @@ public interface ViajeRepository extends JpaRepository<ViajeModel, Integer> {
             "AND :endViaje <= d.data_hora", nativeQuery = true)
     List<ViajeModel> getFromTrayecto(UUID codigo, LocalDateTime startViaje, LocalDateTime endViaje);
 
+    //Tranquilo
     @Query(value = "SELECT e.logo FROM tb_empresa as e, tb_autobus as a, tb_trayecto as t " +
             "WHERE t.idtb_trayecto = :codigo " +
             "AND t.fk_idtb_autobus = a.idtb_autobus " +
             "AND a.fk_idtb_empresa = e.idtb_empresa", nativeQuery = true)
     String getLogoEmpresaFromTrayecto(UUID codigo);
+}
 
+/* No usage
+* //Steve
     @Query(value = "SELECT e.logo FROM tb_empresa as e, tb_autobus as a, tb_trayecto as t, tb_viaje as v " +
             "WHERE v.idtb_viaje = :id" +
             "AND t.idtb_trayecto = v.fk_idtb_trayecto " +
@@ -67,5 +67,4 @@ public interface ViajeRepository extends JpaRepository<ViajeModel, Integer> {
             "AND s.fk_idtb_lugar = :idParadaSalida " +
             "AND v.id_destino = d.idtb_parada " +
             "AND d.fk_idtb_lugar = :idParadaDestino ", nativeQuery = true)
-    Integer getViajesIguais(UUID codigo, Integer idParadaSalida, Integer idParadaDestino);
-}
+    Integer getViajesIguais(UUID codigo, Integer idParadaSalida, Integer idParadaDestino);*/
