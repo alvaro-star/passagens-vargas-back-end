@@ -81,9 +81,9 @@ public class ShareProfile {
         roleService.save(empresaFuncionario);
 
         //Empresas
-        EmpresaModel marzo = empresaRepository.save(new EmpresaModel("27 de Marzo", "teste", "202345"));
-        EmpresaModel abril = empresaRepository.save(new EmpresaModel("20 de Abril", "teste", "202345"));
-        EmpresaModel copacabana = empresaRepository.save(new EmpresaModel("Copacabana", "teste", "202345"));
+        EmpresaModel marzo = empresaRepository.save(new EmpresaModel("27 de Marzo", "https://github.com/alvaro-star.png", "202345"));
+        EmpresaModel abril = empresaRepository.save(new EmpresaModel("20 de Abril", "https://github.com/alvaro-star.png", "202345"));
+        EmpresaModel copacabana = empresaRepository.save(new EmpresaModel("Copacabana", "https://github.com/alvaro-star.png", "202345"));
         var usuarioCliente = usuarioRepository.save(new UsuarioModel("cliente@gmail.com", "Rick Sanchez", "(11) - 11111-1111", criptogrador.encode("cliente")));
         var usuarioAdmin = usuarioRepository.save(new UsuarioModel("admin@gmail.com", "Darth Vader", "(11) - 11111-1111", criptogrador.encode("admin")));
         var usuarioEmpresaAdmin = usuarioRepository.save(new UsuarioModel("empresaadmin@gmail.com", "Hero Nakamura", "(33) - 33333-3333", criptogrador.encode("empresaadmin"), marzo.getId()));
@@ -109,9 +109,8 @@ public class ShareProfile {
         for (AutobusModel autobus : autobuses) {
             List<PisoModel> pisos = new ArrayList<>();
             pisos.add(pisoRepository.save(new PisoModel(20, 4, EnumPosicao.IZQUIERDA, 1, EnumPosicao.DERECHA, 20 * 4, 1, autobus)));
-            if (indice % 2 == 0) {
+            if (indice % 2 == 0)
                 pisos.add(pisoRepository.save(new PisoModel(20, 4, EnumPosicao.IZQUIERDA, 2, EnumPosicao.DERECHA, 20 * 4, 81, autobus)));
-            }
 
             indice++;
 
