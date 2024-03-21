@@ -22,7 +22,7 @@ public class PisoModel {
     @Id
     @Column(name = "idtb_piso")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(nullable = false)
     private Integer nLinhas;

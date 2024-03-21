@@ -38,7 +38,7 @@ public class AutobusService {
     @Autowired
     private PisoService pisoService;
 
-    public AutobusModel findById(Integer id) {
+    public AutobusModel findById(Long id) {
         var model = autobusRepository.findById(id);
         return model.orElseThrow(() -> new ObjectNotFoundException(id, AutobusModel.class.getName()));
     }
@@ -54,7 +54,7 @@ public class AutobusService {
         return autobuses.map((autobus) -> new AutobusDTOList(autobus, empresa.getId()));
     }
 
-    public AutobusDTOResponse getOne(Integer id) {
+    public AutobusDTOResponse getOne(Long id) {
         var model = findById(id);
         List<TrayectoDTO> trayectosDto = new ArrayList<>();
         List<PisoDTOResponse> pisosDto = new ArrayList<>();
@@ -78,8 +78,8 @@ public class AutobusService {
         ValidationError err = new ValidationError(
                 System.currentTimeMillis(),
                 HttpStatus.UNPROCESSABLE_ENTITY.value(),
-                "Erro de Validacao",
-                "Erro durante a validacao",
+                "Erro de validação",
+                "Erro durante a validação",
                 "/autobuses");
         for (FieldError erro : bindingResult.getFieldErrors()) {
             err.addError(erro.getField(), erro.getDefaultMessage());
@@ -128,7 +128,7 @@ public class AutobusService {
         return new AutobusDTOResponse(save, save.getEmpresa().getId(), pisosGuardados);
     }
 
-    public AutobusDTOList update(AutobusDTOUpdate dto, Integer id) {
+    public AutobusDTOList update(AutobusDTOUpdate dto, Long id) {
         var model = this.findById(id);
         model.updateValues(dto);
         var update = autobusRepository.save(model);

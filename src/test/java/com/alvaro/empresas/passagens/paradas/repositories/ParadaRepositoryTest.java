@@ -32,7 +32,7 @@ class ParadaRepositoryTest {
     @Test
     @DisplayName("Dado tres registros de parada, deveriam ser mostradas os codigos de tres trayectos que posseen una parada de un lugar em um dia determinado")
     void cargarSalidasDelDiaCenario1() {
-        var empresa = cadastrarEmpresa("23 de Abril");
+        var empresa = cadastrarEmpresa();
         var autobus = cadastrarAutobus("2345L", empresa);
         var trayecto1 = cadastrarTrayecto(autobus);
         var trayecto2 = cadastrarTrayecto(autobus);
@@ -40,16 +40,12 @@ class ParadaRepositoryTest {
         var trayecto4 = cadastrarTrayecto(autobus);
         var lugares = cadastrarLugares();
         var dataAtual = LocalDateTime.now().with(TemporalAdjusters.next(DayOfWeek.MONDAY)).withHour(8);
-        List<ParadaModel> paradas1 = new ArrayList<>();
-        List<ParadaModel> paradas2 = new ArrayList<>();
-        List<ParadaModel> paradas3 = new ArrayList<>();
-        List<ParadaModel> paradas4 = new ArrayList<>();
 
         for (int i = 0; i < 5; i++) {
-            paradas1.add(cadastrarParada(dataAtual.plusDays(i), lugares.get(i), trayecto1));
-            paradas2.add(cadastrarParada(dataAtual.plusDays(i), lugares.get(i), trayecto2));
-            paradas3.add(cadastrarParada(dataAtual.plusDays(i), lugares.get(i), trayecto3));
-            paradas4.add(cadastrarParada(dataAtual.plusDays(i), lugares.get(i + 1), trayecto4));
+            cadastrarParada(dataAtual.plusDays(i), lugares.get(i), trayecto1);
+            cadastrarParada(dataAtual.plusDays(i), lugares.get(i), trayecto2);
+            cadastrarParada(dataAtual.plusDays(i), lugares.get(i), trayecto3);
+            cadastrarParada(dataAtual.plusDays(i), lugares.get(i + 1), trayecto4);
         }
 
         LocalDateTime startDay = dataAtual.plusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
@@ -61,9 +57,32 @@ class ParadaRepositoryTest {
         assertThat(trayectosDia.size()).isEqualTo(0);
     }
 
+    @Test
+    @DisplayName("Deve mostrar quantas vezes um trayecto pasa por un lugar, tem que ser 1, 2, 0")
+    void nVezesTrayectoPasaCenario1() {
+        //Un autobus no puede realizar un trayecto mientras hace uno, mas para este ejemplo no esta siendo evaluado esto
+        var empresa = cadastrarEmpresa();
+        var autobus = cadastrarAutobus("2345L", empresa);
+        var trayecto1 = cadastrarTrayecto(autobus);
+        var lugares = cadastrarLugares();
+        var dataAtual = LocalDateTime.now().with(TemporalAdjusters.next(DayOfWeek.MONDAY)).withHour(8);
 
-    private EmpresaModel cadastrarEmpresa(String nombre) {
-        var empresa = new EmpresaModel(nombre, "logo", "numerocuenta");
+        for (int i = 0; i < 5; i++)
+            cadastrarParada(dataAtual.plusDays(i), lugares.get(i), trayecto1);
+        cadastrarParada(dataAtual, lugares.get(3), trayecto1);
+        List<ParadaModel> vezesPassadas;
+        vezesPassadas = paradaRepository.nVezesTrayectoPassa(lugares.get(1).getId(), trayecto1.getCodigo());
+        assertThat(vezesPassadas.size()).isEqualTo(1);
+
+        vezesPassadas = paradaRepository.nVezesTrayectoPassa(lugares.get(3).getId(), trayecto1.getCodigo());
+        assertThat(vezesPassadas.size()).isEqualTo(2);
+
+        vezesPassadas = paradaRepository.nVezesTrayectoPassa(lugares.get(7).getId(), trayecto1.getCodigo());
+        assertThat(vezesPassadas.size()).isEqualTo(0);
+    }
+
+    private EmpresaModel cadastrarEmpresa() {
+        var empresa = new EmpresaModel("23 de Abril", "logo", "numerocuenta");
         em.persist(empresa);
         return empresa;
     }

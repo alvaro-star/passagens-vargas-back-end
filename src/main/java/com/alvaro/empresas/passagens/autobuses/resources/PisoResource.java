@@ -21,7 +21,7 @@ public class PisoResource {
     private PisoService pisoService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<PisoDTOResponse> getOne(@PathVariable(value = "id") Integer id) {
+    public ResponseEntity<PisoDTOResponse> getOne(@PathVariable(value = "id") Long id) {
         return ResponseEntity.ok(pisoService.getOne(id));
     }
 
@@ -31,7 +31,7 @@ public class PisoResource {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> update(@PathVariable(value = "id") Integer id, @RequestBody @Valid PisoDTOUpdate dto) {
+    public ResponseEntity<Object> update(@PathVariable(value = "id") Long id, @RequestBody @Valid PisoDTOUpdate dto) {
         var updated = pisoService.update(dto, id);
         if (updated == null) {
             return ResponseEntity.unprocessableEntity().body(new Mensaje(

@@ -39,7 +39,7 @@ public class AutobusResource {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AutobusDTOResponse> getOne(@PathVariable(value = "id") Integer id) {
+    public ResponseEntity<AutobusDTOResponse> getOne(@PathVariable(value = "id") Long id) {
         return ResponseEntity.ok().body(autobusService.getOne(id));
     }
 
@@ -54,7 +54,7 @@ public class AutobusResource {
 
     //Solo el administrador
     @PutMapping("/{id}")
-    public ResponseEntity<Object> update(@PathVariable(value = "id") Integer id, @Valid @RequestBody AutobusDTOUpdate dto, BindingResult bindingResult) {
+    public ResponseEntity<Object> update(@PathVariable(value = "id") Long id, @Valid @RequestBody AutobusDTOUpdate dto, BindingResult bindingResult) {
         var transform = new AutobusDTO(dto.placa());
         ValidationError validacao = autobusService.validar(bindingResult, transform);
         if (!validacao.getErrors().isEmpty()) {
@@ -64,7 +64,7 @@ public class AutobusResource {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> delete(@PathVariable(value = "id") Integer id) {
+    public ResponseEntity<Object> delete(@PathVariable(value = "id") Long id) {
         var model = autobusService.findById(id);
         if (!model.getTrayectos().isEmpty()) {
             return ResponseEntity.badRequest().body(new Mensaje("El autobus tiene trayectos registrados"));

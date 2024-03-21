@@ -8,13 +8,13 @@ import java.util.UUID;
 public record TrayectoDTO(
         UUID codigo,
         @NotNull
-        Integer idAutobus) {
+        Long idAutobus) {
 
     public TrayectoDTO(TrayectoModel model) {
         this(model.getCodigo(), null);
     }
 
-    public TrayectoDTO(TrayectoModel model, Integer idAutobus) {
+    public TrayectoDTO(TrayectoModel model, Long idAutobus) {
         this(model.getCodigo(), idAutobus);
     }
 }

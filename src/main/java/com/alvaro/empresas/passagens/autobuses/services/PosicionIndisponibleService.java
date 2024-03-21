@@ -27,7 +27,7 @@ public class PosicionIndisponibleService {
     }
 
     public void deleteAll(List<PosicionIndisponibleModel> list) {
-        List<Integer> ids = new ArrayList<>();
+        List<Long> ids = new ArrayList<>();
         list.forEach(model -> {
             ids.add(model.getId());
         });

@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface ViajeRepository extends JpaRepository<ViajeModel, Integer> {
+public interface ViajeRepository extends JpaRepository<ViajeModel, Long> {
 
     //viajeDestino.isAfter(viajeModelSalida) &&
     //viajeModelDestino.isAfter(viajeSalida)
