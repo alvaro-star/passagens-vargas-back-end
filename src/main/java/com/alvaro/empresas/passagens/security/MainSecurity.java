@@ -29,12 +29,13 @@ public class MainSecurity {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
                 .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSourceMy()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.GET, "/").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
-                        .requestMatchers( "/dados/**").permitAll()
+                        .requestMatchers("/dados/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/pasajes").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll()
                         .anyRequest().authenticated()
@@ -49,11 +50,12 @@ public class MainSecurity {
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
+    public PasswordEncoder myPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    public CorsConfigurationSource corsConfigurationSource(){
+    @Bean
+    public CorsConfigurationSource corsConfigurationSourceMy() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.addAllowedOrigin("*");
         configuration.addAllowedMethod("*");

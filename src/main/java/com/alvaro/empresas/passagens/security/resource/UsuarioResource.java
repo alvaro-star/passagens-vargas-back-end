@@ -78,20 +78,18 @@ public class UsuarioResource {
             case ROLE_ADMIN -> {
                 roles.add(roleService.getByRoleName(registerDto.role()));
             }
+
             case ROLE_CLIENTE -> {
-                if (logado) {
+                if (logado)
                     return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new Mensaje("Alguien inicio Sesion"));
-                }
                 roles.add(roleService.getByRoleName(registerDto.role()));
             }
 
             case ROLE_EMPRESA_ADMIN -> {
-                if (!logado) {
+                if (!logado)
                     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Mensaje("Token Invalido"));
-                }
-                if (registerDto.idEmpresa() == null) {
+                if (registerDto.idEmpresa() == null)
                     return ResponseEntity.unprocessableEntity().body(new FieldMessage("idEmpresa", "No puede ser nulo"));
-                }
 
                 boolean roleValido = false;
                 for (GrantedAuthority authority : usuario.getAuthorities()) {
@@ -103,20 +101,17 @@ public class UsuarioResource {
                 }
                 boolean empresaValida = empresaRepository.existsById(registerDto.idEmpresa());
 
-                if (!empresaValida) {
+                if (!empresaValida)
                     return ResponseEntity.unprocessableEntity().body(new FieldMessage("idEmpresa", "La empresa no existe"));
-                }
-                if (!roleValido) {
+                if (!roleValido)
                     return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new Mensaje("Peticion Invalida"));
-                }
 
                 roles.add(roleService.getByRoleName(RoleList.ROLE_EMPRESA_ADMIN));
                 newUser.setIdEmpresa(registerDto.idEmpresa());
             }
             case ROLE_EMPRESA_FUNCIONARIO -> {
-                if (!logado) {
+                if (!logado)
                     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Mensaje("Token Invalido"));
-                }
 
                 boolean roleValido = false;
                 for (GrantedAuthority authority : usuario.getAuthorities()) {
@@ -127,9 +122,8 @@ public class UsuarioResource {
                     }
                 }
 
-                if (!roleValido) {
+                if (!roleValido)
                     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Mensaje("No estas Autorizado"));
-                }
 
                 var administradorEmpresa = usuarioRepository.findByEmail(usuario.getName());
 
