@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public record PisoDTOResponse(
-        Long id,
+        Integer id,
         Integer nLinhas,
         Integer nColunas,//Tipo Onibus
         String distribuicaoFileira,
@@ -14,10 +14,10 @@ public record PisoDTOResponse(
         String inicioContagem,
         Integer nSillas,
         Integer primeraSilla,
-        Long idAutobus,
+        Integer idAutobus,
         List<Integer> posicoesIndisponiveis
 ) {
-    public PisoDTOResponse(PisoModel model, Long idAutobus, List<Integer> posicoesIndisponiveis) {
+    public PisoDTOResponse(PisoModel model, Integer idAutobus, List<Integer> posicoesIndisponiveis) {
         this(
                 model.getId(),
                 model.getNLinhas(),

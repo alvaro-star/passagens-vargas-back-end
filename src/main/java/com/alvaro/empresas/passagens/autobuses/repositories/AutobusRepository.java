@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface AutobusRepository extends JpaRepository<AutobusModel, Long> {
+public interface AutobusRepository extends JpaRepository<AutobusModel, Integer> {
     boolean existsByPlaca(String placa);
     Page<AutobusModel> findByEmpresa(EmpresaModel empresaModel, Pageable pageable);
 }

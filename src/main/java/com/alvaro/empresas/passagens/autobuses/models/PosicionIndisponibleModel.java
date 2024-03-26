@@ -18,13 +18,17 @@ public class PosicionIndisponibleModel {
     @Id
     @Column(name = "idtb_posicion_indisponible")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
     private Integer numero;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_piso")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private PisoModel piso;
+
+    public PosicionIndisponibleModel(PosicionIndisponibleDTO dto) {
+        numero = dto.numero();
+    }
 
     public PosicionIndisponibleModel(Integer numero) {
         this.numero = numero;

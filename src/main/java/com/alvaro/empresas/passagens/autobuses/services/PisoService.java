@@ -27,12 +27,12 @@ public class PisoService {
     @Autowired
     private PosicionIndisponibleService posicionService;
 
-    public PisoModel findById(Long id) {
+    public PisoModel findById(Integer id) {
         Optional<PisoModel> model = pisoRepository.findById(id);
         return model.orElseThrow(() -> new ObjectNotFoundException(id, PisoModel.class.getName()));
     }
 
-    public PisoDTOResponse getOne(Long id) {
+    public PisoDTOResponse getOne(Integer id) {
         var model = this.findById(id);
         List<Integer> posicionesBloqueadas = new ArrayList<>();
 
@@ -40,7 +40,7 @@ public class PisoService {
             posicionesBloqueadas.add(posicionIndisponibleModel.getNumero());
         }
 
-        long idAutobus = model.getAutobus().getId();
+        int idAutobus = model.getAutobus().getId();
 
         return new PisoDTOResponse(model, idAutobus, posicionesBloqueadas);
     }
@@ -75,7 +75,7 @@ public class PisoService {
     }
 
     @Transactional
-    public PisoDTOResponse update(PisoDTOUpdate dto, Long id) {
+    public PisoDTOResponse update(PisoDTOUpdate dto, Integer id) {
         var model = this.findById(id);
 
         if (!model.getAutobus().getTrayectos().isEmpty()) {

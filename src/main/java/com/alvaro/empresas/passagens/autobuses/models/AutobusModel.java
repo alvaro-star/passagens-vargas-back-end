@@ -22,7 +22,7 @@ public class AutobusModel {
     @Id
     @Column(name = "idtb_autobus")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
     @Column(unique = true, nullable = false)
     private String placa;
     private boolean enable;
@@ -57,7 +57,7 @@ public class AutobusModel {
 
     public void updateValues(AutobusDTOUpdate dto) {
         placa = dto.placa();
-        if (dto.enable() != null) {
+        if (dto.enable() != null){
             enable = dto.enable();
         }
     }
