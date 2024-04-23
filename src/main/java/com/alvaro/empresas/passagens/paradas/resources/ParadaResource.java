@@ -2,6 +2,7 @@ package com.alvaro.empresas.passagens.paradas.resources;
 
 import com.alvaro.empresas.passagens.dtos.Mensaje;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTO;
+import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOUpdate;
 import com.alvaro.empresas.passagens.paradas.services.ParadaService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -32,7 +33,7 @@ public class ParadaResource {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ParadaDTO> getOne(@PathVariable Integer id) {
+    public ResponseEntity<ParadaDTOComplete> getOne(@PathVariable Integer id) {
         return ResponseEntity.ok(paradaService.getOne(id));
     }
 

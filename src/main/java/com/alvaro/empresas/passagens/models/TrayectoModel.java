@@ -31,17 +31,17 @@ public class TrayectoModel {
     private AutobusModel autobus;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "trayecto")
-    private List<ParadaModel> paradas = new ArrayList<ParadaModel>();
+    private List<ParadaModel> paradas = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "trayecto")
-    private List<ViajeModel> viajes = new ArrayList<ViajeModel>();
+    private List<ViajeModel> viajes = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "trayecto")
-    private List<PasajeModel> pasajes = new ArrayList<PasajeModel>();
+    private List<PagoModel> pagos = new ArrayList<>();
 
     public ParadaModel getParadaById(Integer id) {
         for (ParadaModel parada : this.paradas) {
-            if (parada.getId() == id) {
+            if (parada.getId().equals(id)) {
                 return parada;
             }
         }

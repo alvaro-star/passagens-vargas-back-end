@@ -13,7 +13,7 @@ public class PassagensApplication {
     }
 
     @GetMapping("/")
-    public String teste() {
+    public String index() {
         return "Bem vindo à API";
     }
 

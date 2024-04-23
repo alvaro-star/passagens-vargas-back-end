@@ -1,5 +1,8 @@
 package com.alvaro.empresas.passagens.autobuses.dtos.pisos;
 
+import com.alvaro.empresas.passagens.autobuses.enums.EnumPosicao;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -18,10 +21,13 @@ public class PisoDTOUpdate {
     private Integer nLinhas;
     @NotNull
     private Integer nColunas;
-    @NotBlank
-    private String distribuicaoFileira;
 
-    private String inicioContagem;
+    @NotBlank
+    @Enumerated(EnumType.STRING)
+    private EnumPosicao distribuicaoFileira;
+    @NotBlank
+    @Enumerated(EnumType.STRING)
+    private EnumPosicao inicioContagem;
 
     private List<Integer> posicoesIndisponiveis = new ArrayList<Integer>();
 

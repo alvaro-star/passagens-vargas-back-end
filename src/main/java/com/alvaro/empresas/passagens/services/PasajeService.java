@@ -50,6 +50,7 @@ public class PasajeService {
         var trayecto = precio.getViaje().getTrayecto();
         ParadaModel salida;
         ParadaModel destino;
+
         List<Integer> ocupados = pasajeRepository.getPasajesVendidos(precio.getId());
 
         validarSilla(trayecto, precio, dto.pasajes(), ocupados);
@@ -66,7 +67,7 @@ public class PasajeService {
             throw new ValidationException(new FieldMessage("idLugarDestino", "El destino no hace parte del trayecto"));
         }
 
-        PagoModel pago = pagoService.save(dto, precio.getPrecio(), metodo, guardarContacto);
+        PagoModel pago = pagoService.save(dto, precio.getPrecio(), trayecto, metodo, guardarContacto);
 
         boolean estaPago;
 
@@ -77,8 +78,7 @@ public class PasajeService {
         }
 
         for (PasajeDTO pasajeDTO : dto.pasajes()) {
-            var pasajeModel = new PasajeModel(pasajeDTO.nSilla(), compradoWeb, estaPago,
-                    trayecto, precio, pago);
+            var pasajeModel = new PasajeModel(pasajeDTO.nSilla(), compradoWeb, estaPago, precio, pago);
             var pasajeSaved = pasajeRepository.save(pasajeModel);
 
             var pasajero = new PasajeroModel(pasajeDTO);

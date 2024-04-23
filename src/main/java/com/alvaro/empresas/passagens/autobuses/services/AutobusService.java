@@ -102,7 +102,7 @@ public class AutobusService {
                 if (pisoDto.getNColunas() > 4)
                     err.addError("nColunas" + counter, "No puede ser maior que 4");
             }
-            if (pisoDto.getDistribuicaoFileira() == null || pisoDto.getDistribuicaoFileira() == "") {
+            if (pisoDto.getDistribuicaoFileira() == null) {
                 err.addError("distribuicaoFileira" + counter, "No puede ser vazio");
             }
             counter++;

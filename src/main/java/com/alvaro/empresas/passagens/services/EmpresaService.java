@@ -1,6 +1,7 @@
 package com.alvaro.empresas.passagens.services;
 
 import com.alvaro.empresas.passagens.dtos.EmpresaDto;
+import com.alvaro.empresas.passagens.dtos.EmpresaResponseDto;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.repositories.EmpresaRepository;
 import org.hibernate.ObjectNotFoundException;
@@ -24,8 +25,8 @@ public class EmpresaService {
         return model.orElseThrow(() -> new ObjectNotFoundException(id, EmpresaModel.class.getName()));
     }
 
-    public Page<EmpresaDto> findAll(Pageable pageable) {
-        return empresaRepository.findAll(pageable).map(EmpresaDto::new);
+    public Page<EmpresaResponseDto> findAll(Pageable pageable) {
+        return empresaRepository.findAll(pageable).map(EmpresaResponseDto::new);
     }
 
     @Transactional

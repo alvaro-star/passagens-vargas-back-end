@@ -2,6 +2,8 @@ package com.alvaro.empresas.passagens.paradas.resources;
 
 import com.alvaro.empresas.passagens.paradas.dtos.CiudadDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.CiudadDtoUpdate;
+import com.alvaro.empresas.passagens.paradas.dtos.LugarDTO;
+import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import com.alvaro.empresas.passagens.paradas.services.CiudadService;
 import com.alvaro.empresas.passagens.paradas.services.DepartamentoService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -13,6 +15,9 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/ciudades")
@@ -31,6 +36,16 @@ public class CiudadResource {
     @GetMapping("/{id}")
     public ResponseEntity<CiudadDTO> getOne(@PathVariable(value = "id") Integer id) {
         return ResponseEntity.ok().body(ciudadService.getOne(id));
+    }
+
+    @GetMapping("/{id}/lugares")
+    public ResponseEntity<List<LugarDTO>> getLugaresFromCiudad(@PathVariable(value = "id") Integer id) {
+        var ciudadModel = ciudadService.findById(id);
+        List<LugarDTO> lugares = new ArrayList<>();
+        ciudadModel.getLugares().forEach(lugarModel -> {
+            lugares.add(new LugarDTO(lugarModel, ciudadModel.getId()));
+        });
+        return ResponseEntity.ok().body(lugares);
     }
 
     @GetMapping("/{nombre}/like")

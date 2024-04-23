@@ -12,7 +12,7 @@ import com.alvaro.empresas.passagens.helpers.ConvertsType;
 import com.alvaro.empresas.passagens.models.PrecioModel;
 import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTO;
-import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOList;
+import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
 import com.alvaro.empresas.passagens.paradas.models.CiudadModel;
 import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
@@ -64,7 +64,7 @@ public class ViajeService {
 
     //Inconcluso
     public List<ViajeDTOListBusqueda> getViajesFromDia(ViajeDTOSolicitacao dto) {
-        // Converter o id da cidade para um LUGAR
+        // Converter o id da ciudad para um LUGAR
         if (dto.idCiudadDestino().equals(dto.idCiudadSalida()))
             throw new ValidationException("idDestino", "El destino no puede ser el mismo que la salida");
 
@@ -109,8 +109,8 @@ public class ViajeService {
                         ParadaModel destino = nVezesTrayectoPassaDestino.get(0);
                         List<ViajeModel> viajes = viajeRepository.getFromTrayecto(codigo, salida.getDataHora(), destino.getDataHora());
                         for (ViajeModel viaje : viajes) {
-                            ParadaDTOList salidaDTO = convertToParadaDTOList(viaje.getSalida());
-                            ParadaDTOList destinoDTO = convertToParadaDTOList(viaje.getDestino());
+                            ParadaDTOComplete salidaDTO = new ParadaDTOComplete(salida, codigo);
+                            ParadaDTOComplete destinoDTO = new ParadaDTOComplete(destino, codigo);
                             List<PrecioDTO> precios = new ArrayList<>();
                             for (PrecioModel precio : viaje.getPrecios())
                                 if (!precio.getLleno()) precios.add(new PrecioDTO(precio));
@@ -121,7 +121,6 @@ public class ViajeService {
             }
         }
 
-
         return viajesSelecionados;
     }
 
@@ -129,8 +128,8 @@ public class ViajeService {
         var model = this.findById(id);
         UUID codigoTrayecto = model.getTrayecto().getCodigo();
 
-        var salida = convertToParadaDTOList(model.getSalida());
-        var destino = convertToParadaDTOList(model.getDestino());
+        var salida = new ParadaDTOComplete(model.getSalida(), codigoTrayecto);
+        var destino = new ParadaDTOComplete(model.getDestino(), codigoTrayecto);
 
         List<PrecioDTO> precios = new ArrayList<>();
         for (PrecioModel precioModel : model.getPrecios())
@@ -163,12 +162,12 @@ public class ViajeService {
 
         var saved = viajeRepository.save(model);
 
-        //Tratando os precos da viajem
+        //Tratando los precios del viaje
         List<PisoModel> pisos = trayecto.getAutobus().getPisos();
 
         List<PrecioModel> precios = new ArrayList<>();
 
-        //So podem existir dois pisos
+        //Solo pueden existir dos precios
         switch (pisos.size()) {
             case 1 -> precios.add(new PrecioModel(dto.precioPiso1(), 1, pisos.get(0).getNSillas()));
             case 2 -> {
@@ -199,9 +198,5 @@ public class ViajeService {
         for (PrecioModel precio : model.getPrecios())
             if (!precio.getPasajes().isEmpty()) throw new ValidationException("El viaje no pudo ser eliminado");
         viajeRepository.delete(model);
-    }
-
-    public ParadaDTOList convertToParadaDTOList(ParadaModel model) {
-        return new ParadaDTOList(model, model.getLugar().getNombre(), model.getLugar().getCiudad().getNombre(), model.getLugar().getCiudad().getDepartamento().getNombre());
     }
 }

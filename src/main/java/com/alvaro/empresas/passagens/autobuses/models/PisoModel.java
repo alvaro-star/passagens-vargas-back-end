@@ -54,23 +54,10 @@ public class PisoModel {
         nSillas = dto.getNColunas() * dto.getNLinhas() - dto.getPosicoesIndisponiveis().size();
         nLinhas = dto.getNLinhas();
         nColunas = dto.getNColunas();
+        distribuicaoFileira = dto.getDistribuicaoFileira();
+        inicioContagem = dto.getInicioContagem();
         this.nPiso = nPiso;
         this.primeraSilla = primeraSilla;
-
-        switch (dto.getDistribuicaoFileira()) {
-            case "izquierda":
-                distribuicaoFileira = EnumPosicao.IZQUIERDA;
-                break;
-            case "derecha":
-                distribuicaoFileira = EnumPosicao.DERECHA;
-                break;
-        }
-
-        if (dto.getInicioContagem().equals("izquierda")) {
-            inicioContagem = EnumPosicao.IZQUIERDA;
-        } else {
-            inicioContagem = EnumPosicao.DERECHA;
-        }
     }
 
     public PisoModel(Integer nLinhas, Integer nColunas, EnumPosicao distribuicaoFileira, Integer nPiso, EnumPosicao inicioContagem, Integer nSillas, Integer primeraSilla, AutobusModel autobus) {
@@ -89,19 +76,8 @@ public class PisoModel {
         nLinhas = dto.getNLinhas();
         nColunas = dto.getNColunas();
 
-        switch (dto.getDistribuicaoFileira()) {
-            case "izquierda":
-                distribuicaoFileira = EnumPosicao.IZQUIERDA;
-                break;
-            case "derecha":
-                distribuicaoFileira = EnumPosicao.DERECHA;
-                break;
-        }
+        distribuicaoFileira = dto.getDistribuicaoFileira();
 
-        if (dto.getInicioContagem().equals("izquierda")) {
-            inicioContagem = EnumPosicao.IZQUIERDA;
-        } else {
-            inicioContagem = EnumPosicao.DERECHA;
-        }
+        inicioContagem = dto.getInicioContagem();
     }
 }

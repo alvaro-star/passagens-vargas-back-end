@@ -1,5 +1,8 @@
 package com.alvaro.empresas.passagens.autobuses.dtos.pisos;
 
+import com.alvaro.empresas.passagens.autobuses.enums.EnumPosicao;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
@@ -20,10 +23,13 @@ public class PisoDTO {
     @NotNull
     @Max(value = 4)
     private Integer nColunas;//Tipo Onibus
-    @NotBlank
-    private String distribuicaoFileira;
 
-    private String inicioContagem = "";
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private EnumPosicao distribuicaoFileira;
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private EnumPosicao inicioContagem;
 
     @Valid
     private List<Integer> posicoesIndisponiveis = new ArrayList<>();

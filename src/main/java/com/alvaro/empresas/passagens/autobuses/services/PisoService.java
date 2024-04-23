@@ -3,7 +3,6 @@ package com.alvaro.empresas.passagens.autobuses.services;
 import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTO;
 import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTOResponse;
 import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTOUpdate;
-import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PosicionIndisponibleDTO;
 import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import com.alvaro.empresas.passagens.autobuses.models.PosicionIndisponibleModel;

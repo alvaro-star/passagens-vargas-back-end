@@ -37,6 +37,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 @Profile({"dev", "share"})
@@ -71,23 +72,28 @@ public class ShareProfile {
     public void loadData() {
         var criptogrador = new BCryptPasswordEncoder();
         //Cadastra os Roles
-        var admin = new RoleModel(RoleList.ROLE_ADMIN);
-        roleService.save(admin);
-        var user = new RoleModel(RoleList.ROLE_CLIENTE);
-        roleService.save(user);
-        var empresaAdmin = new RoleModel(RoleList.ROLE_EMPRESA_ADMIN);
-        roleService.save(empresaAdmin);
-        var empresaFuncionario = new RoleModel(RoleList.ROLE_EMPRESA_FUNCIONARIO);
-        roleService.save(empresaFuncionario);
+        var admin = roleService.save(new RoleModel(RoleList.ROLE_ADMIN));
+        var cliente = roleService.save(new RoleModel(RoleList.ROLE_CLIENTE));
+        var empresaAdmin = roleService.save(new RoleModel(RoleList.ROLE_EMPRESA_ADMIN));
+        var empresaFuncionario = roleService.save(new RoleModel(RoleList.ROLE_EMPRESA_FUNCIONARIO));
 
         //Empresas
         EmpresaModel marzo = empresaRepository.save(new EmpresaModel("27 de Marzo", "https://github.com/alvaro-star.png", "202345"));
         EmpresaModel abril = empresaRepository.save(new EmpresaModel("20 de Abril", "https://github.com/alvaro-star.png", "202345"));
         EmpresaModel copacabana = empresaRepository.save(new EmpresaModel("Copacabana", "https://github.com/alvaro-star.png", "202345"));
-        var usuarioCliente = usuarioRepository.save(new UsuarioModel("cliente@gmail.com", "Rick Sanchez", "(11) - 11111-1111", criptogrador.encode("cliente")));
-        var usuarioAdmin = usuarioRepository.save(new UsuarioModel("admin@gmail.com", "Darth Vader", "(11) - 11111-1111", criptogrador.encode("admin")));
-        var usuarioEmpresaAdmin = usuarioRepository.save(new UsuarioModel("empresaadmin@gmail.com", "Hero Nakamura", "(33) - 33333-3333", criptogrador.encode("empresaadmin"), marzo.getId()));
-        var usuarioFuncionario = usuarioRepository.save(new UsuarioModel("empresafuncionario@gmail.com", "Rick Sanchez", "(11) - 11111-1111", criptogrador.encode("empresafuncionario"), marzo.getId()));
+
+        var usuarioCliente = new UsuarioModel("cliente@gmail.com", "Rick Sanchez", "(11) - 11111-1111", criptogrador.encode("cliente"));
+        usuarioCliente.setRoles(new HashSet<RoleModel>(Arrays.asList(cliente)));
+        usuarioRepository.save(usuarioCliente);
+        var usuarioAdmin = new UsuarioModel("admin@gmail.com", "Darth Vader", "(11) - 11111-1111", criptogrador.encode("admin"));
+        usuarioAdmin.setRoles(new HashSet<RoleModel>(Arrays.asList(admin)));
+        usuarioRepository.save(usuarioAdmin);
+        var usuarioEmpresaAdmin = new UsuarioModel("empresaadmin@gmail.com", "Hero Nakamura", "(33) - 33333-3333", criptogrador.encode("empresaadmin"), marzo.getId());
+        usuarioEmpresaAdmin.setRoles(new HashSet<RoleModel>(Arrays.asList(empresaAdmin)));
+        usuarioRepository.save(usuarioEmpresaAdmin);
+        var usuarioFuncionario = new UsuarioModel("empresafuncionario@gmail.com", "Rick Sanchez", "(11) - 11111-1111", criptogrador.encode("empresafuncionario"), marzo.getId());
+        usuarioFuncionario.setRoles(new HashSet<RoleModel>(Arrays.asList(empresaFuncionario)));
+        usuarioRepository.save(usuarioFuncionario);
 
         List<String> nombresDepartamentos = Arrays.asList("Santa Cruz", "La Paz", "Cochabamba", "Oruro", "Potosí", "Tarija", "Chuquisaca", "Pando", "Beni");
         List<LugarModel> lugares = new ArrayList<>();
@@ -106,11 +112,13 @@ public class ShareProfile {
 
         //Cria os Pisos
         int indice = 0;
+        int nLinhas = 12;
+        int nColunas = 4;
         for (AutobusModel autobus : autobuses) {
             List<PisoModel> pisos = new ArrayList<>();
-            pisos.add(pisoRepository.save(new PisoModel(20, 4, EnumPosicao.IZQUIERDA, 1, EnumPosicao.DERECHA, 20 * 4, 1, autobus)));
+            pisos.add(pisoRepository.save(new PisoModel(nLinhas, nColunas, EnumPosicao.IZQUIERDA, 1, EnumPosicao.DERECHA, nLinhas * nColunas, 1, autobus)));
             if (indice % 2 == 0)
-                pisos.add(pisoRepository.save(new PisoModel(20, 4, EnumPosicao.IZQUIERDA, 2, EnumPosicao.DERECHA, 20 * 4, 81, autobus)));
+                pisos.add(pisoRepository.save(new PisoModel(nLinhas, nColunas, EnumPosicao.IZQUIERDA, 2, EnumPosicao.DERECHA, nLinhas * nColunas, nLinhas * nColunas + 1, autobus)));
 
             indice++;
 

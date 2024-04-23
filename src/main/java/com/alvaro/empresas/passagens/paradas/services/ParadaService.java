@@ -4,6 +4,7 @@ import com.alvaro.empresas.passagens.configurations.exceptions.FieldMessage;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
 import com.alvaro.empresas.passagens.models.TrayectoModel;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTO;
+import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOUpdate;
 import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
@@ -31,11 +32,11 @@ public class ParadaService {
         return model.orElseThrow(() -> new ObjectNotFoundException(id, ParadaModel.class.getName()));
     }
 
-    public ParadaDTO getOne(Integer id) {
+    public ParadaDTOComplete getOne(Integer id) {
         var model = this.findById(id);
         int idLugar = model.getLugar().getId();
         UUID idTrayecto = model.getTrayecto().getCodigo();
-        return new ParadaDTO(model, idLugar, idTrayecto);
+        return new ParadaDTOComplete(model, idTrayecto);
     }
 
     public Page<ParadaDTO> getAll(Pageable pageable) {

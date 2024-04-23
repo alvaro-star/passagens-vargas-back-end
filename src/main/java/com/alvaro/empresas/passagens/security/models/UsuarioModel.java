@@ -56,6 +56,7 @@ public class UsuarioModel implements UserDetails {
         this.telefono = telefono;
         this.contrasena = contrasena;
         this.idEmpresa = idEmpresa;
+
     }
 
     @Override

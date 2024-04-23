@@ -49,7 +49,7 @@ public class TrayectoResource {
         if (!model.getViajes().isEmpty()) {
             return ResponseEntity.badRequest().body(new Mensaje("El trayecto tiene viajes associados"));
         }
-        if (!model.getPasajes().isEmpty()) {
+        if (!model.getPagos().isEmpty()) {
             return ResponseEntity.badRequest().body(new Mensaje("El trayecto tiene pasajes associados"));
         }
         if (!model.getParadas().isEmpty()) {

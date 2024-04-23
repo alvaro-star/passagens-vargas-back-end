@@ -1,6 +1,7 @@
 package com.alvaro.empresas.passagens.resources;
 
 import com.alvaro.empresas.passagens.dtos.EmpresaDto;
+import com.alvaro.empresas.passagens.dtos.EmpresaResponseDto;
 import com.alvaro.empresas.passagens.dtos.Mensaje;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.services.EmpresaService;
@@ -26,26 +27,26 @@ public class EmpresaResource {
 
 
     @GetMapping
-    public ResponseEntity<Page<EmpresaDto>> getAll(@PageableDefault(size = 10) Pageable pageable) {
+    public ResponseEntity<Page<EmpresaResponseDto>> getAll(@PageableDefault(size = 10) Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK).body(empresaService.findAll(pageable));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<EmpresaDto> getOne(@PathVariable(value = "id") UUID id) {
+    public ResponseEntity<EmpresaResponseDto> getOne(@PathVariable(value = "id") UUID id) {
         EmpresaModel model = empresaService.findById(id);
-        return ResponseEntity.status(HttpStatus.OK).body(new EmpresaDto(model));
+        return ResponseEntity.status(HttpStatus.OK).body(new EmpresaResponseDto(model));
     }
 
     @PostMapping
-    public ResponseEntity<EmpresaDto> save(@RequestBody @Valid EmpresaDto dto) {
+    public ResponseEntity<EmpresaResponseDto> save(@RequestBody @Valid EmpresaDto dto) {
         EmpresaModel model = empresaService.save(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new EmpresaDto(model));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new EmpresaResponseDto(model));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EmpresaDto> update(@PathVariable(value = "id") UUID id, @RequestBody @Valid EmpresaDto dto) {
+    public ResponseEntity<EmpresaResponseDto> update(@PathVariable(value = "id") UUID id, @RequestBody @Valid EmpresaDto dto) {
         EmpresaModel model = empresaService.update(dto, id);
-        return ResponseEntity.status(HttpStatus.OK).body(new EmpresaDto(model));
+        return ResponseEntity.status(HttpStatus.OK).body(new EmpresaResponseDto(model));
     }
 
     @DeleteMapping("/{id}")

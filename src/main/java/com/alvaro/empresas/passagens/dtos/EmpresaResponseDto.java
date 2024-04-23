@@ -5,12 +5,12 @@ import jakarta.validation.constraints.NotBlank;
 
 import java.util.UUID;
 
-public record EmpresaDto(
+public record EmpresaResponseDto(
         UUID id,
-        @NotBlank
         String nombre,
-        @NotBlank
-        String logo,
-        @NotBlank
-        String numeroCuenta) {
+        String logo
+) {
+    public EmpresaResponseDto(EmpresaModel model) {
+        this(model.getId(), model.getNombre(), model.getLogo());
+    }
 }

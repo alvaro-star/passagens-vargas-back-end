@@ -9,6 +9,7 @@ import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOList;
 import com.alvaro.empresas.passagens.models.TrayectoModel;
 import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTO;
+import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.alvaro.empresas.passagens.repositories.TrayectoRepository;
 import org.hibernate.ObjectNotFoundException;
@@ -37,9 +38,9 @@ public class TrayectoService {
     public TrayectoDTOResponse getOne(UUID id) {
         var model = this.findById(id);
 
-        List<ParadaDTO> paradasDTOs = new ArrayList<>();
+        List<ParadaDTOComplete> paradasDTOs = new ArrayList<>();
         for (ParadaModel paradaModel : model.getParadas()) {
-            paradasDTOs.add(new ParadaDTO(paradaModel, paradaModel.getLugar().getId(), model.getCodigo()));
+            paradasDTOs.add(new ParadaDTOComplete(paradaModel, model.getCodigo()));
         }
 
         List<ViajeDTOList> viajesDTOs = new ArrayList<>();
