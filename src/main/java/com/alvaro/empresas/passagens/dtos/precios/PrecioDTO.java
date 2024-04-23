@@ -16,9 +16,9 @@ public record PrecioDTO(
         @NotNull
         Integer nSillasDisponibles,
         @NotNull
-        Integer idViaje
+        UUID idViaje
 ) {
-    public PrecioDTO(PrecioModel model, Integer idViaje) {
+    public PrecioDTO(PrecioModel model, UUID idViaje) {
         this(model.getId(), model.getPrecio(), model.getNPiso(), model.getLleno(), model.getNSillasDisponibles(), idViaje);
     }
 

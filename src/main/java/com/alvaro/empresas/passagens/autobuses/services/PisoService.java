@@ -77,7 +77,7 @@ public class PisoService {
     public PisoDTOResponse update(PisoDTOUpdate dto, Integer id) {
         var model = this.findById(id);
 
-        if (!model.getAutobus().getTrayectos().isEmpty()) {
+        if (!model.getAutobus().getViajes().isEmpty()) {
             return null;
         }
 

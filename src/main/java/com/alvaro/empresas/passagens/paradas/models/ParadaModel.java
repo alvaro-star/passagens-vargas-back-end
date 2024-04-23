@@ -1,7 +1,5 @@
 package com.alvaro.empresas.passagens.paradas.models;
 
-
-import com.alvaro.empresas.passagens.models.TrayectoModel;
 import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOUpdate;
@@ -12,8 +10,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "tb_parada", indexes = @Index(name = "idx_dataHora", columnList = "data_hora"))
@@ -39,26 +35,20 @@ public class ParadaModel {
     private LugarModel lugar;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "fk_idtb_trayecto")
+    @JoinColumn(name = "fk_idtb_viaje")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private TrayectoModel trayecto;
-
-    @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "salida")
-    private List<ViajeModel> salidas = new ArrayList<>();
-
-    @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "destino")
-    private List<ViajeModel> destinos = new ArrayList<>();
+    private ViajeModel viaje;
 
     public ParadaModel(ParadaDTO dto) {
         dataHora = dto.dataHora();
         plataforma = dto.plataforma();
     }
 
-    public ParadaModel(LocalDateTime dataHora, int plataforma, LugarModel lugar, TrayectoModel trayecto) {
+    public ParadaModel(LocalDateTime dataHora, int plataforma, LugarModel lugar, ViajeModel viaje) {
         this.dataHora = dataHora;
         this.plataforma = plataforma;
         this.lugar = lugar;
-        this.trayecto = trayecto;
+        this.viaje = viaje;
     }
 
     public void updateValues(ParadaDTOUpdate dtoUpdate) {

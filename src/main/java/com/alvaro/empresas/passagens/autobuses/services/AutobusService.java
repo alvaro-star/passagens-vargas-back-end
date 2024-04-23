@@ -11,9 +11,9 @@ import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import com.alvaro.empresas.passagens.autobuses.models.PosicionIndisponibleModel;
 import com.alvaro.empresas.passagens.autobuses.repositories.AutobusRepository;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationError;
-import com.alvaro.empresas.passagens.dtos.TrayectoDTO;
+import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOList;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
-import com.alvaro.empresas.passagens.models.TrayectoModel;
+import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.services.EmpresaService;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,11 +56,11 @@ public class AutobusService {
 
     public AutobusDTOResponse getOne(Integer id) {
         var model = findById(id);
-        List<TrayectoDTO> trayectosDto = new ArrayList<>();
+        List<ViajeDTOList> viajesDTO = new ArrayList<>();
         List<PisoDTOResponse> pisosDto = new ArrayList<>();
 
-        for (TrayectoModel trayecto : model.getTrayectos()) {
-            trayectosDto.add(new TrayectoDTO(trayecto, model.getId()));
+        for (ViajeModel viaje : model.getViajes()) {
+            viajesDTO.add(new ViajeDTOList(viaje, model.getId()));
         }
 
         for (PisoModel piso : model.getPisos()) {
@@ -71,16 +71,11 @@ public class AutobusService {
             pisosDto.add(new PisoDTOResponse(piso, model.getId(), bloqueadosDto));
         }
 
-        return new AutobusDTOResponse(model, model.getEmpresa().getId(), pisosDto, trayectosDto);
+        return new AutobusDTOResponse(model, model.getEmpresa().getId(), pisosDto, viajesDTO);
     }
 
     public ValidationError validar(BindingResult bindingResult, AutobusDTO dto) {
-        ValidationError err = new ValidationError(
-                System.currentTimeMillis(),
-                HttpStatus.UNPROCESSABLE_ENTITY.value(),
-                "Erro de Validacao",
-                "Erro durante a validacao",
-                "/autobuses");
+        ValidationError err = new ValidationError(System.currentTimeMillis(), HttpStatus.UNPROCESSABLE_ENTITY.value(), "Erro de Validacao", "Erro durante a validacao", "/autobuses");
         for (FieldError erro : bindingResult.getFieldErrors()) {
             err.addError(erro.getField(), erro.getDefaultMessage());
         }
@@ -99,8 +94,7 @@ public class AutobusService {
             if (pisoDto.getNColunas() == null) {
                 err.addError("nColunas" + counter, "No puede ser nulo");
             } else {
-                if (pisoDto.getNColunas() > 4)
-                    err.addError("nColunas" + counter, "No puede ser maior que 4");
+                if (pisoDto.getNColunas() > 4) err.addError("nColunas" + counter, "No puede ser maior que 4");
             }
             if (pisoDto.getDistribuicaoFileira() == null) {
                 err.addError("distribuicaoFileira" + counter, "No puede ser vazio");

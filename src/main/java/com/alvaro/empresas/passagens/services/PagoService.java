@@ -28,7 +28,7 @@ public class PagoService {
     @Autowired
     private ContactoRepository contactoRepository;
 
-    public PagoModel save(PasajesDTO dto, Float precio, TrayectoModel trayecto, MetodoPagamentoEnum metodo, boolean guardarContacto) {
+    public PagoModel save(PasajesDTO dto, Float precio, ViajeModel viaje, MetodoPagamentoEnum metodo, boolean guardarContacto) {
         Float precioTotal = dto.pasajes().size() * precio;
         boolean estaPagado;
         LocalDateTime fechaPago = null;
@@ -42,7 +42,7 @@ public class PagoService {
         } else
             throw new ValidationException(new FieldMessage("metodo", "Metodo de Pago invalido"));
 
-        var pago = new PagoModel(precioTotal, 0f, tasa, estaPagado, metodo, trayecto, fechaPago);
+        var pago = new PagoModel(precioTotal, 0f, tasa, estaPagado, metodo, viaje, fechaPago);
         var pagoModel = pagoRepository.save(pago);
         if (guardarContacto) {
             ContactoModel contactoModel = new ContactoModel(dto.contacto().email(), dto.contacto().telefono());

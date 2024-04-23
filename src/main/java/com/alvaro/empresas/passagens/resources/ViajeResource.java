@@ -6,6 +6,7 @@ import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacao;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTO;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOList;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOResponse;
+import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOUpdate;
 import com.alvaro.empresas.passagens.services.ViajeService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -18,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/viajes")
@@ -32,7 +34,7 @@ public class ViajeResource {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ViajeDTOListBusqueda> getOne(@PathVariable(value = "id") Integer id) {
+    public ResponseEntity<ViajeDTOResponse> getOne(@PathVariable(value = "id") UUID id) {
         return ResponseEntity.ok(viajeService.getOne(id));
     }
 
@@ -53,9 +55,26 @@ public class ViajeResource {
         }
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<ViajeDTOList> update(@PathVariable(value = "id") UUID id, @RequestBody @Valid ViajeDTOUpdate dto) {
+        return ResponseEntity.ok(viajeService.update(dto, id));
+    }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> delete(@PathVariable(value = "id") Integer id) {
+    public ResponseEntity<Object> delete(@PathVariable(value = "id") UUID id) {
         var model = viajeService.findById(id);
+
+
+        if (!model.getPrecios().isEmpty()) {
+            return ResponseEntity.badRequest().body(new Mensaje("El trayecto tiene precios associados"));
+        }
+        if (!model.getPagos().isEmpty()) {
+            return ResponseEntity.badRequest().body(new Mensaje("El trayecto tiene pagos associados"));
+        }
+        if (!model.getParadas().isEmpty()) {
+            return ResponseEntity.badRequest().body(new Mensaje("El trayecto tiene paradas associados"));
+        }
+
         viajeService.delete(model);
         return ResponseEntity.noContent().build();
     }

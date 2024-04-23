@@ -42,12 +42,12 @@ public class ParadaResource {
         return ResponseEntity.ok(paradaService.update(dto, id));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id}")//Mejorar politica de exclusion, solo se puede eliminar si nádie pago o compro
     public ResponseEntity<Mensaje> delete(@PathVariable Integer id) {
         var model = paradaService.findById(id);
-        var viajes = model.getTrayecto().getViajes();
-        if (!viajes.isEmpty())
-            return ResponseEntity.badRequest().body(new Mensaje("La parada no puede ser eliminada pues el trayecto ya posse un viaje regsitrado"));
+        var pagos = model.getViaje().getPagos();
+        if (!pagos.isEmpty())
+            return ResponseEntity.badRequest().body(new Mensaje("La parada no puede ser eliminada pues el viaje ya posee un pago registrado"));
 
         paradaService.delete(model);
         return ResponseEntity.noContent().build();

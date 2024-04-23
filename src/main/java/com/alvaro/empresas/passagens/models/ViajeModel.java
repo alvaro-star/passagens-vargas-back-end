@@ -1,5 +1,6 @@
 package com.alvaro.empresas.passagens.models;
 
+import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
@@ -7,8 +8,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 
 @Entity
@@ -18,31 +21,96 @@ import java.util.List;
 @NoArgsConstructor
 public class ViajeModel {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "idtb_viaje")
-    private Integer id;
+    private UUID codigo;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_salida")
+    @JoinColumn(name = "fk_idtb_autobus")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private ParadaModel salida;
+    private AutobusModel autobus;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_destino")
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private ParadaModel destino;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "viaje")
+    private List<ParadaModel> paradas = new ArrayList<>();
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "fk_idtb_trayecto")
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private TrayectoModel trayecto;
+    @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "viaje")
+    private List<PagoModel> pagos = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "viaje")
     private List<PrecioModel> precios = new ArrayList<>();
 
-    public ViajeModel(ParadaModel salida, ParadaModel destino, TrayectoModel trayecto) {
-        this.salida = salida;
-        this.destino = destino;
-        this.trayecto = trayecto;
+    public ViajeModel(AutobusModel autobus) {
+        this.autobus = autobus;
+    }
+
+
+    public ParadaModel getParadaById(Integer id) {
+        for (ParadaModel parada : this.paradas) {
+            if (parada.getId().equals(id)) {
+                return parada;
+            }
+        }
+        return null;
+    }
+
+    public ParadaModel getParadaByLugarId(Integer idLugar) {
+        for (ParadaModel parada : this.getParadas()) {
+            if (parada.getLugar().getId() == idLugar) {
+                return parada;
+            }
+        }
+        return null;
+    }
+
+    public boolean dataHoraValido(LocalDateTime dtoTime) {
+        if (this.getParadas().size() >= 2) {
+            LocalDateTime maior = this.getParadas().get(0).getDataHora();
+            LocalDateTime menor = this.getParadas().get(0).getDataHora();
+            for (ParadaModel parada : this.getParadas()) {
+                if (parada.getDataHora().isAfter(maior))
+                    maior = parada.getDataHora();
+
+                if (parada.getDataHora().isBefore(menor))
+                    menor = parada.getDataHora();
+            }
+            return dtoTime.isAfter(menor) && dtoTime.isBefore(maior);
+        } else {
+            return true;
+        }
+    }
+
+    public boolean maiorDataHoraParada(LocalDateTime time) {
+        for (ParadaModel parada : this.paradas) {
+            if (time.isBefore(parada.getDataHora())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public ParadaModel getMenorParada() {
+        if (paradas.isEmpty()) {
+            return null;
+        }
+        int indiceMenor = 0;
+        for (int i = 0; i < paradas.size(); i++) {
+            if (paradas.get(indiceMenor).getDataHora().isAfter(paradas.get(i).getDataHora())) {
+                indiceMenor = i;
+            }
+        }
+        return paradas.get(indiceMenor);
+    }
+
+    public ParadaModel getMaiorParada() {
+        if (paradas.isEmpty()) {
+            return null;
+        }
+        int indiceMaior = 0;
+        for (int i = 0; i < paradas.size(); i++) {
+            if (paradas.get(indiceMaior).getDataHora().isBefore(paradas.get(i).getDataHora())) {
+                indiceMaior = i;
+            }
+        }
+        return paradas.get(indiceMaior);
     }
 }

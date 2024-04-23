@@ -7,7 +7,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.cglib.core.Local;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -47,21 +46,21 @@ public class PagoModel {
     private UsuarioModel cliente;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "fk_idtb_trayecto")
+    @JoinColumn(name = "fk_idtb_viaje")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private TrayectoModel trayecto;
+    private ViajeModel viaje;
 
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "pago")
     private List<PasajeModel> pasajes;
 
-    public PagoModel(Float valorTotal, Float descuento, Float tasaServicio, Boolean estaPagado, MetodoPagamentoEnum metodoPago, TrayectoModel trayecto, LocalDateTime fechaPago) {
+    public PagoModel(Float valorTotal, Float descuento, Float tasaServicio, Boolean estaPagado, MetodoPagamentoEnum metodoPago, ViajeModel viajeModel, LocalDateTime fechaPago) {
         this.valorTotal = valorTotal;
         this.descuento = descuento;
         this.tasaServicio = tasaServicio;
         this.estaPagado = estaPagado;
         this.metodoPago = metodoPago;
-        this.trayecto = trayecto;
         this.fechaPago = fechaPago;
+        this.viaje = viajeModel;
     }
 
     @PrePersist

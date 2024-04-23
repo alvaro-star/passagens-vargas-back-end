@@ -9,18 +9,18 @@ public record ParadaDTOComplete(
         Integer id,
         LocalDateTime dataHora,
         Integer plataforma,
-        UUID idTrayecto,
+        UUID idViaje,
         Integer idLugar,
         String lugar,
         String ciudad,
         String departamento,
         String abreviacion
 ) {
-    public ParadaDTOComplete(ParadaModel model, UUID idTrayecto) {
+    public ParadaDTOComplete(ParadaModel model, UUID idViaje) {
         this(model.getId(),
                 model.getDataHora(),
                 model.getPlataforma(),
-                idTrayecto,
+                idViaje,
                 model.getLugar().getId(),
                 model.getLugar().getNombre(),
                 model.getLugar().getCiudad().getNombre(),

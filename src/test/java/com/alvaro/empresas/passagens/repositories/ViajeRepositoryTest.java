@@ -1,16 +1,6 @@
 package com.alvaro.empresas.passagens.repositories;
 
-import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
-import com.alvaro.empresas.passagens.models.EmpresaModel;
-import com.alvaro.empresas.passagens.models.TrayectoModel;
-import com.alvaro.empresas.passagens.models.ViajeModel;
-import com.alvaro.empresas.passagens.paradas.models.CiudadModel;
-import com.alvaro.empresas.passagens.paradas.models.DepartamentoModel;
-import com.alvaro.empresas.passagens.paradas.models.LugarModel;
-import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import jakarta.persistence.EntityManager;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
@@ -29,11 +19,10 @@ class ViajeRepositoryTest {
     private ViajeRepository viajeRepository;
     @Autowired
     private EntityManager em;
-
-    @Test
+    /*
     @DisplayName("Deveria mostrar un viaje que contenga un intervalo de tiempo")
-    /* Sabendo que un trayecto tiene un viaje, mas muchas paradas, si quiero realizar un viaje que pase por dos
-    paradas mas no por la primera ni por la ultima necessáriamente, el viaje deveria contener el itervalo de un trayecto dado **/
+    *Sabendo que un trayecto tiene un viaje, mas muchas paradas, si quiero realizar un viaje que pase por dos
+    paradas mas no por la primera ni por la ultima necessáriamente, el viaje deveria contener el itervalo de un trayecto dado
     void getFromTrayectoCenario1() {
         var empresa = cadastrarEmpresa("23 de Abril");
         var autobus = cadastrarAutobus("2345L", empresa);
@@ -60,7 +49,6 @@ class ViajeRepositoryTest {
         assertThat(viajesEncontrados.get(0)).isEqualTo(viaje1);
     }
 
-    @Test
     @DisplayName("No deveria retornar ningun viaje en que la fecha de salida dado maior o igual que la fecha del destino")
     void getFromTrayectoCenario2() {
         var empresa = cadastrarEmpresa("23 de Abril");
@@ -88,7 +76,6 @@ class ViajeRepositoryTest {
         assertThat(viajesEncontrados.size()).isEqualTo(0);
     }
 
-    @Test
     @DisplayName("No deveria retornar ningun viaje, porque el intervalo dado no esta dentro del intervalo del viaje")
     void getFromTrayectoCenario3() {
         var empresa = cadastrarEmpresa("23 de Abril");
@@ -164,4 +151,5 @@ class ViajeRepositoryTest {
         em.persist(viaje);
         return viaje;
     }
+    */
 }

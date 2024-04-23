@@ -5,15 +5,16 @@ import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
 
 import java.util.List;
+import java.util.UUID;
 
 public record ViajeDTOListBusqueda(
-        Integer id,
+        UUID id,
         String logo,
         ParadaDTOComplete salida,
         ParadaDTOComplete destino,
         List<PrecioDTO> precios
 ) {
     public ViajeDTOListBusqueda(ViajeModel model, String logo, ParadaDTOComplete salida, ParadaDTOComplete destino, List<PrecioDTO> precios) {
-        this(model.getId(), logo, salida, destino, precios);
+        this(model.getCodigo(), logo, salida, destino, precios);
     }
 }

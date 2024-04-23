@@ -47,27 +47,27 @@ public class PasajeService {
     @Transactional
     public PagoModel save(PasajesDTO dto, MetodoPagamentoEnum metodo, boolean guardarContacto, boolean compradoWeb) {
         var precio = precioService.findById(dto.idPrecio());
-        var trayecto = precio.getViaje().getTrayecto();
+        var viaje = precio.getViaje();
         ParadaModel salida;
         ParadaModel destino;
 
         List<Integer> ocupados = pasajeRepository.getPasajesVendidos(precio.getId());
 
-        validarSilla(trayecto, precio, dto.pasajes(), ocupados);
+        validarSilla(viaje, precio, dto.pasajes(), ocupados);
 
-        salida = trayecto.getParadaByLugarId(dto.idLugarSalida());
+        salida = viaje.getParadaByLugarId(dto.idLugarSalida());
 
         if (salida == null) {
             throw new ValidationException(new FieldMessage("idLugarSalida", "La salida no hace parte del trayecto"));
         }
 
-        destino = trayecto.getParadaByLugarId(dto.idLugarDestino());
+        destino = viaje.getParadaByLugarId(dto.idLugarDestino());
 
         if (destino == null) {
             throw new ValidationException(new FieldMessage("idLugarDestino", "El destino no hace parte del trayecto"));
         }
 
-        PagoModel pago = pagoService.save(dto, precio.getPrecio(), trayecto, metodo, guardarContacto);
+        PagoModel pago = pagoService.save(dto, precio.getPrecio(), viaje, metodo, guardarContacto);
 
         boolean estaPago;
 
@@ -104,8 +104,8 @@ public class PasajeService {
         return pago;
     }
 
-    public void validarSilla(TrayectoModel trayecto, PrecioModel precio, List<PasajeDTO> pasajesDTO, List<Integer> ocupados) {
-        PisoModel piso = trayecto.getAutobus().getPisoByNumero(precio.getNPiso());
+    public void validarSilla(ViajeModel viaje, PrecioModel precio, List<PasajeDTO> pasajesDTO, List<Integer> ocupados) {
+        PisoModel piso = viaje.getAutobus().getPisoByNumero(precio.getNPiso());
         if (piso == null)
             throw new ValidationException(new FieldMessage("piso", "El piso informado no existe"));
 
@@ -127,9 +127,6 @@ public class PasajeService {
     public boolean empresaValida(Authentication usuario, UUID idPrecio) {
         var autorizado = usuarioRepository.findByEmail(usuario.getName());
         var precio = precioService.findById(idPrecio);
-        if (autorizado.getIdEmpresa() == precio.getViaje().getTrayecto().getAutobus().getEmpresa().getId()) {
-            return true;
-        }
-        return false;
+        return autorizado.getIdEmpresa() == precio.getViaje().getAutobus().getEmpresa().getId();
     }
 }

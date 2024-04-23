@@ -3,7 +3,7 @@ package com.alvaro.empresas.passagens.autobuses.models;
 import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTO;
 import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTOUpdate;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
-import com.alvaro.empresas.passagens.models.TrayectoModel;
+import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -25,23 +25,24 @@ public class AutobusModel {
     private Integer id;
     @Column(unique = true, nullable = false)
     private String placa;
-    private boolean enable;
+
+    private boolean enable = true;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_empresa")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private EmpresaModel empresa;
 
-    public AutobusModel(String placa, EmpresaModel empresa) {
-        this.placa = placa;
-        this.empresa = empresa;
-    }
-
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "autobus")
     private List<PisoModel> pisos = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "autobus")
-    private List<TrayectoModel> trayectos = new ArrayList<>();
+    private List<ViajeModel> viajes = new ArrayList<>();
+
+    public AutobusModel(String placa, EmpresaModel empresa) {
+        this.placa = placa;
+        this.empresa = empresa;
+    }
 
     public PisoModel getPisoByNumero(Integer nPiso) {
         for (PisoModel piso : this.pisos)
@@ -57,7 +58,7 @@ public class AutobusModel {
 
     public void updateValues(AutobusDTOUpdate dto) {
         placa = dto.placa();
-        if (dto.enable() != null){
+        if (dto.enable() != null) {
             enable = dto.enable();
         }
     }

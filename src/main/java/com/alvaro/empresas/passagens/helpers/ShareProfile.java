@@ -7,7 +7,6 @@ import com.alvaro.empresas.passagens.autobuses.repositories.AutobusRepository;
 import com.alvaro.empresas.passagens.autobuses.repositories.PisoRepository;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.models.PrecioModel;
-import com.alvaro.empresas.passagens.models.TrayectoModel;
 import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.paradas.models.CiudadModel;
 import com.alvaro.empresas.passagens.paradas.models.DepartamentoModel;
@@ -19,7 +18,6 @@ import com.alvaro.empresas.passagens.paradas.repositories.LugarRepository;
 import com.alvaro.empresas.passagens.paradas.repositories.ParadaRepository;
 import com.alvaro.empresas.passagens.repositories.EmpresaRepository;
 import com.alvaro.empresas.passagens.repositories.PrecioRepository;
-import com.alvaro.empresas.passagens.repositories.TrayectoRepository;
 import com.alvaro.empresas.passagens.repositories.ViajeRepository;
 import com.alvaro.empresas.passagens.security.models.RoleList;
 import com.alvaro.empresas.passagens.security.models.RoleModel;
@@ -57,8 +55,6 @@ public class ShareProfile {
     private AutobusRepository autobusRepository;
     @Autowired
     private PisoRepository pisoRepository;
-    @Autowired
-    private TrayectoRepository trayectoRepository;
     @Autowired
     private ParadaRepository paradaRepository;
     @Autowired
@@ -124,7 +120,7 @@ public class ShareProfile {
 
             //Cria os trayectos y las paradas de cada autobus
             for (DayOfWeek dia : DayOfWeek.values()) {
-                var trayecto = trayectoRepository.save(new TrayectoModel(autobus));
+                var viaje = viajeRepository.save(new ViajeModel(autobus));
                 var dataInicio = LocalDateTime.now().with(TemporalAdjusters.next(dia)).withHour(8);
                 int nLista = 0;
                 List<ParadaModel> paradas = new ArrayList<>();
@@ -132,24 +128,22 @@ public class ShareProfile {
                 if (lugares.size() > 5) {
                     for (int i = 0; i < 5; i++) {
                         dataInicio = dataInicio.plusHours(1);
-                        var parada = paradaRepository.save(new ParadaModel(dataInicio, 10, lugares.get(i), trayecto));
+                        var parada = paradaRepository.save(new ParadaModel(dataInicio, 10, lugares.get(i), viaje));
                         paradas.add(parada);
                         nLista++;
                     }
                 } else {
                     for (LugarModel lugar : lugares) {
                         dataInicio = dataInicio.plusHours(1);
-                        var parada = paradaRepository.save(new ParadaModel(dataInicio, 10, lugar, trayecto));
+                        var parada = paradaRepository.save(new ParadaModel(dataInicio, 10, lugar, viaje));
                         paradas.add(parada);
                         nLista++;
                     }
                 }
-                // Cria a viajem
-                var viajeSaved = viajeRepository.save(new ViajeModel(paradas.get(0), paradas.get(nLista - 1), trayecto));
 
                 float precioBruto = 200;
                 for (PisoModel piso : pisos) {
-                    var precio = precioRepository.save(new PrecioModel(precioBruto, piso.getNPiso(), piso.getNSillas(), viajeSaved));
+                    var precio = precioRepository.save(new PrecioModel(precioBruto, piso.getNPiso(), piso.getNSillas(), viaje));
                     precioBruto = precioBruto - 2;
                 }
             }

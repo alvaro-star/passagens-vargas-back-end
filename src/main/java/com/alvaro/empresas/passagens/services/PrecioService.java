@@ -35,19 +35,19 @@ public class PrecioService {
         for (PrecioModel precioModel : dtoModels) {
             precioModel.setViaje(viaje);
             var save = precioRepository.save(precioModel);
-            salvos.add(new PrecioDTO(save, viaje.getId()));
+            salvos.add(new PrecioDTO(save, viaje.getCodigo()));
         }
         return salvos;
     }
 
     public PrecioDTO getOne(UUID id) {
         var model = findById(id);
-        return new PrecioDTO(model, model.getViaje().getId());
+        return new PrecioDTO(model, model.getViaje().getCodigo());
     }
 
     public PrecioDTOResponseViaje vender(UUID id) {
         var model = findById(id);
-        List<PisoModel> pisos = model.getViaje().getTrayecto().getAutobus().getPisos();
+        List<PisoModel> pisos = model.getViaje().getAutobus().getPisos();
         var pisoElegido = new PisoModel();
         for (PisoModel piso : pisos) {
             if (piso.getNPiso() == model.getNPiso()) {
@@ -60,7 +60,7 @@ public class PrecioService {
             bloqueados.add(posicionesIndisponible.getNumero());
         }
 
-        PisoDTOResponse pisoDto = new PisoDTOResponse(pisoElegido, model.getViaje().getTrayecto().getAutobus().getId(), bloqueados);
+        PisoDTOResponse pisoDto = new PisoDTOResponse(pisoElegido, model.getViaje().getAutobus().getId(), bloqueados);
 
         List<Integer> ocupados = pasajeRepository.getPasajesVendidos(model.getId());
         return new PrecioDTOResponseViaje(model, pisoDto, ocupados);
@@ -70,7 +70,7 @@ public class PrecioService {
         var model = findById(id);
         model.updateValues(dto);
         var update = precioRepository.save(model);
-        return new PrecioDTO(update, model.getViaje().getId());
+        return new PrecioDTO(update, model.getViaje().getCodigo());
     }
 
     public PrecioModel updateFromService(PrecioModel precioModel) {

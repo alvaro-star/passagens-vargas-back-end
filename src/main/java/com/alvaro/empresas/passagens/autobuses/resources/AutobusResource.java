@@ -66,8 +66,8 @@ public class AutobusResource {
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> delete(@PathVariable(value = "id") Integer id) {
         var model = autobusService.findById(id);
-        if (!model.getTrayectos().isEmpty()) {
-            return ResponseEntity.badRequest().body(new Mensaje("El autobus tiene trayectos registrados"));
+        if (!model.getViajes().isEmpty()) {
+            return ResponseEntity.badRequest().body(new Mensaje("El autobus tiene viajes registrados"));
         }
         autobusService.delete(model);
         return ResponseEntity.noContent().build();

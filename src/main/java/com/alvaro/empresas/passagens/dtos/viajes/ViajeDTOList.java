@@ -6,15 +6,11 @@ import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 
 public record ViajeDTOList(
-        Integer id,
+        UUID codigo,
         @NotNull
-        UUID idTrayecto,
-        @NotNull
-        Integer salida,
-        @NotNull
-        Integer destino
+        Integer idAutobus
 ) {
-    public ViajeDTOList(ViajeModel model, UUID idTrayecto, Integer salida, Integer destino) {
-        this(model.getId(), idTrayecto, salida, destino);
+    public ViajeDTOList(ViajeModel model, Integer idAutobus) {
+        this(model.getCodigo(), idAutobus);
     }
 }
