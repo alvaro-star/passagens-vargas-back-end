@@ -15,9 +15,9 @@ public record PisoDTOResponse(
         Integer nSillas,
         Integer primeraSilla,
         Integer idAutobus,
-        List<Integer> posicoesIndisponiveis
+        String posicoesBloqueadas
 ) {
-    public PisoDTOResponse(PisoModel model, Integer idAutobus, List<Integer> posicoesIndisponiveis) {
+    public PisoDTOResponse(PisoModel model, Integer idAutobus) {
         this(
                 model.getId(),
                 model.getNLinhas(),
@@ -28,7 +28,7 @@ public record PisoDTOResponse(
                 model.getNSillas(),
                 model.getPrimeraSilla(),
                 idAutobus,
-                posicoesIndisponiveis
+                model.getPosicionesBloqueadas()
         );
     }
 }

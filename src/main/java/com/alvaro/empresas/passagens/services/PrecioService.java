@@ -2,7 +2,6 @@ package com.alvaro.empresas.passagens.services;
 
 import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTOResponse;
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
-import com.alvaro.empresas.passagens.autobuses.models.PosicionIndisponibleModel;
 import com.alvaro.empresas.passagens.dtos.precios.PrecioDTO;
 import com.alvaro.empresas.passagens.dtos.precios.PrecioDTOResponseViaje;
 import com.alvaro.empresas.passagens.dtos.precios.PrecioDTOUpdate;
@@ -49,18 +48,13 @@ public class PrecioService {
         var model = findById(id);
         List<PisoModel> pisos = model.getViaje().getAutobus().getPisos();
         var pisoElegido = new PisoModel();
+
         for (PisoModel piso : pisos) {
-            if (piso.getNPiso() == model.getNPiso()) {
+            if (piso.getNPiso().equals(model.getNPiso()))
                 pisoElegido = piso;
-            }
         }
 
-        List<Integer> bloqueados = new ArrayList<>();
-        for (PosicionIndisponibleModel posicionesIndisponible : pisoElegido.getPosicionesIndisponibles()) {
-            bloqueados.add(posicionesIndisponible.getNumero());
-        }
-
-        PisoDTOResponse pisoDto = new PisoDTOResponse(pisoElegido, model.getViaje().getAutobus().getId(), bloqueados);
+        PisoDTOResponse pisoDto = new PisoDTOResponse(pisoElegido, model.getViaje().getAutobus().getId());
 
         List<Integer> ocupados = pasajeRepository.getPasajesVendidos(model.getId());
         return new PrecioDTOResponseViaje(model, pisoDto, ocupados);

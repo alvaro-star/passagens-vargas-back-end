@@ -47,8 +47,7 @@ public class PisoModel {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private AutobusModel autobus;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "piso")
-    private List<PosicionIndisponibleModel> posicionesIndisponibles = new ArrayList<PosicionIndisponibleModel>();
+    private String posicionesBloqueadas = "";
 
     public PisoModel(PisoDTO dto, Integer nPiso, Integer primeraSilla) {
         nSillas = dto.getNColunas() * dto.getNLinhas() - dto.getPosicoesIndisponiveis().size();
@@ -58,6 +57,10 @@ public class PisoModel {
         inicioContagem = dto.getInicioContagem();
         this.nPiso = nPiso;
         this.primeraSilla = primeraSilla;
+        String palavra = "";
+        for (Integer posicionBloqueada : dto.getPosicoesIndisponiveis())
+            palavra = palavra.concat(posicionBloqueada + ",");
+        this.posicionesBloqueadas = palavra;
     }
 
     public PisoModel(Integer nLinhas, Integer nColunas, EnumPosicao distribuicaoFileira, Integer nPiso, EnumPosicao inicioContagem, Integer nSillas, Integer primeraSilla, AutobusModel autobus) {
@@ -75,9 +78,12 @@ public class PisoModel {
         nSillas = dto.getNColunas() * dto.getNLinhas() - dto.getPosicoesIndisponiveis().size();
         nLinhas = dto.getNLinhas();
         nColunas = dto.getNColunas();
-
         distribuicaoFileira = dto.getDistribuicaoFileira();
-
         inicioContagem = dto.getInicioContagem();
+
+        String palavra = "";
+        for (Integer posicionBloqueada : dto.getPosicoesIndisponiveis())
+            palavra = palavra.concat(posicionBloqueada + ",");
+        this.posicionesBloqueadas = palavra;
     }
 }

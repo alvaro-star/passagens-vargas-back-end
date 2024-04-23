@@ -8,7 +8,6 @@ import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTO;
 import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTOResponse;
 import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
-import com.alvaro.empresas.passagens.autobuses.models.PosicionIndisponibleModel;
 import com.alvaro.empresas.passagens.autobuses.repositories.AutobusRepository;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationError;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOList;
@@ -59,17 +58,11 @@ public class AutobusService {
         List<ViajeDTOList> viajesDTO = new ArrayList<>();
         List<PisoDTOResponse> pisosDto = new ArrayList<>();
 
-        for (ViajeModel viaje : model.getViajes()) {
+        for (ViajeModel viaje : model.getViajes())
             viajesDTO.add(new ViajeDTOList(viaje, model.getId()));
-        }
 
-        for (PisoModel piso : model.getPisos()) {
-            List<Integer> bloqueadosDto = new ArrayList<>();
-            for (PosicionIndisponibleModel bloqueado : piso.getPosicionesIndisponibles()) {
-                bloqueadosDto.add(bloqueado.getNumero());
-            }
-            pisosDto.add(new PisoDTOResponse(piso, model.getId(), bloqueadosDto));
-        }
+        for (PisoModel piso : model.getPisos())
+            pisosDto.add(new PisoDTOResponse(piso, model.getId()));
 
         return new AutobusDTOResponse(model, model.getEmpresa().getId(), pisosDto, viajesDTO);
     }

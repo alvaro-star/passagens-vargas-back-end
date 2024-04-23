@@ -2,7 +2,7 @@ package com.alvaro.empresas.passagens.paradas.repositories;
 
 import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
-import com.alvaro.empresas.passagens.models.TrayectoModel;
+import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.paradas.models.CiudadModel;
 import com.alvaro.empresas.passagens.paradas.models.DepartamentoModel;
 import com.alvaro.empresas.passagens.paradas.models.LugarModel;
@@ -34,10 +34,10 @@ class ParadaRepositoryTest {
     void cargarSalidasDelDiaCenario1() {
         var empresa = cadastrarEmpresa("23 de Abril");
         var autobus = cadastrarAutobus("2345L", empresa);
-        var trayecto1 = cadastrarTrayecto(autobus);
-        var trayecto2 = cadastrarTrayecto(autobus);
-        var trayecto3 = cadastrarTrayecto(autobus);
-        var trayecto4 = cadastrarTrayecto(autobus);
+        var viaje1 = cadastrarViaje(autobus);
+        var viaje2 = cadastrarViaje(autobus);
+        var viaje3 = cadastrarViaje(autobus);
+        var viaje4 = cadastrarViaje(autobus);
         var lugares = cadastrarLugares();
         var dataAtual = LocalDateTime.now().with(TemporalAdjusters.next(DayOfWeek.MONDAY)).withHour(8);
         List<ParadaModel> paradas1 = new ArrayList<>();
@@ -46,10 +46,10 @@ class ParadaRepositoryTest {
         List<ParadaModel> paradas4 = new ArrayList<>();
 
         for (int i = 0; i < 5; i++) {
-            paradas1.add(cadastrarParada(dataAtual.plusDays(i), lugares.get(i), trayecto1));
-            paradas2.add(cadastrarParada(dataAtual.plusDays(i), lugares.get(i), trayecto2));
-            paradas3.add(cadastrarParada(dataAtual.plusDays(i), lugares.get(i), trayecto3));
-            paradas4.add(cadastrarParada(dataAtual.plusDays(i), lugares.get(i + 1), trayecto4));
+            paradas1.add(cadastrarParada(dataAtual.plusDays(i), lugares.get(i), viaje1));
+            paradas2.add(cadastrarParada(dataAtual.plusDays(i), lugares.get(i), viaje2));
+            paradas3.add(cadastrarParada(dataAtual.plusDays(i), lugares.get(i), viaje3));
+            paradas4.add(cadastrarParada(dataAtual.plusDays(i), lugares.get(i + 1), viaje4));
         }
 
         LocalDateTime startDay = dataAtual.plusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
@@ -74,10 +74,10 @@ class ParadaRepositoryTest {
         return autobus;
     }
 
-    private TrayectoModel cadastrarTrayecto(AutobusModel autobusModel) {
-        var trayecto = new TrayectoModel(autobusModel);
-        em.persist(trayecto);
-        return trayecto;
+    private ViajeModel cadastrarViaje(AutobusModel autobusModel) {
+        var viaje = new ViajeModel(autobusModel);
+        em.persist(viaje);
+        return viaje;
     }
 
     private List<LugarModel> cadastrarLugares() {
@@ -95,8 +95,8 @@ class ParadaRepositoryTest {
         return lugares;
     }
 
-    private ParadaModel cadastrarParada(LocalDateTime data, LugarModel lugar, TrayectoModel trayecto) {
-        var parada = new ParadaModel(data, 10, lugar, trayecto);
+    private ParadaModel cadastrarParada(LocalDateTime data, LugarModel lugar, ViajeModel viaje) {
+        var parada = new ParadaModel(data, 10, lugar, viaje);
         em.persist(parada);
         return parada;
     }
