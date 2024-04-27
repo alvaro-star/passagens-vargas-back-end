@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -18,16 +19,17 @@ import java.util.UUID;
 @Table(name = "tb_pago")
 @NoArgsConstructor
 public class PagoModel {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "idtb_pagamento")
     private UUID id;
     @Column(nullable = false)
-    private Float valorTotal;
+    private BigDecimal valorTotal;
     @Column(nullable = false)
-    private Float descuento;
+    private BigDecimal descuento;
     @Column(nullable = false)
-    private Float tasaServicio;
+    private BigDecimal tasaServicio;
     @Column(nullable = false, name = "pagado?")
     private Boolean estaPagado;
     @Column(nullable = false, name = "metodo_pago")
@@ -53,7 +55,7 @@ public class PagoModel {
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "pago")
     private List<PasajeModel> pasajes;
 
-    public PagoModel(Float valorTotal, Float descuento, Float tasaServicio, Boolean estaPagado, MetodoPagamentoEnum metodoPago, ViajeModel viajeModel, LocalDateTime fechaPago) {
+    public PagoModel(BigDecimal valorTotal, BigDecimal descuento, BigDecimal tasaServicio, Boolean estaPagado, MetodoPagamentoEnum metodoPago, ViajeModel viajeModel, LocalDateTime fechaPago, ContactoModel contacto) {
         this.valorTotal = valorTotal;
         this.descuento = descuento;
         this.tasaServicio = tasaServicio;
@@ -61,6 +63,7 @@ public class PagoModel {
         this.metodoPago = metodoPago;
         this.fechaPago = fechaPago;
         this.viaje = viajeModel;
+        this.contacto = contacto;
     }
 
     @PrePersist

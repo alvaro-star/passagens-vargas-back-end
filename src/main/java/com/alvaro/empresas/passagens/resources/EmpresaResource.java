@@ -15,11 +15,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/empresas")
 @SecurityRequirement(name = "bearer-key")
+//Role_ADMIN, ROLE_EMPRESA_ADMIN
 public class EmpresaResource {
 
     @Autowired
@@ -33,25 +35,22 @@ public class EmpresaResource {
 
     @GetMapping("/{id}")
     public ResponseEntity<EmpresaResponseDto> getOne(@PathVariable(value = "id") UUID id) {
-        EmpresaModel model = empresaService.findById(id);
-        return ResponseEntity.status(HttpStatus.OK).body(new EmpresaResponseDto(model));
+        return ResponseEntity.status(HttpStatus.OK).body(empresaService.getOne(id));
     }
 
     @PostMapping
     public ResponseEntity<EmpresaResponseDto> save(@RequestBody @Valid EmpresaDto dto) {
-        EmpresaModel model = empresaService.save(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new EmpresaResponseDto(model));
+        return ResponseEntity.status(HttpStatus.CREATED).body(empresaService.save(dto));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<EmpresaResponseDto> update(@PathVariable(value = "id") UUID id, @RequestBody @Valid EmpresaDto dto) {
-        EmpresaModel model = empresaService.update(dto, id);
-        return ResponseEntity.status(HttpStatus.OK).body(new EmpresaResponseDto(model));
+        return ResponseEntity.status(HttpStatus.OK).body(empresaService.update(dto, id));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> delete(@PathVariable(value = "id") UUID id) {
         empresaService.delete(id);
-        return ResponseEntity.status(HttpStatus.OK).body(new Mensaje("Eliminado"));
+        return ResponseEntity.noContent().build();
     }
 }

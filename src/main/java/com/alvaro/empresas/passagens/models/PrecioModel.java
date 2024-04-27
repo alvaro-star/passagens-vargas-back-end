@@ -4,10 +4,12 @@ import com.alvaro.empresas.passagens.dtos.precios.PrecioDTO;
 import com.alvaro.empresas.passagens.dtos.precios.PrecioDTOUpdate;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -22,12 +24,17 @@ public class PrecioModel {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "idtb_precio")
     private UUID id;
-    @Column(nullable = false)
-    private Float precio;
+
+    @Column(precision = 10, scale = 2, nullable = false)
+    @DecimalMin("0.00")
+    private BigDecimal precio;
+
     @Column(nullable = false)
     private Integer nPiso;
+
     @Column(nullable = false)
     private Boolean lleno = false;
+
     @Column(nullable = false)
     private Integer nSillasDisponibles;
 
@@ -44,13 +51,13 @@ public class PrecioModel {
         nPiso = dto.nPiso();
     }
 
-    public PrecioModel(Float precio, Integer nPiso, Integer nSillasDisponibles) {
+    public PrecioModel(BigDecimal precio, Integer nPiso, Integer nSillasDisponibles) {
         this.precio = precio;
         this.nPiso = nPiso;
         this.nSillasDisponibles = nSillasDisponibles;
     }
 
-    public PrecioModel(Float precio, Integer nPiso, Integer nSillasDisponibles, ViajeModel viaje) {
+    public PrecioModel(BigDecimal precio, Integer nPiso, Integer nSillasDisponibles, ViajeModel viaje) {
         this.precio = precio;
         this.nPiso = nPiso;
         this.nSillasDisponibles = nSillasDisponibles;

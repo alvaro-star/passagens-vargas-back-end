@@ -30,7 +30,6 @@ public class UsuarioResource {
         ArrayList<String> roles = new ArrayList<>();
         for (GrantedAuthority authority : usuarioAuth.getAuthorities()) {
             String role = authority.getAuthority();
-            System.out.println(role);
             roles.add(role);
             if ("ROLE_EMPRESA_FUNCIONARIO".equals(role) || "ROLE_EMPRESA_ADMIN".equals(role))
                 isEmpresa = true;

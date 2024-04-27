@@ -2,6 +2,7 @@ package com.alvaro.empresas.passagens.models;
 
 import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.dtos.EmpresaDto;
+import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOListBusqueda;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,6 +29,9 @@ public class EmpresaModel {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "empresa")
     private List<AutobusModel> autobuses = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "empresa")
+    private List<ViajeModel> viajes = new ArrayList<>();
 
     //Funcionarios
     public EmpresaModel(EmpresaDto dto) {

@@ -3,12 +3,13 @@ package com.alvaro.empresas.passagens.dtos.precios;
 import com.alvaro.empresas.passagens.models.PrecioModel;
 import jakarta.validation.constraints.NotNull;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 public record PrecioDTO(
         UUID id,
         @NotNull
-        Float precio,
+        BigDecimal precio,
         @NotNull
         Integer nPiso,
         @NotNull

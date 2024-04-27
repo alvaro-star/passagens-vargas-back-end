@@ -12,13 +12,17 @@ import java.util.UUID;
 
 @Repository
 public interface ParadaRepository extends JpaRepository<ParadaModel, Integer> {
-    @Query(value = "SELECT fk_idtb_viaje FROM tb_parada " +
+    @Query(value = "SELECT * FROM tb_parada " +
             "WHERE fk_idtb_lugar = :id_lugar " +
             "AND data_hora BETWEEN :data_start AND :data_end", nativeQuery = true)
-    List<byte[]> cargarSalidasDelDia(@Param("id_lugar") Integer idLugar,
-                                     @Param("data_start") LocalDateTime dataStart,
-                                     @Param("data_end") LocalDateTime dataEnd);
+    List<ParadaModel> cargarSalidasDelDia(@Param("id_lugar") Integer idLugar,
+                                          @Param("data_start") LocalDateTime dataStart,
+                                          @Param("data_end") LocalDateTime dataEnd);
 
+    /*
+        SELECT v.* FROM ViajeModel v RIGHT Join ParadaModel p where v.id = "teste"
+        List<ViajeModel> viajes
+     */
     @Query(value = "SELECT * FROM tb_parada WHERE fk_idtb_lugar = :idLugar " +
             "AND fk_idtb_viaje = :codigo", nativeQuery = true)
     List<ParadaModel> nVezesViajePassa(@Param("idLugar") Integer idLugar, @Param("codigo") UUID codigoViaje);

@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -27,14 +28,21 @@ public class PagoService {
     private PrecioService precioService;
     @Autowired
     private ContactoRepository contactoRepository;
+    private Integer nPasajes;
 
-    public PagoModel save(PasajesDTO dto, Float precio, ViajeModel viaje, MetodoPagamentoEnum metodo, boolean guardarContacto) {
-        Float precioTotal = dto.pasajes().size() * precio;
+    public PagoModel save(PasajesDTO dto, BigDecimal precio, ViajeModel viaje, MetodoPagamentoEnum metodo, boolean guardarContacto) {
+        int nPasajes = dto.pasajes().size();
+        BigDecimal precioTotal = precio.multiply(BigDecimal.valueOf(nPasajes));
         boolean estaPagado;
+
         LocalDateTime fechaPago = null;
-        var tasa = 0.0f;
+
+        BigDecimal tasa = new BigDecimal("0.1");//Cuanto será cobrad por el servicio
+
+        BigDecimal tasaServicio = new BigDecimal("0.00");
+
         if (metodo == MetodoPagamentoEnum.QR) {
-            tasa = precioTotal / 10;
+            tasaServicio = precioTotal.multiply(tasa);
             estaPagado = false;
         } else if (metodo == MetodoPagamentoEnum.EFECTIVO) {
             estaPagado = true;
@@ -42,18 +50,17 @@ public class PagoService {
         } else
             throw new ValidationException(new FieldMessage("metodo", "Metodo de Pago invalido"));
 
-        var pago = new PagoModel(precioTotal, 0f, tasa, estaPagado, metodo, viaje, fechaPago);
-        var pagoModel = pagoRepository.save(pago);
-        if (guardarContacto) {
-            ContactoModel contactoModel = new ContactoModel(dto.contacto().email(), dto.contacto().telefono());
-            contactoModel.setPago(pagoModel);
-            contactoRepository.save(contactoModel);
-        }
+        ContactoModel contactoModel = null;
+        if (guardarContacto)
+            contactoModel = new ContactoModel(dto.contacto().nombre(), dto.contacto().email(), dto.contacto().telefono());
 
-        return pagoModel;
+        var pago = new PagoModel(precioTotal, BigDecimal.valueOf(0), tasaServicio, estaPagado, metodo, viaje, fechaPago, contactoModel);
+
+        return pagoRepository.save(pago);
     }
 
     //O tipo de retorno é vazio, mas estamos colocando booleano por teste
+
     @Transactional
     public boolean pagarQr(UUID idPago) {//
         PagoModel pago = pagoRepository.findById(idPago).orElseThrow(() -> new ObjectNotFoundException(idPago, PagoModel.class.getName()));

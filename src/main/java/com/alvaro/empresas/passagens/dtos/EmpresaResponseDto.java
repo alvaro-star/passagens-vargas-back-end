@@ -3,14 +3,16 @@ package com.alvaro.empresas.passagens.dtos;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import jakarta.validation.constraints.NotBlank;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 public record EmpresaResponseDto(
         UUID id,
         String nombre,
-        String logo
+        String logo,
+        BigDecimal valorViajes
 ) {
-    public EmpresaResponseDto(EmpresaModel model) {
-        this(model.getId(), model.getNombre(), model.getLogo());
+    public EmpresaResponseDto(EmpresaModel model, BigDecimal valorViajes) {
+        this(model.getId(), model.getNombre(), model.getLogo(), valorViajes);
     }
 }

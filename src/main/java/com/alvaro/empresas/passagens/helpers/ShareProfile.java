@@ -30,6 +30,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
@@ -120,7 +121,7 @@ public class ShareProfile {
 
             //Cria os trayectos y las paradas de cada autobus
             for (DayOfWeek dia : DayOfWeek.values()) {
-                var viaje = viajeRepository.save(new ViajeModel(autobus));
+                var viaje = viajeRepository.save(new ViajeModel(autobus, autobus.getEmpresa(), new BigDecimal("0.00"), false));
                 var dataInicio = LocalDateTime.now().with(TemporalAdjusters.next(dia)).withHour(8);
                 int nLista = 0;
                 List<ParadaModel> paradas = new ArrayList<>();
@@ -141,10 +142,10 @@ public class ShareProfile {
                     }
                 }
 
-                float precioBruto = 200;
+                BigDecimal precioBruto = BigDecimal.valueOf(200);
                 for (PisoModel piso : pisos) {
                     var precio = precioRepository.save(new PrecioModel(precioBruto, piso.getNPiso(), piso.getNSillas(), viaje));
-                    precioBruto = precioBruto - 2;
+                    precioBruto = precioBruto.subtract(BigDecimal.valueOf(2));
                 }
             }
         }

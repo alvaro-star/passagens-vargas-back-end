@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -25,21 +26,33 @@ public class EmpresaService {
         return model.orElseThrow(() -> new ObjectNotFoundException(id, EmpresaModel.class.getName()));
     }
 
+    public EmpresaResponseDto getOne(UUID id) {
+        EmpresaModel model = this.findById(id);
+        var valorArrecadado = empresaRepository.getArrecadacao(id);
+        return new EmpresaResponseDto(model, valorArrecadado);
+    }
+
     public Page<EmpresaResponseDto> findAll(Pageable pageable) {
-        return empresaRepository.findAll(pageable).map(EmpresaResponseDto::new);
+        return empresaRepository.findAll(pageable).map(model -> {
+            BigDecimal valorViajes = empresaRepository.getArrecadacao(model.getId());
+            return new EmpresaResponseDto(model, valorViajes);
+        });
     }
 
     @Transactional
-    public EmpresaModel save(EmpresaDto dto) {
+    public EmpresaResponseDto save(EmpresaDto dto) {
         var model = new EmpresaModel();
         BeanUtils.copyProperties(dto, model, "id", "autobuses");
-        return empresaRepository.save(model);
+        var modelSaved = empresaRepository.save(model);
+        return new EmpresaResponseDto(modelSaved, new BigDecimal("00.0"));
     }
 
-    public EmpresaModel update(EmpresaDto dto, UUID id) {
+    public EmpresaResponseDto update(EmpresaDto dto, UUID id) {
         var model = this.findById(id);
         BeanUtils.copyProperties(dto, model, "id", "autobuses");
-        return empresaRepository.save(model);
+        BigDecimal valorArrecadado = empresaRepository.getArrecadacao(id);
+        EmpresaModel update = empresaRepository.save(model);
+        return new EmpresaResponseDto(update, valorArrecadado);
     }
 
     @Transactional

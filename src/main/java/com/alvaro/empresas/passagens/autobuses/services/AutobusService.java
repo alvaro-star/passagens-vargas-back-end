@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -44,13 +45,19 @@ public class AutobusService {
 
     public Page<AutobusDTOList> findAll(Pageable pageable) {
         Page<AutobusModel> models = autobusRepository.findAll(pageable);
-        return models.map(model -> new AutobusDTOList(model, model.getEmpresa().getId()));
+        return models.map(model -> {
+            BigDecimal valorViajes = autobusRepository.getArrecadacao(model.getId());
+            return new AutobusDTOList(model, valorViajes, model.getEmpresa().getId());
+        });
     }
 
     public Page<AutobusDTOList> findAllFromEmpresa(UUID idEmpresa, Pageable pageable) {
         var empresa = empresaService.findById(idEmpresa);
         Page<AutobusModel> autobuses = autobusRepository.findByEmpresa(empresa, pageable);
-        return autobuses.map((autobus) -> new AutobusDTOList(autobus, empresa.getId()));
+        return autobuses.map((autobus) -> {
+            BigDecimal valorViajes = autobusRepository.getArrecadacao(autobus.getId());
+            return new AutobusDTOList(autobus, valorViajes, empresa.getId());
+        });
     }
 
     public AutobusDTOResponse getOne(Integer id) {
@@ -119,7 +126,8 @@ public class AutobusService {
         var model = this.findById(id);
         model.updateValues(dto);
         var update = autobusRepository.save(model);
-        return new AutobusDTOList(update, update.getEmpresa().getId());
+        BigDecimal valorViajes = autobusRepository.getArrecadacao(model.getId());
+        return new AutobusDTOList(update, valorViajes, update.getEmpresa().getId());
     }
 
     @Transactional

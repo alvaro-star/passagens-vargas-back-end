@@ -4,10 +4,13 @@ import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,10 +28,23 @@ public class ViajeModel {
     @Column(name = "idtb_viaje")
     private UUID codigo;
 
+    @Column(precision = 10, scale = 2, nullable = false)
+    @DecimalMin("0.00")
+    private BigDecimal valorArrecadado;
+
+    @Column(name="cobrado", nullable = false)
+    private boolean isCobrado;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_autobus")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private AutobusModel autobus;
+
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "fk_idtb_empresa")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private EmpresaModel empresa;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "viaje")
     private List<ParadaModel> paradas = new ArrayList<>();
@@ -39,19 +55,13 @@ public class ViajeModel {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "viaje")
     private List<PrecioModel> precios = new ArrayList<>();
 
-    public ViajeModel(AutobusModel autobus) {
+    public ViajeModel(AutobusModel autobus, EmpresaModel empresa, BigDecimal valorArrecadado, boolean isCobrado) {
         this.autobus = autobus;
+        this.valorArrecadado = valorArrecadado;
+        this.isCobrado = isCobrado;
+        this.empresa = empresa;
     }
 
-
-    public ParadaModel getParadaById(Integer id) {
-        for (ParadaModel parada : this.paradas) {
-            if (parada.getId().equals(id)) {
-                return parada;
-            }
-        }
-        return null;
-    }
 
     public ParadaModel getParadaByLugarId(Integer idLugar) {
         for (ParadaModel parada : this.getParadas()) {
@@ -74,43 +84,8 @@ public class ViajeModel {
                     menor = parada.getDataHora();
             }
             return dtoTime.isAfter(menor) && dtoTime.isBefore(maior);
-        } else {
-            return true;
-        }
-    }
-
-    public boolean maiorDataHoraParada(LocalDateTime time) {
-        for (ParadaModel parada : this.paradas) {
-            if (time.isBefore(parada.getDataHora())) {
-                return false;
-            }
         }
         return true;
     }
 
-    public ParadaModel getMenorParada() {
-        if (paradas.isEmpty()) {
-            return null;
-        }
-        int indiceMenor = 0;
-        for (int i = 0; i < paradas.size(); i++) {
-            if (paradas.get(indiceMenor).getDataHora().isAfter(paradas.get(i).getDataHora())) {
-                indiceMenor = i;
-            }
-        }
-        return paradas.get(indiceMenor);
-    }
-
-    public ParadaModel getMaiorParada() {
-        if (paradas.isEmpty()) {
-            return null;
-        }
-        int indiceMaior = 0;
-        for (int i = 0; i < paradas.size(); i++) {
-            if (paradas.get(indiceMaior).getDataHora().isBefore(paradas.get(i).getDataHora())) {
-                indiceMaior = i;
-            }
-        }
-        return paradas.get(indiceMaior);
-    }
 }

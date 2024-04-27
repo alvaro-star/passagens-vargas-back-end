@@ -54,11 +54,11 @@ class ParadaRepositoryTest {
 
         LocalDateTime startDay = dataAtual.plusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
         LocalDateTime endDay = startDay.withHour(23).withMinute(59).withSecond(59).withNano(999999999);
-        List<byte[]> trayectosDia = paradaRepository.cargarSalidasDelDia(lugares.get(1).getId(), startDay, endDay);
-        assertThat(trayectosDia.size()).isEqualTo(3);
+        List<ParadaModel> paradasDia = paradaRepository.cargarSalidasDelDia(lugares.get(1).getId(), startDay, endDay);
+        assertThat(paradasDia.size()).isEqualTo(3);
 
-        trayectosDia = paradaRepository.cargarSalidasDelDia(lugares.get(7).getId(), startDay, endDay);
-        assertThat(trayectosDia.size()).isEqualTo(0);
+        paradasDia = paradaRepository.cargarSalidasDelDia(lugares.get(7).getId(), startDay, endDay);
+        assertThat(paradasDia.size()).isEqualTo(0);
     }
 
 

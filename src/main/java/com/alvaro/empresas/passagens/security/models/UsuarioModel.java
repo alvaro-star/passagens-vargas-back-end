@@ -30,7 +30,6 @@ public class UsuarioModel implements UserDetails {
     private String telefono;
     @Column(nullable = false)
     private String contrasena;
-
     private UUID idEmpresa;
 
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "cliente")

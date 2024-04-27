@@ -29,8 +29,6 @@ public class PasajeService {
     @Autowired
     private PagoService pagoService;
     @Autowired
-    private PasajeroRepository pasajeroRepository;
-    @Autowired
     private UsuarioRepository usuarioRepository;
 
     public PasajeModel findById(UUID id) {
@@ -57,17 +55,13 @@ public class PasajeService {
 
         salida = viaje.getParadaByLugarId(dto.idLugarSalida());
 
-        if (salida == null) {
+        if (salida == null)
             throw new ValidationException(new FieldMessage("idLugarSalida", "La salida no hace parte del trayecto"));
-        }
 
         destino = viaje.getParadaByLugarId(dto.idLugarDestino());
 
-        if (destino == null) {
+        if (destino == null)
             throw new ValidationException(new FieldMessage("idLugarDestino", "El destino no hace parte del trayecto"));
-        }
-
-        PagoModel pago = pagoService.save(dto, precio.getPrecio(), viaje, metodo, guardarContacto);
 
         boolean estaPago;
 
@@ -77,15 +71,18 @@ public class PasajeService {
             default -> throw new ValidationException(new FieldMessage("metodo", "Metodo de Pago invalido"));
         }
 
-        for (PasajeDTO pasajeDTO : dto.pasajes()) {
-            var pasajeModel = new PasajeModel(pasajeDTO.nSilla(), compradoWeb, estaPago, precio, pago);
-            var pasajeSaved = pasajeRepository.save(pasajeModel);
+        PagoModel pago = pagoService.save(dto, precio.getPrecio(), viaje, metodo, guardarContacto);
 
-            var pasajero = new PasajeroModel(pasajeDTO);
-            pasajero.setPasaje(pasajeSaved);
-            pasajeroRepository.save(pasajero);
+        if (estaPago){
+            viaje.setValorArrecadado(pago.getValorTotal());
         }
 
+
+        for (PasajeDTO pasajeDTO : dto.pasajes()) {
+            var pasajero = new PasajeroModel(pasajeDTO);
+            var pasajeModel = new PasajeModel(pasajeDTO.nSilla(), compradoWeb, estaPago, salida, destino, precio, pago, pasajero);
+            pasajeRepository.save(pasajeModel);
+        }
 
         if (metodo == MetodoPagamentoEnum.EFECTIVO) {
             int nSillasDisponibles = precio.getNSillasDisponibles() - dto.pasajes().size();

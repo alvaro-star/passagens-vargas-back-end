@@ -16,6 +16,8 @@ public class ContactoModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idtb_contacto")
     private Long id;
+    @Column(length = 70)
+    private String nombre;
     @Column(length = 50)
     private String email;
     private Integer numero;
@@ -25,7 +27,8 @@ public class ContactoModel {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private PagoModel pago;
 
-    public ContactoModel(String email, Integer numero) {
+    public ContactoModel(String nombre, String email, Integer numero) {
+        this.nombre = nombre;
         this.email = email;
         this.numero = numero;
     }

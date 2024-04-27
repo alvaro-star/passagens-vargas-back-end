@@ -14,16 +14,21 @@ public interface ViajeRepository extends JpaRepository<ViajeModel, UUID> {
     //viajeModelDestino.isAfter(viajeSalida)
 
 
-    //Dado a alguns viajes, Si se pone el inervalo de tiempo al reves igual te devolvera el mismo registro
 
-    //Tranquilo
-    @Query("SELECT v.autobus.empresa.logo FROM ViajeModel v WHERE v.codigo = :codigo")
-    String getLogoEmpresaFromViaje(UUID codigo);
 }
 
 /* No usage
+//Dado a alguns viajes, Si se pone el inervalo de tiempo al reves igual te devolvera el mismo registro
+
+@Query(value = "SELECT s.*, d.* FROM tb_parada as s, tb_parada as d " +
+            "AND :startViaje < :endViaje " +
+            "AND :startViaje >= s.data_hora " +
+            "AND d.fk_idtb_viaje = s.fk_idtb_viaje " +
+            "AND :endViaje <= d.data_hora", nativeQuery = true)
+    List<ViajeModel> getViajes(UUID idEmpresa, LocalDateTime startViaje, LocalDateTime endViaje);
+
 @Query(value = "SELECT v.* FROM tb_viaje as v, tb_parada as s, tb_parada as d " +
-            "WHERE v.fk_idtb_trayecto = :codigo " +
+            "WHERE v.id = :codigo " +
             "AND :startViaje < :endViaje " +
             "AND v.id_salida = s.idtb_parada " +
             "AND :startViaje >= s.data_hora " +

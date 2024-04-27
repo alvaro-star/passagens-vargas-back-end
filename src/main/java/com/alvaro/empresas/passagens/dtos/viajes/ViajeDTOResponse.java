@@ -2,7 +2,6 @@ package com.alvaro.empresas.passagens.dtos.viajes;
 
 import com.alvaro.empresas.passagens.dtos.precios.PrecioDTO;
 import com.alvaro.empresas.passagens.models.ViajeModel;
-import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
 
 import java.util.List;
