@@ -35,6 +35,8 @@ public class MainSecurity {
                         .requestMatchers(HttpMethod.GET, "/").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/viajes").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/viajes/{id}").permitAll()
                         .requestMatchers(HttpMethod.POST, "/pasajes").permitAll()
                         .requestMatchers(HttpMethod.GET, "/ciudades/{nombre}/like").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll()

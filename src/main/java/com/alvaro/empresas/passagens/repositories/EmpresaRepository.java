@@ -13,6 +13,6 @@ import java.util.UUID;
 public interface EmpresaRepository extends JpaRepository<EmpresaModel, UUID> {
     boolean existsById(UUID id);
 
-    @Query(value = "SELECT sum(valorArrecadado) FROM tb_viaje as v where fk_idtb_empresa = :idEmpresa and cobrado = false", nativeQuery = true)
-    BigDecimal getArrecadacao(@Param("idEmpresa") UUID idEmpresa);
+    @Query(value = "SELECT sum(valor_arrecadado_efectivo), sum(valor_arrecadado_web) FROM tb_viaje as v where fk_idtb_empresa = :idEmpresa and cobrado = false", nativeQuery = true)
+    Object[] getArrecadacao(@Param("idEmpresa") UUID idEmpresa);
 }

@@ -28,14 +28,14 @@ public class EmpresaService {
 
     public EmpresaResponseDto getOne(UUID id) {
         EmpresaModel model = this.findById(id);
-        var valorArrecadado = empresaRepository.getArrecadacao(id);
-        return new EmpresaResponseDto(model, valorArrecadado);
+        Object[] valorArrecadado = empresaRepository.getArrecadacao(id);
+        return new EmpresaResponseDto(model, (BigDecimal) valorArrecadado[0], (BigDecimal) valorArrecadado[0]);
     }
 
     public Page<EmpresaResponseDto> findAll(Pageable pageable) {
         return empresaRepository.findAll(pageable).map(model -> {
-            BigDecimal valorViajes = empresaRepository.getArrecadacao(model.getId());
-            return new EmpresaResponseDto(model, valorViajes);
+            Object[] valorArrecadado = empresaRepository.getArrecadacao(model.getId());
+            return new EmpresaResponseDto(model, (BigDecimal) valorArrecadado[0], (BigDecimal) valorArrecadado[0]);
         });
     }
 
@@ -44,15 +44,15 @@ public class EmpresaService {
         var model = new EmpresaModel();
         BeanUtils.copyProperties(dto, model, "id", "autobuses");
         var modelSaved = empresaRepository.save(model);
-        return new EmpresaResponseDto(modelSaved, new BigDecimal("00.0"));
+        return new EmpresaResponseDto(modelSaved, new BigDecimal("00.0"), new BigDecimal("00.0"));
     }
 
     public EmpresaResponseDto update(EmpresaDto dto, UUID id) {
         var model = this.findById(id);
         BeanUtils.copyProperties(dto, model, "id", "autobuses");
-        BigDecimal valorArrecadado = empresaRepository.getArrecadacao(id);
+        Object[] valorArrecadado = empresaRepository.getArrecadacao(id);
         EmpresaModel update = empresaRepository.save(model);
-        return new EmpresaResponseDto(update, valorArrecadado);
+        return new EmpresaResponseDto(update, (BigDecimal) valorArrecadado[0], (BigDecimal) valorArrecadado[1]);
     }
 
     @Transactional

@@ -10,9 +10,10 @@ public record EmpresaResponseDto(
         UUID id,
         String nombre,
         String logo,
-        BigDecimal valorViajes
+        BigDecimal valorViajesEfectivo,
+        BigDecimal valorViajesWeb
 ) {
-    public EmpresaResponseDto(EmpresaModel model, BigDecimal valorViajes) {
-        this(model.getId(), model.getNombre(), model.getLogo(), valorViajes);
+    public EmpresaResponseDto(EmpresaModel model, BigDecimal valorViajesEfectivo, BigDecimal valorViajesWeb) {
+        this(model.getId(), model.getNombre(), model.getLogo(), valorViajesEfectivo, valorViajesWeb);
     }
 }

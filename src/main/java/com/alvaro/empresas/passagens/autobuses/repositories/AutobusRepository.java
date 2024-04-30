@@ -10,14 +10,15 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 @Repository
 public interface AutobusRepository extends JpaRepository<AutobusModel, Integer> {
     boolean existsByPlaca(String placa);
 
-    Page<AutobusModel> findByEmpresa(EmpresaModel empresaModel, Pageable pageable);
+    Page<AutobusModel> findByEmpresaId(UUID idEmpresa, Pageable pageable);
 
-    @Query(value = "SELECT sum(valorArrecadado) FROM tb_viaje as v where fk_idtb_autobus = :idAutobus and cobrado = false", nativeQuery = true)
-    BigDecimal getArrecadacao(@Param("idAutobus") Integer idAutobus);
+    @Query(value = "SELECT sum(valor_arrecadado_efectivo),sum(valor_arrecadado_web) FROM tb_viaje as v where fk_idtb_autobus = :idAutobus and cobrado = false", nativeQuery = true)
+    Object[] getArrecadacao(@Param("idAutobus") Integer idAutobus);
 }

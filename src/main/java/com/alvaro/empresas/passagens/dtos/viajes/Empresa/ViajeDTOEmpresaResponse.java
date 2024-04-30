@@ -10,13 +10,14 @@ import java.util.UUID;
 
 public record ViajeDTOEmpresaResponse(
         UUID codigo,
-        BigDecimal valorArrecadado,
+        BigDecimal valorArrecadadoEfectivo,
+        BigDecimal valorArrecadadoWeb,
         boolean isCobrado,
         Integer idAutobus,
         List<ParadaDTOComplete> paradas,
         List<PrecioDTO> precios
 ) {
     public ViajeDTOEmpresaResponse(ViajeModel model, Integer idAutobus, List<ParadaDTOComplete> paradas, List<PrecioDTO> precios) {
-        this(model.getCodigo(), model.getValorArrecadado(), model.isCobrado(), idAutobus, paradas, precios);
+        this(model.getCodigo(), model.getValorArrecadadoEfectivo(), model.getValorArrecadadoWeb(), model.isCobrado(), idAutobus, paradas, precios);
     }
 }

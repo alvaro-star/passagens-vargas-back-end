@@ -1,20 +1,16 @@
 package com.alvaro.empresas.passagens.repositories;
 
 import com.alvaro.empresas.passagens.models.ViajeModel;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.UUID;
 
 @Repository
 public interface ViajeRepository extends JpaRepository<ViajeModel, UUID> {
-
-    //viajeDestino.isAfter(viajeModelSalida) &&
-    //viajeModelDestino.isAfter(viajeSalida)
-
-
-
+    Page<ViajeModel> findByEmpresaId(UUID id, Pageable pageable);
 }
 
 /* No usage

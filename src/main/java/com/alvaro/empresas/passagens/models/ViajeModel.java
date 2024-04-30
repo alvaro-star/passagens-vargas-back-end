@@ -30,16 +30,19 @@ public class ViajeModel {
 
     @Column(precision = 10, scale = 2, nullable = false)
     @DecimalMin("0.00")
-    private BigDecimal valorArrecadado;
+    private BigDecimal valorArrecadadoEfectivo;
 
-    @Column(name="cobrado", nullable = false)
+    @Column(precision = 10, scale = 2, nullable = false)
+    @DecimalMin("0.00")
+    private BigDecimal valorArrecadadoWeb;
+
+    @Column(name = "cobrado", nullable = false)
     private boolean isCobrado;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_autobus")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private AutobusModel autobus;
-
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_empresa")
@@ -55,9 +58,10 @@ public class ViajeModel {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "viaje")
     private List<PrecioModel> precios = new ArrayList<>();
 
-    public ViajeModel(AutobusModel autobus, EmpresaModel empresa, BigDecimal valorArrecadado, boolean isCobrado) {
+    public ViajeModel(AutobusModel autobus, EmpresaModel empresa, BigDecimal valorArrecadadoEfectivo, BigDecimal valorArrecadadoWeb, boolean isCobrado) {
         this.autobus = autobus;
-        this.valorArrecadado = valorArrecadado;
+        this.valorArrecadadoEfectivo = valorArrecadadoEfectivo;
+        this.valorArrecadadoWeb = valorArrecadadoWeb;
         this.isCobrado = isCobrado;
         this.empresa = empresa;
     }
@@ -65,9 +69,8 @@ public class ViajeModel {
 
     public ParadaModel getParadaByLugarId(Integer idLugar) {
         for (ParadaModel parada : this.getParadas()) {
-            if (parada.getLugar().getId() == idLugar) {
+            if (parada.getLugar().getId() == idLugar)
                 return parada;
-            }
         }
         return null;
     }

@@ -46,17 +46,17 @@ public class AutobusService {
     public Page<AutobusDTOList> findAll(Pageable pageable) {
         Page<AutobusModel> models = autobusRepository.findAll(pageable);
         return models.map(model -> {
-            BigDecimal valorViajes = autobusRepository.getArrecadacao(model.getId());
-            return new AutobusDTOList(model, valorViajes, model.getEmpresa().getId());
+            Object[] valores = autobusRepository.getArrecadacao(model.getId());
+            return new AutobusDTOList(model, (BigDecimal) valores[0], (BigDecimal) valores[1], model.getEmpresa().getId());
         });
     }
 
     public Page<AutobusDTOList> findAllFromEmpresa(UUID idEmpresa, Pageable pageable) {
         var empresa = empresaService.findById(idEmpresa);
-        Page<AutobusModel> autobuses = autobusRepository.findByEmpresa(empresa, pageable);
+        Page<AutobusModel> autobuses = autobusRepository.findByEmpresaId(empresa.getId(), pageable);
         return autobuses.map((autobus) -> {
-            BigDecimal valorViajes = autobusRepository.getArrecadacao(autobus.getId());
-            return new AutobusDTOList(autobus, valorViajes, empresa.getId());
+            Object[] valorViajes = autobusRepository.getArrecadacao(autobus.getId());
+            return new AutobusDTOList(autobus, (BigDecimal) valorViajes[0], (BigDecimal) valorViajes[1], empresa.getId());
         });
     }
 
@@ -126,8 +126,8 @@ public class AutobusService {
         var model = this.findById(id);
         model.updateValues(dto);
         var update = autobusRepository.save(model);
-        BigDecimal valorViajes = autobusRepository.getArrecadacao(model.getId());
-        return new AutobusDTOList(update, valorViajes, update.getEmpresa().getId());
+        Object[] valorViajes = autobusRepository.getArrecadacao(model.getId());
+        return new AutobusDTOList(update, (BigDecimal) valorViajes[0], (BigDecimal) valorViajes[1], update.getEmpresa().getId());
     }
 
     @Transactional

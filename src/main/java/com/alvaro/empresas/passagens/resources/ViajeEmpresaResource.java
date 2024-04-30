@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,7 +25,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/empresa/viajes")
 @SecurityRequirement(name = "bearer-key")
-//PreAuthorize("hasRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN')")
 public class ViajeEmpresaResource {
     @Autowired
     private ViajeEmpresaService viajeEmpresaService;
@@ -32,6 +32,12 @@ public class ViajeEmpresaResource {
     @GetMapping
     public ResponseEntity<Page<ViajeDTOList>> getAll(@PageableDefault(size = 10) Pageable pageable) {
         return ResponseEntity.ok(viajeEmpresaService.findAll(pageable));
+    }
+
+    @GetMapping("/from/{idEmpresa}")
+    public ResponseEntity<Page<ViajeDTOList>> getAllFromEmpresa(@PathVariable(value = "idEmpresa") UUID id,
+                                                                @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(viajeEmpresaService.findAllEmpresa(id, pageable));
     }
 
     @PostMapping
@@ -49,7 +55,6 @@ public class ViajeEmpresaResource {
         }
     }
 
-
     @PutMapping("/{id}")
     public ResponseEntity<ViajeDTOUpdate> update(@PathVariable(value = "id") UUID id, @RequestBody @Valid ViajeDTOUpdate dto) {
         return ResponseEntity.ok(viajeEmpresaService.update(dto, id));
@@ -58,7 +63,6 @@ public class ViajeEmpresaResource {
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> delete(@PathVariable(value = "id") UUID id) {
         var model = viajeEmpresaService.findById(id);
-
 
         if (!model.getPrecios().isEmpty())
             return ResponseEntity.badRequest().body(new Mensaje("El trayecto tiene precios associados"));

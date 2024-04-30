@@ -22,7 +22,6 @@ public class RoleService {
     }
 
     public RoleModel getByRoleName(RoleList name) {
-        String teste = "posto";
         var model = roleRepository.findByNombre(name);
         return model.orElseThrow(() -> new ObjectNotFoundException(name, RoleModel.class.getName()));
     }

@@ -8,6 +8,7 @@ import com.alvaro.empresas.passagens.models.*;
 import com.alvaro.empresas.passagens.repositories.ContactoRepository;
 import com.alvaro.empresas.passagens.repositories.PagoRepository;
 import com.alvaro.empresas.passagens.repositories.PasajeRepository;
+import com.alvaro.empresas.passagens.repositories.ViajeRepository;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,8 +28,7 @@ public class PagoService {
     @Autowired
     private PrecioService precioService;
     @Autowired
-    private ContactoRepository contactoRepository;
-    private Integer nPasajes;
+    private ViajeRepository viajeRepository;
 
     public PagoModel save(PasajesDTO dto, BigDecimal precio, ViajeModel viaje, MetodoPagamentoEnum metodo, boolean guardarContacto) {
         int nPasajes = dto.pasajes().size();
@@ -97,9 +97,14 @@ public class PagoService {
 
         precioService.updateFromService(precio);
 
-        for (PasajeModel pasaje : pago.getPasajes()) {
+        for (PasajeModel pasaje : pago.getPasajes())
             pasajeRepository.updateValuePagado(pasaje.getId(), true);
-        }
+
+        var viaje = pago.getViaje();
+        BigDecimal valorArrecadado = viaje.getValorArrecadadoWeb() != null ? viaje.getValorArrecadadoWeb() : BigDecimal.ZERO;
+        BigDecimal valorTotalPago = pago.getValorTotal() != null ? pago.getValorTotal() : BigDecimal.ZERO;
+        viaje.setValorArrecadadoWeb(valorArrecadado.add(valorTotalPago));
+        viajeRepository.save(viaje);
 
         pago.setEstaPagado(true);
         pago.setFechaPago(LocalDateTime.now());
@@ -110,9 +115,8 @@ public class PagoService {
     public void codigoVencido(UUID idPago) {//
         PagoModel pago = pagoRepository.findById(idPago).orElseThrow(() -> new ObjectNotFoundException(idPago, PagoModel.class.getName()));
         if (!pago.getEstaPagado()) {
-            for (PasajeModel pasaje : pago.getPasajes()) {
+            for (PasajeModel pasaje : pago.getPasajes())
                 pasajeRepository.delete(pasaje);
-            }
         }
     }
 

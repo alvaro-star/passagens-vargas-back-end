@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
+import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
@@ -75,7 +76,7 @@ class ParadaRepositoryTest {
     }
 
     private ViajeModel cadastrarViaje(AutobusModel autobusModel) {
-        var viaje = new ViajeModel(autobusModel);
+        var viaje = new ViajeModel(autobusModel, autobusModel.getEmpresa(), BigDecimal.valueOf(0), false);
         em.persist(viaje);
         return viaje;
     }

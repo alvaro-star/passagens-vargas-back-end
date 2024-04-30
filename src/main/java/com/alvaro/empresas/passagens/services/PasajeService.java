@@ -17,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -65,18 +66,21 @@ public class PasajeService {
 
         boolean estaPago;
 
-        switch (metodo) {
-            case QR -> estaPago = false;
-            case EFECTIVO -> estaPago = true;
-            default -> throw new ValidationException(new FieldMessage("metodo", "Metodo de Pago invalido"));
-        }
-
         PagoModel pago = pagoService.save(dto, precio.getPrecio(), viaje, metodo, guardarContacto);
 
-        if (estaPago){
-            viaje.setValorArrecadado(pago.getValorTotal());
-        }
+        switch (metodo) {
+            case QR -> {
+                estaPago = false;
+            }
 
+            case EFECTIVO -> {
+                estaPago = true;
+                BigDecimal valorArrecadado = viaje.getValorArrecadadoEfectivo() != null ? viaje.getValorArrecadadoEfectivo() : BigDecimal.ZERO;
+                BigDecimal valorTotalPago = pago.getValorTotal() != null ? pago.getValorTotal() : BigDecimal.ZERO;
+                viaje.setValorArrecadadoEfectivo(valorArrecadado.add(valorTotalPago));
+            }
+            default -> throw new ValidationException(new FieldMessage("metodo", "Metodo de Pago invalido"));
+        }
 
         for (PasajeDTO pasajeDTO : dto.pasajes()) {
             var pasajero = new PasajeroModel(pasajeDTO);

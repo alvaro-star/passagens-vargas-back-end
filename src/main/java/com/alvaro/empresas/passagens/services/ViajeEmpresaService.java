@@ -62,12 +62,17 @@ public class ViajeEmpresaService {
         return models.map(model -> new ViajeDTOList(model, model.getAutobus().getId()));
     }
 
+    public Page<ViajeDTOList> findAllEmpresa(UUID idEmpresa, Pageable pageable) {
+        Page<ViajeModel> models = viajeRepository.findByEmpresaId(idEmpresa, pageable);
+        return models.map(model -> new ViajeDTOList(model, model.getAutobus().getId()));
+    }
+
     public List<ViajeDTOListBusquedaEmpresa> getViajesFromDia(ViajeDTOSolicitacao dto) {
         if (dto.idCiudadDestino().equals(dto.idCiudadSalida()))
             throw new ValidationException("idDestino", "El destino no puede ser el mismo que la salida");
 
-        List<LugarModel> lugaresSalida = lugarRepository.findLugaresByCiudadId(dto.idCiudadSalida());
-        List<LugarModel> lugaresDestino = lugarRepository.findLugaresByCiudadId(dto.idCiudadDestino());
+        List<LugarModel> lugaresSalida = lugarRepository.findByCiudadId(dto.idCiudadSalida());
+        List<LugarModel> lugaresDestino = lugarRepository.findByCiudadId(dto.idCiudadDestino());
 
         if (lugaresSalida.isEmpty())
             throw new ObjectNotFoundException(dto.idCiudadSalida(), CiudadModel.class.getName());
@@ -149,7 +154,7 @@ public class ViajeEmpresaService {
 
 
         var autobus = autobusService.findById(dto.idAutobus());
-        var model = new ViajeModel(autobus, autobus.getEmpresa(), new BigDecimal("0.00"), false);
+        var model = new ViajeModel(autobus, autobus.getEmpresa(), new BigDecimal("0.00"), new BigDecimal("0.00"),false);
 
         var saved = viajeRepository.save(model);
 
