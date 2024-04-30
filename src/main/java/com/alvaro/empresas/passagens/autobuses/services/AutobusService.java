@@ -1,5 +1,6 @@
 package com.alvaro.empresas.passagens.autobuses.services;
 
+import com.alvaro.empresas.passagens.autobuses.dtos.ValoresArrecadadosDTO;
 import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTO;
 import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTOList;
 import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTOResponse;
@@ -46,8 +47,8 @@ public class AutobusService {
     public Page<AutobusDTOList> findAll(Pageable pageable) {
         Page<AutobusModel> models = autobusRepository.findAll(pageable);
         return models.map(model -> {
-            Object[] valores = autobusRepository.getArrecadacao(model.getId());
-            return new AutobusDTOList(model, (BigDecimal) valores[0], (BigDecimal) valores[1], model.getEmpresa().getId());
+            ValoresArrecadadosDTO valores = autobusRepository.getArrecadacao(model.getId());
+            return new AutobusDTOList(model, valores.valorArrecadadoEfectivo(), valores.valorArrecadadoWeb(), model.getEmpresa().getId());
         });
     }
 
@@ -55,8 +56,8 @@ public class AutobusService {
         var empresa = empresaService.findById(idEmpresa);
         Page<AutobusModel> autobuses = autobusRepository.findByEmpresaId(empresa.getId(), pageable);
         return autobuses.map((autobus) -> {
-            Object[] valorViajes = autobusRepository.getArrecadacao(autobus.getId());
-            return new AutobusDTOList(autobus, (BigDecimal) valorViajes[0], (BigDecimal) valorViajes[1], empresa.getId());
+            ValoresArrecadadosDTO valorViajes = autobusRepository.getArrecadacao(autobus.getId());
+            return new AutobusDTOList(autobus, valorViajes.valorArrecadadoEfectivo(), valorViajes.valorArrecadadoWeb(), empresa.getId());
         });
     }
 
@@ -126,8 +127,8 @@ public class AutobusService {
         var model = this.findById(id);
         model.updateValues(dto);
         var update = autobusRepository.save(model);
-        Object[] valorViajes = autobusRepository.getArrecadacao(model.getId());
-        return new AutobusDTOList(update, (BigDecimal) valorViajes[0], (BigDecimal) valorViajes[1], update.getEmpresa().getId());
+        ValoresArrecadadosDTO valorViajes = autobusRepository.getArrecadacao(model.getId());
+        return new AutobusDTOList(update, valorViajes.valorArrecadadoEfectivo(), valorViajes.valorArrecadadoWeb(), update.getEmpresa().getId());
     }
 
     @Transactional

@@ -1,5 +1,6 @@
 package com.alvaro.empresas.passagens.services;
 
+import com.alvaro.empresas.passagens.autobuses.dtos.ValoresArrecadadosDTO;
 import com.alvaro.empresas.passagens.dtos.EmpresaDto;
 import com.alvaro.empresas.passagens.dtos.EmpresaResponseDto;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
@@ -28,14 +29,14 @@ public class EmpresaService {
 
     public EmpresaResponseDto getOne(UUID id) {
         EmpresaModel model = this.findById(id);
-        Object[] valorArrecadado = empresaRepository.getArrecadacao(id);
-        return new EmpresaResponseDto(model, (BigDecimal) valorArrecadado[0], (BigDecimal) valorArrecadado[0]);
+        ValoresArrecadadosDTO valorArrecadado = empresaRepository.getArrecadacao(id);
+        return new EmpresaResponseDto(model, valorArrecadado.valorArrecadadoEfectivo(), valorArrecadado.valorArrecadadoWeb());
     }
 
     public Page<EmpresaResponseDto> findAll(Pageable pageable) {
         return empresaRepository.findAll(pageable).map(model -> {
-            Object[] valorArrecadado = empresaRepository.getArrecadacao(model.getId());
-            return new EmpresaResponseDto(model, (BigDecimal) valorArrecadado[0], (BigDecimal) valorArrecadado[0]);
+            ValoresArrecadadosDTO valorArrecadado = empresaRepository.getArrecadacao(model.getId());
+            return new EmpresaResponseDto(model, valorArrecadado.valorArrecadadoEfectivo(), valorArrecadado.valorArrecadadoWeb());
         });
     }
 
@@ -50,9 +51,9 @@ public class EmpresaService {
     public EmpresaResponseDto update(EmpresaDto dto, UUID id) {
         var model = this.findById(id);
         BeanUtils.copyProperties(dto, model, "id", "autobuses");
-        Object[] valorArrecadado = empresaRepository.getArrecadacao(id);
+        ValoresArrecadadosDTO valorArrecadado = empresaRepository.getArrecadacao(id);
         EmpresaModel update = empresaRepository.save(model);
-        return new EmpresaResponseDto(update, (BigDecimal) valorArrecadado[0], (BigDecimal) valorArrecadado[1]);
+        return new EmpresaResponseDto(update, valorArrecadado.valorArrecadadoEfectivo(), valorArrecadado.valorArrecadadoWeb());
     }
 
     @Transactional
