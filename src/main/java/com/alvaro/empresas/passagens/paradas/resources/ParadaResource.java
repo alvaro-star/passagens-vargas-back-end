@@ -28,7 +28,7 @@ public class ParadaResource {
     }
 
     @PostMapping
-    public ResponseEntity<ParadaDTO> save(@RequestBody @Valid ParadaDTO dto) {
+    public ResponseEntity<ParadaDTOComplete> save(@RequestBody @Valid ParadaDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(paradaService.save(dto));
     }
 
@@ -38,7 +38,7 @@ public class ParadaResource {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ParadaDTO> update(@Valid @RequestBody ParadaDTOUpdate dto, @PathVariable Integer id) {
+    public ResponseEntity<ParadaDTOComplete> update(@Valid @RequestBody ParadaDTOUpdate dto, @PathVariable Integer id) {
         return ResponseEntity.ok(paradaService.update(dto, id));
     }
 

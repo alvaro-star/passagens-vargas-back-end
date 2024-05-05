@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +35,7 @@ public class AutobusResource {
 
     @GetMapping("/from/{idEmpresa}")
     public ResponseEntity<Page<AutobusDTOList>> getAutobusesFromEmpresa(@PathVariable(value = "idEmpresa") UUID id,
-                                                                        @PageableDefault(size = 10, sort = {"placa"}) Pageable pageable) {
+                                                                        @PageableDefault(size = 10, sort = {"createdAt"}, direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok().body(autobusService.findAllFromEmpresa(id, pageable));
     }
 

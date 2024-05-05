@@ -30,5 +30,4 @@ public class ViajeResource {
         List<ViajeDTOListBusqueda> viajes = viajeService.getViajesFromDia(dto);
         return ResponseEntity.ok(viajes);
     }
-
 }

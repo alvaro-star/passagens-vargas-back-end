@@ -47,7 +47,7 @@ public class ParadaService {
         });
     }
 
-    public ParadaDTO save(ParadaDTO dtoSended) {
+    public ParadaDTOComplete save(ParadaDTO dtoSended) {
         LugarModel lugar = lugarService.findById(dtoSended.idLugar());
         if (!lugar.getEnable())
             throw new ValidationException("idLugar", "El lugar no esta disponible");
@@ -69,10 +69,10 @@ public class ParadaService {
         model.setViaje(viaje);
 
         var modelSave = paradaRepository.save(model);
-        return new ParadaDTO(modelSave, lugar.getId(), viaje.getCodigo());
+        return new ParadaDTOComplete(modelSave, viaje.getCodigo());
     }
 
-    public ParadaDTO update(ParadaDTOUpdate dtoSended, Integer id) {
+    public ParadaDTOComplete update(ParadaDTOUpdate dtoSended, Integer id) {
         var model = this.findById(id);
 
         for (ParadaModel parada : model.getViaje().getParadas()) {
@@ -98,7 +98,7 @@ public class ParadaService {
 
         var modelUpdated = paradaRepository.save(model);
         UUID idViaje = modelUpdated.getViaje().getCodigo();
-        return new ParadaDTO(modelUpdated, modelUpdated.getLugar().getId(), idViaje);
+        return new ParadaDTOComplete(modelUpdated, idViaje);
     }
 
     public void delete(ParadaModel model) {

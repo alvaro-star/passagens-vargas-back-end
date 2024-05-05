@@ -9,6 +9,8 @@ import jakarta.validation.constraints.DecimalMin;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -18,7 +20,7 @@ import java.util.UUID;
 
 
 @Entity
-@Table(name = "tb_viaje")
+@Table(name = "tb_viaje", indexes = @Index(name = "idxtb_viaje", columnList = "fk_idtb_empresa, created_at"))
 @Getter
 @Setter
 @NoArgsConstructor
@@ -38,6 +40,14 @@ public class ViajeModel {
 
     @Column(name = "cobrado", nullable = false)
     private boolean isCobrado;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_autobus")

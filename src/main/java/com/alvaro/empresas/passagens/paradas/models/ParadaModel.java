@@ -12,7 +12,7 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "tb_parada", indexes = @Index(name = "idx_dataHora", columnList = "data_hora"))
+@Table(name = "tb_parada", indexes = @Index(name = "idxtb_parada_dataHora", columnList = "data_hora"))
 @Getter
 @Setter
 @NoArgsConstructor

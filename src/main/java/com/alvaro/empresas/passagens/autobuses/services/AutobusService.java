@@ -25,19 +25,22 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @Service
 public class AutobusService {
+    private final AutobusRepository autobusRepository;
+    private final EmpresaService empresaService;
+    private final PisoService pisoService;
+
     @Autowired
-    private AutobusRepository autobusRepository;
-    @Autowired
-    private EmpresaService empresaService;
-    @Autowired
-    private PisoService pisoService;
+    public AutobusService(AutobusRepository autobusRepository, EmpresaService empresaService, PisoService pisoService) {
+        this.autobusRepository = autobusRepository;
+        this.empresaService = empresaService;
+        this.pisoService = pisoService;
+    }
 
     public AutobusModel findById(Integer id) {
         var model = autobusRepository.findById(id);

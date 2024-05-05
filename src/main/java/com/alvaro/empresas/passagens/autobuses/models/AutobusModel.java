@@ -9,15 +9,20 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "tb_autobus")
+@Table(name = "tb_autobus", indexes = @Index(name="idxtb_autobus_empresa_criado", columnList = "fk_idtb_empresa, created_at"))
 @Getter
 @Setter
 @NoArgsConstructor
+//@Table(name = "tb_parada", indexes = @Index(name = "idx_dataHora", columnList = "data_hora"))
+//indexes = { @Index(name = "idx_composto", columnList = "chave_estrangeira, chave_unica")
 public class AutobusModel {
     @Id
     @Column(name = "idtb_autobus")
@@ -26,7 +31,16 @@ public class AutobusModel {
     @Column(unique = true, nullable = false)
     private String placa;
 
+    @Column(nullable = false)
     private boolean enable = true;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_empresa")

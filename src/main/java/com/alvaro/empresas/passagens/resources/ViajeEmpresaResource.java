@@ -36,7 +36,7 @@ public class ViajeEmpresaResource {
 
     @GetMapping("/from/{idEmpresa}")
     public ResponseEntity<Page<ViajeDTOList>> getAllFromEmpresa(@PathVariable(value = "idEmpresa") UUID id,
-                                                                @PageableDefault(size = 10) Pageable pageable) {
+                                                                @PageableDefault(size = 10, sort = {}) Pageable pageable) {
         return ResponseEntity.ok(viajeEmpresaService.findAllEmpresa(id, pageable));
     }
 

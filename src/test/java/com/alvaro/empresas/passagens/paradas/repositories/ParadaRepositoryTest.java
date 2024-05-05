@@ -25,10 +25,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 class ParadaRepositoryTest {
+    private final ParadaRepository paradaRepository;
+
+    private final EntityManager em;
     @Autowired
-    private ParadaRepository paradaRepository;
-    @Autowired
-    private EntityManager em;
+    public ParadaRepositoryTest(ParadaRepository paradaRepository, EntityManager em) {
+        this.paradaRepository = paradaRepository;
+        this.em = em;
+    }
 
     @Test
     @DisplayName("Dado tres registros de parada, deveriam ser mostradas os codigos de tres trayectos que posseen una parada de un lugar em um dia determinado")
@@ -76,7 +80,7 @@ class ParadaRepositoryTest {
     }
 
     private ViajeModel cadastrarViaje(AutobusModel autobusModel) {
-        var viaje = new ViajeModel(autobusModel, autobusModel.getEmpresa(), BigDecimal.valueOf(0), false);
+        var viaje = new ViajeModel(autobusModel, autobusModel.getEmpresa(), BigDecimal.valueOf(0), BigDecimal.valueOf(0), false);
         em.persist(viaje);
         return viaje;
     }

@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "tb_ciudad")
+@Table(name = "tb_ciudad", indexes = @Index(name = "idxtb_ciudad_nombre", columnList = "nombre"))
 @Getter
 @Setter
 @NoArgsConstructor

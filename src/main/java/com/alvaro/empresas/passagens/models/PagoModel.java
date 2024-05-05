@@ -7,6 +7,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -37,7 +39,13 @@ public class PagoModel {
     private MetodoPagamentoEnum metodoPago;
     private LocalDateTime fechaPago;
 
-    private LocalDateTime criatedAt;
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 
     @OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "pago")
     private ContactoModel contacto;
@@ -64,10 +72,5 @@ public class PagoModel {
         this.fechaPago = fechaPago;
         this.viaje = viajeModel;
         this.contacto = contacto;
-    }
-
-    @PrePersist
-    protected void onCreate() {
-        criatedAt = LocalDateTime.now();
     }
 }
