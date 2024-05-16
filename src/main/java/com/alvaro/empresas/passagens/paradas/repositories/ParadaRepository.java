@@ -1,5 +1,6 @@
 package com.alvaro.empresas.passagens.paradas.repositories;
 
+import com.alvaro.empresas.passagens.enums.EnumParada;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,12 +20,17 @@ public interface ParadaRepository extends JpaRepository<ParadaModel, Integer> {
                                           @Param("data_start") LocalDateTime dataStart,
                                           @Param("data_end") LocalDateTime dataEnd);
 
+    List<ParadaModel> findByViajeCodigoAndTipo(UUID codigoViaje, EnumParada tipo);
+
+    List<ParadaModel> findByViajeCodigoAndLugarId(UUID codigoViaje, Integer idLugar);
+
+}
+//List<LugarModel> findByCiudadId(Integer idCiudad);
     /*
         SELECT v.* FROM ViajeModel v RIGHT Join ParadaModel p where v.id = "teste"
         List<ViajeModel> viajes
-     */
-    @Query(value = "SELECT * FROM tb_parada WHERE fk_idtb_lugar = :idLugar " +
+
+     @Query(value = "SELECT * FROM tb_parada WHERE fk_idtb_lugar = :idLugar " +
             "AND fk_idtb_viaje = :codigo", nativeQuery = true)
     List<ParadaModel> nVezesViajePassa(@Param("idLugar") Integer idLugar, @Param("codigo") UUID codigoViaje);
-
-}
+     */

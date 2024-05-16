@@ -5,6 +5,7 @@ import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import com.alvaro.empresas.passagens.autobuses.repositories.AutobusRepository;
 import com.alvaro.empresas.passagens.autobuses.repositories.PisoRepository;
+import com.alvaro.empresas.passagens.enums.EnumParada;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.models.PrecioModel;
 import com.alvaro.empresas.passagens.models.ViajeModel;
@@ -123,23 +124,40 @@ public class ShareProfile {
             for (DayOfWeek dia : DayOfWeek.values()) {
                 var viaje = viajeRepository.save(new ViajeModel(autobus, autobus.getEmpresa(), new BigDecimal("0.00"), new BigDecimal("0.00"), false));
                 var dataInicio = LocalDateTime.now().with(TemporalAdjusters.next(dia)).withHour(8);
-                int nLista = 0;
+                int nLista = 1;
                 List<ParadaModel> paradas = new ArrayList<>();
                 //Registra as paradas
                 if (lugares.size() > 5) {
-                    for (int i = 0; i < 5; i++) {
+                    dataInicio = dataInicio.plusHours(1);
+                    var parada = paradaRepository.save(new ParadaModel(dataInicio, 10, EnumParada.SALIDA, lugares.get(0), viaje));
+                    paradas.add(parada);
+                    nLista++;
+                    for (int i = 1; i < 4; i++) {
                         dataInicio = dataInicio.plusHours(1);
-                        var parada = paradaRepository.save(new ParadaModel(dataInicio, 10, lugares.get(i), viaje));
+                        parada = paradaRepository.save(new ParadaModel(dataInicio, 10, EnumParada.CAMINO, lugares.get(i), viaje));
                         paradas.add(parada);
                         nLista++;
                     }
+                    dataInicio = dataInicio.plusHours(1);
+                    parada = paradaRepository.save(new ParadaModel(dataInicio, 20, EnumParada.DESTINO, lugares.get(5), viaje));
+                    paradas.add(parada);
+                    nLista++;
                 } else {
-                    for (LugarModel lugar : lugares) {
+                    var tamanhoMaximo = lugares.size();
+                    dataInicio = dataInicio.plusHours(1);
+                    var parada = paradaRepository.save(new ParadaModel(dataInicio, 10, EnumParada.SALIDA, lugares.get(0), viaje));
+                    paradas.add(parada);
+                    nLista++;
+                    for (int i = 1; i < tamanhoMaximo - 1; i++) {
                         dataInicio = dataInicio.plusHours(1);
-                        var parada = paradaRepository.save(new ParadaModel(dataInicio, 10, lugar, viaje));
+                        parada = paradaRepository.save(new ParadaModel(dataInicio, 10, EnumParada.CAMINO, lugares.get(i), viaje));
                         paradas.add(parada);
                         nLista++;
                     }
+                    dataInicio = dataInicio.plusHours(1);
+                    parada = paradaRepository.save(new ParadaModel(dataInicio, 20, EnumParada.DESTINO, lugares.get(tamanhoMaximo - 1), viaje));
+                    paradas.add(parada);
+                    nLista++;
                 }
 
                 BigDecimal precioBruto = BigDecimal.valueOf(200);

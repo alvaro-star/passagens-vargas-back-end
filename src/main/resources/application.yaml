@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: share
+    active: dev
   jackson:
     time-zone: America/La_Paz
 api:

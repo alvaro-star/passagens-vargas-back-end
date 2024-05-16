@@ -1,12 +1,14 @@
 package com.alvaro.empresas.passagens.resources;
 
 import com.alvaro.empresas.passagens.dtos.Mensaje;
+import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacaoEmpresa;
 import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOEmpresaResponse;
 import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOListBusquedaEmpresa;
 import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacao;
 import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOForm;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOList;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOUpdate;
+import com.alvaro.empresas.passagens.helpers.beans.MyUserService;
 import com.alvaro.empresas.passagens.services.ViajeEmpresaService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -29,20 +31,42 @@ public class ViajeEmpresaResource {
     @Autowired
     private ViajeEmpresaService viajeEmpresaService;
 
+    @Autowired
+    private MyUserService myUserService;
+
     @GetMapping
-    public ResponseEntity<Page<ViajeDTOList>> getAll(@PageableDefault(size = 10) Pageable pageable) {
+    public ResponseEntity<Page<ViajeDTOList>> getAll(Pageable pageable) {
         return ResponseEntity.ok(viajeEmpresaService.findAll(pageable));
     }
 
     @GetMapping("/from/{idEmpresa}")
-    public ResponseEntity<Page<ViajeDTOList>> getAllFromEmpresa(@PathVariable(value = "idEmpresa") UUID id,
-                                                                @PageableDefault(size = 10, sort = {}) Pageable pageable) {
+    public ResponseEntity<Page<ViajeDTOList>> getAllFromEmpresa(@PathVariable(value = "idEmpresa") UUID id, Pageable pageable) {
         return ResponseEntity.ok(viajeEmpresaService.findAllEmpresa(id, pageable));
     }
 
-    @PostMapping
-    public ResponseEntity<List<ViajeDTOListBusquedaEmpresa>> getViajeFromDia(@RequestBody @Valid ViajeDTOSolicitacao dto) {
-        return ResponseEntity.ok(viajeEmpresaService.getViajesFromDia(dto));
+    @PostMapping("/{idEmpresa}")
+    public ResponseEntity<List<ViajeDTOListBusquedaEmpresa>> getViajeFromDia(@PathVariable(value = "idEmpresa") UUID idEmpresa,
+                                                                             @RequestBody @Valid ViajeDTOSolicitacaoEmpresa dto) {
+        var user = myUserService.getUser();
+        boolean isAdmin = false;
+        for (String role : user.roles())
+            isAdmin = role.equals("ROLE_ADMIN");
+
+        if (isAdmin) {
+            if (dto.idCiudadDestino() == null)
+                return ResponseEntity.ok(viajeEmpresaService.getViajesFromSalida(idEmpresa, dto));
+            else
+                return ResponseEntity.ok(viajeEmpresaService.getViajesFromDia(idEmpresa, dto));
+        }
+
+        if (user.idEmpresa() != null && user.idEmpresa() == idEmpresa) {
+            if (dto.idCiudadDestino() == null)
+                return ResponseEntity.ok(viajeEmpresaService.getViajesFromSalida(idEmpresa, dto));
+            else
+                return ResponseEntity.ok(viajeEmpresaService.getViajesFromDia(idEmpresa, dto));
+        }
+
+        return ResponseEntity.badRequest().build();
     }
 
     @PostMapping("/create")

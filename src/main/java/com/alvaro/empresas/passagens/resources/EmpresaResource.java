@@ -2,8 +2,6 @@ package com.alvaro.empresas.passagens.resources;
 
 import com.alvaro.empresas.passagens.dtos.EmpresaDto;
 import com.alvaro.empresas.passagens.dtos.EmpresaResponseDto;
-import com.alvaro.empresas.passagens.dtos.Mensaje;
-import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.services.EmpresaService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -13,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -27,8 +26,8 @@ public class EmpresaResource {
     @Autowired
     private EmpresaService empresaService;
 
-
     @GetMapping
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Page<EmpresaResponseDto>> getAll(@PageableDefault(size = 10) Pageable pageable) {
         return ResponseEntity.status(HttpStatus.OK).body(empresaService.findAll(pageable));
     }
@@ -39,16 +38,20 @@ public class EmpresaResource {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<EmpresaResponseDto> save(@RequestBody @Valid EmpresaDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(empresaService.save(dto));
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<EmpresaResponseDto> update(@PathVariable(value = "id") UUID id, @RequestBody @Valid EmpresaDto dto) {
         return ResponseEntity.status(HttpStatus.OK).body(empresaService.update(dto, id));
     }
 
+
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Object> delete(@PathVariable(value = "id") UUID id) {
         empresaService.delete(id);
         return ResponseEntity.noContent().build();

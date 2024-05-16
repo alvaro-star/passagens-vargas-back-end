@@ -12,5 +12,6 @@ public record EmpresaDto(
         @NotBlank
         String logo,
         @NotBlank
-        String numeroCuenta) {
+        String numeroCuenta
+) {
 }

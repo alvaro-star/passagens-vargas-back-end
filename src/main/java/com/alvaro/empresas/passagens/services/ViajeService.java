@@ -1,6 +1,5 @@
 package com.alvaro.empresas.passagens.services;
 
-import com.alvaro.empresas.passagens.autobuses.services.AutobusService;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
 import com.alvaro.empresas.passagens.dtos.precios.PrecioDTO;
 import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOListBusqueda;
@@ -29,15 +28,17 @@ import java.util.UUID;
 @Service
 public class ViajeService {
     @Autowired
-    private ViajeRepository viajeRepository;
+    private final ViajeRepository viajeRepository;
     @Autowired
-    private ParadaRepository paradaRepository;
+    private final ParadaRepository paradaRepository;
     @Autowired
-    private PrecioService precioService;
-    @Autowired
-    private LugarRepository lugarRepository;
-    @Autowired
-    private AutobusService autobusService;
+    private final LugarRepository lugarRepository;
+
+    public ViajeService(ViajeRepository viajeRepository, ParadaRepository paradaRepository, LugarRepository lugarRepository) {
+        this.viajeRepository = viajeRepository;
+        this.paradaRepository = paradaRepository;
+        this.lugarRepository = lugarRepository;
+    }
 
     public ViajeModel findById(UUID id) {
         var model = viajeRepository.findById(id);
@@ -92,7 +93,7 @@ public class ViajeService {
                     ViajeModel viaje = salidaFor.getViaje();
 
                     for (LugarModel lugarDestino : lugaresDestino) {
-                        List<ParadaModel> nVezesTrayectoPassaDestino = paradaRepository.nVezesViajePassa(lugarDestino.getId(), viaje.getCodigo());
+                        List<ParadaModel> nVezesTrayectoPassaDestino = paradaRepository.findByViajeCodigoAndLugarId(viaje.getCodigo(), lugarDestino.getId());
                         if (nVezesTrayectoPassaDestino.size() != 1) continue;
 
                         ParadaModel destino = nVezesTrayectoPassaDestino.get(0);

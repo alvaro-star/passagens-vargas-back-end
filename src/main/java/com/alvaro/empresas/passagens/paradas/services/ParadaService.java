@@ -2,6 +2,7 @@ package com.alvaro.empresas.passagens.paradas.services;
 
 import com.alvaro.empresas.passagens.configurations.exceptions.FieldMessage;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
+import com.alvaro.empresas.passagens.enums.EnumParada;
 import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
@@ -64,7 +65,7 @@ public class ParadaService {
         if (!viaje.dataHoraValido(dtoSended.dataHora()))
             throw new ValidationException("dataHora", "La parada no puede ser maior o menor que las dos primeras");
 
-        var model = new ParadaModel(dtoSended);
+        var model = new ParadaModel(dtoSended, EnumParada.CAMINO);
         model.setLugar(lugar);
         model.setViaje(viaje);
 

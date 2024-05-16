@@ -6,10 +6,12 @@ import com.alvaro.empresas.passagens.configurations.exceptions.FieldMessage;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
 import com.alvaro.empresas.passagens.dtos.precios.PrecioDTO;
 import com.alvaro.empresas.passagens.dtos.viajes.*;
+import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacaoEmpresa;
 import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOForm;
 import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOListBusquedaEmpresa;
 import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacao;
 import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOEmpresaResponse;
+import com.alvaro.empresas.passagens.enums.EnumParada;
 import com.alvaro.empresas.passagens.helpers.beans.MyUserService;
 import com.alvaro.empresas.passagens.helpers.beans.UsuarioBean;
 import com.alvaro.empresas.passagens.models.PrecioModel;
@@ -48,9 +50,6 @@ public class ViajeEmpresaService {
     private LugarRepository lugarRepository;
     @Autowired
     private AutobusService autobusService;
-    @Autowired
-    private MyUserService myUserService;
-
 
     public ViajeModel findById(UUID id) {
         var model = viajeRepository.findById(id);
@@ -67,7 +66,7 @@ public class ViajeEmpresaService {
         return models.map(model -> new ViajeDTOList(model, model.getAutobus().getId()));
     }
 
-    public List<ViajeDTOListBusquedaEmpresa> getViajesFromDia(ViajeDTOSolicitacao dto) {
+    public List<ViajeDTOListBusquedaEmpresa> getViajesFromDia(UUID idEmpresa, ViajeDTOSolicitacaoEmpresa dto) {
         if (dto.idCiudadDestino().equals(dto.idCiudadSalida()))
             throw new ValidationException("idDestino", "El destino no puede ser el mismo que la salida");
 
@@ -91,19 +90,17 @@ public class ViajeEmpresaService {
             if (hj.toLocalTime().isAfter(LocalTime.of(23, 30))) return new ArrayList<>();
         } else startDay = dto.fechaSalida().atTime(LocalTime.MIN);
 
-        UsuarioBean usuarioBean = myUserService.getUser();
-
         for (LugarModel lugarSalida : lugaresSalida) {
             List<ParadaModel> salidasDia = paradaRepository.cargarSalidasDelDia(lugarSalida.getId(), startDay, endDay);
 
             if (!salidasDia.isEmpty()) {
                 for (ParadaModel salidaFor : salidasDia) {
                     ViajeModel viaje = salidaFor.getViaje();
-                    if (viaje.getEmpresa().getId() == usuarioBean.idEmpresa())
+                    if (viaje.getEmpresa().getId() != idEmpresa)
                         continue;
 
                     for (LugarModel lugarDestino : lugaresDestino) {
-                        List<ParadaModel> nVezesTrayectoPassaDestino = paradaRepository.nVezesViajePassa(lugarDestino.getId(), viaje.getCodigo());
+                        List<ParadaModel> nVezesTrayectoPassaDestino = paradaRepository.findByViajeCodigoAndLugarId(viaje.getCodigo(), lugarDestino.getId());
                         if (nVezesTrayectoPassaDestino.size() != 1) continue;
 
                         ParadaModel destino = nVezesTrayectoPassaDestino.get(0);
@@ -117,6 +114,54 @@ public class ViajeEmpresaService {
 
                         viajesSelecionados.add(new ViajeDTOListBusquedaEmpresa(viaje, viaje.getEmpresa().getLogo(), salidaDTO, destinoDTO, precios));
                     }
+                }
+            }
+        }
+
+        return viajesSelecionados;
+    }
+
+    public List<ViajeDTOListBusquedaEmpresa> getViajesFromSalida(UUID idEmpresa, ViajeDTOSolicitacaoEmpresa dto) {
+
+        List<LugarModel> lugaresSalida = lugarRepository.findByCiudadId(dto.idCiudadSalida());
+
+        if (lugaresSalida.isEmpty())
+            throw new ObjectNotFoundException(dto.idCiudadSalida(), CiudadModel.class.getName());
+
+        LocalDateTime hj = LocalDateTime.now();
+        LocalDateTime startDay;
+        LocalDateTime endDay = dto.fechaSalida().atTime(LocalTime.MAX);
+
+        List<ViajeDTOListBusquedaEmpresa> viajesSelecionados = new ArrayList<>();
+
+        if (hj.toLocalDate().isEqual(dto.fechaSalida())) {
+            startDay = hj.plusMinutes(30);
+            if (hj.toLocalTime().isAfter(LocalTime.of(23, 30))) return new ArrayList<>();
+        } else startDay = dto.fechaSalida().atTime(LocalTime.MIN);
+
+        for (LugarModel lugarSalida : lugaresSalida) {
+            List<ParadaModel> salidasDia = paradaRepository.cargarSalidasDelDia(lugarSalida.getId(), startDay, endDay);
+
+            if (!salidasDia.isEmpty()) {
+                for (ParadaModel salidaFor : salidasDia) {
+                    ViajeModel viaje = salidaFor.getViaje();
+                    if (viaje.getEmpresa().getId() != idEmpresa)
+                        continue;
+
+                    List<ParadaModel> nVezesTrayectoPassaDestino = paradaRepository.findByViajeCodigoAndTipo(viaje.getCodigo(), EnumParada.DESTINO);
+                    if (nVezesTrayectoPassaDestino.size() != 1) continue;
+
+                    ParadaModel destino = nVezesTrayectoPassaDestino.get(0);
+
+                    ParadaDTOComplete salidaDTO = new ParadaDTOComplete(salidaFor, viaje.getCodigo());
+                    ParadaDTOComplete destinoDTO = new ParadaDTOComplete(destino, viaje.getCodigo());
+
+                    List<PrecioDTO> precios = new ArrayList<>();
+                    for (PrecioModel precio : viaje.getPrecios())
+                        if (!precio.getLleno()) precios.add(new PrecioDTO(precio));
+
+                    viajesSelecionados.add(new ViajeDTOListBusquedaEmpresa(viaje, viaje.getEmpresa().getLogo(), salidaDTO, destinoDTO, precios));
+
                 }
             }
         }
@@ -154,12 +199,12 @@ public class ViajeEmpresaService {
 
 
         var autobus = autobusService.findById(dto.idAutobus());
-        var model = new ViajeModel(autobus, autobus.getEmpresa(), new BigDecimal("0.00"), new BigDecimal("0.00"),false);
+        var model = new ViajeModel(autobus, autobus.getEmpresa(), new BigDecimal("0.00"), new BigDecimal("0.00"), false);
 
         var saved = viajeRepository.save(model);
 
-        var salida = new ParadaModel(dto.salida().dataHora(), dto.salida().plataforma(), lugarSalida.get(), saved);
-        var destino = new ParadaModel(dto.destino().dataHora(), dto.destino().plataforma(), lugarDestino.get(), saved);
+        var salida = new ParadaModel(dto.salida().dataHora(), dto.salida().plataforma(), EnumParada.SALIDA, lugarSalida.get(), saved);
+        var destino = new ParadaModel(dto.destino().dataHora(), dto.destino().plataforma(), EnumParada.DESTINO, lugarDestino.get(), saved);
 
         //Tratando los precios del viaje
         List<PisoModel> pisos = autobus.getPisos();

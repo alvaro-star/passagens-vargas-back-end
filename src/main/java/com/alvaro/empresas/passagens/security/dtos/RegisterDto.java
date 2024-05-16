@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public record RegisterDto(
         @Email
-	@NotBlank
+        @NotBlank
         String login,
         @NotBlank
         String telefono,

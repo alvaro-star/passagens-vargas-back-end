@@ -1,5 +1,6 @@
 package com.alvaro.empresas.passagens.paradas.models;
 
+import com.alvaro.empresas.passagens.enums.EnumParada;
 import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOUpdate;
@@ -28,6 +29,8 @@ public class ParadaModel {
 
     @Column(nullable = false)
     private int plataforma;
+    @Enumerated(EnumType.STRING)
+    private EnumParada tipo;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_lugar")
@@ -39,14 +42,16 @@ public class ParadaModel {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private ViajeModel viaje;
 
-    public ParadaModel(ParadaDTO dto) {
+    public ParadaModel(ParadaDTO dto, EnumParada tipo) {
         dataHora = dto.dataHora();
+        this.tipo = tipo;
         plataforma = dto.plataforma();
     }
 
-    public ParadaModel(LocalDateTime dataHora, int plataforma, LugarModel lugar, ViajeModel viaje) {
+    public ParadaModel(LocalDateTime dataHora, int plataforma, EnumParada tipo, LugarModel lugar, ViajeModel viaje) {
         this.dataHora = dataHora;
         this.plataforma = plataforma;
+        this.tipo = tipo;
         this.lugar = lugar;
         this.viaje = viaje;
     }

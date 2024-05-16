@@ -71,9 +71,7 @@ public class AuthResource {
         UsuarioModel newUser = new UsuarioModel(registerDto.login(), registerDto.nombre(), registerDto.telefono(), encriptedPassword);
 
         switch (registerDto.role()) {
-            case ROLE_ADMIN -> {
-                roles.add(roleService.getByRoleName(registerDto.role()));
-            }
+            case ROLE_ADMIN -> roles.add(roleService.getByRoleName(registerDto.role()));
 
             case ROLE_CLIENTE -> {
                 if (logado)
@@ -104,27 +102,6 @@ public class AuthResource {
 
                 roles.add(roleService.getByRoleName(RoleList.ROLE_EMPRESA_ADMIN));
                 newUser.setIdEmpresa(registerDto.idEmpresa());
-            }
-            case ROLE_EMPRESA_FUNCIONARIO -> {
-                if (!logado)
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Mensaje("Token Invalido"));
-
-                boolean roleValido = false;
-                for (GrantedAuthority authority : usuario.getAuthorities()) {
-                    String role = authority.getAuthority();
-                    if ("ROLE_EMPRESA_ADMIN".equals(role)) {
-                        roleValido = true;
-                        break;
-                    }
-                }
-
-                if (!roleValido)
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Mensaje("No estas Autorizado"));
-
-                var administradorEmpresa = usuarioRepository.findByEmail(usuario.getName());
-
-                roles.add(roleService.getByRoleName(RoleList.ROLE_EMPRESA_ADMIN));
-                newUser.setIdEmpresa(administradorEmpresa.getIdEmpresa());
             }
 
             default -> {
