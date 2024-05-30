@@ -20,6 +20,14 @@ public interface ParadaRepository extends JpaRepository<ParadaModel, Integer> {
                                           @Param("data_start") LocalDateTime dataStart,
                                           @Param("data_end") LocalDateTime dataEnd);
 
+    @Query(value = "SELECT * FROM tb_parada " +
+            "WHERE fk_idtb_empresa = :id_empresa AND fk_idtb_lugar = :id_lugar " +
+            "AND data_hora BETWEEN :data_start AND :data_end", nativeQuery = true)
+    List<ParadaModel> cargarSalidasDelDiaFromEmpresa(@Param("id_empresa") UUID idEmpresa,
+                                                     @Param("id_lugar") Integer idLugar,
+                                                     @Param("data_start") LocalDateTime dataStart,
+                                                     @Param("data_end") LocalDateTime dataEnd);
+
     List<ParadaModel> findByViajeCodigoAndTipo(UUID codigoViaje, EnumParada tipo);
 
     List<ParadaModel> findByViajeCodigoAndLugarId(UUID codigoViaje, Integer idLugar);

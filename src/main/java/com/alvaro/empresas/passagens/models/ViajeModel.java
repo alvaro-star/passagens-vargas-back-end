@@ -4,7 +4,6 @@ import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,7 +19,7 @@ import java.util.UUID;
 
 
 @Entity
-@Table(name = "tb_viaje", indexes = @Index(name = "idxtb_viaje", columnList = "fk_idtb_empresa, created_at"))
+@Table(name = "tb_viaje", indexes = @Index(name = "idxtb_viaje_fk_idtb_empresa_data_hora_salida", columnList = "fk_idtb_empresa, data_hora_salida"))
 @Getter
 @Setter
 @NoArgsConstructor
@@ -40,6 +39,9 @@ public class ViajeModel {
 
     @Column(name = "cobrado", nullable = false)
     private boolean isCobrado;
+
+    @Column(nullable = false, name = "data_hora_salida")
+    private LocalDateTime dataHoraSalida;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -68,12 +70,13 @@ public class ViajeModel {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "viaje")
     private List<PrecioModel> precios = new ArrayList<>();
 
-    public ViajeModel(AutobusModel autobus, EmpresaModel empresa, BigDecimal valorArrecadadoEfectivo, BigDecimal valorArrecadadoWeb, boolean isCobrado) {
+    public ViajeModel(AutobusModel autobus, EmpresaModel empresa, BigDecimal valorArrecadadoEfectivo, BigDecimal valorArrecadadoWeb, boolean isCobrado, LocalDateTime dataHoraSalida) {
         this.autobus = autobus;
         this.valorArrecadadoEfectivo = valorArrecadadoEfectivo;
         this.valorArrecadadoWeb = valorArrecadadoWeb;
         this.isCobrado = isCobrado;
         this.empresa = empresa;
+        this.dataHoraSalida = dataHoraSalida;
     }
 
 

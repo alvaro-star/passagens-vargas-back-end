@@ -31,9 +31,8 @@ public class PasajeResource {
     //PreAuthorize("hasRole('ROLE_EMPRESA-FUNCIONARIO', 'ROLE_EMPRESA_ADMIN')")
     @PostMapping("/vender")
     public ResponseEntity<Object> vender(@Valid @RequestBody PasajesDTOVenta dto) {
-        var usuario = SecurityContextHolder.getContext().getAuthentication();
         PasajesDTO dto1 = new PasajesDTO(dto);
-        if (pasajeService.empresaValida(usuario, dto.idPrecio())) {
+        if (pasajeService.empresaValida(dto.idPrecio())) {
             return ResponseEntity.status(HttpStatus.CREATED).body(pasajeService.save(dto1, dto.metodo(), false, false));
         } else {
             return ResponseEntity.unprocessableEntity().body(new Mensaje("No se puede vender el pasaje de otra empresa"));

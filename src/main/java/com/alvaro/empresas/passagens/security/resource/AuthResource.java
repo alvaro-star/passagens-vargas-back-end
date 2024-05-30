@@ -71,7 +71,6 @@ public class AuthResource {
         UsuarioModel newUser = new UsuarioModel(registerDto.login(), registerDto.nombre(), registerDto.telefono(), encriptedPassword);
 
         switch (registerDto.role()) {
-            case ROLE_ADMIN -> roles.add(roleService.getByRoleName(registerDto.role()));
 
             case ROLE_CLIENTE -> {
                 if (logado)

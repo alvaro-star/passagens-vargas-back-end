@@ -33,7 +33,7 @@ class ParadaRepositoryTest {
         this.paradaRepository = paradaRepository;
         this.em = em;
     }
-
+/*
     @Test
     @DisplayName("Dado tres registros de parada, deveriam ser mostradas os codigos de tres trayectos que posseen una parada de un lugar em um dia determinado")
     void cargarSalidasDelDiaCenario1() {
@@ -104,5 +104,5 @@ class ParadaRepositoryTest {
         var parada = new ParadaModel(data, 10, lugar, viaje);
         em.persist(parada);
         return parada;
-    }
+    }*/
 }

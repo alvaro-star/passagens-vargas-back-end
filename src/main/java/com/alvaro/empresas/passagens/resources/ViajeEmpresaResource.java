@@ -3,10 +3,8 @@ package com.alvaro.empresas.passagens.resources;
 import com.alvaro.empresas.passagens.dtos.Mensaje;
 import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacaoEmpresa;
 import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOEmpresaResponse;
-import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOListBusquedaEmpresa;
-import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacao;
 import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOForm;
-import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOList;
+import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOListBusquedaEmpresa;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOUpdate;
 import com.alvaro.empresas.passagens.helpers.beans.MyUserService;
 import com.alvaro.empresas.passagens.services.ViajeEmpresaService;
@@ -15,6 +13,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,36 +29,22 @@ import java.util.UUID;
 public class ViajeEmpresaResource {
     @Autowired
     private ViajeEmpresaService viajeEmpresaService;
-
     @Autowired
     private MyUserService myUserService;
 
-    @GetMapping
-    public ResponseEntity<Page<ViajeDTOList>> getAll(Pageable pageable) {
-        return ResponseEntity.ok(viajeEmpresaService.findAll(pageable));
-    }
-
-    @GetMapping("/from/{idEmpresa}")
-    public ResponseEntity<Page<ViajeDTOList>> getAllFromEmpresa(@PathVariable(value = "idEmpresa") UUID id, Pageable pageable) {
-        return ResponseEntity.ok(viajeEmpresaService.findAllEmpresa(id, pageable));
+    @GetMapping("/from/{idEmpresa}/{type}")
+    public ResponseEntity<Page<ViajeDTOListBusquedaEmpresa>> getAllFromEmpresa(@PathVariable(value = "idEmpresa") UUID id,
+                                                                               @PageableDefault(sort = "dataHoraSalida", direction = Sort.Direction.DESC) Pageable pageable,
+                                                                               @PathVariable(value = "type") String type) {
+        return ResponseEntity.ok(viajeEmpresaService.findAllEmpresa(id, pageable, type));
     }
 
     @PostMapping("/{idEmpresa}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN')")
     public ResponseEntity<List<ViajeDTOListBusquedaEmpresa>> getViajeFromDia(@PathVariable(value = "idEmpresa") UUID idEmpresa,
                                                                              @RequestBody @Valid ViajeDTOSolicitacaoEmpresa dto) {
         var user = myUserService.getUser();
-        boolean isAdmin = false;
-        for (String role : user.roles())
-            isAdmin = role.equals("ROLE_ADMIN");
-
-        if (isAdmin) {
-            if (dto.idCiudadDestino() == null)
-                return ResponseEntity.ok(viajeEmpresaService.getViajesFromSalida(idEmpresa, dto));
-            else
-                return ResponseEntity.ok(viajeEmpresaService.getViajesFromDia(idEmpresa, dto));
-        }
-
-        if (user.idEmpresa() != null && user.idEmpresa() == idEmpresa) {
+        if (user.hasRole("ROLE_ADMIN") || user.isMyEmpresa(idEmpresa)) {
             if (dto.idCiudadDestino() == null)
                 return ResponseEntity.ok(viajeEmpresaService.getViajesFromSalida(idEmpresa, dto));
             else
@@ -72,11 +57,10 @@ public class ViajeEmpresaResource {
     @PostMapping("/create")
     public ResponseEntity<Object> save(@Valid @RequestBody ViajeDTOForm dto) {
         ViajeDTOEmpresaResponse response = viajeEmpresaService.save(dto);
-        if (response == null) {
+        if (response == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Mensaje("Las paradas no son validas"));
-        } else {
+        else
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        }
     }
 
     @PutMapping("/{id}")

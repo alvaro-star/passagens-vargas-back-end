@@ -4,13 +4,21 @@ import com.alvaro.empresas.passagens.models.ViajeModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Repository
 public interface ViajeRepository extends JpaRepository<ViajeModel, UUID> {
     Page<ViajeModel> findByEmpresaId(UUID id, Pageable pageable);
+
+    @Query("SELECT v FROM ViajeModel v WHERE v.empresa.id = :empresaId AND v.dataHoraSalida >= :dataHoraSalida")
+    Page<ViajeModel> findViajesFuturos(UUID empresaId, LocalDateTime dataHoraSalida, Pageable pageable);
+
+    @Query("SELECT v FROM ViajeModel v WHERE v.empresa.id = :empresaId AND v.dataHoraSalida < :dataHoraSalida")
+    Page<ViajeModel> findViajesPassados(UUID empresaId, LocalDateTime dataHoraSalida, Pageable pageable);
 }
 
 /* No usage

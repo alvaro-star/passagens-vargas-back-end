@@ -1,6 +1,7 @@
 package com.alvaro.empresas.passagens.paradas.models;
 
 import com.alvaro.empresas.passagens.enums.EnumParada;
+import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOUpdate;
@@ -13,7 +14,11 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "tb_parada", indexes = @Index(name = "idxtb_parada_dataHora", columnList = "data_hora"))
+@Table(name = "tb_parada", indexes = {
+        @Index(name = "idxtb_parada_fk_idtb_lugar_dataHora", columnList = "fk_idtb_lugar, data_hora"),
+        @Index(name = "idxtb_parada_fk_idtb_empresa_fk_idtb_lugar_dataHora", columnList = "fk_idtb_empresa, fk_idtb_lugar, data_hora"),
+        @Index(name = "idxtb_parada_fk_idtb_viaje", columnList = "fk_idtb_viaje")
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -37,10 +42,16 @@ public class ParadaModel {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private LugarModel lugar;
 
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_viaje")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private ViajeModel viaje;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "fk_idtb_empresa")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private EmpresaModel empresa;
 
     public ParadaModel(ParadaDTO dto, EnumParada tipo) {
         dataHora = dto.dataHora();
@@ -48,12 +59,13 @@ public class ParadaModel {
         plataforma = dto.plataforma();
     }
 
-    public ParadaModel(LocalDateTime dataHora, int plataforma, EnumParada tipo, LugarModel lugar, ViajeModel viaje) {
+    public ParadaModel(LocalDateTime dataHora, int plataforma, EnumParada tipo, LugarModel lugar, ViajeModel viaje, EmpresaModel empresa) {
         this.dataHora = dataHora;
         this.plataforma = plataforma;
         this.tipo = tipo;
         this.lugar = lugar;
         this.viaje = viaje;
+        this.empresa = empresa;
     }
 
     public void updateValues(ParadaDTOUpdate dtoUpdate) {

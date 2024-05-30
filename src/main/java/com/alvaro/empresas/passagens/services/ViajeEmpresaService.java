@@ -5,15 +5,12 @@ import com.alvaro.empresas.passagens.autobuses.services.AutobusService;
 import com.alvaro.empresas.passagens.configurations.exceptions.FieldMessage;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
 import com.alvaro.empresas.passagens.dtos.precios.PrecioDTO;
-import com.alvaro.empresas.passagens.dtos.viajes.*;
 import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacaoEmpresa;
+import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOEmpresaResponse;
 import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOForm;
 import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOListBusquedaEmpresa;
-import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacao;
-import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOEmpresaResponse;
+import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOUpdate;
 import com.alvaro.empresas.passagens.enums.EnumParada;
-import com.alvaro.empresas.passagens.helpers.beans.MyUserService;
-import com.alvaro.empresas.passagens.helpers.beans.UsuarioBean;
 import com.alvaro.empresas.passagens.models.PrecioModel;
 import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
@@ -56,14 +53,24 @@ public class ViajeEmpresaService {
         return model.orElseThrow(() -> new ObjectNotFoundException(id, ViajeModel.class.getName()));
     }
 
-    public Page<ViajeDTOList> findAll(Pageable pageable) {
-        Page<ViajeModel> models = viajeRepository.findAll(pageable);
-        return models.map(model -> new ViajeDTOList(model, model.getAutobus().getId()));
-    }
+    public Page<ViajeDTOListBusquedaEmpresa> findAllEmpresa(UUID idEmpresa, Pageable pageable, String type) {
+        Page<ViajeModel> models;
+        LocalDateTime data = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
+        switch (type) {
+            case "before" -> models = viajeRepository.findViajesPassados(idEmpresa, data, pageable);
+            case "after" -> models = viajeRepository.findViajesFuturos(idEmpresa, data, pageable);
+            default -> models = viajeRepository.findByEmpresaId(idEmpresa, pageable);
+        }
 
-    public Page<ViajeDTOList> findAllEmpresa(UUID idEmpresa, Pageable pageable) {
-        Page<ViajeModel> models = viajeRepository.findByEmpresaId(idEmpresa, pageable);
-        return models.map(model -> new ViajeDTOList(model, model.getAutobus().getId()));
+        return models.map(model -> {
+            var salida = paradaRepository.findByViajeCodigoAndTipo(model.getCodigo(), EnumParada.SALIDA);
+            var destino = paradaRepository.findByViajeCodigoAndTipo(model.getCodigo(), EnumParada.DESTINO);
+            if (salida.isEmpty() || destino.isEmpty())
+                throw new ValidationException("lista", "Hay un viaje que no posse ninguna parada");
+            ParadaDTOComplete salidaDTO = new ParadaDTOComplete(salida.get(0), model.getCodigo());
+            ParadaDTOComplete destinoDTO = new ParadaDTOComplete(destino.get(0), model.getCodigo());
+            return new ViajeDTOListBusquedaEmpresa(model, "", salidaDTO, destinoDTO, new ArrayList<>());
+        });
     }
 
     public List<ViajeDTOListBusquedaEmpresa> getViajesFromDia(UUID idEmpresa, ViajeDTOSolicitacaoEmpresa dto) {
@@ -140,13 +147,11 @@ public class ViajeEmpresaService {
         } else startDay = dto.fechaSalida().atTime(LocalTime.MIN);
 
         for (LugarModel lugarSalida : lugaresSalida) {
-            List<ParadaModel> salidasDia = paradaRepository.cargarSalidasDelDia(lugarSalida.getId(), startDay, endDay);
+            List<ParadaModel> salidasDia = paradaRepository.cargarSalidasDelDiaFromEmpresa(idEmpresa, lugarSalida.getId(), startDay, endDay);
 
             if (!salidasDia.isEmpty()) {
                 for (ParadaModel salidaFor : salidasDia) {
                     ViajeModel viaje = salidaFor.getViaje();
-                    if (viaje.getEmpresa().getId() != idEmpresa)
-                        continue;
 
                     List<ParadaModel> nVezesTrayectoPassaDestino = paradaRepository.findByViajeCodigoAndTipo(viaje.getCodigo(), EnumParada.DESTINO);
                     if (nVezesTrayectoPassaDestino.size() != 1) continue;
@@ -193,25 +198,27 @@ public class ViajeEmpresaService {
         var lugarDestino = lugarRepository.findById(dto.destino().idLugar());
         if (lugarDestino.isEmpty())
             throw new ValidationException("destino.idLugar", "El lugarDestino no fue allado");
+        LocalDateTime dataHoraSalidaAjustada = dto.salida().dataHora().withSecond(0).withNano(0);
+        LocalDateTime dataHoraDestinoAjustada = dto.destino().dataHora().withSecond(0).withNano(0);
 
-        if (!dto.destino().dataHora().isAfter(dto.salida().dataHora()))
+        if (!dataHoraDestinoAjustada.isAfter(dataHoraSalidaAjustada))
             throw new ValidationException("salida", "La salida posee un horario superior al del destino");
-
+        //Adicionando la hora de salida, -> nota: es conveniencia
 
         var autobus = autobusService.findById(dto.idAutobus());
-        var model = new ViajeModel(autobus, autobus.getEmpresa(), new BigDecimal("0.00"), new BigDecimal("0.00"), false);
+        var model = new ViajeModel(autobus, autobus.getEmpresa(), new BigDecimal("0.00"), new BigDecimal("0.00"), false, dataHoraSalidaAjustada);
 
         var saved = viajeRepository.save(model);
 
-        var salida = new ParadaModel(dto.salida().dataHora(), dto.salida().plataforma(), EnumParada.SALIDA, lugarSalida.get(), saved);
-        var destino = new ParadaModel(dto.destino().dataHora(), dto.destino().plataforma(), EnumParada.DESTINO, lugarDestino.get(), saved);
+        var salida = new ParadaModel(dataHoraSalidaAjustada, dto.salida().plataforma(), EnumParada.SALIDA, lugarSalida.get(), saved, saved.getEmpresa());
+        var destino = new ParadaModel(dataHoraDestinoAjustada, dto.destino().plataforma(), EnumParada.DESTINO, lugarDestino.get(), saved, saved.getEmpresa());
 
         //Tratando los precios del viaje
         List<PisoModel> pisos = autobus.getPisos();
 
         List<PrecioModel> precios = new ArrayList<>();
 
-        //Solo pueden existir dos precios
+        //Solo pueden existir dos precios -> Por el momento
         switch (pisos.size()) {
             case 1 -> precios.add(new PrecioModel(dto.precioPiso1(), 1, pisos.get(0).getNSillas()));
             case 2 -> {

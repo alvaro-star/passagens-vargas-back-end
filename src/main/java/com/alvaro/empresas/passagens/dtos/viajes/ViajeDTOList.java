@@ -15,6 +15,6 @@ public record ViajeDTOList(
         Integer idAutobus
 ) {
     public ViajeDTOList(ViajeModel model, Integer idAutobus) {
-        this(model.getCodigo(), model.getValorArrecadadoEfectivo(),model.getValorArrecadadoWeb(), model.isCobrado(), idAutobus);
+        this(model.getCodigo(), model.getValorArrecadadoEfectivo(), model.getValorArrecadadoWeb(), model.isCobrado(), idAutobus);
     }
 }

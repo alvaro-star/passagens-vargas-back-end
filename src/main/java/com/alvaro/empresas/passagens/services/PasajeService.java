@@ -6,14 +6,12 @@ import com.alvaro.empresas.passagens.configurations.exceptions.ValidationExcepti
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajeDTO;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTO;
 import com.alvaro.empresas.passagens.enums.MetodoPagamentoEnum;
+import com.alvaro.empresas.passagens.helpers.beans.MyUserService;
 import com.alvaro.empresas.passagens.models.*;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.alvaro.empresas.passagens.repositories.PasajeRepository;
-import com.alvaro.empresas.passagens.repositories.PasajeroRepository;
-import com.alvaro.empresas.passagens.security.repositories.UsuarioRepository;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +28,7 @@ public class PasajeService {
     @Autowired
     private PagoService pagoService;
     @Autowired
-    private UsuarioRepository usuarioRepository;
+    private MyUserService myUserService;
 
     public PasajeModel findById(UUID id) {
         var model = pasajeRepository.findById(id);
@@ -125,9 +123,9 @@ public class PasajeService {
         }
     }
 
-    public boolean empresaValida(Authentication usuario, UUID idPrecio) {
-        var autorizado = usuarioRepository.findByEmail(usuario.getName());
+    public boolean empresaValida(UUID idPrecio) {
+        var autorizado = myUserService.getUser();
         var precio = precioService.findById(idPrecio);
-        return autorizado.getIdEmpresa() == precio.getViaje().getAutobus().getEmpresa().getId();
+        return precio.getViaje().getAutobus().getEmpresa().getId().equals(autorizado.getIdEmpresa());
     }
 }

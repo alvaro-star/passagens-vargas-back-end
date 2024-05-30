@@ -122,40 +122,41 @@ public class ShareProfile {
 
             //Cria os trayectos y las paradas de cada autobus
             for (DayOfWeek dia : DayOfWeek.values()) {
-                var viaje = viajeRepository.save(new ViajeModel(autobus, autobus.getEmpresa(), new BigDecimal("0.00"), new BigDecimal("0.00"), false));
-                var dataInicio = LocalDateTime.now().with(TemporalAdjusters.next(dia)).withHour(8);
+                var dataInicio = LocalDateTime.now().with(TemporalAdjusters.next(dia)).withHour(8).withSecond(0).withNano(0);
+                var viaje = viajeRepository.save(new ViajeModel(autobus, autobus.getEmpresa(), new BigDecimal("0.00"), new BigDecimal("0.00"), false, dataInicio));
+
                 int nLista = 1;
                 List<ParadaModel> paradas = new ArrayList<>();
                 //Registra as paradas
                 if (lugares.size() > 5) {
+                    var parada = paradaRepository.save(new ParadaModel(dataInicio, 10, EnumParada.SALIDA, lugares.get(0), viaje, viaje.getEmpresa()));
                     dataInicio = dataInicio.plusHours(1);
-                    var parada = paradaRepository.save(new ParadaModel(dataInicio, 10, EnumParada.SALIDA, lugares.get(0), viaje));
                     paradas.add(parada);
                     nLista++;
                     for (int i = 1; i < 4; i++) {
                         dataInicio = dataInicio.plusHours(1);
-                        parada = paradaRepository.save(new ParadaModel(dataInicio, 10, EnumParada.CAMINO, lugares.get(i), viaje));
+                        parada = paradaRepository.save(new ParadaModel(dataInicio, 10, EnumParada.CAMINO, lugares.get(i), viaje, viaje.getEmpresa()));
                         paradas.add(parada);
                         nLista++;
                     }
                     dataInicio = dataInicio.plusHours(1);
-                    parada = paradaRepository.save(new ParadaModel(dataInicio, 20, EnumParada.DESTINO, lugares.get(5), viaje));
+                    parada = paradaRepository.save(new ParadaModel(dataInicio, 20, EnumParada.DESTINO, lugares.get(5), viaje, viaje.getEmpresa()));
                     paradas.add(parada);
                     nLista++;
                 } else {
                     var tamanhoMaximo = lugares.size();
+                    var parada = paradaRepository.save(new ParadaModel(dataInicio, 10, EnumParada.SALIDA, lugares.get(0), viaje, viaje.getEmpresa()));
                     dataInicio = dataInicio.plusHours(1);
-                    var parada = paradaRepository.save(new ParadaModel(dataInicio, 10, EnumParada.SALIDA, lugares.get(0), viaje));
                     paradas.add(parada);
                     nLista++;
                     for (int i = 1; i < tamanhoMaximo - 1; i++) {
                         dataInicio = dataInicio.plusHours(1);
-                        parada = paradaRepository.save(new ParadaModel(dataInicio, 10, EnumParada.CAMINO, lugares.get(i), viaje));
+                        parada = paradaRepository.save(new ParadaModel(dataInicio, 10, EnumParada.CAMINO, lugares.get(i), viaje, viaje.getEmpresa()));
                         paradas.add(parada);
                         nLista++;
                     }
                     dataInicio = dataInicio.plusHours(1);
-                    parada = paradaRepository.save(new ParadaModel(dataInicio, 20, EnumParada.DESTINO, lugares.get(tamanhoMaximo - 1), viaje));
+                    parada = paradaRepository.save(new ParadaModel(dataInicio, 20, EnumParada.DESTINO, lugares.get(tamanhoMaximo - 1), viaje, viaje.getEmpresa()));
                     paradas.add(parada);
                     nLista++;
                 }

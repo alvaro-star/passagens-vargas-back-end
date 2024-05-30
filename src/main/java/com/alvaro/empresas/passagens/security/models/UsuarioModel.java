@@ -55,7 +55,22 @@ public class UsuarioModel implements UserDetails {
         this.telefono = telefono;
         this.contrasena = contrasena;
         this.idEmpresa = idEmpresa;
+    }
 
+
+    public boolean hasRole(String role) {
+        boolean find = false;
+        for (RoleModel roleModel : this.roles)
+            find = roleModel.getAuthority().equals(role);
+        return find;
+    }
+
+
+    public boolean addRole(RoleModel role) {
+        return this.roles.add(role);
+    }
+    public boolean removeRole(RoleModel role){
+        return this.roles.remove(role);
     }
 
     @Override
