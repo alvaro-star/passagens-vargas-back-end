@@ -27,10 +27,14 @@ import java.util.UUID;
 @RequestMapping("/empresa/viajes")
 @SecurityRequirement(name = "bearer-key")
 public class ViajeEmpresaResource {
+    private final ViajeEmpresaService viajeEmpresaService;
+    private final MyUserService myUserService;
+
     @Autowired
-    private ViajeEmpresaService viajeEmpresaService;
-    @Autowired
-    private MyUserService myUserService;
+    public ViajeEmpresaResource(ViajeEmpresaService viajeEmpresaService, MyUserService myUserService) {
+        this.viajeEmpresaService = viajeEmpresaService;
+        this.myUserService = myUserService;
+    }
 
     @GetMapping("/from/{idEmpresa}/{type}")
     public ResponseEntity<Page<ViajeDTOListBusquedaEmpresa>> getAllFromEmpresa(@PathVariable(value = "idEmpresa") UUID id,

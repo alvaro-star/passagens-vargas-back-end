@@ -32,16 +32,20 @@ import java.util.Set;
 @RestController
 @RequestMapping("/auth")
 public class AuthResource {
+    private final UsuarioRepository usuarioRepository;
+    private final RoleService roleService;
+    private final AuthenticationManager authenticationManager;
+    private final TokenService tokenService;
+    private final EmpresaRepository empresaRepository;
+
     @Autowired
-    private UsuarioRepository usuarioRepository;
-    @Autowired
-    private RoleService roleService;
-    @Autowired
-    private AuthenticationManager authenticationManager;
-    @Autowired
-    private TokenService tokenService;
-    @Autowired
-    private EmpresaRepository empresaRepository;
+    public AuthResource(UsuarioRepository usuarioRepository, RoleService roleService, AuthenticationManager authenticationManager, TokenService tokenService, EmpresaRepository empresaRepository) {
+        this.usuarioRepository = usuarioRepository;
+        this.roleService = roleService;
+        this.authenticationManager = authenticationManager;
+        this.tokenService = tokenService;
+        this.empresaRepository = empresaRepository;
+    }
 
     @PostMapping("/login")
     public ResponseEntity<Object> login(@RequestBody @Valid LoginDto loginDto) {
