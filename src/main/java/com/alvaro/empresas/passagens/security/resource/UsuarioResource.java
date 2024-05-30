@@ -16,10 +16,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/usuarios")
 @SecurityRequirement(name = "bearer-key")
 public class UsuarioResource {
+    private final UsuarioRepository usuarioRepository;
+    private final MyUserService myUserService;
+
     @Autowired
-    private UsuarioRepository usuarioRepository;
-    @Autowired
-    private MyUserService myUserService;
+    public UsuarioResource(UsuarioRepository usuarioRepository, MyUserService myUserService) {
+        this.usuarioRepository = usuarioRepository;
+        this.myUserService = myUserService;
+    }
 
     @GetMapping("/mydata")
     public ResponseEntity<Object> getProfile() {

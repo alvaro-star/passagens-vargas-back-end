@@ -21,11 +21,14 @@ import java.util.UUID;
 @SecurityRequirement(name = "bearer-key")
 //EMPRESA_ADMIN - EMPRESA_ADMIN
 public class FuncionarioResource {
+    private final MyUserService myUserService;
+    private final FuncionarioService funcionarioService;
 
     @Autowired
-    private MyUserService myUserService;
-    @Autowired
-    private FuncionarioService funcionarioService;
+    public FuncionarioResource(MyUserService myUserService, FuncionarioService funcionarioService) {
+        this.myUserService = myUserService;
+        this.funcionarioService = funcionarioService;
+    }
 
     @GetMapping("/{idEmpresa}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN')")

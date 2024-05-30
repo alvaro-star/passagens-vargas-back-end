@@ -1,6 +1,5 @@
 package com.alvaro.empresas.passagens.helpers.beans;
 
-import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.security.models.UsuarioModel;
 import com.alvaro.empresas.passagens.security.repositories.UsuarioRepository;
 import org.hibernate.ObjectNotFoundException;
@@ -14,8 +13,12 @@ import java.util.List;
 @Service
 
 public class MyUserService {
+
+    private final UsuarioRepository usuarioRepository;
     @Autowired
-    private UsuarioRepository usuarioRepository;
+    public MyUserService(UsuarioRepository usuarioRepository) {
+        this.usuarioRepository = usuarioRepository;
+    }
 
     public UsuarioBean getUser() {
         var usuario = SecurityContextHolder.getContext().getAuthentication();
