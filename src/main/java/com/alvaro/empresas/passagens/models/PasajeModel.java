@@ -1,6 +1,5 @@
 package com.alvaro.empresas.passagens.models;
 
-import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
@@ -8,15 +7,18 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Date;
 import java.util.UUID;
 
 
 @Entity
-@Table(name = "tb_pasaje")
+@Table(name = "tb_pasaje", indexes = {
+        @Index(name = "idxtb_pasaje_fk_idtb_precio", columnList = "fk_idtb_precio"),
+        @Index(name = "idxtb_pasaje_fk_idtb_pago", columnList = "fk_idtb_pago")
+})
 @Getter
 @Setter
 @NoArgsConstructor
+
 public class PasajeModel {
     @Id
     @Column(name = "idtb_pasaje")

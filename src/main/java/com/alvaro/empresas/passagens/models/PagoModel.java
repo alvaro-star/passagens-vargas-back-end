@@ -18,10 +18,10 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
-@Table(name = "tb_pago")
+@Table(name = "tb_pago", indexes = @Index(name = "idxtb_viaje_fk_idtb_viaje_created_at", columnList = "fk_idtb_viaje, created_at"))
 @NoArgsConstructor
-public class PagoModel {
 
+public class PagoModel {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "idtb_pagamento")

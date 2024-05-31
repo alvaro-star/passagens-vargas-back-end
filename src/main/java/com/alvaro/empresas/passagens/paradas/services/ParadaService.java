@@ -1,6 +1,5 @@
 package com.alvaro.empresas.passagens.paradas.services;
 
-import com.alvaro.empresas.passagens.configurations.exceptions.FieldMessage;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
 import com.alvaro.empresas.passagens.enums.EnumParada;
 import com.alvaro.empresas.passagens.helpers.beans.MyUserService;
@@ -20,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -69,9 +69,11 @@ public class ParadaService {
         var dataParadaAjustada = dtoSended.dataHora().withSecond(0).withNano(0);
         for (ParadaModel parada : viaje.getParadas()) {
             if (parada.getDataHora().isEqual(dataParadaAjustada))
-                throw new ValidationException(new FieldMessage("dataHora", "Ya hay una parada registrada en esta fecha"));
+                throw new ValidationException("dataHora", "Ya hay una parada registrada en esta fecha");
             if (parada.getLugar().getId() == dtoSended.idLugar())
                 throw new ValidationException("idLugar", "Ya hay una parada registrada que passara por este lugar");
+            if (parada.getTipo().equals(EnumParada.DESTINO) && parada.getDataHora().isBefore(LocalDateTime.now()))
+                throw new ValidationException("dataHora", "No se puede agregar una parada a un viaje del passado");
         }
 
         if (!viaje.dataHoraValido(dataParadaAjustada))
@@ -90,16 +92,18 @@ public class ParadaService {
     @Transactional
     public ParadaDTOComplete update(ParadaDTOUpdate dtoSended, ParadaModel model) {
         var dataParadaAjustada = dtoSended.dataHora().withSecond(0).withNano(0);
-
         for (ParadaModel parada : model.getViaje().getParadas()) {
-            if (parada.getDataHora().isEqual(dataParadaAjustada))
+            if (parada.getTipo().equals(EnumParada.SALIDA) && parada.getDataHora().isBefore(LocalDateTime.now()))
+                throw new ValidationException("entity", "No se puede editar una parada del passado");
+            if (parada.getDataHora().isEqual(dataParadaAjustada) && !parada.getId().equals(model.getId()))
                 throw new ValidationException("dataHora", "Ya hay una parada registrada en esta fecha");
-            if (parada.getLugar().getId() == dtoSended.idLugar())
+            if (parada.getLugar().getId() == dtoSended.idLugar() && !parada.getId().equals(model.getId()))
                 throw new ValidationException("idLugar", "Ya hay una parada registrada que passara por este lugar");
         }
+
         if (model.getTipo().equals(EnumParada.CAMINO))
             if (!model.getViaje().dataHoraValido(dataParadaAjustada))
-                throw new ValidationException("dataHora", "La parada no puede ser maior o menor que las paradas extremas");
+                throw new ValidationException("dataHora", "La fecha y hora estan fuera del limite");
 
         if (model.getTipo().equals(EnumParada.SALIDA)) {
             for (ParadaModel parada : model.getViaje().getParadas()) {

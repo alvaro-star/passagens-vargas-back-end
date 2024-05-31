@@ -1,10 +1,14 @@
 package com.alvaro.empresas.passagens.paradas.resources;
 
+import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
 import com.alvaro.empresas.passagens.dtos.Mensaje;
+import com.alvaro.empresas.passagens.enums.EnumParada;
 import com.alvaro.empresas.passagens.helpers.beans.MyUserService;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOUpdate;
+import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
+import com.alvaro.empresas.passagens.paradas.repositories.ParadaRepository;
 import com.alvaro.empresas.passagens.paradas.services.ParadaService;
 import com.alvaro.empresas.passagens.security.models.RoleList;
 import com.alvaro.empresas.passagens.services.ViajeService;
@@ -18,6 +22,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/paradas")
@@ -66,17 +72,35 @@ public class ParadaResource {
     }
 
     @DeleteMapping("/{id}")//Mejorar politica de exclusion, solo se puede eliminar si nádie pago o compro
+    //Otimizar a eliminacao de uma parada
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
     public ResponseEntity<Mensaje> delete(@PathVariable Integer id) {
+
         var model = paradaService.findById(id);
         var userLogin = myUserService.getUser();
         if (!(userLogin.hasRole(RoleList.ROLE_ADMIN.toString()) || userLogin.isMyEmpresa(model.getEmpresa().getId())))
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Mensaje("El usuario no esta relacionado con esta Parada"));
 
+        int indice = -1;
+
+        if (!model.getTipo().equals(EnumParada.CAMINO))
+            return ResponseEntity.badRequest().body(new Mensaje("No se puede eliminar el destino o la parada"));
+
+        for (int i = 0; i < model.getViaje().getParadas().size(); i++) {
+            ParadaModel aux = model.getViaje().getParadas().get(i);
+            if (aux.getTipo().equals(EnumParada.DESTINO) && aux.getDataHora().isBefore(LocalDateTime.now()))
+                throw new ValidationException("entity", "No se puede eliminar un punto de un viaje que termino o sigue en curso");
+            if (aux.getId().equals(model.getId()))
+                indice = i;
+        }
+        if (indice == -1)
+            return ResponseEntity.badRequest().body(new Mensaje("La parada no esta relacionado"));
+        //Causa de nao exclusao: a o relacionamento com viaje
+        model.getViaje().getParadas().remove(indice);
         var pagos = model.getViaje().getPagos();
+
         if (!pagos.isEmpty())
             return ResponseEntity.badRequest().body(new Mensaje("La parada no puede ser eliminada pues el viaje ya posee un pago registrado"));
-
         paradaService.delete(model);
         return ResponseEntity.noContent().build();
     }
