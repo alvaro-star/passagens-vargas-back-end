@@ -6,6 +6,7 @@ import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOUpdate;
 import com.alvaro.empresas.passagens.paradas.services.ParadaService;
+import com.alvaro.empresas.passagens.security.models.RoleList;
 import com.alvaro.empresas.passagens.services.ViajeService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -23,7 +24,6 @@ import org.springframework.web.bind.annotation.*;
 @SecurityRequirement(name = "bearer-key")
 public class ParadaResource {
     private final ParadaService paradaService;
-
     private final MyUserService myUserService;
     private final ViajeService viajeService;
 
@@ -46,7 +46,7 @@ public class ParadaResource {
         var viajeModel = this.viajeService.findById(dto.idViaje());
         var userLogin = myUserService.getUser();
         if (!(userLogin.hasRole("ROLE_ADMIN") || userLogin.isMyEmpresa(viajeModel.getEmpresa().getId())))
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Mensaje("El usuario no esta relacionado a un empresa"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Mensaje("El usuario no esta relacionado con este Viaje"));
         return ResponseEntity.status(HttpStatus.CREATED).body(paradaService.save(dto, viajeModel));
     }
 
@@ -56,14 +56,23 @@ public class ParadaResource {
     }
 
     @PutMapping("/{id}")
-    //Validar
-    public ResponseEntity<ParadaDTOComplete> update(@Valid @RequestBody ParadaDTOUpdate dto, @PathVariable Integer id) {
-        return ResponseEntity.ok(paradaService.update(dto, id));
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
+    public ResponseEntity<Object> update(@Valid @RequestBody ParadaDTOUpdate dto, @PathVariable Integer id) {
+        var paradaModel = paradaService.findById(id);
+        var userLogin = myUserService.getUser();
+        if (!(userLogin.hasRole(RoleList.ROLE_ADMIN.toString()) || userLogin.isMyEmpresa(paradaModel.getEmpresa().getId())))
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Mensaje("El usuario no esta relacionado con esta Parada"));
+        return ResponseEntity.ok(paradaService.update(dto, paradaModel));
     }
 
     @DeleteMapping("/{id}")//Mejorar politica de exclusion, solo se puede eliminar si nádie pago o compro
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
     public ResponseEntity<Mensaje> delete(@PathVariable Integer id) {
         var model = paradaService.findById(id);
+        var userLogin = myUserService.getUser();
+        if (!(userLogin.hasRole(RoleList.ROLE_ADMIN.toString()) || userLogin.isMyEmpresa(model.getEmpresa().getId())))
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Mensaje("El usuario no esta relacionado con esta Parada"));
+
         var pagos = model.getViaje().getPagos();
         if (!pagos.isEmpty())
             return ResponseEntity.badRequest().body(new Mensaje("La parada no puede ser eliminada pues el viaje ya posee un pago registrado"));

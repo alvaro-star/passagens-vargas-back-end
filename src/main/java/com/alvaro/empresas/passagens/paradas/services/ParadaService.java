@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -58,6 +59,7 @@ public class ParadaService {
         });
     }
 
+    @Transactional
     public ParadaDTOComplete save(ParadaDTO dtoSended, ViajeModel viaje) {
         LugarModel lugar = lugarService.findById(dtoSended.idLugar());
         if (!lugar.getEnable())
@@ -85,15 +87,13 @@ public class ParadaService {
         return new ParadaDTOComplete(modelSave, viaje.getCodigo());
     }
 
-    public ParadaDTOComplete update(ParadaDTOUpdate dtoSended, Integer id) {
-        var model = this.findById(id);
+    @Transactional
+    public ParadaDTOComplete update(ParadaDTOUpdate dtoSended, ParadaModel model) {
         var dataParadaAjustada = dtoSended.dataHora().withSecond(0).withNano(0);
 
         for (ParadaModel parada : model.getViaje().getParadas()) {
             if (parada.getDataHora().isEqual(dataParadaAjustada))
                 throw new ValidationException("dataHora", "Ya hay una parada registrada en esta fecha");
-
-            System.out.println("\n" + parada.getLugar().getId() + " - " + dtoSended.idLugar());
             if (parada.getLugar().getId() == dtoSended.idLugar())
                 throw new ValidationException("idLugar", "Ya hay una parada registrada que passara por este lugar");
         }
@@ -133,6 +133,7 @@ public class ParadaService {
         return new ParadaDTOComplete(modelUpdated, idViaje);
     }
 
+    @Transactional
     public void delete(ParadaModel model) {
         paradaRepository.delete(model);
     }
