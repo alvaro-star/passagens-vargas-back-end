@@ -49,7 +49,7 @@ public class ViajeEmpresaResource {
                                                                              @RequestBody @Valid ViajeDTOSolicitacaoEmpresa dto) {
         var user = myUserService.getUser();
         if (user.hasRole("ROLE_ADMIN") || user.isMyEmpresa(idEmpresa)) {
-            if (dto.idCiudadDestino() == null)
+            if (dto.idCiudadDestino() == null || dto.idCiudadDestino() == 0)
                 return ResponseEntity.ok(viajeEmpresaService.getViajesFromSalida(idEmpresa, dto));
             else
                 return ResponseEntity.ok(viajeEmpresaService.getViajesFromDia(idEmpresa, dto));

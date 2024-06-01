@@ -98,19 +98,19 @@ public class ViajeEmpresaService {
         } else startDay = dto.fechaSalida().atTime(LocalTime.MIN);
 
         for (LugarModel lugarSalida : lugaresSalida) {
-            List<ParadaModel> salidasDia = paradaRepository.cargarSalidasDelDia(lugarSalida.getId(), startDay, endDay);
+            List<ParadaModel> salidasDia = paradaRepository.cargarSalidasDelDiaFromEmpresa(idEmpresa,lugarSalida.getId(), startDay, endDay);
 
             if (!salidasDia.isEmpty()) {
                 for (ParadaModel salidaFor : salidasDia) {
                     ViajeModel viaje = salidaFor.getViaje();
-                    if (viaje.getEmpresa().getId() != idEmpresa)
-                        continue;
 
                     for (LugarModel lugarDestino : lugaresDestino) {
                         List<ParadaModel> nVezesTrayectoPassaDestino = paradaRepository.findByViajeCodigoAndLugarId(viaje.getCodigo(), lugarDestino.getId());
                         if (nVezesTrayectoPassaDestino.size() != 1) continue;
 
                         ParadaModel destino = nVezesTrayectoPassaDestino.get(0);
+                        if (!destino.getDataHora().isAfter(salidaFor.getDataHora()))
+                            continue;
 
                         ParadaDTOComplete salidaDTO = new ParadaDTOComplete(salidaFor, viaje.getCodigo());
                         ParadaDTOComplete destinoDTO = new ParadaDTOComplete(destino, viaje.getCodigo());
@@ -157,6 +157,8 @@ public class ViajeEmpresaService {
                     if (nVezesTrayectoPassaDestino.size() != 1) continue;
 
                     ParadaModel destino = nVezesTrayectoPassaDestino.get(0);
+                    if (!destino.getDataHora().isAfter(salidaFor.getDataHora()))
+                        continue;
 
                     ParadaDTOComplete salidaDTO = new ParadaDTOComplete(salidaFor, viaje.getCodigo());
                     ParadaDTOComplete destinoDTO = new ParadaDTOComplete(destino, viaje.getCodigo());

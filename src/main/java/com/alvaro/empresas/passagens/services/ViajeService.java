@@ -97,6 +97,8 @@ public class ViajeService {
                         if (nVezesTrayectoPassaDestino.size() != 1) continue;
 
                         ParadaModel destino = nVezesTrayectoPassaDestino.get(0);
+                        if (!destino.getDataHora().isAfter(salidaFor.getDataHora()))
+                            continue;
 
                         ParadaDTOComplete salidaDTO = new ParadaDTOComplete(salidaFor, viaje.getCodigo());
                         ParadaDTOComplete destinoDTO = new ParadaDTOComplete(destino, viaje.getCodigo());
