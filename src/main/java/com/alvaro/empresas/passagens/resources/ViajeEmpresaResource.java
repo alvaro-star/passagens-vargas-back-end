@@ -44,7 +44,7 @@ public class ViajeEmpresaResource {
     }
 
     @PostMapping("/{idEmpresa}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
     public ResponseEntity<List<ViajeDTOListBusquedaEmpresa>> getViajeFromDia(@PathVariable(value = "idEmpresa") UUID idEmpresa,
                                                                              @RequestBody @Valid ViajeDTOSolicitacaoEmpresa dto) {
         var user = myUserService.getUser();

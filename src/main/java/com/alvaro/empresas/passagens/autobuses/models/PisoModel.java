@@ -9,12 +9,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.List;
-
 
 @Entity
-@Table(name = "tb_piso")
+@Table(name = "tb_piso", indexes = @Index(name = "idxtb_piso_fk_idtb_autobus", columnList = "fk_idtb_autobus"))
 @Getter
 @Setter
 @NoArgsConstructor
