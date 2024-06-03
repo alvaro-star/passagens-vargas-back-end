@@ -21,8 +21,4 @@ public record PasajesDTO(
         @Size(min = 1)
         List<PasajeDTO> pasajes
 ) {
-    public PasajesDTO(PasajesDTOVenta dtoVenta) {
-        this(dtoVenta.idPrecio(), dtoVenta.descuento(), null,
-                dtoVenta.idLugarSalida(), dtoVenta.idLugarDestino(), dtoVenta.pasajes());
-    }
 }

@@ -88,6 +88,14 @@ public class ViajeModel {
         return null;
     }
 
+    public PrecioModel getPrecioByNPiso(Integer nPiso) {
+        for (PrecioModel precio : this.precios) {
+            if (precio.getNPiso().equals(nPiso))
+                return precio;
+        }
+        return null;
+    }
+
     public boolean dataHoraValido(LocalDateTime dtoTime) {
         if (this.getParadas().size() >= 2) {
             LocalDateTime maior = this.getParadas().get(0).getDataHora();

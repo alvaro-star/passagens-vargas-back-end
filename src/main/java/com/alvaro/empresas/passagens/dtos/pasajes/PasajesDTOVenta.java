@@ -12,9 +12,11 @@ import java.util.UUID;
 
 public record PasajesDTOVenta(
         @NotNull
-        UUID idPrecio,
+        UUID idViaje,
         @NotNull
         Float descuento,
+        @Valid
+        ContactoDTO contacto,
         @NotNull
         Integer idLugarSalida,
         @NotNull

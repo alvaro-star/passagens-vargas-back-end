@@ -2,10 +2,9 @@ package com.alvaro.empresas.passagens.services;
 
 import com.alvaro.empresas.passagens.configurations.exceptions.FieldMessage;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
-import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTO;
+import com.alvaro.empresas.passagens.dtos.pasajes.ContactoDTO;
 import com.alvaro.empresas.passagens.enums.MetodoPagamentoEnum;
 import com.alvaro.empresas.passagens.models.*;
-import com.alvaro.empresas.passagens.repositories.ContactoRepository;
 import com.alvaro.empresas.passagens.repositories.PagoRepository;
 import com.alvaro.empresas.passagens.repositories.PasajeRepository;
 import com.alvaro.empresas.passagens.repositories.ViajeRepository;
@@ -30,9 +29,7 @@ public class PagoService {
     @Autowired
     private ViajeRepository viajeRepository;
 
-    public PagoModel save(PasajesDTO dto, BigDecimal precio, ViajeModel viaje, MetodoPagamentoEnum metodo, boolean guardarContacto) {
-        int nPasajes = dto.pasajes().size();
-        BigDecimal precioTotal = precio.multiply(BigDecimal.valueOf(nPasajes));
+    public PagoModel save(ContactoDTO contactoDTO, BigDecimal precioTotal, ViajeModel viaje, MetodoPagamentoEnum metodo, boolean guardarContacto) {
         boolean estaPagado;
 
         LocalDateTime fechaPago = null;
@@ -52,7 +49,7 @@ public class PagoService {
 
         ContactoModel contactoModel = null;
         if (guardarContacto)
-            contactoModel = new ContactoModel(dto.contacto().nombre(), dto.contacto().email(), dto.contacto().telefono());
+            contactoModel = new ContactoModel(contactoDTO.nombre(), contactoDTO.email(), contactoDTO.telefono());
 
         var pago = new PagoModel(precioTotal, BigDecimal.valueOf(0), tasaServicio, estaPagado, metodo, viaje, fechaPago, contactoModel);
 
