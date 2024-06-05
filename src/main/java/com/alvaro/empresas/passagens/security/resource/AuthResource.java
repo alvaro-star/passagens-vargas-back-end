@@ -70,51 +70,15 @@ public class AuthResource {
         boolean logado;
 
         logado = !(usuario == null || usuario.getName().equals("anonymousUser"));
-
+        if (logado)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Mensaje("Hay un usuario que inicio session"));
         String encriptedPassword = new BCryptPasswordEncoder().encode(registerDto.contrasena());
         UsuarioModel newUser = new UsuarioModel(registerDto.login(), registerDto.nombre(), registerDto.telefono(), encriptedPassword);
-
-        switch (registerDto.role()) {
-
-            case ROLE_CLIENTE -> {
-                if (logado)
-                    return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new Mensaje("Alguien inicio Sesion"));
-                roles.add(roleService.getByRoleName(registerDto.role()));
-            }
-
-            case ROLE_EMPRESA_ADMIN -> {
-                if (!logado)
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Mensaje("Token Invalido"));
-                if (registerDto.idEmpresa() == null)
-                    return ResponseEntity.unprocessableEntity().body(new FieldMessage("idEmpresa", "No puede ser nulo"));
-
-                boolean roleValido = false;
-                for (GrantedAuthority authority : usuario.getAuthorities()) {
-                    String role = authority.getAuthority();
-                    if ("ROLE_ADMIN".equals(role)) {
-                        roleValido = true;
-                        break;
-                    }
-                }
-                boolean empresaValida = empresaRepository.existsById(registerDto.idEmpresa());
-
-                if (!empresaValida)
-                    return ResponseEntity.unprocessableEntity().body(new FieldMessage("idEmpresa", "La empresa no existe"));
-                if (!roleValido)
-                    return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new Mensaje("Peticion Invalida"));
-
-                roles.add(roleService.getByRoleName(RoleList.ROLE_EMPRESA_ADMIN));
-                newUser.setIdEmpresa(registerDto.idEmpresa());
-            }
-
-            default -> {
-                return ResponseEntity.unprocessableEntity().body(new FieldMessage("role", "Role invalido"));
-            }
-        }
+        roles.add(roleService.getByRoleName(RoleList.ROLE_CLIENTE));
 
         newUser.setRoles(roles);
         usuarioRepository.save(newUser);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new Mensaje("criado"));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new Mensaje("Usuario Registrado"));
     }
 
 }

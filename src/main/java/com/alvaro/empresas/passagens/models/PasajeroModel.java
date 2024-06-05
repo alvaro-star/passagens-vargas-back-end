@@ -28,7 +28,6 @@ public class PasajeroModel {
     @Column(nullable = false)
     private Date nascimento;
 
-
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_pasaje")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)

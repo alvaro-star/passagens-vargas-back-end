@@ -62,5 +62,7 @@ public class PasajeModel {
         this.precio = precio;
         this.pago = pago;
         this.pasajero = pasajero;
+        this.salida = salida;
+        this.destino = destino;
     }
 }

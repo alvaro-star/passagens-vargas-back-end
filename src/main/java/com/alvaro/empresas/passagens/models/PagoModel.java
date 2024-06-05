@@ -20,7 +20,6 @@ import java.util.UUID;
 @Entity
 @Table(name = "tb_pago", indexes = @Index(name = "idxtb_viaje_fk_idtb_viaje_created_at", columnList = "fk_idtb_viaje, created_at"))
 @NoArgsConstructor
-
 public class PagoModel {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -50,7 +49,7 @@ public class PagoModel {
     @OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "pago")
     private ContactoModel contacto;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fk_idtb_cliente")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private UsuarioModel cliente;

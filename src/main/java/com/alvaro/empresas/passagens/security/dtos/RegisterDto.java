@@ -18,8 +18,6 @@ public record RegisterDto(
         String contrasena,
         @NotBlank
         String nombre,
-        @Enumerated(EnumType.STRING)
-        RoleList role,
         UUID idEmpresa
 ) {
 }

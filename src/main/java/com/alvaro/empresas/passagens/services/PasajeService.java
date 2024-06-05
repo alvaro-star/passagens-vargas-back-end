@@ -12,6 +12,7 @@ import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.alvaro.empresas.passagens.paradas.repositories.ParadaRepository;
 import com.alvaro.empresas.passagens.repositories.PasajeRepository;
 import com.alvaro.empresas.passagens.repositories.ViajeRepository;
+import com.alvaro.empresas.passagens.security.models.RoleList;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -64,70 +65,41 @@ public class PasajeService {
         validarSilla(viaje, precio, dto.pasajes(), ocupados);
 
         salida = viaje.getParadaByLugarId(dto.idLugarSalida());
-
         if (salida == null)
             throw new ValidationException(new FieldMessage("idLugarSalida", "La salida no hace parte del trayecto"));
-
         destino = viaje.getParadaByLugarId(dto.idLugarDestino());
-
         if (destino == null)
             throw new ValidationException(new FieldMessage("idLugarDestino", "El destino no hace parte del trayecto"));
-
-        boolean estaPago;
 
         BigDecimal valorTotal = precio.getPrecio().multiply(BigDecimal.valueOf(dto.pasajes().size()));
         PagoModel pago = pagoService.save(dto.contacto(), valorTotal, viaje, metodo, guardarContacto);
 
-        switch (metodo) {
-            case QR -> estaPago = false;
-            case EFECTIVO -> {
-                estaPago = true;
-                BigDecimal valorArrecadado = viaje.getValorArrecadadoEfectivo() != null ? viaje.getValorArrecadadoEfectivo() : BigDecimal.ZERO;
-                BigDecimal valorTotalPago = pago.getValorTotal() != null ? pago.getValorTotal() : BigDecimal.ZERO;
-                viaje.setValorArrecadadoEfectivo(valorArrecadado.add(valorTotalPago));
-                viajeRepository.save(viaje);
-            }
-            default -> throw new ValidationException(new FieldMessage("metodo", "Metodo de Pago invalido"));
-        }
+        if (!metodo.equals(MetodoPagamentoEnum.QR))
+            throw new ValidationException(new FieldMessage("metodo", "Metodo de Pago invalido"));
+        PasajeroModel pasajero;
+        PasajeModel pasajeModel;
 
         for (PasajeDTO pasajeDTO : dto.pasajes()) {
-            var pasajero = new PasajeroModel(pasajeDTO);
-            var pasajeModel = new PasajeModel(pasajeDTO.nSilla(), compradoWeb, estaPago, salida, destino, precio, pago, pasajero);
+            pasajero = new PasajeroModel(pasajeDTO);
+            pasajeModel = new PasajeModel(pasajeDTO.nSilla(), compradoWeb, false, salida, destino, precio, pago, pasajero);
+            pasajero.setPasaje(pasajeModel);
             pasajeRepository.save(pasajeModel);
-        }
-
-        if (metodo == MetodoPagamentoEnum.EFECTIVO) {
-            int nSillasDisponibles = precio.getNSillasDisponibles() - dto.pasajes().size();
-
-            if (nSillasDisponibles < 0)
-                throw new ValidationException(new FieldMessage("pasajes", "No hay sillas disponibles"));
-
-            precio.setNSillasDisponibles(nSillasDisponibles);
-
-            if (nSillasDisponibles == 0)
-                precio.setLleno(true);
-
-            precioService.updateFromService(precio);
         }
 
         return pago;
     }
 
     @Transactional
-    public PagoModel saveEmpresa(PasajesDTOVenta dto, MetodoPagamentoEnum metodo, boolean guardarContacto, boolean compradoWeb) {
-        var viaje = viajeService.findById(dto.idViaje());
+    public PagoModel saveEmpresa(PasajesDTOVenta dto, MetodoPagamentoEnum metodo, ViajeModel viaje, boolean guardarContacto, boolean compradoWeb) {
         ParadaModel salida;
         ParadaModel destino;
-        List<ParadaModel> salidas = paradaRepository.findByViajeCodigoAndLugarId(viaje.getCodigo(), dto.idLugarSalida());
-        List<ParadaModel> destinos = paradaRepository.findByViajeCodigoAndLugarId(viaje.getCodigo(), dto.idLugarSalida());
-        if (salidas.size() != 1)
-            throw new ValidationException("idLugarSalida", "Ocurrio un error con la parada de salida");
-        if (destinos.size() != 1)
-            throw new ValidationException("idLugarDestino", "Ocurrio un error con la parada de destino");
 
-        salida = salidas.get(0);
-        destino = destinos.get(0);
-
+        salida = viaje.getParadaByLugarId(dto.idLugarSalida());
+        if (salida == null)
+            throw new ValidationException(new FieldMessage("idLugarSalida", "La salida no hace parte del trayecto"));
+        destino = viaje.getParadaByLugarId(dto.idLugarDestino());
+        if (destino == null)
+            throw new ValidationException(new FieldMessage("idLugarDestino", "El destino no hace parte del trayecto"));
 
         List<PasajeDTO> sillasPiso1 = new ArrayList<>();
         List<PasajeDTO> sillasPiso2 = new ArrayList<>();
@@ -151,13 +123,13 @@ public class PasajeService {
             validarSillasEmpresa(piso1, precio1, sillasPiso1);
             valorTotal = precio1.getPrecio().multiply(BigDecimal.valueOf(sillasPiso1.size()));
         } else {
-            if (!sillasPiso2.isEmpty()) {
-                validarSillasEmpresa(piso2, precio2, sillasPiso2);
-                valorTotal = valorTotal.add(precio2.getPrecio().multiply(BigDecimal.valueOf(sillasPiso2.size())));
-            }
             if (!sillasPiso1.isEmpty()) {
                 validarSillasEmpresa(piso1, precio1, sillasPiso1);
                 valorTotal = valorTotal.add(precio1.getPrecio().multiply(BigDecimal.valueOf(sillasPiso1.size())));
+            }
+            if (!sillasPiso2.isEmpty()) {
+                validarSillasEmpresa(piso2, precio2, sillasPiso2);
+                valorTotal = valorTotal.add(precio2.getPrecio().multiply(BigDecimal.valueOf(sillasPiso2.size())));
             }
         }
 
@@ -176,49 +148,52 @@ public class PasajeService {
                 BigDecimal valorTotalPago = pago.getValorTotal() != null ? pago.getValorTotal() : BigDecimal.ZERO;
                 viaje.setValorArrecadadoEfectivo(valorArrecadado.add(valorTotalPago));
                 viajeRepository.save(viaje);
+
+                if (!sillasPiso1.isEmpty()) {
+                    actualizarNSillasDisponibles(precio1, sillasPiso1);
+                    precioService.updateFromService(precio1);
+                }
+
+                if (precio2 != null && !sillasPiso2.isEmpty()) {
+                    actualizarNSillasDisponibles(precio2, sillasPiso2);
+                    precioService.updateFromService(precio1);
+                }
             }
-            default -> throw new ValidationException(new FieldMessage("metodo", "Metodo de Pago invalido"));
+            default -> throw new ValidationException("metodo", "Metodo de Pago invalido");
         }
 
-
-        if (metodo == MetodoPagamentoEnum.EFECTIVO) {
-            if (!sillasPiso1.isEmpty()) {
-                int nSillasDisponibles = precio1.getNSillasDisponibles() - sillasPiso1.size();
-                if (nSillasDisponibles < 0)
-                    throw new ValidationException(new FieldMessage("pasajes", "No hay sillas disponibles"));
-                precio1.setNSillasDisponibles(nSillasDisponibles);
-                if (nSillasDisponibles == 0)
-                    precio1.setLleno(true);
-                precioService.updateFromService(precio1);
-            }
-
-            if (precio2 != null && !sillasPiso2.isEmpty()) {
-                int nSillasDisponibles = precio2.getNSillasDisponibles() - sillasPiso2.size();
-                if (nSillasDisponibles < 0)
-                    throw new ValidationException(new FieldMessage("pasajes", "No hay sillas disponibles"));
-                precio1.setNSillasDisponibles(nSillasDisponibles);
-                if (nSillasDisponibles == 0)
-                    precio1.setLleno(true);
-                precioService.updateFromService(precio1);
-            }
-        }
-
+        PasajeroModel pasajero;
+        PasajeModel pasaje;
+        List<PasajeModel> pasajesModels = new ArrayList<>();
         for (PasajeDTO pasajeDTO : sillasPiso1) {
-            var pasajero = new PasajeroModel(pasajeDTO);
-            var pasajeModel = new PasajeModel(pasajeDTO.nSilla(), compradoWeb, estaPago, salida, destino, precio1, pago, pasajero);
-            pasajeRepository.save(pasajeModel);
+            pasajero = new PasajeroModel(pasajeDTO);
+            pasaje = new PasajeModel(pasajeDTO.nSilla(), compradoWeb, estaPago, salida, destino, precio1, pago, pasajero);
+            pasajero.setPasaje(pasaje);
+            pasajesModels.add(pasaje);
         }
+
         if (precio2 != null) {
             for (PasajeDTO pasajeDTO : sillasPiso2) {
-                var pasajero = new PasajeroModel(pasajeDTO);
-                var pasajeModel = new PasajeModel(pasajeDTO.nSilla(), compradoWeb, estaPago, salida, destino, precio2, pago, pasajero);
-                pasajeRepository.save(pasajeModel);
+                pasajero = new PasajeroModel(pasajeDTO);
+                pasaje = new PasajeModel(pasajeDTO.nSilla(), compradoWeb, estaPago, salida, destino, precio2, pago, pasajero);
+                pasajero.setPasaje(pasaje);
+                pasajesModels.add(pasaje);
             }
         }
+
+        pasajeRepository.saveAll(pasajesModels);
         return pago;
     }
 
     //Validadores
+    public void actualizarNSillasDisponibles(PrecioModel precio, List<PasajeDTO> sillasPiso) {
+        int nSillasDisponibles = precio.getNSillasDisponibles() - sillasPiso.size();
+        if (nSillasDisponibles < 0)
+            throw new ValidationException(new FieldMessage("pasajes", "No hay sillas disponibles"));
+        if (nSillasDisponibles == 0)
+            precio.setLleno(true);
+        precio.setNSillasDisponibles(nSillasDisponibles);
+    }
 
     public void validarSillasEmpresa(PisoModel piso, PrecioModel precio, List<PasajeDTO> sillasSolicitadas) {
         int numeroMinimo = piso.getPrimeraSilla();

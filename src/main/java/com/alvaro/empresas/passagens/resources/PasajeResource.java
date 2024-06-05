@@ -24,11 +24,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class PasajeResource {
     private final PasajeService pasajeService;
     private final MyUserService myUserService;
+    private final ViajeService viajeService;
 
     @Autowired
-    public PasajeResource(PasajeService pasajeService, MyUserService myUserService) {
+    public PasajeResource(PasajeService pasajeService, MyUserService myUserService, ViajeService viajeService) {
         this.pasajeService = pasajeService;
         this.myUserService = myUserService;
+        this.viajeService = viajeService;
     }
 
     @PostMapping
@@ -40,8 +42,9 @@ public class PasajeResource {
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_FUNCIONARIO', 'ROLE_EMPRESA_ADMIN')")
     public ResponseEntity<Object> vender(@Valid @RequestBody PasajesDTOVenta dto) {
         var usuario = myUserService.getUser();
-        if (!usuario.isMyEmpresa(dto.idViaje()))
+        var viaje = viajeService.findById(dto.idViaje());
+        if (!usuario.isMyEmpresa(viaje.getEmpresa().getId()))
             return ResponseEntity.unprocessableEntity().body(new Mensaje("No se puede vender el pasaje de otra empresa"));
-        return ResponseEntity.status(HttpStatus.CREATED).body(pasajeService.saveEmpresa(dto, dto.metodo(), false, false));
+        return ResponseEntity.status(HttpStatus.CREATED).body(pasajeService.saveEmpresa(dto, dto.metodo(),viaje, false, false));
     }
 }
