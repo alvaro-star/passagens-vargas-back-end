@@ -17,7 +17,6 @@ public record RegisterDto(
         @NotBlank
         String contrasena,
         @NotBlank
-        String nombre,
-        UUID idEmpresa
+        String nombre
 ) {
 }

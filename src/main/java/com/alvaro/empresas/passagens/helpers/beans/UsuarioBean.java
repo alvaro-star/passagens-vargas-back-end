@@ -29,14 +29,12 @@ public class UsuarioBean {
     }
 
     public boolean hasRole(String role) {
-        boolean find = false;
         for (String roleList : this.roles) {
             //System.out.println("\n" + roleList + "   ->  " + role);
-            find = roleList.equals(role);
-            if (find)
-                break;
+            if (roleList.equals(role))
+                return true;
         }
 
-        return find;
+        return false;
     }
 }

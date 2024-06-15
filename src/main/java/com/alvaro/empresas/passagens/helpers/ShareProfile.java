@@ -163,7 +163,7 @@ public class ShareProfile {
 
                 BigDecimal precioBruto = BigDecimal.valueOf(200);
                 for (PisoModel piso : pisos) {
-                    var precio = precioRepository.save(new PrecioModel(precioBruto, piso.getNPiso(), piso.getNSillas(), viaje));
+                    var precio = precioRepository.save(new PrecioModel(precioBruto, piso.getNPiso(), piso.getNSillas(), viaje, viaje.getEmpresa()));
                     precioBruto = precioBruto.subtract(BigDecimal.valueOf(2));
                 }
             }

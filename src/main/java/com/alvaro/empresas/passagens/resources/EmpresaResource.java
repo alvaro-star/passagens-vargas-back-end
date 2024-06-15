@@ -2,6 +2,8 @@ package com.alvaro.empresas.passagens.resources;
 
 import com.alvaro.empresas.passagens.dtos.EmpresaDto;
 import com.alvaro.empresas.passagens.dtos.EmpresaResponseDto;
+import com.alvaro.empresas.passagens.dtos.Mensaje;
+import com.alvaro.empresas.passagens.security.dtos.RegisterDtoEmpresaAdmin;
 import com.alvaro.empresas.passagens.services.EmpresaService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -26,6 +28,24 @@ public class EmpresaResource {
     @Autowired
     private EmpresaService empresaService;
 
+    @PostMapping("/admin")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<Mensaje> registerEmpresaAdmin(@RequestBody @Valid RegisterDtoEmpresaAdmin empresaAdmin){
+        Mensaje mensaje;
+        mensaje = empresaService.saveAdmin(empresaAdmin);
+        if (mensaje.conteudo().equals(""))
+            return ResponseEntity.ok(new Mensaje("Criado con exito"));
+        return  ResponseEntity.badRequest().body(mensaje);
+    }
+    @DeleteMapping("/admin/{email}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<Mensaje> removerEmpresario(@PathVariable(value = "email") String email){
+        Mensaje mensaje;
+        mensaje = empresaService.removerAdmin(email);
+        if (mensaje.conteudo().equals(""))
+            return ResponseEntity.noContent().build();
+        return  ResponseEntity.badRequest().body(mensaje);
+    }
     @GetMapping
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Page<EmpresaResponseDto>> getAll(@PageableDefault(size = 10) Pageable pageable) {

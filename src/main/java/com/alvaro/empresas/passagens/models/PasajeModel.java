@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Date;
 import java.util.UUID;
 
 
@@ -32,6 +33,13 @@ public class PasajeModel {
     @Column(name = "pagado", nullable = false)
     private Boolean estaPagado;
 
+    @Column(nullable = false, length = 9)
+    private String carnet;
+    @Column(nullable = false, length = 70)
+    private String nombre;
+    @Column(nullable = false)
+    private Date nascimento;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_id_salida")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
@@ -47,21 +55,20 @@ public class PasajeModel {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private PrecioModel precio;
 
-    @OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "pasaje")
-    private PasajeroModel pasajero;
-
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_pago")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private PagoModel pago;
 
-    public PasajeModel(Integer nSilla, Boolean compradoWeb, Boolean estaPagado, ParadaModel salida, ParadaModel destino, PrecioModel precio, PagoModel pago, PasajeroModel pasajero) {
+    public PasajeModel(Integer nSilla, Boolean compradoWeb, Boolean estaPagado, String nombre,String carnet, Date nascimento,ParadaModel salida, ParadaModel destino, PrecioModel precio, PagoModel pago) {
         this.nSilla = nSilla;
         this.compradoWeb = compradoWeb;
         this.estaPagado = estaPagado;
+        this.carnet = carnet;
+        this.nombre = nombre;
+        this.nascimento = nascimento;
         this.precio = precio;
         this.pago = pago;
-        this.pasajero = pasajero;
         this.salida = salida;
         this.destino = destino;
     }

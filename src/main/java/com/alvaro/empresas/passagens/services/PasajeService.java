@@ -4,15 +4,15 @@ import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import com.alvaro.empresas.passagens.configurations.exceptions.FieldMessage;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajeDTO;
+import com.alvaro.empresas.passagens.dtos.pasajes.PasajeDTOEmpresaResponse;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTO;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTOVenta;
 import com.alvaro.empresas.passagens.enums.MetodoPagamentoEnum;
 import com.alvaro.empresas.passagens.models.*;
+import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
-import com.alvaro.empresas.passagens.paradas.repositories.ParadaRepository;
 import com.alvaro.empresas.passagens.repositories.PasajeRepository;
 import com.alvaro.empresas.passagens.repositories.ViajeRepository;
-import com.alvaro.empresas.passagens.security.models.RoleList;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,17 +28,13 @@ public class PasajeService {
     private final PasajeRepository pasajeRepository;
     private final PrecioService precioService;
     private final PagoService pagoService;
-    private final ParadaRepository paradaRepository;
-    private final ViajeService viajeService;
     private final ViajeRepository viajeRepository;
 
     @Autowired
-    public PasajeService(PasajeRepository pasajeRepository, PrecioService precioService, PagoService pagoService, ParadaRepository paradaRepository, ViajeService viajeService, ViajeRepository viajeRepository) {
+    public PasajeService(PasajeRepository pasajeRepository, PrecioService precioService, PagoService pagoService, ViajeRepository viajeRepository) {
         this.pasajeRepository = pasajeRepository;
         this.precioService = precioService;
         this.pagoService = pagoService;
-        this.paradaRepository = paradaRepository;
-        this.viajeService = viajeService;
         this.viajeRepository = viajeRepository;
     }
 
@@ -76,16 +72,16 @@ public class PasajeService {
 
         if (!metodo.equals(MetodoPagamentoEnum.QR))
             throw new ValidationException(new FieldMessage("metodo", "Metodo de Pago invalido"));
-        PasajeroModel pasajero;
+
         PasajeModel pasajeModel;
+        List<PasajeModel> pasajesList = new ArrayList<>();
 
         for (PasajeDTO pasajeDTO : dto.pasajes()) {
-            pasajero = new PasajeroModel(pasajeDTO);
-            pasajeModel = new PasajeModel(pasajeDTO.nSilla(), compradoWeb, false, salida, destino, precio, pago, pasajero);
-            pasajero.setPasaje(pasajeModel);
-            pasajeRepository.save(pasajeModel);
+            pasajeModel = new PasajeModel(pasajeDTO.nSilla(), compradoWeb, false, pasajeDTO.nombre(), pasajeDTO.carnet(), pasajeDTO.nascimento(), salida, destino, precio, pago);
+            pasajesList.add(pasajeModel);
         }
 
+        pasajeRepository.saveAll(pasajesList);
         return pago;
     }
 
@@ -162,27 +158,30 @@ public class PasajeService {
             default -> throw new ValidationException("metodo", "Metodo de Pago invalido");
         }
 
-        PasajeroModel pasajero;
         PasajeModel pasaje;
         List<PasajeModel> pasajesModels = new ArrayList<>();
         for (PasajeDTO pasajeDTO : sillasPiso1) {
-            pasajero = new PasajeroModel(pasajeDTO);
-            pasaje = new PasajeModel(pasajeDTO.nSilla(), compradoWeb, estaPago, salida, destino, precio1, pago, pasajero);
-            pasajero.setPasaje(pasaje);
+            pasaje = new PasajeModel(pasajeDTO.nSilla(), compradoWeb, estaPago, pasajeDTO.nombre(),
+                    pasajeDTO.carnet(), pasajeDTO.nascimento(), salida, destino, precio1, pago);
             pasajesModels.add(pasaje);
         }
 
-        if (precio2 != null) {
+        if (precio2 != null)
             for (PasajeDTO pasajeDTO : sillasPiso2) {
-                pasajero = new PasajeroModel(pasajeDTO);
-                pasaje = new PasajeModel(pasajeDTO.nSilla(), compradoWeb, estaPago, salida, destino, precio2, pago, pasajero);
-                pasajero.setPasaje(pasaje);
+                pasaje = new PasajeModel(pasajeDTO.nSilla(), compradoWeb, estaPago, pasajeDTO.nombre(), pasajeDTO.carnet(), pasajeDTO.nascimento(), salida, destino, precio2, pago);
                 pasajesModels.add(pasaje);
             }
-        }
 
         pasajeRepository.saveAll(pasajesModels);
         return pago;
+    }
+
+    public List<PasajeDTOEmpresaResponse> getPasajesFromPrecio(UUID idPrecio) {
+        return pasajeRepository.findByPrecioIdAndEstaPagado(idPrecio, true).stream().map(model -> {
+            ParadaDTOComplete salida = new ParadaDTOComplete(model.getSalida(), null);
+            ParadaDTOComplete destino = new ParadaDTOComplete(model.getSalida(), null);
+            return new PasajeDTOEmpresaResponse(model, salida, destino);
+        }).toList();
     }
 
     //Validadores
@@ -202,7 +201,7 @@ public class PasajeService {
         List<Integer> ocupados = pasajeRepository.getPasajesVendidos(precio.getId());
 
         if (precio.getNSillasDisponibles() < sillasSolicitadas.size())
-            throw new ValidationException(new FieldMessage("pasajes", "No hay tantas sillas disponibles"));
+            throw new ValidationException("pasajes", "No hay tantas sillas disponibles");
 
         for (PasajeDTO sillasSolicitada : sillasSolicitadas) {
             for (Integer ocupado : ocupados)

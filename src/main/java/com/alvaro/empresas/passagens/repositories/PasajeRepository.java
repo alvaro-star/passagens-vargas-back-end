@@ -18,4 +18,6 @@ public interface PasajeRepository extends JpaRepository<PasajeModel, UUID> {
 
     @Query(value = "SELECT n_silla FROM tb_pasaje WHERE fk_idtb_precio = :idPrecio AND pagado = true", nativeQuery = true)
     List<Integer> getPasajesVendidos(UUID idPrecio);
+
+    List<PasajeModel> findByPrecioIdAndEstaPagado(UUID idPrecio, boolean estaPago);
 }

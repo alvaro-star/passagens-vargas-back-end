@@ -6,9 +6,12 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Table(name = "tb_usuario")
@@ -22,7 +25,7 @@ public class UsuarioModel implements UserDetails {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "idtb_usuario")
     private UUID id;
-    @Column(name = "email", nullable = false)
+    @Column(unique = true, name = "email", nullable = false)
     private String login;
     @Column(nullable = false)
     private String nombre;
@@ -31,6 +34,14 @@ public class UsuarioModel implements UserDetails {
     @Column(nullable = false)
     private String contrasena;
     private UUID idEmpresa;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "cliente")
     private List<PagoModel> pagos;
@@ -57,19 +68,29 @@ public class UsuarioModel implements UserDetails {
         this.idEmpresa = idEmpresa;
     }
 
+    public UsuarioModel(UsuarioSolicitudModel usuarioSolicitudModel) {
+        this.login = usuarioSolicitudModel.getEmail();
+        this.nombre = usuarioSolicitudModel.getNombre();
+        this.telefono = usuarioSolicitudModel.getTelefono();
+        this.contrasena = usuarioSolicitudModel.getContrasena();
+        this.idEmpresa = null;
+    }
+
 
     public boolean hasRole(String role) {
-        boolean find = false;
-        for (RoleModel roleModel : this.roles)
-            find = roleModel.getAuthority().equals(role);
-        return find;
+        for (RoleModel roleModel : this.roles) {
+            if (roleModel.getAuthority().equals(role))
+                return true;
+        }
+        return false;
     }
 
 
     public boolean addRole(RoleModel role) {
         return this.roles.add(role);
     }
-    public boolean removeRole(RoleModel role){
+
+    public boolean removeRole(RoleModel role) {
         return this.roles.remove(role);
     }
 

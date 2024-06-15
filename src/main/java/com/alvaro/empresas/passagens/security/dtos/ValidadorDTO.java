@@ -1,0 +1,14 @@
+package com.alvaro.empresas.passagens.security.dtos;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+import java.util.UUID;
+
+public record ValidadorDTO(
+        @NotBlank
+        String email,
+        @NotNull
+        UUID codigo
+) {
+}

@@ -33,6 +33,7 @@ public class PrecioService {
         List<PrecioDTO> salvos = new ArrayList<>();
         for (PrecioModel precioModel : dtoModels) {
             precioModel.setViaje(viaje);
+            precioModel.setEmpresa(viaje.getEmpresa());
             var save = precioRepository.save(precioModel);
             salvos.add(new PrecioDTO(save, viaje.getCodigo()));
         }

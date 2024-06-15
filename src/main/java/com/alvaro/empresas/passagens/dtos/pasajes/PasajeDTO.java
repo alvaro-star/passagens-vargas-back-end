@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Size;
+import org.hibernate.validator.constraints.Length;
 
 import java.util.Date;
 
@@ -11,6 +12,7 @@ import java.util.Date;
 public record PasajeDTO(
         Integer id,
         @NotBlank
+        @Size(max = 7, min = 7)
         String carnet,
         @NotBlank
         @Size(max = 50)

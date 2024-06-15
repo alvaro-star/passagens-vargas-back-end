@@ -35,7 +35,7 @@ public class FuncionarioResource {
     public ResponseEntity<Page<FuncionarioDTO>> getAll(@PathVariable(value = "idEmpresa") UUID idEmpresa, Pageable pageable) {
         var user = myUserService.getUser();
         if (user.hasRole("ROLE_ADMIN") || user.isMyEmpresa(idEmpresa))
-            return ResponseEntity.ok(funcionarioService.findAllFromEmresa(idEmpresa, pageable));
+            return ResponseEntity.ok(funcionarioService.findAllFromEmpresa(idEmpresa, pageable));
 
         return ResponseEntity.badRequest().build();
     }

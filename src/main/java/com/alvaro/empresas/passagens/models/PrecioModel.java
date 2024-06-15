@@ -43,6 +43,11 @@ public class PrecioModel {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private ViajeModel viaje;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "fk_idtb_empresa")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private EmpresaModel empresa;
+
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "precio")
     private List<PasajeModel> pasajes = new ArrayList<>();
 
@@ -57,11 +62,12 @@ public class PrecioModel {
         this.nSillasDisponibles = nSillasDisponibles;
     }
 
-    public PrecioModel(BigDecimal precio, Integer nPiso, Integer nSillasDisponibles, ViajeModel viaje) {
+    public PrecioModel(BigDecimal precio, Integer nPiso, Integer nSillasDisponibles, ViajeModel viaje, EmpresaModel empresa) {
         this.precio = precio;
         this.nPiso = nPiso;
         this.nSillasDisponibles = nSillasDisponibles;
         this.viaje = viaje;
+        this.empresa = empresa;
     }
 
     public void updateValues(PrecioDTOUpdate dto) {
