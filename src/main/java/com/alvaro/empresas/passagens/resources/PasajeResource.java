@@ -10,12 +10,15 @@ import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
 import com.alvaro.empresas.passagens.services.PasajeService;
 import com.alvaro.empresas.passagens.services.PrecioService;
 import com.alvaro.empresas.passagens.services.ViajeService;
+import com.alvaro.empresas.passagens.services.validacao.ValidarCompraPasajes;
+import com.alvaro.empresas.passagens.services.validacao.ValidationErrorsWithList;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -40,12 +43,17 @@ public class PasajeResource {
     }
 
     @PostMapping
-    public ResponseEntity<Object> save(@Valid @RequestBody PasajesDTO dto) {
+    public ResponseEntity<Object> save(@Valid @RequestBody PasajesDTO dto, BindingResult bindingResult) {
+        ValidationErrorsWithList validacao;
+        validacao = ValidarCompraPasajes.validarPasajesDTO(bindingResult, dto, "/pasajes");
+        if (!validacao.getErrorsList().isEmpty() || !validacao.getErrors().isEmpty())
+            return ResponseEntity.unprocessableEntity().body(validacao);
         return ResponseEntity.status(HttpStatus.CREATED).body(pasajeService.save(dto, MetodoPagamentoEnum.QR, true, true));
     }
+
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ROLE_CLIENTE', 'ROLE_ADMIN')")
-    public ResponseEntity<PasajeDTOEmpresaResponse> getOne(@PathVariable(value = "id")UUID id){
+    public ResponseEntity<PasajeDTOEmpresaResponse> getOne(@PathVariable(value = "id") UUID id) {
         var model = pasajeService.findById(id);
         var salida = new ParadaDTOComplete(model.getSalida(), null);
         var destino = new ParadaDTOComplete(model.getDestino(), null);
@@ -64,11 +72,17 @@ public class PasajeResource {
 
     @PostMapping("/vender")
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_FUNCIONARIO', 'ROLE_EMPRESA_ADMIN')")
-    public ResponseEntity<Object> vender(@Valid @RequestBody PasajesDTOVenta dto) {
+    public ResponseEntity<Object> vender(@RequestBody @Valid PasajesDTOVenta dto, BindingResult bindingResult) {
+        ValidationErrorsWithList validacao;
         var usuario = myUserService.getUser();
         var viaje = viajeService.findById(dto.idViaje());
         if (!usuario.isMyEmpresa(viaje.getEmpresa().getId()))
             return ResponseEntity.unprocessableEntity().body(new Mensaje("No se puede vender el pasaje de otra empresa"));
+
+        validacao = ValidarCompraPasajes.validarPasajesDTOVenta(bindingResult, dto, "/pasajes/vender");
+        if (!validacao.getErrorsList().isEmpty() || !validacao.getErrors().isEmpty())
+            return ResponseEntity.unprocessableEntity().body(validacao);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(pasajeService.saveEmpresa(dto, dto.metodo(), viaje, false, false));
     }
 }

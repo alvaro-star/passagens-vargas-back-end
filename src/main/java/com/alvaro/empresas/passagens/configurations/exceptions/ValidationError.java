@@ -1,7 +1,10 @@
 package com.alvaro.empresas.passagens.configurations.exceptions;
 
+import lombok.Getter;
+
 import java.util.ArrayList;
 import java.util.List;
+
 
 public class ValidationError extends StandardError {
     private static final long serialVersionUID = 1L;

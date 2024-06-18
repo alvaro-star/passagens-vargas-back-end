@@ -47,9 +47,8 @@ public class AutobusResource {
     @PostMapping
     public ResponseEntity<Object> save(@Valid @RequestBody AutobusDTO dto, BindingResult bindingResult) {
         ValidationError validacao = autobusService.validar(bindingResult, dto);
-        if (!validacao.getErrors().isEmpty()) {
+        if (!validacao.getErrors().isEmpty())
             return ResponseEntity.unprocessableEntity().body(validacao);
-        }
         return ResponseEntity.status(HttpStatus.CREATED).body(autobusService.salvar(dto));
     }
 
