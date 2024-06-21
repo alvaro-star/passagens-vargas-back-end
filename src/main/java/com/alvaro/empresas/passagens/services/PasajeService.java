@@ -57,9 +57,7 @@ public class PasajeService {
         ParadaModel destino;
 
         List<Integer> ocupados = pasajeRepository.getPasajesVendidos(precio.getId());
-
         validarSilla(viaje, precio, dto.pasajes(), ocupados);
-
         salida = viaje.getParadaByLugarId(dto.idLugarSalida());
         if (salida == null)
             throw new ValidationException(new FieldMessage("idLugarSalida", "La salida no hace parte del trayecto"));
@@ -179,7 +177,7 @@ public class PasajeService {
     public List<PasajeDTOEmpresaResponse> getPasajesFromPrecio(UUID idPrecio) {
         return pasajeRepository.findByPrecioIdAndEstaPagado(idPrecio, true).stream().map(model -> {
             ParadaDTOComplete salida = new ParadaDTOComplete(model.getSalida(), null);
-            ParadaDTOComplete destino = new ParadaDTOComplete(model.getSalida(), null);
+            ParadaDTOComplete destino = new ParadaDTOComplete(model.getDestino(), null);
             return new PasajeDTOEmpresaResponse(model, salida, destino);
         }).toList();
     }

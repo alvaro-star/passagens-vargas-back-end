@@ -45,12 +45,12 @@ public class PasajeModel {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private ParadaModel salida;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "fk_id_destino")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private ParadaModel destino;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "fk_idtb_precio")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private PrecioModel precio;
