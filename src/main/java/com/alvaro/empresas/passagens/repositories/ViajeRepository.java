@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.UUID;
 
 @Repository
@@ -19,6 +20,10 @@ public interface ViajeRepository extends JpaRepository<ViajeModel, UUID> {
 
     @Query("SELECT v FROM ViajeModel v WHERE v.empresa.id = :empresaId AND v.dataHoraSalida < :dataHoraSalida")
     Page<ViajeModel> findViajesPassados(UUID empresaId, LocalDateTime dataHoraSalida, Pageable pageable);
+
+
+    @Query("SELECT v FROM ViajeModel v WHERE v.empresa.id = :empresaId AND v.dataHoraSalida BETWEEN :dataInicio AND :dataFim AND v.autobus.id = :autobusId")
+    Page<ViajeModel> findByEmpresaIdAndAutobusId(UUID idEmpresa, Integer idAutobus, Date dataInicio, Date dataFim, Pageable pageable);
 }
 
 /* No usage

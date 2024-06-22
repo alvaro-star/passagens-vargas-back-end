@@ -57,18 +57,16 @@ public class AutobusResource {
     public ResponseEntity<Object> update(@PathVariable(value = "id") Integer id, @Valid @RequestBody AutobusDTOUpdate dto, BindingResult bindingResult) {
         var transform = new AutobusDTO(dto.placa());
         ValidationError validacao = autobusService.validar(bindingResult, transform);
-        if (!validacao.getErrors().isEmpty()) {
+        if (!validacao.getErrors().isEmpty())
             return ResponseEntity.unprocessableEntity().body(validacao);
-        }
         return ResponseEntity.ok().body(autobusService.update(dto, id));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> delete(@PathVariable(value = "id") Integer id) {
         var model = autobusService.findById(id);
-        if (!model.getViajes().isEmpty()) {
+        if (!model.getViajes().isEmpty())
             return ResponseEntity.badRequest().body(new Mensaje("El autobus tiene viajes registrados"));
-        }
         autobusService.delete(model);
         return ResponseEntity.noContent().build();
     }

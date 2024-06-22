@@ -75,7 +75,6 @@ public class ParadaResource {
     //Otimizar a eliminacao de uma parada
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
     public ResponseEntity<Mensaje> delete(@PathVariable Integer id) {
-
         var model = paradaService.findById(id);
         var userLogin = myUserService.getUser();
         if (!(userLogin.hasRole(RoleList.ROLE_ADMIN.toString()) || userLogin.isMyEmpresa(model.getEmpresa().getId())))

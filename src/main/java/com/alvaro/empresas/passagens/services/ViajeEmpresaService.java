@@ -1,16 +1,19 @@
 package com.alvaro.empresas.passagens.services;
 
+import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import com.alvaro.empresas.passagens.autobuses.services.AutobusService;
 import com.alvaro.empresas.passagens.configurations.exceptions.FieldMessage;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
 import com.alvaro.empresas.passagens.dtos.precios.PrecioDTO;
 import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacaoEmpresa;
+import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacaoFromAutobus;
 import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOEmpresaResponse;
 import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOForm;
 import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOListBusquedaEmpresa;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOUpdate;
 import com.alvaro.empresas.passagens.enums.EnumParada;
+import com.alvaro.empresas.passagens.helpers.DateAuxiliarFunctions;
 import com.alvaro.empresas.passagens.models.PrecioModel;
 import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
@@ -31,6 +34,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -73,6 +77,26 @@ public class ViajeEmpresaService {
         });
     }
 
+    public Page<ViajeDTOListBusquedaEmpresa> findAllFromAutobus(AutobusModel autobusModel, ViajeDTOSolicitacaoFromAutobus solicitacao, Pageable pageable) {
+        Page<ViajeModel> models;
+        Date dataInicio = DateAuxiliarFunctions.getDateWithFirstDayOfMonth(solicitacao.dataAnalise());
+        Date dataFim = DateAuxiliarFunctions.getDateWithLastDayOfMonth(solicitacao.dataAnalise());
+
+        models = viajeRepository.findByEmpresaIdAndAutobusId(autobusModel.getEmpresa().getId(), autobusModel.getId(), dataInicio, dataFim, pageable);
+
+        return models.map(model -> {
+            var salida = paradaRepository.findByViajeCodigoAndTipo(model.getCodigo(), EnumParada.SALIDA);
+            var destino = paradaRepository.findByViajeCodigoAndTipo(model.getCodigo(), EnumParada.DESTINO);
+            if (salida.isEmpty() || destino.isEmpty())
+                throw new ValidationException("lista", "Hay un viaje que no posse ninguna parada");
+            ParadaDTOComplete salidaDTO = new ParadaDTOComplete(salida.get(0), model.getCodigo());
+            ParadaDTOComplete destinoDTO = new ParadaDTOComplete(destino.get(0), model.getCodigo());
+            return new ViajeDTOListBusquedaEmpresa(model, "", salidaDTO, destinoDTO, new ArrayList<>());
+        });
+
+    }
+
+
     public List<ViajeDTOListBusquedaEmpresa> getViajesFromDia(UUID idEmpresa, ViajeDTOSolicitacaoEmpresa dto) {
         if (dto.idCiudadDestino().equals(dto.idCiudadSalida()))
             throw new ValidationException("idDestino", "El destino no puede ser el mismo que la salida");
@@ -98,7 +122,7 @@ public class ViajeEmpresaService {
         } else startDay = dto.fechaSalida().atTime(LocalTime.MIN);
 
         for (LugarModel lugarSalida : lugaresSalida) {
-            List<ParadaModel> salidasDia = paradaRepository.cargarSalidasDelDiaFromEmpresa(idEmpresa,lugarSalida.getId(), startDay, endDay);
+            List<ParadaModel> salidasDia = paradaRepository.cargarSalidasDelDiaFromEmpresa(idEmpresa, lugarSalida.getId(), startDay, endDay);
 
             if (!salidasDia.isEmpty()) {
                 for (ParadaModel salidaFor : salidasDia) {
@@ -109,8 +133,7 @@ public class ViajeEmpresaService {
                         if (nVezesTrayectoPassaDestino.size() != 1) continue;
 
                         ParadaModel destino = nVezesTrayectoPassaDestino.get(0);
-                        if (!destino.getDataHora().isAfter(salidaFor.getDataHora()))
-                            continue;
+                        if (!destino.getDataHora().isAfter(salidaFor.getDataHora())) continue;
 
                         ParadaDTOComplete salidaDTO = new ParadaDTOComplete(salidaFor, viaje.getCodigo());
                         ParadaDTOComplete destinoDTO = new ParadaDTOComplete(destino, viaje.getCodigo());
@@ -157,8 +180,7 @@ public class ViajeEmpresaService {
                     if (nVezesTrayectoPassaDestino.size() != 1) continue;
 
                     ParadaModel destino = nVezesTrayectoPassaDestino.get(0);
-                    if (!destino.getDataHora().isAfter(salidaFor.getDataHora()))
-                        continue;
+                    if (!destino.getDataHora().isAfter(salidaFor.getDataHora())) continue;
 
                     ParadaDTOComplete salidaDTO = new ParadaDTOComplete(salidaFor, viaje.getCodigo());
                     ParadaDTOComplete destinoDTO = new ParadaDTOComplete(destino, viaje.getCodigo());
@@ -194,12 +216,10 @@ public class ViajeEmpresaService {
     @Transactional
     public ViajeDTOEmpresaResponse save(ViajeDTOForm dto) {
         var lugarSalida = lugarRepository.findById(dto.salida().idLugar());
-        if (lugarSalida.isEmpty())
-            throw new ValidationException("salida.idLugar", "El lugarSalida no fue allado");
+        if (lugarSalida.isEmpty()) throw new ValidationException("salida.idLugar", "El lugarSalida no fue allado");
 
         var lugarDestino = lugarRepository.findById(dto.destino().idLugar());
-        if (lugarDestino.isEmpty())
-            throw new ValidationException("destino.idLugar", "El lugarDestino no fue allado");
+        if (lugarDestino.isEmpty()) throw new ValidationException("destino.idLugar", "El lugarDestino no fue allado");
         LocalDateTime dataHoraSalidaAjustada = dto.salida().dataHora().withSecond(0).withNano(0);
         LocalDateTime dataHoraDestinoAjustada = dto.destino().dataHora().withSecond(0).withNano(0);
 
@@ -268,8 +288,7 @@ public class ViajeEmpresaService {
             if (model.getAutobus().getPisos().get(1) != autobus.getPisos().get(1))
                 throw new ValidationException(new FieldMessage("idAutobus", "El autobus no es compatible"));
 
-        } else
-            throw new ValidationException(new FieldMessage("idAutobus", "El autobus no es compatible"));
+        } else throw new ValidationException(new FieldMessage("idAutobus", "El autobus no es compatible"));
 
         model.setAutobus(autobus);
         var update = viajeRepository.save(model);

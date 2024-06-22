@@ -1,12 +1,15 @@
 package com.alvaro.empresas.passagens.resources;
 
+import com.alvaro.empresas.passagens.autobuses.services.AutobusService;
 import com.alvaro.empresas.passagens.dtos.Mensaje;
 import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacaoEmpresa;
+import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacaoFromAutobus;
 import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOEmpresaResponse;
 import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOForm;
 import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOListBusquedaEmpresa;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOUpdate;
 import com.alvaro.empresas.passagens.helpers.beans.MyUserService;
+import com.alvaro.empresas.passagens.security.models.RoleList;
 import com.alvaro.empresas.passagens.services.ViajeEmpresaService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -29,18 +32,33 @@ import java.util.UUID;
 public class ViajeEmpresaResource {
     private final ViajeEmpresaService viajeEmpresaService;
     private final MyUserService myUserService;
+    private final AutobusService autobusService;
 
     @Autowired
-    public ViajeEmpresaResource(ViajeEmpresaService viajeEmpresaService, MyUserService myUserService) {
+    public ViajeEmpresaResource(ViajeEmpresaService viajeEmpresaService, MyUserService myUserService, AutobusService autobusService) {
         this.viajeEmpresaService = viajeEmpresaService;
         this.myUserService = myUserService;
+        this.autobusService = autobusService;
     }
 
+
     @GetMapping("/from/{idEmpresa}/{type}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
     public ResponseEntity<Page<ViajeDTOListBusquedaEmpresa>> getAllFromEmpresa(@PathVariable(value = "idEmpresa") UUID id,
                                                                                @PageableDefault(sort = "dataHoraSalida", direction = Sort.Direction.DESC) Pageable pageable,
                                                                                @PathVariable(value = "type") String type) {
         return ResponseEntity.ok(viajeEmpresaService.findAllEmpresa(id, pageable, type));
+    }
+
+    @PostMapping("/from/autobus")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
+    public ResponseEntity<Page<ViajeDTOListBusquedaEmpresa>> getAllFromAutobus(@RequestBody @Valid ViajeDTOSolicitacaoFromAutobus solicitacao,
+                                                                               @PageableDefault(sort = "dataHoraSalida") Pageable pageable) {
+        var autobusModel = autobusService.findById(solicitacao.idAutobus());
+        var usuarioLogado = myUserService.getUser();
+        if (usuarioLogado.hasRole(RoleList.ROLE_ADMIN.toString()) || usuarioLogado.isMyEmpresa(autobusModel.getEmpresa().getId()))
+            return ResponseEntity.ok(viajeEmpresaService.findAllFromAutobus(autobusModel, solicitacao, pageable));
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
     @PostMapping("/{idEmpresa}")
