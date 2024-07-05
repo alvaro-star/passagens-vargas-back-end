@@ -1,10 +1,19 @@
 package com.alvaro.empresas.passagens.helpers;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 
+@Component
 public class DateAuxiliarFunctions {
-    public static Date getDateWithFirstDayOfMonth(Date date) {
+    @Value("${spring.jackson.time-zone}")
+    private String timeZone;
+
+    public LocalDateTime getDateWithFirstDayOfMonth(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         calendar.set(Calendar.DAY_OF_MONTH, 1);
@@ -12,10 +21,12 @@ public class DateAuxiliarFunctions {
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
-        return calendar.getTime();
+
+        ZoneId zoneId = ZoneId.of(timeZone);
+        return calendar.getTime().toInstant().atZone(zoneId).toLocalDateTime();
     }
 
-    public static Date getDateWithLastDayOfMonth(Date date) {
+    public LocalDateTime getDateWithLastDayOfMonth(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
@@ -23,7 +34,8 @@ public class DateAuxiliarFunctions {
         calendar.set(Calendar.MINUTE, 59);
         calendar.set(Calendar.SECOND, 59);
         calendar.set(Calendar.MILLISECOND, 999);
-        return calendar.getTime();
+        ZoneId zoneId = ZoneId.of(timeZone);
+        return calendar.getTime().toInstant().atZone(zoneId).toLocalDateTime();
 
     }
 }

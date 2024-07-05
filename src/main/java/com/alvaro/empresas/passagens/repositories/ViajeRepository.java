@@ -23,7 +23,7 @@ public interface ViajeRepository extends JpaRepository<ViajeModel, UUID> {
 
 
     @Query("SELECT v FROM ViajeModel v WHERE v.empresa.id = :empresaId AND v.dataHoraSalida BETWEEN :dataInicio AND :dataFim AND v.autobus.id = :autobusId")
-    Page<ViajeModel> findByEmpresaIdAndAutobusId(UUID idEmpresa, Integer idAutobus, Date dataInicio, Date dataFim, Pageable pageable);
+    Page<ViajeModel> findByEmpresaIdAndAutobusId(UUID empresaId, Integer autobusId, LocalDateTime dataInicio, LocalDateTime dataFim, Pageable pageable);
 }
 
 /* No usage

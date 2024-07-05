@@ -67,7 +67,7 @@ public class ShareProfile {
     private UsuarioRepository usuarioRepository;
 
     @Bean
-    public void loadData() {
+    public String loadData() {
         var criptogrador = new BCryptPasswordEncoder();
         //Cadastra os Roles
         var admin = roleService.save(new RoleModel(RoleList.ROLE_ADMIN));
@@ -168,5 +168,6 @@ public class ShareProfile {
                 }
             }
         }
+        return "Sucesso";
     }
 }

@@ -66,16 +66,11 @@ public class AutobusService {
 
     public AutobusDTOResponse getOne(Integer id) {
         var model = findById(id);
-        List<ViajeDTOList> viajesDTO = new ArrayList<>();
         List<PisoDTOResponse> pisosDto = new ArrayList<>();
-
-        for (ViajeModel viaje : model.getViajes())
-            viajesDTO.add(new ViajeDTOList(viaje, model.getId()));
-
         for (PisoModel piso : model.getPisos())
             pisosDto.add(new PisoDTOResponse(piso, model.getId()));
 
-        return new AutobusDTOResponse(model, model.getEmpresa().getId(), pisosDto, viajesDTO);
+        return new AutobusDTOResponse(model, model.getEmpresa().getId(), pisosDto);
     }
 
     public ValidationError validar(BindingResult bindingResult, AutobusDTO dto) {
@@ -84,11 +79,9 @@ public class AutobusService {
             err.addError(erro.getField(), erro.getDefaultMessage());
         }
 
-        if (!bindingResult.hasFieldErrors("placa")) {
-            if (autobusRepository.existsByPlaca(dto.placa())) {
+        if (!bindingResult.hasFieldErrors("placa"))
+            if (autobusRepository.existsByPlaca(dto.placa()))
                 err.addError("placa", "La placa ya esta registrada");
-            }
-        }
 
         int counter = 1;
         for (PisoDTO pisoDto : dto.pisos()) {

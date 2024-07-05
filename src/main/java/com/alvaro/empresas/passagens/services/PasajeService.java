@@ -8,16 +8,19 @@ import com.alvaro.empresas.passagens.dtos.pasajes.PasajeDTOEmpresaResponse;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTO;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTOVenta;
 import com.alvaro.empresas.passagens.enums.MetodoPagamentoEnum;
+import com.alvaro.empresas.passagens.helpers.PasajesPDF;
 import com.alvaro.empresas.passagens.models.*;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.alvaro.empresas.passagens.repositories.PasajeRepository;
 import com.alvaro.empresas.passagens.repositories.ViajeRepository;
+import jakarta.validation.Valid;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -83,8 +86,9 @@ public class PasajeService {
         return pago;
     }
 
+
     @Transactional
-    public PagoModel saveEmpresa(PasajesDTOVenta dto, MetodoPagamentoEnum metodo, ViajeModel viaje, boolean guardarContacto, boolean compradoWeb) {
+    public byte[] saveEmpresa(String empresaNombre, PasajesDTOVenta dto, MetodoPagamentoEnum metodo, ViajeModel viaje, boolean guardarContacto, boolean compradoWeb) {
         ParadaModel salida;
         ParadaModel destino;
 
@@ -171,7 +175,34 @@ public class PasajeService {
             }
 
         pasajeRepository.saveAll(pasajesModels);
-        return pago;
+        PasajesPDF pasajesPDF = new PasajesPDF();
+        byte[] emptyByteArray = new byte[0];
+
+        try {
+            for (PasajeModel pasajeModel : pasajesModels)
+                pasajesPDF.addPasaje(pasajeModel, empresaNombre, salida, destino);
+            emptyByteArray = pasajesPDF.closeAndGetBytes();
+            return emptyByteArray;
+        } catch (IOException exception) {
+            throw new ValidationException("pasajes", "Hubo un error ala hora de crear los boletos");
+        }
+    }
+
+    public byte[] getOnePasajeDownload(UUID idPasaje) {
+        var pasajeModel = findById(idPasaje);
+        PasajesPDF pasajePDF = new PasajesPDF();
+        byte[] emptyByteArray = new byte[0];
+        try {
+            pasajePDF.addPasaje(
+                    pasajeModel,
+                    pasajeModel.getPrecio().getEmpresa().getNombre(),
+                    pasajeModel.getSalida(),
+                    pasajeModel.getDestino());
+            emptyByteArray = pasajePDF.closeAndGetBytes();
+            return emptyByteArray;
+        } catch (IOException exception) {
+            throw new ValidationException("pasaje", "Hubo un error ala hra de crear el boleto");
+        }
     }
 
     public List<PasajeDTOEmpresaResponse> getPasajesFromPrecio(UUID idPrecio) {

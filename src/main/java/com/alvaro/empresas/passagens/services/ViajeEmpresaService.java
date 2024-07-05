@@ -41,16 +41,33 @@ import java.util.UUID;
 
 @Service
 public class ViajeEmpresaService {
+
+    private final ViajeRepository viajeRepository;
+
+    private final ParadaRepository paradaRepository;
+
+    private final PrecioService precioService;
+
+    private final LugarRepository lugarRepository;
+
+    private final AutobusService autobusService;
+    private final DateAuxiliarFunctions helperDate;
+
     @Autowired
-    private ViajeRepository viajeRepository;
-    @Autowired
-    private ParadaRepository paradaRepository;
-    @Autowired
-    private PrecioService precioService;
-    @Autowired
-    private LugarRepository lugarRepository;
-    @Autowired
-    private AutobusService autobusService;
+    public ViajeEmpresaService(
+            ViajeRepository viajeRepository,
+            ParadaRepository paradaRepository,
+            PrecioService precioService,
+            LugarRepository lugarRepository,
+            AutobusService autobusService,
+            DateAuxiliarFunctions helperDate) {
+        this.viajeRepository = viajeRepository;
+        this.paradaRepository = paradaRepository;
+        this.precioService = precioService;
+        this.lugarRepository = lugarRepository;
+        this.autobusService = autobusService;
+        this.helperDate = helperDate;
+    }
 
     public ViajeModel findById(UUID id) {
         var model = viajeRepository.findById(id);
@@ -79,8 +96,8 @@ public class ViajeEmpresaService {
 
     public Page<ViajeDTOListBusquedaEmpresa> findAllFromAutobus(AutobusModel autobusModel, ViajeDTOSolicitacaoFromAutobus solicitacao, Pageable pageable) {
         Page<ViajeModel> models;
-        Date dataInicio = DateAuxiliarFunctions.getDateWithFirstDayOfMonth(solicitacao.dataAnalise());
-        Date dataFim = DateAuxiliarFunctions.getDateWithLastDayOfMonth(solicitacao.dataAnalise());
+        LocalDateTime dataInicio = helperDate.getDateWithFirstDayOfMonth(solicitacao.dataAnalise());
+        LocalDateTime dataFim = helperDate.getDateWithLastDayOfMonth(solicitacao.dataAnalise());
 
         models = viajeRepository.findByEmpresaIdAndAutobusId(autobusModel.getEmpresa().getId(), autobusModel.getId(), dataInicio, dataFim, pageable);
 

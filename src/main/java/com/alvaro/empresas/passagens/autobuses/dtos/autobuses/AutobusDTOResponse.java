@@ -11,15 +11,10 @@ public record AutobusDTOResponse(
         Integer id,
         String placa,
         UUID idEmpresa,
-        List<PisoDTOResponse> pisos,
-        List<ViajeDTOList> viajes
+        List<PisoDTOResponse> pisos
 ) {
 
-    public AutobusDTOResponse(AutobusModel model, UUID idEmpresa, List<PisoDTOResponse> pisos, List<ViajeDTOList> viajes) {
-        this(model.getId(), model.getPlaca(), idEmpresa, pisos, viajes);
-    }
-
     public AutobusDTOResponse(AutobusModel model, UUID idEmpresa, List<PisoDTOResponse> pisos) {
-        this(model.getId(), model.getPlaca(), idEmpresa, pisos, null);
+        this(model.getId(), model.getPlaca(), idEmpresa, pisos);
     }
 }

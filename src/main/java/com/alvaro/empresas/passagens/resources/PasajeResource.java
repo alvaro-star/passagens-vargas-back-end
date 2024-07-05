@@ -15,6 +15,7 @@ import com.alvaro.empresas.passagens.services.validacao.ValidationErrorsWithList
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -42,15 +43,6 @@ public class PasajeResource {
         this.precioService = precioService;
     }
 
-    @PostMapping
-    public ResponseEntity<Object> save(@Valid @RequestBody PasajesDTO dto, BindingResult bindingResult) {
-        ValidationErrorsWithList validacao;
-        validacao = ValidarCompraPasajes.validarPasajesDTO(bindingResult, dto, "/pasajes");
-        if (!validacao.getErrorsList().isEmpty() || !validacao.getErrors().isEmpty())
-            return ResponseEntity.unprocessableEntity().body(validacao);
-        return ResponseEntity.status(HttpStatus.CREATED).body(pasajeService.save(dto, MetodoPagamentoEnum.QR, true, true));
-    }
-
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ROLE_CLIENTE', 'ROLE_ADMIN')")
     public ResponseEntity<PasajeDTOEmpresaResponse> getOne(@PathVariable(value = "id") UUID id) {
@@ -58,6 +50,16 @@ public class PasajeResource {
         var salida = new ParadaDTOComplete(model.getSalida(), null);
         var destino = new ParadaDTOComplete(model.getDestino(), null);
         return ResponseEntity.ok(new PasajeDTOEmpresaResponse(model, salida, destino));
+    }
+
+    @GetMapping("/{id}/download")
+    public ResponseEntity<byte[]> getFilePasaje(@PathVariable(value = "id") UUID id) {
+        var model = pasajeService.findById(id);
+        byte[] pasajePdf = pasajeService.getOnePasajeDownload(id);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=pasaje.pdf");
+        headers.add(HttpHeaders.CONTENT_TYPE, "application/pdf");
+        return new ResponseEntity<>(pasajePdf, headers, HttpStatus.OK);
     }
 
     @GetMapping("/from/{idPrecio}")
@@ -70,19 +72,33 @@ public class PasajeResource {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ArrayList<>());
     }
 
+    @PostMapping
+    public ResponseEntity<Object> save(@Valid @RequestBody PasajesDTO dto, BindingResult bindingResult) {
+        ValidationErrorsWithList validacao;
+        validacao = ValidarCompraPasajes.validarPasajesDTO(bindingResult, dto, "/pasajes");
+        if (!validacao.getErrorsList().isEmpty() || !validacao.getErrors().isEmpty())
+            return ResponseEntity.unprocessableEntity().body(validacao);
+        return ResponseEntity.status(HttpStatus.CREATED).body(pasajeService.save(dto, MetodoPagamentoEnum.QR, true, true));
+    }
+
     @PostMapping("/vender")
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_FUNCIONARIO', 'ROLE_EMPRESA_ADMIN')")
-    public ResponseEntity<Object> vender(@RequestBody @Valid PasajesDTOVenta dto, BindingResult bindingResult) {
+    public ResponseEntity<?> vender(@RequestBody @Valid PasajesDTOVenta dto, BindingResult bindingResult) {
         ValidationErrorsWithList validacao;
         var usuario = myUserService.getUser();
         var viaje = viajeService.findById(dto.idViaje());
         if (!usuario.isMyEmpresa(viaje.getEmpresa().getId()))
             return ResponseEntity.unprocessableEntity().body(new Mensaje("No se puede vender el pasaje de otra empresa"));
-
         validacao = ValidarCompraPasajes.validarPasajesDTOVenta(bindingResult, dto, "/pasajes/vender");
         if (!validacao.getErrorsList().isEmpty() || !validacao.getErrors().isEmpty())
             return ResponseEntity.unprocessableEntity().body(validacao);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(pasajeService.saveEmpresa(dto, dto.metodo(), viaje, false, false));
+        byte[] pasajesPDF = pasajeService.saveEmpresa(viaje.getEmpresa().getNombre(), dto, dto.metodo(), viaje, false, false);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=pasajes.pdf");
+        headers.add(HttpHeaders.CONTENT_TYPE, "application/pdf");
+
+        return new ResponseEntity<>(pasajesPDF, headers, HttpStatus.OK);
     }
+
 }
