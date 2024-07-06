@@ -1,17 +1,20 @@
 package com.alvaro.empresas.passagens.security.resource;
 
-import com.alvaro.empresas.passagens.configurations.exceptions.FieldMessage;
+import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
 import com.alvaro.empresas.passagens.dtos.Mensaje;
 import com.alvaro.empresas.passagens.helpers.services.EmailService;
-import com.alvaro.empresas.passagens.repositories.EmpresaRepository;
 import com.alvaro.empresas.passagens.security.dtos.LoginDto;
 import com.alvaro.empresas.passagens.security.dtos.LoginResponseDto;
 import com.alvaro.empresas.passagens.security.dtos.RegisterDto;
 import com.alvaro.empresas.passagens.security.dtos.ValidadorDTO;
+import com.alvaro.empresas.passagens.security.dtos.password.PasswordForm;
+import com.alvaro.empresas.passagens.security.dtos.password.SolicitudNewPassword;
 import com.alvaro.empresas.passagens.security.models.RoleList;
 import com.alvaro.empresas.passagens.security.models.RoleModel;
 import com.alvaro.empresas.passagens.security.models.UsuarioModel;
 import com.alvaro.empresas.passagens.security.models.UsuarioSolicitudModel;
+import com.alvaro.empresas.passagens.security.models.temporal.CodigoVerificacao;
+import com.alvaro.empresas.passagens.security.repositories.CodigoRepository;
 import com.alvaro.empresas.passagens.security.repositories.UsuarioRepository;
 import com.alvaro.empresas.passagens.security.repositories.UsuarioSolicitudRepository;
 import com.alvaro.empresas.passagens.security.services.RoleService;
@@ -22,17 +25,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -45,15 +45,28 @@ public class AuthResource {
     private final TokenService tokenService;
     private final UsuarioSolicitudRepository usuarioSolicitudRepository;
     private final EmailService emailService;
+    private final CodigoRepository codigoRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
-    public AuthResource(UsuarioRepository usuarioRepository, RoleService roleService, AuthenticationManager authenticationManager, TokenService tokenService, UsuarioSolicitudRepository usuarioSolicitudRepository, EmailService emailService) {
+    public AuthResource(
+            UsuarioRepository usuarioRepository,
+            RoleService roleService,
+            AuthenticationManager authenticationManager,
+            TokenService tokenService,
+            UsuarioSolicitudRepository usuarioSolicitudRepository,
+            EmailService emailService,
+            CodigoRepository codigoRepository,
+            BCryptPasswordEncoder passwordEncoder
+    ) {
         this.usuarioRepository = usuarioRepository;
         this.roleService = roleService;
         this.authenticationManager = authenticationManager;
         this.tokenService = tokenService;
         this.usuarioSolicitudRepository = usuarioSolicitudRepository;
         this.emailService = emailService;
+        this.codigoRepository = codigoRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @PostMapping("/login")
@@ -87,7 +100,7 @@ public class AuthResource {
         logado = !(usuario == null || usuario.getName().equals("anonymousUser"));
         if (logado)
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Mensaje("Hay un usuario que inicio session"));
-        String encriptedPassword = new BCryptPasswordEncoder().encode(registerDto.contrasena());
+        String encriptedPassword = this.passwordEncoder.encode(registerDto.contrasena());
         UUID codigoAleatorio = UUID.randomUUID();
         UsuarioSolicitudModel newUser = new UsuarioSolicitudModel(registerDto.login(), registerDto.nombre(), registerDto.telefono(), encriptedPassword);
         newUser.setCodigoVerificacion(codigoAleatorio);
@@ -104,13 +117,15 @@ public class AuthResource {
     }
 
     @PostMapping("/validar")
-    public ResponseEntity<Mensaje> verificar(@RequestBody ValidadorDTO validadorDTO) {
+    public ResponseEntity<Mensaje> verificarRegistro(@RequestBody ValidadorDTO validadorDTO) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime halfHourAgo = now.minus(Duration.ofMinutes(30));
         var solicitudes = usuarioSolicitudRepository.findByEmailAfterTime(validadorDTO.email(), halfHourAgo);
-
+        var usuario = usuarioRepository.findByEmail(validadorDTO.email());
+        if (usuario.isPresent())
+            return ResponseEntity.badRequest().body(new Mensaje("El usuario ya esta registrado"));
         if (solicitudes.isEmpty()) {
-            //usuarioSolicitudRepository.deleteByEmailBeforeTime(validadorDTO.email(), halfHourAgo);
+            // usuarioSolicitudRepository.deleteByEmailBeforeTime(validadorDTO.email(), halfHourAgo);
             return ResponseEntity.badRequest().body(new Mensaje("No hay solicitudes recientes"));
         }
         if (!solicitudes.get(0).getCodigoVerificacion().equals(validadorDTO.codigo()))
@@ -122,11 +137,59 @@ public class AuthResource {
         roles.add(roleCliente);
         usuaroNovo.setRoles(roles);
         var usuarioNovo = usuarioRepository.save(usuaroNovo);
-        emailService.mandarEmail(validadorDTO.email(), "Codigo de Verificacion",
+        /*emailService.mandarEmail(validadorDTO.email(), "Codigo de Verificacion",
                 "Bien benido ala aplcacion, " + usuarioNovo.getNombre()
-                        + " agradezemos tu registro, ahora podras comprar tus pasajes y disfrutar tur viajes");
+                + " agradezemos tu registro, ahora podras comprar tus pasajes y disfrutar tur viajes");*/
         return ResponseEntity.status(HttpStatus.CREATED).body(new Mensaje("Usuario registrado con exito"));
         //Verificar o seu codigo
     }
+
+    @PostMapping("/forget_password")
+    public ResponseEntity<Object> getCodigoToRestorePassword(@RequestBody @Valid SolicitudNewPassword solicitud) {
+        var usuario = usuarioRepository.findByEmail(solicitud.email());
+        if (usuario.isEmpty())
+            return ResponseEntity.badRequest().body(new Mensaje("Informe un email valido"));
+        LocalDateTime thrityMinutesBefore = LocalDateTime.now().minusMinutes(60);
+        List<CodigoVerificacao> codigos = codigoRepository.findByEmailAfterDate(solicitud.email(), thrityMinutesBefore);
+        if (codigos.size() >= 5)
+            return ResponseEntity.badRequest().body(new Mensaje("Fueron intentadas muchas solicitaciones"));
+
+        CodigoVerificacao codigo = new CodigoVerificacao();
+        codigo.setEmail(solicitud.email());
+        codigoRepository.save(codigo);
+        emailService.mandarEmail(solicitud.email(), "Cambio de contrasena",
+                "Este es tu codigo de verificacion para cambiar tu contrasena: \n"
+                        + codigo.getId()
+                        + "\nNo lo compartas con nadie");
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/reset_password")
+    public ResponseEntity<Object> validarPassword(@RequestBody @Valid PasswordForm form) {
+        var codigo = codigoRepository.findById(form.codigo());
+        if (codigo.isEmpty())
+            throw new ValidationException("codigo", "El codigo de verificacion es invalido");
+
+        LocalDateTime thyrtyMinutesBefore = LocalDateTime.now().minusMinutes(30);
+
+        if (codigo.get().getCreatedAt().isBefore(thyrtyMinutesBefore)) {
+            codigoRepository.delete(codigo.get());
+            throw new ValidationException("codigo", "El codigo ha expirado");
+            //Util para eliminar todos los codigos del usuario
+        }
+
+        if (!codigo.get().getEmail().equals(form.email()))
+            throw new ValidationException("email", "El codigo no le pertenece a este usuario");
+
+        String passwordEncoder = this.passwordEncoder.encode(form.password());
+        var usuario = usuarioRepository.findByEmail(form.email());
+        if (usuario.isEmpty())
+            throw new ValidationException("email", "El usuario no existe");
+        usuario.get().setContrasena(passwordEncoder);
+        usuarioRepository.save(usuario.get());
+
+        return ResponseEntity.noContent().build();
+    }
+
 
 }

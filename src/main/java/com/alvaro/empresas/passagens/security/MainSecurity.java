@@ -37,6 +37,8 @@ public class MainSecurity {
                         .requestMatchers(HttpMethod.GET, "/").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/forget_password").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/auth/reset_password").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/validar").permitAll()
                         .requestMatchers(HttpMethod.POST, "/viajes").permitAll()
                         .requestMatchers(HttpMethod.GET, "/viajes/{id}").permitAll()
