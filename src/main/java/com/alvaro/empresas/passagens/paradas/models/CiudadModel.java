@@ -5,7 +5,6 @@ import com.alvaro.empresas.passagens.paradas.dtos.CiudadDtoUpdate;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,7 +25,7 @@ public class CiudadModel {
     @NotBlank
     private String nombre;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "fk_idtb_departamento")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private DepartamentoModel departamento;
@@ -35,15 +34,15 @@ public class CiudadModel {
     private List<LugarModel> lugares = new ArrayList<>();
 
     public CiudadModel(CiudadDTO dto) {
-        nombre = dto.nombre();
+        nombre = dto.nombre().toUpperCase();
     }
 
     public void updateValues(CiudadDtoUpdate dto) {
-        nombre = dto.nombre();
+        nombre = dto.nombre().toUpperCase();
     }
 
     public CiudadModel(String nombre, DepartamentoModel departamento) {
-        this.nombre = nombre;
+        this.nombre = nombre.toUpperCase();
         this.departamento = departamento;
     }
 }

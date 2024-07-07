@@ -125,21 +125,18 @@ public class AuthResource {
         if (usuario.isPresent())
             return ResponseEntity.badRequest().body(new Mensaje("El usuario ya esta registrado"));
         if (solicitudes.isEmpty()) {
-            // usuarioSolicitudRepository.deleteByEmailBeforeTime(validadorDTO.email(), halfHourAgo);
             return ResponseEntity.badRequest().body(new Mensaje("No hay solicitudes recientes"));
         }
         if (!solicitudes.get(0).getCodigoVerificacion().equals(validadorDTO.codigo()))
             return ResponseEntity.badRequest().body(new Mensaje("El codigo de verificacion es incorrecto"));
 
+        usuarioSolicitudRepository.deleteByEmailBeforeTime(validadorDTO.email(), halfHourAgo);
         var usuaroNovo = new UsuarioModel(solicitudes.get(0));
         Set<RoleModel> roles = new HashSet<>();
         var roleCliente = roleService.getByRoleName(RoleList.ROLE_CLIENTE);
         roles.add(roleCliente);
         usuaroNovo.setRoles(roles);
-        var usuarioNovo = usuarioRepository.save(usuaroNovo);
-        /*emailService.mandarEmail(validadorDTO.email(), "Codigo de Verificacion",
-                "Bien benido ala aplcacion, " + usuarioNovo.getNombre()
-                + " agradezemos tu registro, ahora podras comprar tus pasajes y disfrutar tur viajes");*/
+        usuarioRepository.save(usuaroNovo);
         return ResponseEntity.status(HttpStatus.CREATED).body(new Mensaje("Usuario registrado con exito"));
         //Verificar o seu codigo
     }
@@ -188,6 +185,7 @@ public class AuthResource {
         usuario.get().setContrasena(passwordEncoder);
         usuarioRepository.save(usuario.get());
 
+        codigoRepository.deleteAllBeforeTime(form.email(), LocalDateTime.now());
         return ResponseEntity.noContent().build();
     }
 

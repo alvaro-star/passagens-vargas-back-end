@@ -28,7 +28,7 @@ public class LugarModel {
     @Column(nullable = false)
     private Boolean enable = true;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "fk_idtb_ciudad")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private CiudadModel ciudad;
@@ -37,11 +37,11 @@ public class LugarModel {
     private List<ParadaModel> paradas = new ArrayList<>();
 
     public LugarModel(LugarDTO dto) {
-        nombre = dto.nombre();
+        nombre = dto.nombre().toUpperCase();
     }
 
     public LugarModel(String nombre, CiudadModel ciudad) {
-        this.nombre = nombre;
+        this.nombre = nombre.toUpperCase();
         this.ciudad = ciudad;
     }
 

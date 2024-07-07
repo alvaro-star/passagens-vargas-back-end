@@ -50,7 +50,7 @@ public class CiudadResource {
 
     @GetMapping("/{nombre}/like")
     public ResponseEntity<Page<CiudadDTO>> getAllLike(@PathVariable(value = "nombre") String nombre, @PageableDefault(size = 8, sort = "nombre") Pageable pageable) {
-        return ResponseEntity.ok().body(ciudadService.findByNombreContaining(nombre, pageable));
+        return ResponseEntity.ok().body(ciudadService.findByNombreContaining(nombre.toUpperCase(), pageable));
     }
 
     @PostMapping

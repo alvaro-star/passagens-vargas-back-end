@@ -16,8 +16,8 @@ import java.util.UUID;
 public interface UsuarioSolicitudRepository extends JpaRepository<UsuarioSolicitudModel, UUID> {
     @Query("SELECT u FROM UsuarioSolicitudModel u WHERE u.email=:email AND u.createdAt >= :createdAt ORDER BY u.createdAt DESC")
     List<UsuarioSolicitudModel> findByEmailAfterTime(@Param("email") String email, @Param("createdAt") LocalDateTime createdAt);
-    /*@Modifying
+    @Modifying
     @Transactional
     @Query("DELETE FROM UsuarioSolicitudModel u WHERE u.email = :email AND u.createdAt < :createdAt")
-    void deleteByEmailBeforeTime(@Param("email") String email, @Param("createdAt") LocalDateTime createdAt);*/
+    void deleteByEmailBeforeTime(@Param("email") String email, @Param("createdAt") LocalDateTime createdAt);
 }

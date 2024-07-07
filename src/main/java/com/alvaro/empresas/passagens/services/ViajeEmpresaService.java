@@ -164,7 +164,6 @@ public class ViajeEmpresaService {
                 }
             }
         }
-
         return viajesSelecionados;
     }
 

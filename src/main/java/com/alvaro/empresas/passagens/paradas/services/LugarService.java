@@ -34,7 +34,7 @@ public class LugarService {
 
     public LugarModel update(LugarDtoUpdate dto, Integer id) {
         var model = this.findById(id);
-        model.setNombre(dto.nombre());
+        model.setNombre(dto.nombre().toUpperCase());
         return lugarRepository.save(model);
     }
 

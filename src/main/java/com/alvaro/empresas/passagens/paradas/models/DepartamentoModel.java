@@ -33,17 +33,17 @@ public class DepartamentoModel {
     private List<CiudadModel> ciudades = new ArrayList<>();
 
     public DepartamentoModel(DepartamentoDTO dto) {
-        nombre = dto.nombre();
-        abreviacion = dto.abreviacion();
+        nombre = dto.nombre().toUpperCase();
+        abreviacion = dto.abreviacion().toUpperCase();
     }
 
     public DepartamentoModel(String nombre, String abreviacion) {
-        this.nombre = nombre;
-        this.abreviacion = abreviacion;
+        this.nombre = nombre.toUpperCase();
+        this.abreviacion = abreviacion.toUpperCase();
     }
 
     public void updateValues(DepartamentoDTO dto) {
-        nombre = dto.nombre();
-        abreviacion = dto.abreviacion();
+        nombre = dto.nombre().toUpperCase();
+        abreviacion = dto.abreviacion().toUpperCase();
     }
 }
