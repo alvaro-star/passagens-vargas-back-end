@@ -52,7 +52,6 @@ public class PasajesPDF {
     }
 
     public void addPasaje(PasajeModel model, String empresaName, ParadaModel salida, ParadaModel destino) throws IOException {
-
         PDPage page = new PDPage(rectangle);
         document.addPage(page);
 

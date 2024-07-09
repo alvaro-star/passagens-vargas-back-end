@@ -14,7 +14,4 @@ public record ViajeDTOListBusqueda(
         ParadaDTOComplete destino,
         List<PrecioDTO> precios
 ) {
-    public ViajeDTOListBusqueda(ViajeModel model, String logo, ParadaDTOComplete salida, ParadaDTOComplete destino, List<PrecioDTO> precios) {
-        this(model.getCodigo(), logo, salida, destino, precios);
-    }
 }

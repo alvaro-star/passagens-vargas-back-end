@@ -16,6 +16,7 @@ import com.alvaro.empresas.passagens.enums.EnumParada;
 import com.alvaro.empresas.passagens.helpers.DateAuxiliarFunctions;
 import com.alvaro.empresas.passagens.models.PrecioModel;
 import com.alvaro.empresas.passagens.models.ViajeModel;
+import com.alvaro.empresas.passagens.paradas.dtos.JPQL.ViajeEmpresaDTOJPQ;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
 import com.alvaro.empresas.passagens.paradas.models.CiudadModel;
 import com.alvaro.empresas.passagens.paradas.models.LugarModel;
@@ -34,22 +35,16 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 
 @Service
 public class ViajeEmpresaService {
-
     private final ViajeRepository viajeRepository;
-
     private final ParadaRepository paradaRepository;
-
     private final PrecioService precioService;
-
     private final LugarRepository lugarRepository;
-
     private final AutobusService autobusService;
     private final DateAuxiliarFunctions helperDate;
 
@@ -138,32 +133,27 @@ public class ViajeEmpresaService {
             if (hj.toLocalTime().isAfter(LocalTime.of(23, 30))) return new ArrayList<>();
         } else startDay = dto.fechaSalida().atTime(LocalTime.MIN);
 
+
+        ParadaDTOComplete salidaDTO;
+        ParadaDTOComplete destinoDTO;
+        List<PrecioDTO> precios;
         for (LugarModel lugarSalida : lugaresSalida) {
-            List<ParadaModel> salidasDia = paradaRepository.cargarSalidasDelDiaFromEmpresa(idEmpresa, lugarSalida.getId(), startDay, endDay);
+            for (LugarModel lugarDestino : lugaresDestino) {
+                List<ViajeEmpresaDTOJPQ> salidasDia = paradaRepository.cargarSalidasDelDiaFromEmpresa(idEmpresa, lugarSalida.getId(), lugarDestino.getId(), startDay, endDay);
+                for (ViajeEmpresaDTOJPQ ViajeEmpresaDTOJPQ : salidasDia) {
+                    salidaDTO = new ParadaDTOComplete(ViajeEmpresaDTOJPQ.getSalida(), ViajeEmpresaDTOJPQ.getViaje().getCodigo());
+                    destinoDTO = new ParadaDTOComplete(ViajeEmpresaDTOJPQ.getDestino(), ViajeEmpresaDTOJPQ.getViaje().getCodigo());
+                    if (!destinoDTO.dataHora().isAfter(salidaDTO.dataHora())) continue;
 
-            if (!salidasDia.isEmpty()) {
-                for (ParadaModel salidaFor : salidasDia) {
-                    ViajeModel viaje = salidaFor.getViaje();
+                    precios = new ArrayList<>();
+                    for (PrecioModel precio : ViajeEmpresaDTOJPQ.getViaje().getPrecios())
+                        if (!precio.getLleno()) precios.add(new PrecioDTO(precio));
 
-                    for (LugarModel lugarDestino : lugaresDestino) {
-                        List<ParadaModel> nVezesTrayectoPassaDestino = paradaRepository.findByViajeCodigoAndLugarId(viaje.getCodigo(), lugarDestino.getId());
-                        if (nVezesTrayectoPassaDestino.size() != 1) continue;
-
-                        ParadaModel destino = nVezesTrayectoPassaDestino.get(0);
-                        if (!destino.getDataHora().isAfter(salidaFor.getDataHora())) continue;
-
-                        ParadaDTOComplete salidaDTO = new ParadaDTOComplete(salidaFor, viaje.getCodigo());
-                        ParadaDTOComplete destinoDTO = new ParadaDTOComplete(destino, viaje.getCodigo());
-
-                        List<PrecioDTO> precios = new ArrayList<>();
-                        for (PrecioModel precio : viaje.getPrecios())
-                            if (!precio.getLleno()) precios.add(new PrecioDTO(precio));
-
-                        viajesSelecionados.add(new ViajeDTOListBusquedaEmpresa(viaje, viaje.getEmpresa().getLogo(), salidaDTO, destinoDTO, precios));
-                    }
+                    viajesSelecionados.add(new ViajeDTOListBusquedaEmpresa(ViajeEmpresaDTOJPQ.getViaje(), null, salidaDTO, destinoDTO, precios));
                 }
             }
         }
+
         return viajesSelecionados;
     }
 
@@ -185,29 +175,22 @@ public class ViajeEmpresaService {
             if (hj.toLocalTime().isAfter(LocalTime.of(23, 30))) return new ArrayList<>();
         } else startDay = dto.fechaSalida().atTime(LocalTime.MIN);
 
+        ParadaDTOComplete salidaDTO;
+        ParadaDTOComplete destinoDTO;
+        List<PrecioDTO> precios;
         for (LugarModel lugarSalida : lugaresSalida) {
-            List<ParadaModel> salidasDia = paradaRepository.cargarSalidasDelDiaFromEmpresa(idEmpresa, lugarSalida.getId(), startDay, endDay);
+            List<ViajeEmpresaDTOJPQ> salidasDia = paradaRepository.cargarSalidasDelDiaFromEmpresa2(idEmpresa, lugarSalida.getId(), startDay, endDay);
+            for (ViajeEmpresaDTOJPQ ViajeEmpresaDTOJPQ : salidasDia) {
+                salidaDTO = new ParadaDTOComplete(ViajeEmpresaDTOJPQ.getSalida(), ViajeEmpresaDTOJPQ.getViaje().getCodigo());
+                destinoDTO = new ParadaDTOComplete(ViajeEmpresaDTOJPQ.getDestino(), ViajeEmpresaDTOJPQ.getViaje().getCodigo());
 
-            if (!salidasDia.isEmpty()) {
-                for (ParadaModel salidaFor : salidasDia) {
-                    ViajeModel viaje = salidaFor.getViaje();
+                if (!destinoDTO.dataHora().isAfter(salidaDTO.dataHora())) continue;
 
-                    List<ParadaModel> nVezesTrayectoPassaDestino = paradaRepository.findByViajeCodigoAndTipo(viaje.getCodigo(), EnumParada.DESTINO);
-                    if (nVezesTrayectoPassaDestino.size() != 1) continue;
+                precios = new ArrayList<>();
+                for (PrecioModel precio : ViajeEmpresaDTOJPQ.getViaje().getPrecios())
+                    if (!precio.getLleno()) precios.add(new PrecioDTO(precio));
 
-                    ParadaModel destino = nVezesTrayectoPassaDestino.get(0);
-                    if (!destino.getDataHora().isAfter(salidaFor.getDataHora())) continue;
-
-                    ParadaDTOComplete salidaDTO = new ParadaDTOComplete(salidaFor, viaje.getCodigo());
-                    ParadaDTOComplete destinoDTO = new ParadaDTOComplete(destino, viaje.getCodigo());
-
-                    List<PrecioDTO> precios = new ArrayList<>();
-                    for (PrecioModel precio : viaje.getPrecios())
-                        if (!precio.getLleno()) precios.add(new PrecioDTO(precio));
-
-                    viajesSelecionados.add(new ViajeDTOListBusquedaEmpresa(viaje, viaje.getEmpresa().getLogo(), salidaDTO, destinoDTO, precios));
-
-                }
+                viajesSelecionados.add(new ViajeDTOListBusquedaEmpresa(ViajeEmpresaDTOJPQ.getViaje(), null, salidaDTO, destinoDTO, precios));
             }
         }
 
@@ -319,3 +302,56 @@ public class ViajeEmpresaService {
         viajeRepository.delete(model);
     }
 }
+/*Restos
+        /*for (LugarModel lugarSalida : lugaresSalida) {
+            List<ParadaModel> salidasDia = paradaRepository.cargarSalidasDelDiaFromEmpresa(idEmpresa, lugarSalida.getId(), startDay, endDay);
+
+            if (!salidasDia.isEmpty()) {
+                for (ParadaModel salidaFor : salidasDia) {
+                    ViajeModel viaje = salidaFor.getViaje();
+
+                    List<ParadaModel> nVezesTrayectoPassaDestino = paradaRepository.findByViajeCodigoAndTipo(viaje.getCodigo(), EnumParada.DESTINO);
+                    if (nVezesTrayectoPassaDestino.size() != 1) continue;
+
+                    ParadaModel destino = nVezesTrayectoPassaDestino.get(0);
+                    if (!destino.getDataHora().isAfter(salidaFor.getDataHora())) continue;
+
+                    ParadaDTOComplete salidaDTO = new ParadaDTOComplete(salidaFor, viaje.getCodigo());
+                    ParadaDTOComplete destinoDTO = new ParadaDTOComplete(destino, viaje.getCodigo());
+
+                    List<PrecioDTO> precios = new ArrayList<>();
+                    for (PrecioModel precio : viaje.getPrecios())
+                        if (!precio.getLleno()) precios.add(new PrecioDTO(precio));
+
+                    viajesSelecionados.add(new ViajeDTOListBusquedaEmpresa(viaje, viaje.getEmpresa().getLogo(), salidaDTO, destinoDTO, precios));
+                }
+            }
+        }*/
+        /*
+        for (LugarModel lugarSalida : lugaresSalida) {
+            List<ParadaModel> salidasDia = paradaRepository.cargarSalidasDelDiaFromEmpresa(idEmpresa, lugarSalida.getId(), startDay, endDay);
+
+            if (!salidasDia.isEmpty()) {
+                for (ParadaModel salidaFor : salidasDia) {
+                    ViajeModel viaje = salidaFor.getViaje();
+
+                    for (LugarModel lugarDestino : lugaresDestino) {
+                        List<ParadaModel> nVezesTrayectoPassaDestino = paradaRepository.findByViajeCodigoAndLugarId(viaje.getCodigo(), lugarDestino.getId());
+                        if (nVezesTrayectoPassaDestino.size() != 1) continue;
+
+                        ParadaModel destino = nVezesTrayectoPassaDestino.get(0);
+                        if (!destino.getDataHora().isAfter(salidaFor.getDataHora())) continue;
+
+                        ParadaDTOComplete salidaDTO = new ParadaDTOComplete(salidaFor, viaje.getCodigo());
+                        ParadaDTOComplete destinoDTO = new ParadaDTOComplete(destino, viaje.getCodigo());
+
+                        List<PrecioDTO> precios = new ArrayList<>();
+                        for (PrecioModel precio : viaje.getPrecios())
+                            if (!precio.getLleno()) precios.add(new PrecioDTO(precio));
+
+                        viajesSelecionados.add(new ViajeDTOListBusquedaEmpresa(viaje, viaje.getEmpresa().getLogo(), salidaDTO, destinoDTO, precios));
+                    }
+                }
+            }}*/
+
+

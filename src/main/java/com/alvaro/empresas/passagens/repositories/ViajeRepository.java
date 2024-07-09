@@ -17,6 +17,10 @@ public interface ViajeRepository extends JpaRepository<ViajeModel, UUID> {
 
     @Query("SELECT v FROM ViajeModel v WHERE v.empresa.id = :empresaId AND v.dataHoraSalida >= :dataHoraSalida")
     Page<ViajeModel> findViajesFuturos(UUID empresaId, LocalDateTime dataHoraSalida, Pageable pageable);
+    /*
+    @Query("SELECT v FROM ViajeModel v WHERE v.empresa.id = :empresaId AND v.dataHoraSalida >= :dataHoraSalida")
+    Page<ViajeModel> findViajesFuturos(UUID empresaId, LocalDateTime dataHoraSalida, Pageable pageable);
+    * */
 
     @Query("SELECT v FROM ViajeModel v WHERE v.empresa.id = :empresaId AND v.dataHoraSalida < :dataHoraSalida")
     Page<ViajeModel> findViajesPassados(UUID empresaId, LocalDateTime dataHoraSalida, Pageable pageable);

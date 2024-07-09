@@ -65,11 +65,13 @@ public class ViajeEmpresaResource {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
     public ResponseEntity<List<ViajeDTOListBusquedaEmpresa>> getViajeFromDia(@PathVariable(value = "idEmpresa") UUID idEmpresa,
                                                                              @RequestBody @Valid ViajeDTOSolicitacaoEmpresa dto) {
+        System.out.println("Inicio do metodo");
         var user = myUserService.getUser();
         if (user.hasRole("ROLE_ADMIN") || user.isMyEmpresa(idEmpresa)) {
-            if (dto.idCiudadDestino() == null || dto.idCiudadDestino() == 0)
+            if (dto.idCiudadDestino() == null || dto.idCiudadDestino() == 0) {
+                System.out.println("Uma chavada ao service");
                 return ResponseEntity.ok(viajeEmpresaService.getViajesFromSalida(idEmpresa, dto));
-            else
+            } else
                 return ResponseEntity.ok(viajeEmpresaService.getViajesFromDia(idEmpresa, dto));
         }
 
