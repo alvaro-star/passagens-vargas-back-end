@@ -123,7 +123,7 @@ public class ShareProfile {
             //Cria os trayectos y las paradas de cada autobus
             for (DayOfWeek dia : DayOfWeek.values()) {
                 var dataInicio = LocalDateTime.now().with(TemporalAdjusters.next(dia)).withHour(8).withSecond(0).withNano(0);
-                var viaje = viajeRepository.save(new ViajeModel(autobus, autobus.getEmpresa(), new BigDecimal("0.00"), new BigDecimal("0.00"), false, dataInicio));
+                var viaje = viajeRepository.save(new ViajeModel(autobus, autobus.getEmpresa(), new BigDecimal("0.00"), new BigDecimal("0.00"), new BigDecimal("0.00"), false, dataInicio));
 
                 int nLista = 1;
                 List<ParadaModel> paradas = new ArrayList<>();

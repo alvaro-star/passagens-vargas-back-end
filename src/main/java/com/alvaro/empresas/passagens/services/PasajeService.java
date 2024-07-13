@@ -9,12 +9,14 @@ import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTO;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTOVenta;
 import com.alvaro.empresas.passagens.enums.MetodoPagamentoEnum;
 import com.alvaro.empresas.passagens.helpers.PasajesPDF;
-import com.alvaro.empresas.passagens.models.*;
+import com.alvaro.empresas.passagens.models.FacturaPasajeModel;
+import com.alvaro.empresas.passagens.models.PasajeModel;
+import com.alvaro.empresas.passagens.models.PrecioModel;
+import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.alvaro.empresas.passagens.repositories.PasajeRepository;
 import com.alvaro.empresas.passagens.repositories.ViajeRepository;
-import jakarta.validation.Valid;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,14 +32,14 @@ import java.util.UUID;
 public class PasajeService {
     private final PasajeRepository pasajeRepository;
     private final PrecioService precioService;
-    private final PagoService pagoService;
+    private final FacturaPasajeService facturaPasajeService;
     private final ViajeRepository viajeRepository;
 
     @Autowired
-    public PasajeService(PasajeRepository pasajeRepository, PrecioService precioService, PagoService pagoService, ViajeRepository viajeRepository) {
+    public PasajeService(PasajeRepository pasajeRepository, PrecioService precioService, FacturaPasajeService facturaPasajeService, ViajeRepository viajeRepository) {
         this.pasajeRepository = pasajeRepository;
         this.precioService = precioService;
-        this.pagoService = pagoService;
+        this.facturaPasajeService = facturaPasajeService;
         this.viajeRepository = viajeRepository;
     }
 
@@ -51,9 +53,9 @@ public class PasajeService {
         var model = findById(id);
     }
 
-    //Solo podra salvar pasajes de un mismo piso
+    //Exclusivo para el servicio online
     @Transactional
-    public PagoModel save(PasajesDTO dto, MetodoPagamentoEnum metodo, boolean guardarContacto, boolean compradoWeb) {
+    public FacturaPasajeModel save(PasajesDTO dto, MetodoPagamentoEnum metodo, boolean guardarContacto, boolean compradoWeb) {
         var precio = precioService.findById(dto.idPrecio());
         var viaje = precio.getViaje();
         ParadaModel salida;
@@ -69,8 +71,11 @@ public class PasajeService {
             throw new ValidationException(new FieldMessage("idLugarDestino", "El destino no hace parte del trayecto"));
 
         BigDecimal valorTotal = precio.getPrecio().multiply(BigDecimal.valueOf(dto.pasajes().size()));
-        PagoModel pago = pagoService.save(dto.contacto(), valorTotal, viaje, metodo, guardarContacto);
+        FacturaPasajeModel pago = facturaPasajeService.save(dto.contacto(), valorTotal, viaje, metodo, guardarContacto);
 
+        BigDecimal valorArrecadadoWeb = viaje.getValorArrecadadoWeb() != null ? viaje.getValorArrecadadoWeb() : BigDecimal.ZERO;
+        viaje.setValorArrecadadoWeb(valorArrecadadoWeb.add(pago.getValorTotal()));
+        viajeRepository.save(viaje);
         if (!metodo.equals(MetodoPagamentoEnum.QR))
             throw new ValidationException(new FieldMessage("metodo", "Metodo de Pago invalido"));
 
@@ -78,7 +83,7 @@ public class PasajeService {
         List<PasajeModel> pasajesList = new ArrayList<>();
 
         for (PasajeDTO pasajeDTO : dto.pasajes()) {
-            pasajeModel = new PasajeModel(pasajeDTO.nSilla(), compradoWeb, false, pasajeDTO.nombre(), pasajeDTO.carnet(), pasajeDTO.nascimento(), salida, destino, precio, pago);
+            pasajeModel = new PasajeModel(pasajeDTO.nSilla(), compradoWeb, precio.getPrecio(), false, false, pasajeDTO.nombre(), pasajeDTO.carnet(), pasajeDTO.nascimento(), salida, destino, precio, pago);
             pasajesList.add(pasajeModel);
         }
 
@@ -114,7 +119,7 @@ public class PasajeService {
         PrecioModel precio1 = viaje.getPrecioByNPiso(1);
         PrecioModel precio2 = viaje.getPrecioByNPiso(2);
 
-        BigDecimal valorTotal = new BigDecimal("0");
+        BigDecimal valorTotal = BigDecimal.ZERO;
         if (piso2 == null) {
             if (!sillasPiso2.isEmpty())
                 throw new ValidationException("pasajes", "Hay un numero dela silla invalida");
@@ -135,17 +140,21 @@ public class PasajeService {
             throw new ValidationException("pasajes", "La suma delos pasajes es zero");
 
         boolean estaPago;
+        boolean enEfectivo = false;
 
-        PagoModel pago = pagoService.save(dto.contacto(), valorTotal, viaje, metodo, guardarContacto);
+        FacturaPasajeModel pago = facturaPasajeService.save(dto.contacto(), valorTotal, viaje, metodo, guardarContacto);
 
+        BigDecimal valorArrecadadoNoWeb = viaje.getValorArrecadadoNoWeb() != null ? viaje.getValorArrecadadoNoWeb() : BigDecimal.ZERO;
+        BigDecimal valorTotalPago = pago.getValorTotal() != null ? pago.getValorTotal() : BigDecimal.ZERO;
+        viaje.setValorArrecadadoNoWeb(valorArrecadadoNoWeb.add(valorTotalPago));
         switch (metodo) {
             case QR -> estaPago = false;
             case EFECTIVO -> {
                 estaPago = true;
-                BigDecimal valorArrecadado = viaje.getValorArrecadadoEfectivo() != null ? viaje.getValorArrecadadoEfectivo() : BigDecimal.ZERO;
-                BigDecimal valorTotalPago = pago.getValorTotal() != null ? pago.getValorTotal() : BigDecimal.ZERO;
-                viaje.setValorArrecadadoEfectivo(valorArrecadado.add(valorTotalPago));
-                viajeRepository.save(viaje);
+                enEfectivo = true;
+
+                BigDecimal valorArrecadadoEfectivo = viaje.getValorArrecadadoEfectivo() != null ? viaje.getValorArrecadadoEfectivo() : BigDecimal.ZERO;
+                viaje.setValorArrecadadoEfectivo(valorArrecadadoEfectivo.add(valorTotalPago));
 
                 if (!sillasPiso1.isEmpty()) {
                     actualizarNSillasDisponibles(precio1, sillasPiso1);
@@ -160,17 +169,20 @@ public class PasajeService {
             default -> throw new ValidationException("metodo", "Metodo de Pago invalido");
         }
 
+        viajeRepository.save(viaje);//Actualizar los valores arrecadados
+
         PasajeModel pasaje;
         List<PasajeModel> pasajesModels = new ArrayList<>();
         for (PasajeDTO pasajeDTO : sillasPiso1) {
-            pasaje = new PasajeModel(pasajeDTO.nSilla(), compradoWeb, estaPago, pasajeDTO.nombre(),
+            pasaje = new PasajeModel(
+                    pasajeDTO.nSilla(), compradoWeb, precio1.getPrecio(), estaPago, enEfectivo, pasajeDTO.nombre(),
                     pasajeDTO.carnet(), pasajeDTO.nascimento(), salida, destino, precio1, pago);
             pasajesModels.add(pasaje);
         }
 
         if (precio2 != null)
             for (PasajeDTO pasajeDTO : sillasPiso2) {
-                pasaje = new PasajeModel(pasajeDTO.nSilla(), compradoWeb, estaPago, pasajeDTO.nombre(), pasajeDTO.carnet(), pasajeDTO.nascimento(), salida, destino, precio2, pago);
+                pasaje = new PasajeModel(pasajeDTO.nSilla(), compradoWeb, precio1.getPrecio(), estaPago, enEfectivo, pasajeDTO.nombre(), pasajeDTO.carnet(), pasajeDTO.nascimento(), salida, destino, precio2, pago);
                 pasajesModels.add(pasaje);
             }
 

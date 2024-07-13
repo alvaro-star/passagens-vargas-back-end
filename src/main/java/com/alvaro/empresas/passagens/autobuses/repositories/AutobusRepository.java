@@ -21,7 +21,7 @@ public interface AutobusRepository extends JpaRepository<AutobusModel, Integer> 
     @Query(value = "SELECT sum(valor_arrecadado_efectivo),sum(valor_arrecadado_web) FROM tb_viaje as v where fk_idtb_autobus = :idAutobus and cobrado = false", nativeQuery = true)
     BigDecimal[] getArrecadacao(@Param("idAutobus") Integer idAutobus);*/
 
-    @Query("SELECT new com.alvaro.empresas.passagens.autobuses.dtos.ValoresArrecadadosDTO(SUM(v.valorArrecadadoEfectivo), SUM(v.valorArrecadadoWeb)) FROM ViajeModel v WHERE v.autobus.id = :idAutobus AND v.isCobrado = false")
+    @Query("SELECT new com.alvaro.empresas.passagens.autobuses.dtos.ValoresArrecadadosDTO(SUM(v.valorArrecadadoEfectivo), SUM(v.valorArrecadadoNoWeb), SUM(v.valorArrecadadoWeb)) FROM ViajeModel v WHERE v.autobus.id = :idAutobus AND v.isCobrado = false")
     ValoresArrecadadosDTO getArrecadacao(@Param("idAutobus") Integer idAutobus);
 
 }

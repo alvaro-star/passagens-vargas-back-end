@@ -227,7 +227,7 @@ public class ViajeEmpresaService {
         //Adicionando la hora de salida, -> nota: es conveniencia
 
         var autobus = autobusService.findById(dto.idAutobus());
-        var model = new ViajeModel(autobus, autobus.getEmpresa(), new BigDecimal("0.00"), new BigDecimal("0.00"), false, dataHoraSalidaAjustada);
+        var model = new ViajeModel(autobus, autobus.getEmpresa(), new BigDecimal("0.00"), new BigDecimal("0.00"), new BigDecimal("0.00"), false, dataHoraSalidaAjustada);
 
         var saved = viajeRepository.save(model);
 

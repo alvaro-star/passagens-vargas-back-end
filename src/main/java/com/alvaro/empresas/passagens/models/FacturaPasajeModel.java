@@ -18,12 +18,12 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
-@Table(name = "tb_pago", indexes = @Index(name = "idxtb_viaje_fk_idtb_viaje_created_at", columnList = "fk_idtb_viaje, created_at"))
+@Table(name = "tb_factura_pasaje", indexes = @Index(name = "idxtb_viaje_fk_idtb_viaje_created_at", columnList = "fk_idtb_viaje, created_at"))
 @NoArgsConstructor
-public class PagoModel {
+public class FacturaPasajeModel {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "idtb_pagamento")
+    @Column(name = "idtb_factura_pasaje")
     private UUID id;
     @Column(nullable = false)
     private BigDecimal valorTotal;
@@ -46,7 +46,7 @@ public class PagoModel {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "pago")
+    @OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "facturaPasaje")
     private ContactoModel contacto;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -54,15 +54,15 @@ public class PagoModel {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private UsuarioModel cliente;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fk_idtb_viaje")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private ViajeModel viaje;
 
-    @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "pago")
+    @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "facturaPasaje")
     private List<PasajeModel> pasajes;
 
-    public PagoModel(BigDecimal valorTotal, BigDecimal descuento, BigDecimal tasaServicio, Boolean estaPagado, MetodoPagamentoEnum metodoPago, ViajeModel viajeModel, LocalDateTime fechaPago, ContactoModel contacto) {
+    public FacturaPasajeModel(BigDecimal valorTotal, BigDecimal descuento, BigDecimal tasaServicio, Boolean estaPagado, MetodoPagamentoEnum metodoPago, ViajeModel viajeModel, LocalDateTime fechaPago, ContactoModel contacto) {
         this.valorTotal = valorTotal;
         this.descuento = descuento;
         this.tasaServicio = tasaServicio;

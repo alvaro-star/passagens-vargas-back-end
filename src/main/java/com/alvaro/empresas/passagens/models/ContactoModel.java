@@ -23,9 +23,9 @@ public class ContactoModel {
     private Integer numero;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "fk_idtb_pago")
+    @JoinColumn(name = "fk_idtb_factura_pasaje")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private PagoModel pago;
+    private FacturaPasajeModel facturaPasaje;
 
     public ContactoModel(String nombre, String email, Integer numero) {
         this.nombre = nombre;

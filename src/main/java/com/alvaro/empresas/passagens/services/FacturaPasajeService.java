@@ -5,7 +5,7 @@ import com.alvaro.empresas.passagens.configurations.exceptions.ValidationExcepti
 import com.alvaro.empresas.passagens.dtos.pasajes.ContactoDTO;
 import com.alvaro.empresas.passagens.enums.MetodoPagamentoEnum;
 import com.alvaro.empresas.passagens.models.*;
-import com.alvaro.empresas.passagens.repositories.PagoRepository;
+import com.alvaro.empresas.passagens.repositories.FacturaPasajeRepository;
 import com.alvaro.empresas.passagens.repositories.PasajeRepository;
 import com.alvaro.empresas.passagens.repositories.ViajeRepository;
 import org.hibernate.ObjectNotFoundException;
@@ -19,9 +19,9 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-public class PagoService {
+public class FacturaPasajeService {
     @Autowired
-    private PagoRepository pagoRepository;
+    private FacturaPasajeRepository facturaPasajeRepository;
     @Autowired
     private PasajeRepository pasajeRepository;
     @Autowired
@@ -29,7 +29,7 @@ public class PagoService {
     @Autowired
     private ViajeRepository viajeRepository;
 
-    public PagoModel save(ContactoDTO contactoDTO, BigDecimal precioTotal, ViajeModel viaje, MetodoPagamentoEnum metodo, boolean guardarContacto) {
+    public FacturaPasajeModel save(ContactoDTO contactoDTO, BigDecimal precioTotal, ViajeModel viaje, MetodoPagamentoEnum metodo, boolean guardarContacto) {
         boolean estaPagado;
 
         LocalDateTime fechaPago = null;
@@ -51,16 +51,16 @@ public class PagoService {
         if (guardarContacto)
             contactoModel = new ContactoModel(contactoDTO.nombre(), contactoDTO.email(), contactoDTO.telefono());
 
-        var pago = new PagoModel(precioTotal, BigDecimal.valueOf(0), tasaServicio, estaPagado, metodo, viaje, fechaPago, contactoModel);
+        var pago = new FacturaPasajeModel(precioTotal, BigDecimal.valueOf(0), tasaServicio, estaPagado, metodo, viaje, fechaPago, contactoModel);
 
-        return pagoRepository.save(pago);
+        return facturaPasajeRepository.save(pago);
     }
 
     //O tipo de retorno é vazio, mas estamos colocando booleano por teste
 
     @Transactional
     public boolean pagarQr(UUID idPago) {//
-        PagoModel pago = pagoRepository.findById(idPago).orElseThrow(() -> new ObjectNotFoundException(idPago, PagoModel.class.getName()));
+        FacturaPasajeModel pago = facturaPasajeRepository.findById(idPago).orElseThrow(() -> new ObjectNotFoundException(idPago, FacturaPasajeModel.class.getName()));
         if (pago.getEstaPagado()) {
             rembolso();
             mandarEmail("El precio ya fue pagado");
@@ -94,23 +94,34 @@ public class PagoService {
 
         precioService.updateFromService(precio);
 
-        for (PasajeModel pasaje : pago.getPasajes())
-            pasajeRepository.updateValuePagado(pasaje.getId(), true);
 
-        var viaje = pago.getViaje();
-        BigDecimal valorArrecadado = viaje.getValorArrecadadoWeb() != null ? viaje.getValorArrecadadoWeb() : BigDecimal.ZERO;
-        BigDecimal valorTotalPago = pago.getValorTotal() != null ? pago.getValorTotal() : BigDecimal.ZERO;
-        viaje.setValorArrecadadoWeb(valorArrecadado.add(valorTotalPago));
+        pasajeRepository.updateValuePagado(pago.getId(), true);
+
+        var viaje = calculateValorArrecadado(pago);
+
         viajeRepository.save(viaje);
 
         pago.setEstaPagado(true);
         pago.setFechaPago(LocalDateTime.now());
-        pagoRepository.save(pago);
+        facturaPasajeRepository.save(pago);
         return true;
     }
 
+    private static ViajeModel calculateValorArrecadado(FacturaPasajeModel pago) {
+        var viaje = pago.getViaje();
+        BigDecimal valorTotalPago = pago.getValorTotal() != null ? pago.getValorTotal() : BigDecimal.ZERO;
+        if (pago.getPasajes().get(0).getCompradoWeb()) {
+            BigDecimal valorArrecadadoWeb = viaje.getValorArrecadadoWeb() != null ? viaje.getValorArrecadadoWeb() : BigDecimal.ZERO;
+            viaje.setValorArrecadadoWeb(valorArrecadadoWeb.add(valorTotalPago));
+        } else {
+            BigDecimal valorArrecadadoNoWeb = viaje.getValorArrecadadoNoWeb() != null ? viaje.getValorArrecadadoNoWeb() : BigDecimal.ZERO;
+            viaje.setValorArrecadadoNoWeb(valorArrecadadoNoWeb.add(valorTotalPago));
+        }
+        return viaje;
+    }
+
     public void codigoVencido(UUID idPago) {//
-        PagoModel pago = pagoRepository.findById(idPago).orElseThrow(() -> new ObjectNotFoundException(idPago, PagoModel.class.getName()));
+        FacturaPasajeModel pago = facturaPasajeRepository.findById(idPago).orElseThrow(() -> new ObjectNotFoundException(idPago, FacturaPasajeModel.class.getName()));
         if (!pago.getEstaPagado()) {
             for (PasajeModel pasaje : pago.getPasajes())
                 pasajeRepository.delete(pasaje);

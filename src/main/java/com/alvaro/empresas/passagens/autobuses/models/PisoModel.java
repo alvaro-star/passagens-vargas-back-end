@@ -47,7 +47,7 @@ public class PisoModel {
     private String posicionesBloqueadas = "";
 
     public PisoModel(PisoDTO dto, Integer nPiso, Integer primeraSilla) {
-        nSillas = dto.getNColunas() * dto.getNLinhas() - dto.getPosicoesIndisponiveis().size();
+        nSillas = dto.getNColunas() * dto.getNLinhas() - dto.getPosicionesBloqueadas().size();
         nLinhas = dto.getNLinhas();
         nColunas = dto.getNColunas();
         distribuicaoFileira = dto.getDistribuicaoFileira();
@@ -55,8 +55,9 @@ public class PisoModel {
         this.nPiso = nPiso;
         this.primeraSilla = primeraSilla;
         String palavra = "";
-        for (Integer posicionBloqueada : dto.getPosicoesIndisponiveis())
+        for (Integer posicionBloqueada : dto.getPosicionesBloqueadas())
             palavra = palavra.concat(posicionBloqueada + ",");
+        System.out.println(palavra);
         this.posicionesBloqueadas = palavra;
     }
 

@@ -11,9 +11,7 @@ import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import com.alvaro.empresas.passagens.autobuses.repositories.AutobusRepository;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationError;
-import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOList;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
-import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.services.EmpresaService;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +49,9 @@ public class AutobusService {
         Page<AutobusModel> models = autobusRepository.findAll(pageable);
         return models.map(model -> {
             ValoresArrecadadosDTO valores = autobusRepository.getArrecadacao(model.getId());
-            return new AutobusDTOList(model, valores.valorArrecadadoEfectivo(), valores.valorArrecadadoWeb(), model.getEmpresa().getId());
+            return new AutobusDTOList(model,
+                    valores.valorArrecadadoEfectivo(), valores.valorArrecadadoNoWeb(), valores.valorArrecadadoWeb(),
+                    model.getEmpresa().getId());
         });
     }
 
@@ -60,7 +60,9 @@ public class AutobusService {
         Page<AutobusModel> autobuses = autobusRepository.findByEmpresaId(empresa.getId(), pageable);
         return autobuses.map((autobus) -> {
             ValoresArrecadadosDTO valorViajes = autobusRepository.getArrecadacao(autobus.getId());
-            return new AutobusDTOList(autobus, valorViajes.valorArrecadadoEfectivo(), valorViajes.valorArrecadadoWeb(), empresa.getId());
+            return new AutobusDTOList(autobus,
+                    valorViajes.valorArrecadadoEfectivo(), valorViajes.valorArrecadadoNoWeb(), valorViajes.valorArrecadadoWeb(),
+                    empresa.getId());
         });
     }
 
@@ -96,6 +98,10 @@ public class AutobusService {
             if (pisoDto.getDistribuicaoFileira() == null) {
                 err.addError("distribuicaoFileira" + counter, "No puede ser vazio");
             }
+            for (Integer posicionesBloqueada : pisoDto.getPosicionesBloqueadas()) {
+                if (posicionesBloqueada < 1)
+                    err.addError("posicionesBloqueadas" + counter, "No puede ser nulo");
+            }
             counter++;
         }
 
@@ -124,7 +130,9 @@ public class AutobusService {
         model.updateValues(dto);
         var update = autobusRepository.save(model);
         ValoresArrecadadosDTO valorViajes = autobusRepository.getArrecadacao(model.getId());
-        return new AutobusDTOList(update, valorViajes.valorArrecadadoEfectivo(), valorViajes.valorArrecadadoWeb(), update.getEmpresa().getId());
+        return new AutobusDTOList(update,
+                valorViajes.valorArrecadadoEfectivo(), valorViajes.valorArrecadadoNoWeb(), valorViajes.valorArrecadadoWeb(),
+                update.getEmpresa().getId());
     }
 
     @Transactional

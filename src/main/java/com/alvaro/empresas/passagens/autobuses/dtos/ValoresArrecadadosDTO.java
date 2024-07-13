@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 public record ValoresArrecadadosDTO(
         BigDecimal valorArrecadadoEfectivo,
+        BigDecimal valorArrecadadoNoWeb,
         BigDecimal valorArrecadadoWeb
 ) {
 }

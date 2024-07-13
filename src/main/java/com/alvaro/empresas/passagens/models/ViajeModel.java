@@ -19,7 +19,9 @@ import java.util.UUID;
 
 
 @Entity
-@Table(name = "tb_viaje", indexes = @Index(name = "idxtb_viaje_fk_idtb_empresa_data_hora_salida", columnList = "fk_idtb_empresa, data_hora_salida"))
+@Table(name = "tb_viaje",
+        indexes = @Index(name = "idxtb_viaje_fk_idtb_empresa_data_hora_salida", columnList = "fk_idtb_empresa, data_hora_salida")
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -32,6 +34,10 @@ public class ViajeModel {
     @Column(precision = 10, scale = 2, nullable = false)
     @DecimalMin("0.00")
     private BigDecimal valorArrecadadoEfectivo;
+
+    @Column(precision = 10, scale = 2, nullable = false)
+    @DecimalMin("0.00")
+    private BigDecimal valorArrecadadoNoWeb;
 
     @Column(precision = 10, scale = 2, nullable = false)
     @DecimalMin("0.00")
@@ -65,14 +71,15 @@ public class ViajeModel {
     private List<ParadaModel> paradas = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "viaje")
-    private List<PagoModel> pagos = new ArrayList<>();
+    private List<FacturaPasajeModel> pagos = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "viaje")
     private List<PrecioModel> precios = new ArrayList<>();
 
-    public ViajeModel(AutobusModel autobus, EmpresaModel empresa, BigDecimal valorArrecadadoEfectivo, BigDecimal valorArrecadadoWeb, boolean isCobrado, LocalDateTime dataHoraSalida) {
+    public ViajeModel(AutobusModel autobus, EmpresaModel empresa, BigDecimal valorArrecadadoEfectivo, BigDecimal valorArrecadadoNoWeb, BigDecimal valorArrecadadoWeb, boolean isCobrado, LocalDateTime dataHoraSalida) {
         this.autobus = autobus;
         this.valorArrecadadoEfectivo = valorArrecadadoEfectivo;
+        this.valorArrecadadoNoWeb = valorArrecadadoNoWeb;
         this.valorArrecadadoWeb = valorArrecadadoWeb;
         this.isCobrado = isCobrado;
         this.empresa = empresa;

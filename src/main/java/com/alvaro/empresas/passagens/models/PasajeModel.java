@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.UUID;
 
@@ -14,7 +15,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "tb_pasaje", indexes = {
         @Index(name = "idxtb_pasaje_fk_idtb_precio", columnList = "fk_idtb_precio"),
-        @Index(name = "idxtb_pasaje_fk_idtb_pago", columnList = "fk_idtb_pago")
+        @Index(name = "idxtb_pasaje_fk_idtb_factura_pasaje", columnList = "fk_idtb_factura_pasaje")
 })
 @Getter
 @Setter
@@ -28,10 +29,17 @@ public class PasajeModel {
 
     @Column(nullable = false)
     private Integer nSilla;
+
+    @Column(nullable = false)
+    private BigDecimal precioPagado;
+
+
     @Column(name = "comprado_na_web", nullable = false)
     private Boolean compradoWeb;
     @Column(name = "pagado", nullable = false)
     private Boolean estaPagado;
+    @Column(nullable = false)
+    private Boolean enEfectivo;
 
     @Column(nullable = false, length = 9)
     private String carnet;
@@ -56,19 +64,21 @@ public class PasajeModel {
     private PrecioModel precio;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "fk_idtb_pago")
+    @JoinColumn(name = "fk_idtb_factura_pasaje")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private PagoModel pago;
+    private FacturaPasajeModel facturaPasaje;
 
-    public PasajeModel(Integer nSilla, Boolean compradoWeb, Boolean estaPagado, String nombre,String carnet, Date nascimento,ParadaModel salida, ParadaModel destino, PrecioModel precio, PagoModel pago) {
+    public PasajeModel(Integer nSilla, Boolean compradoWeb, BigDecimal precioPagado, Boolean estaPagado, Boolean enEfectivo, String nombre, String carnet, Date nascimento, ParadaModel salida, ParadaModel destino, PrecioModel precio, FacturaPasajeModel facturaPasaje) {
         this.nSilla = nSilla;
         this.compradoWeb = compradoWeb;
         this.estaPagado = estaPagado;
+        this.enEfectivo = enEfectivo;
         this.carnet = carnet;
         this.nombre = nombre;
         this.nascimento = nascimento;
+        this.precioPagado = precioPagado;
         this.precio = precio;
-        this.pago = pago;
+        this.facturaPasaje = facturaPasaje;
         this.salida = salida;
         this.destino = destino;
     }

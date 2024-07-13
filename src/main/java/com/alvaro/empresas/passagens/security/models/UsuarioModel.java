@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.security.models;
 
-import com.alvaro.empresas.passagens.models.PagoModel;
+import com.alvaro.empresas.passagens.models.FacturaPasajeModel;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -44,7 +44,7 @@ public class UsuarioModel implements UserDetails {
     private LocalDateTime updatedAt;
 
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "cliente")
-    private List<PagoModel> pagos;
+    private List<FacturaPasajeModel> facturasPasaje;
 
     @NotNull
     @ManyToMany(fetch = FetchType.EAGER)

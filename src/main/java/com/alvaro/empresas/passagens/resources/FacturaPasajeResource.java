@@ -2,11 +2,9 @@ package com.alvaro.empresas.passagens.resources;
 
 
 import com.alvaro.empresas.passagens.dtos.Mensaje;
-import com.alvaro.empresas.passagens.services.PagoService;
+import com.alvaro.empresas.passagens.services.FacturaPasajeService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import org.apache.catalina.connector.Response;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,14 +17,14 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/pagos")
 @SecurityRequirement(name = "bearer-key")
-public class PagoResource {
+public class FacturaPasajeResource {
     @Autowired
-    private PagoService pagoService;
+    private FacturaPasajeService facturaPasajeService;
 
     @GetMapping("/{id}")
     public ResponseEntity<Object> pagarQR(@PathVariable(value = "id") UUID id) {
 
-        if (pagoService.pagarQr(id)) {
+        if (facturaPasajeService.pagarQr(id)) {
             return ResponseEntity.ok(new Mensaje("El pago fue hecho con exito"));
         }
 

@@ -40,7 +40,7 @@ public class PisoService {
     @Transactional
     public PisoDTOResponse salvar(PisoDTO dto, AutobusModel autobusModel, Integer nPiso, Integer nPrimeraSilla) {
         int nSillas = dto.getNLinhas() * dto.getNColunas();
-        for (Integer posicion : dto.getPosicoesIndisponiveis()) {
+        for (Integer posicion : dto.getPosicionesBloqueadas()) {
             if (posicion > nSillas)
                 throw new ValidationException("Las posiciones indisponibles son invalidas");
         }

@@ -2,7 +2,6 @@ package com.alvaro.empresas.passagens.paradas.services;
 
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
 import com.alvaro.empresas.passagens.enums.EnumParada;
-import com.alvaro.empresas.passagens.helpers.beans.MyUserService;
 import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
@@ -11,7 +10,6 @@ import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.alvaro.empresas.passagens.paradas.repositories.ParadaRepository;
 import com.alvaro.empresas.passagens.repositories.ViajeRepository;
-import com.alvaro.empresas.passagens.services.ViajeService;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -25,18 +23,18 @@ import java.util.UUID;
 @Service
 public class ParadaService {
     private final ParadaRepository paradaRepository;
-    private final ViajeService viajeService;
     private final LugarService lugarService;
     private final ViajeRepository viajeRepository;
-    private final MyUserService myUserService;
 
     @Autowired
-    public ParadaService(ParadaRepository paradaRepository, ViajeService viajeService, LugarService lugarService, ViajeRepository viajeRepository, MyUserService myUserService) {
+    public ParadaService(
+            ParadaRepository paradaRepository,
+            LugarService lugarService,
+            ViajeRepository viajeRepository
+    ) {
         this.paradaRepository = paradaRepository;
-        this.viajeService = viajeService;
         this.lugarService = lugarService;
         this.viajeRepository = viajeRepository;
-        this.myUserService = myUserService;
     }
 
     public ParadaModel findById(Integer id) {

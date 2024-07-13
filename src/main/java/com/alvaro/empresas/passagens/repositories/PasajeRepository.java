@@ -13,11 +13,12 @@ import java.util.UUID;
 @Repository
 public interface PasajeRepository extends JpaRepository<PasajeModel, UUID> {
     @Modifying
-    @Query(value = "UPDATE tb_pasaje SET pagado = :pagado WHERE idtb_pasaje = :id", nativeQuery = true)
-    void updateValuePagado(@Param("id") UUID id, @Param("pagado") Boolean pagado);
+    @Query(value = "UPDATE tb_pasaje SET pagado = :pagado WHERE fk_idtb_factura_pasaje = :idFactura", nativeQuery = true)
+    void updateValuePagado(@Param("idFactura") UUID id, @Param("pagado") Boolean pagado);
 
     @Query(value = "SELECT n_silla FROM tb_pasaje WHERE fk_idtb_precio = :idPrecio AND pagado = true", nativeQuery = true)
     List<Integer> getPasajesVendidos(UUID idPrecio);
+
 
     List<PasajeModel> findByPrecioIdAndEstaPagado(UUID idPrecio, boolean estaPago);
 }

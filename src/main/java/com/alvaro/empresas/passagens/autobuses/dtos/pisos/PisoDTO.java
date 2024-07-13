@@ -32,6 +32,6 @@ public class PisoDTO {
     private EnumPosicao inicioContagem;
 
     @Valid
-    private List<Integer> posicoesIndisponiveis = new ArrayList<>();
+    private List<Integer> posicionesBloqueadas = new ArrayList<>();
 
 }
