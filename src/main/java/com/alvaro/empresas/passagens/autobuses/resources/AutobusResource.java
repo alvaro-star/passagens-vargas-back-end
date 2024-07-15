@@ -4,11 +4,13 @@ import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTO;
 import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTOList;
 import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTOResponse;
 import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTOUpdate;
+import com.alvaro.empresas.passagens.autobuses.repositories.AutobusRepository;
 import com.alvaro.empresas.passagens.autobuses.services.AutobusService;
-import com.alvaro.empresas.passagens.configurations.exceptions.ValidationError;
+import com.alvaro.empresas.passagens.autobuses.services.validacao.ValidarPiso;
 import com.alvaro.empresas.passagens.dtos.Mensaje;
 import com.alvaro.empresas.passagens.helpers.beans.MyUserService;
 import com.alvaro.empresas.passagens.services.EmpresaService;
+import com.alvaro.empresas.passagens.services.validacao.ValidationErrorsWithList;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,16 +33,19 @@ public class AutobusResource {
     private final AutobusService autobusService;
     private final MyUserService myUserService;
     private final EmpresaService empresaService;
+    private final AutobusRepository autobusRepository;
 
     @Autowired
     public AutobusResource(
             AutobusService autobusService,
             MyUserService myUserService,
-            EmpresaService empresaService
+            EmpresaService empresaService,
+            AutobusRepository autobusRepository
     ) {
         this.autobusService = autobusService;
         this.myUserService = myUserService;
         this.empresaService = empresaService;
+        this.autobusRepository = autobusRepository;
     }
 
     private Mensaje validarUsuario(UUID idEmpresa) {
@@ -75,8 +80,8 @@ public class AutobusResource {
     @PostMapping
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN')")
     public ResponseEntity<Object> save(@RequestBody @Valid AutobusDTO dto, BindingResult bindingResult) {
-        ValidationError validacao = autobusService.validar(bindingResult, dto);
-        if (!validacao.getErrors().isEmpty())
+        ValidationErrorsWithList validacao = ValidarPiso.validarAutobusDTO(bindingResult, dto, autobusRepository);
+        if (!validacao.getErrors().isEmpty() || !validacao.getErrorsList().isEmpty())
             return ResponseEntity.unprocessableEntity().body(validacao);
         Mensaje mensaje = this.validarUsuario(dto.idEmpresa());
         if (mensaje.conteudo().isEmpty())
@@ -90,8 +95,8 @@ public class AutobusResource {
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN')")
     public ResponseEntity<Object> update(@PathVariable(value = "id") Integer id, @Valid @RequestBody AutobusDTOUpdate dto, BindingResult bindingResult) {
         var transform = new AutobusDTO(dto.placa());
-        ValidationError validacao = autobusService.validar(bindingResult, transform);
-        if (!validacao.getErrors().isEmpty())
+        ValidationErrorsWithList validacao = ValidarPiso.validarAutobusDTO(bindingResult, transform, autobusRepository);
+        if (!validacao.getErrors().isEmpty() || !validacao.getErrorsList().isEmpty())
             return ResponseEntity.unprocessableEntity().body(validacao);
 
         var autobus = autobusService.findById(id);

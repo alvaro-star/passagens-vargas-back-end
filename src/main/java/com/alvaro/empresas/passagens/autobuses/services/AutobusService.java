@@ -5,12 +5,10 @@ import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTO;
 import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTOList;
 import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTOResponse;
 import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTOUpdate;
-import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTO;
 import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTOResponse;
 import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import com.alvaro.empresas.passagens.autobuses.repositories.AutobusRepository;
-import com.alvaro.empresas.passagens.configurations.exceptions.ValidationError;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.repositories.ViajeRepository;
 import com.alvaro.empresas.passagens.services.EmpresaService;
@@ -18,11 +16,8 @@ import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,38 +78,6 @@ public class AutobusService {
         return new AutobusDTOResponse(model, model.getEmpresa().getId(), pisosDto);
     }
 
-    public ValidationError validar(BindingResult bindingResult, AutobusDTO dto) {
-        ValidationError err = new ValidationError(System.currentTimeMillis(), HttpStatus.UNPROCESSABLE_ENTITY.value(), "Erro de Validacao", "Erro durante a validacao", "/autobuses");
-        for (FieldError erro : bindingResult.getFieldErrors()) {
-            err.addError(erro.getField(), erro.getDefaultMessage());
-        }
-
-        if (!bindingResult.hasFieldErrors("placa"))
-            if (autobusRepository.existsByPlaca(dto.placa()))
-                err.addError("placa", "La placa ya esta registrada");
-
-        int counter = 1;
-        for (PisoDTO pisoDto : dto.pisos()) {
-            if (pisoDto.getNLinhas() == null) {
-                err.addError("nLinhas" + counter, "No puede ser nulo");
-            }
-            if (pisoDto.getNColunas() == null) {
-                err.addError("nColunas" + counter, "No puede ser nulo");
-            } else {
-                if (pisoDto.getNColunas() > 4) err.addError("nColunas" + counter, "No puede ser maior que 4");
-            }
-            if (pisoDto.getDistribuicaoFileira() == null) {
-                err.addError("distribuicaoFileira" + counter, "No puede ser vazio");
-            }
-            for (Integer posicionesBloqueada : pisoDto.getPosicionesBloqueadas()) {
-                if (posicionesBloqueada < 1)
-                    err.addError("posicionesBloqueadas" + counter, "No puede ser nulo");
-            }
-            counter++;
-        }
-
-        return err;
-    }
 
     @Transactional
     public AutobusDTOResponse salvar(AutobusDTO dto) {
@@ -151,6 +114,5 @@ public class AutobusService {
             model.setEnable(false);
             autobusRepository.save(model);
         }
-
     }
 }
