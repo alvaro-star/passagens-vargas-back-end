@@ -10,7 +10,7 @@ import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.alvaro.empresas.passagens.paradas.services.ParadaService;
 import com.alvaro.empresas.passagens.security.models.RoleList;
 import com.alvaro.empresas.passagens.services.EmpresaService;
-import com.alvaro.empresas.passagens.services.ViajeService;
+import com.alvaro.empresas.passagens.services.ViajeEmpresaService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,19 +30,19 @@ import java.time.LocalDateTime;
 public class ParadaResource {
     private final ParadaService paradaService;
     private final MyUserService myUserService;
-    private final ViajeService viajeService;
+    private final ViajeEmpresaService viajeEmpresaService;
     private final EmpresaService empresaService;
 
     @Autowired
     public ParadaResource(
             ParadaService paradaService,
             MyUserService myUserService,
-            ViajeService viajeService,
+            ViajeEmpresaService viajeEmpresaService,
             EmpresaService empresaService
     ) {
         this.paradaService = paradaService;
         this.myUserService = myUserService;
-        this.viajeService = viajeService;
+        this.viajeEmpresaService = viajeEmpresaService;
         this.empresaService = empresaService;
     }
 
@@ -61,7 +61,7 @@ public class ParadaResource {
     @PostMapping
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
     public ResponseEntity<Object> save(@RequestBody @Valid ParadaDTO dto) {
-        var viajeModel = this.viajeService.findById(dto.idViaje());
+        var viajeModel = this.viajeEmpresaService.findById(dto.idViaje());
         var userLogin = myUserService.getUser();
 
         if (!userLogin.isMyEmpresa(viajeModel.getEmpresa().getId())) {
@@ -89,12 +89,16 @@ public class ParadaResource {
     }
 
     @DeleteMapping("/{id}")//Mejorar politica de exclusion, solo se puede eliminar si nádie pago o compro
-    @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
     public ResponseEntity<Mensaje> delete(@PathVariable Integer id) {
         var model = paradaService.findById(id);
         var userLogin = myUserService.getUser();
-        if (!(userLogin.hasRole(RoleList.ROLE_ADMIN.toString()) || userLogin.isMyEmpresa(model.getEmpresa().getId())))
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Mensaje("El usuario no esta relacionado con esta Parada"));
+        if (!userLogin.hasRole(RoleList.ROLE_ADMIN.toString())) {
+            if (!userLogin.isMyEmpresa(model.getEmpresa().getId()))
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Mensaje("El usuario no esta relacionado con esta Parada"));
+            if (model.getEmpresa().getBloqued() || !model.getEmpresa().getEnabled())
+                return ResponseEntity.badRequest().body(new Mensaje("La empresa esta bloqueada"));
+        }
 
         int indice = -1;
 
@@ -112,7 +116,7 @@ public class ParadaResource {
         if (indice == -1)
             return ResponseEntity.badRequest().body(new Mensaje("La parada no esta relacionado"));
         //Causa de nao exclusao: a o relacionamento com viaje
-        if (viajeService.hasPasajes(model.getViaje().getPrecios()))
+        if (viajeEmpresaService.hasPasajes(model.getViaje().getPrecios()))
             return ResponseEntity.badRequest().body(new Mensaje("El viaje ya esta relacionado con un pasaje"));
 
         model.getViaje().getParadas().remove(indice);

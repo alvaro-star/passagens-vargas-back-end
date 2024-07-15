@@ -65,11 +65,9 @@ public class ViajeEmpresaResource {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
     public ResponseEntity<List<ViajeDTOListBusquedaEmpresa>> getViajeFromDia(@PathVariable(value = "idEmpresa") UUID idEmpresa,
                                                                              @RequestBody @Valid ViajeDTOSolicitacaoEmpresa dto) {
-        System.out.println("Inicio do metodo");
         var user = myUserService.getUser();
-        if (user.hasRole("ROLE_ADMIN") || user.isMyEmpresa(idEmpresa)) {
+        if (user.hasRole(RoleList.ROLE_ADMIN.toString()) || user.isMyEmpresa(idEmpresa)) {
             if (dto.idCiudadDestino() == null || dto.idCiudadDestino() == 0) {
-                System.out.println("Uma chavada ao service");
                 return ResponseEntity.ok(viajeEmpresaService.getViajesFromSalida(idEmpresa, dto));
             } else
                 return ResponseEntity.ok(viajeEmpresaService.getViajesFromDia(idEmpresa, dto));
@@ -79,8 +77,17 @@ public class ViajeEmpresaResource {
     }
 
     @PostMapping("/create")
+    @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
     public ResponseEntity<Object> save(@Valid @RequestBody ViajeDTOForm dto) {
-        ViajeDTOEmpresaResponse response = viajeEmpresaService.save(dto);
+        var autobus = autobusService.findById(dto.idAutobus());
+        var user = myUserService.getUser();
+        if (!autobus.isEnable())
+            return ResponseEntity.badRequest().body(new Mensaje("El autobus esta inhabilitado"));
+        if (autobus.getEmpresa().getBloqued() || !autobus.getEmpresa().getEnabled())
+            return ResponseEntity.badRequest().body(new Mensaje("La empresa esta inhabilitada"));
+        if (!user.isMyEmpresa(autobus.getEmpresa().getId()))
+            return ResponseEntity.badRequest().body(new Mensaje("Este autobus no esta relacionado con esta empresa"));
+        ViajeDTOEmpresaResponse response = viajeEmpresaService.save(dto, autobus);
         if (response == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Mensaje("Las paradas no son validas"));
         else
@@ -88,22 +95,34 @@ public class ViajeEmpresaResource {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ViajeDTOUpdate> update(@PathVariable(value = "id") UUID id, @RequestBody @Valid ViajeDTOUpdate dto) {
-        return ResponseEntity.ok(viajeEmpresaService.update(dto, id));
+    @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
+    public ResponseEntity<Object> update(@PathVariable(value = "id") UUID id, @RequestBody @Valid ViajeDTOUpdate dto) {
+        var viajeModel = viajeEmpresaService.findById(id);
+        var user = myUserService.getUser();
+
+        if (viajeModel.getEmpresa().getBloqued() || !viajeModel.getEmpresa().getEnabled())
+            return ResponseEntity.badRequest().body(new Mensaje("La empresa esta inhabilitada"));
+        if (!user.isMyEmpresa(viajeModel.getEmpresa().getId()))
+            return ResponseEntity.badRequest().body(new Mensaje("El viaje no esta relacionado con esta empresa"));
+        var autobusNuevo = autobusService.findById(dto.idAutobus());
+        if (!autobusNuevo.getEmpresa().getId().equals(viajeModel.getEmpresa().getId()))
+            return ResponseEntity.badRequest().body(new Mensaje("Este autobus le pertenece a otra empresa"));
+        if (!autobusNuevo.isEnable())
+            return ResponseEntity.badRequest().body(new Mensaje("El nuevo autobus esta inhabilitado"));
+        return ResponseEntity.ok(viajeEmpresaService.update(dto, viajeModel, autobusNuevo));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
     public ResponseEntity<Object> delete(@PathVariable(value = "id") UUID id) {
         var model = viajeEmpresaService.findById(id);
-
-        if (!model.getPrecios().isEmpty())
-            return ResponseEntity.badRequest().body(new Mensaje("El trayecto tiene precios associados"));
-
-        if (!model.getFacturasPasajes().isEmpty())
-            return ResponseEntity.badRequest().body(new Mensaje("El trayecto tiene pagos associados"));
-
-        if (!model.getParadas().isEmpty())
-            return ResponseEntity.badRequest().body(new Mensaje("El trayecto tiene paradas associados"));
+        var user = myUserService.getUser();
+        if (!user.isMyEmpresa(model.getEmpresa().getId()))
+            return ResponseEntity.badRequest().body(new Mensaje("El viaje no pertenece a esta empresa"));
+        if (model.getEmpresa().getBloqued() || !model.getEmpresa().getEnabled())
+            return ResponseEntity.badRequest().body(new Mensaje("La empresa esta deshabilitada"));
+        if (viajeEmpresaService.hasPasajes(model.getPrecios()))
+            return ResponseEntity.badRequest().body(new Mensaje("El viaje ya posse un pasaje registrado"));
 
         viajeEmpresaService.delete(model);
         return ResponseEntity.noContent().build();

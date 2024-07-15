@@ -111,15 +111,7 @@ public class ViajeService {
         return viajesSelecionados;
     }
 
-    public boolean hasPasajes(List<PrecioModel> precios) {
-        Integer nPasajes;
-        for (PrecioModel precio : precios) {
-            nPasajes = precioRepository.calculateNPasajes(precio.getId());
-            if (nPasajes != null && nPasajes > 0)
-                return true;
-        }
-        return false;
-    }
+
 
 }
        /*

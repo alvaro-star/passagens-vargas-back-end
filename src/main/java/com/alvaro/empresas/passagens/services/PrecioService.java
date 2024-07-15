@@ -61,8 +61,7 @@ public class PrecioService {
         return new PrecioDTOResponseViaje(model, pisoDto, ocupados);
     }
 
-    public PrecioDTO update(PrecioDTOUpdate dto, UUID id) {
-        var model = findById(id);
+    public PrecioDTO update(PrecioDTOUpdate dto, PrecioModel model) {
         model.updateValues(dto);
         var update = precioRepository.save(model);
         return new PrecioDTO(update, model.getViaje().getCodigo());

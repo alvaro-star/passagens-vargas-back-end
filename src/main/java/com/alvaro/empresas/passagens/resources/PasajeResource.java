@@ -35,21 +35,18 @@ public class PasajeResource {
     private final MyUserService myUserService;
     private final ViajeService viajeService;
     private final PrecioService precioService;
-    private final EmpresaService empresaService;
 
     @Autowired
     public PasajeResource(
             PasajeService pasajeService,
             MyUserService myUserService,
             ViajeService viajeService,
-            PrecioService precioService,
-            EmpresaService empresaService
+            PrecioService precioService
     ) {
         this.pasajeService = pasajeService;
         this.myUserService = myUserService;
         this.viajeService = viajeService;
         this.precioService = precioService;
-        this.empresaService = empresaService;
     }
 
     @GetMapping("/{id}")
@@ -62,7 +59,6 @@ public class PasajeResource {
 
     @GetMapping("/{id}/download")
     public ResponseEntity<byte[]> getFilePasaje(@PathVariable(value = "id") UUID id) {
-        var model = pasajeService.findById(id);
         byte[] pasajePdf = pasajeService.getOnePasajeDownload(id);
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=pasaje.pdf");
@@ -96,17 +92,19 @@ public class PasajeResource {
         ValidationErrorsWithList validacao;
         var usuario = myUserService.getUser();
         var viaje = viajeService.findById(dto.idViaje());
-        if (viaje.getEmpresa().getBloqued() || !viaje.getEmpresa().getEnabled())
-            return ResponseEntity.badRequest().body(new Mensaje("La empresa esta suspendida"));
+
         if (!usuario.isMyEmpresa(viaje.getEmpresa().getId()))
             return ResponseEntity.unprocessableEntity().body(new Mensaje("No se puede vender el pasaje de otra empresa"));
+        if (viaje.getEmpresa().getBloqued() || !viaje.getEmpresa().getEnabled())
+            return ResponseEntity.badRequest().body(new Mensaje("La empresa esta suspendida"));
+
         validacao = ValidarCompraPasajes.validarPasajesDTOVenta(bindingResult, dto, "/pasajes/vender");
         if (!validacao.getErrorsList().isEmpty() || !validacao.getErrors().isEmpty())
             return ResponseEntity.unprocessableEntity().body(validacao);
 
         byte[] pasajesPDF = pasajeService.saveEmpresa(viaje.getEmpresa().getNombre(), dto, dto.metodo(), viaje, false, false);
         HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=pasajes.pdf");
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=pasajes.pdf");
         headers.add(HttpHeaders.CONTENT_TYPE, "application/pdf");
 
         return new ResponseEntity<>(pasajesPDF, headers, HttpStatus.OK);

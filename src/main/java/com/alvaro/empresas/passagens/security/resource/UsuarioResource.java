@@ -29,10 +29,6 @@ public class UsuarioResource {
     public ResponseEntity<Object> getProfile() {
         var usuario = myUserService.getUser();
         boolean isEmpresa = usuario.hasRole(RoleList.ROLE_EMPRESA_FUNCIONARIO.toString()) || usuario.hasRole(RoleList.ROLE_EMPRESA_ADMIN.toString());
-        /*System.out.println("\n\n");
-        System.out.println(isEmpresa);
-        System.out.println(usuario.getIdEmpresa());
-        System.out.println("\n\n");*/
         if (isEmpresa)
             return ResponseEntity.ok(new UsuarioEmpresaDto(usuario.getLogin(), usuario.getNombre(), usuario.getTelefono(), usuario.getIdEmpresa(), usuario.getRoles()));
         return ResponseEntity.ok(new UsuarioDto(usuario.getLogin(), usuario.getNombre(), usuario.getTelefono(), usuario.getRoles()));

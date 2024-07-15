@@ -23,6 +23,7 @@ import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.alvaro.empresas.passagens.paradas.repositories.LugarRepository;
 import com.alvaro.empresas.passagens.paradas.repositories.ParadaRepository;
+import com.alvaro.empresas.passagens.repositories.PrecioRepository;
 import com.alvaro.empresas.passagens.repositories.ViajeRepository;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +48,7 @@ public class ViajeEmpresaService {
     private final LugarRepository lugarRepository;
     private final AutobusService autobusService;
     private final DateAuxiliarFunctions helperDate;
+    private final PrecioRepository precioRepository;
 
     @Autowired
     public ViajeEmpresaService(
@@ -55,13 +57,15 @@ public class ViajeEmpresaService {
             PrecioService precioService,
             LugarRepository lugarRepository,
             AutobusService autobusService,
-            DateAuxiliarFunctions helperDate) {
+            DateAuxiliarFunctions helperDate,
+            PrecioRepository precioRepository) {
         this.viajeRepository = viajeRepository;
         this.paradaRepository = paradaRepository;
         this.precioService = precioService;
         this.lugarRepository = lugarRepository;
         this.autobusService = autobusService;
         this.helperDate = helperDate;
+        this.precioRepository = precioRepository;
     }
 
     public ViajeModel findById(UUID id) {
@@ -213,7 +217,7 @@ public class ViajeEmpresaService {
     }
 
     @Transactional
-    public ViajeDTOEmpresaResponse save(ViajeDTOForm dto) {
+    public ViajeDTOEmpresaResponse save(ViajeDTOForm dto, AutobusModel autobus) {
         var lugarSalida = lugarRepository.findById(dto.salida().idLugar());
         if (lugarSalida.isEmpty()) throw new ValidationException("salida.idLugar", "El lugarSalida no fue allado");
 
@@ -225,8 +229,6 @@ public class ViajeEmpresaService {
         if (!dataHoraDestinoAjustada.isAfter(dataHoraSalidaAjustada))
             throw new ValidationException("salida", "La salida posee un horario superior al del destino");
         //Adicionando la hora de salida, -> nota: es conveniencia
-
-        var autobus = autobusService.findById(dto.idAutobus());
         var model = new ViajeModel(autobus, autobus.getEmpresa(), new BigDecimal("0.00"), new BigDecimal("0.00"), new BigDecimal("0.00"), false, dataHoraSalidaAjustada);
 
         var saved = viajeRepository.save(model);
@@ -267,11 +269,7 @@ public class ViajeEmpresaService {
         return new ViajeDTOEmpresaResponse(saved, autobus.getId(), paradas, preciosSalvos);
     }
 
-    public ViajeDTOUpdate update(ViajeDTOUpdate dto, UUID id) {//Validacao para que a mudanca seja feita
-        //O autobus deve ter o mesmo numero de asientos
-        var autobus = autobusService.findById(dto.idAutobus());
-        var model = this.findById(id);
-
+    public ViajeDTOUpdate update(ViajeDTOUpdate dto, ViajeModel model, AutobusModel autobus) {//Validacao para que a mudanca seja feita
         int size = model.getAutobus().getPisos().size();
         if (size != autobus.getPisos().size())
             throw new ValidationException(new FieldMessage("idAutobus", "El autobus no es compatible"));
@@ -297,9 +295,24 @@ public class ViajeEmpresaService {
 
     @Transactional
     public void delete(ViajeModel model) {
-        for (PrecioModel precio : model.getPrecios())
-            if (!precio.getPasajes().isEmpty()) throw new ValidationException("El viaje no pudo ser eliminado");
+        precioRepository.deleteAll(model.getPrecios());
+        paradaRepository.deleteAll(model.getParadas());
         viajeRepository.delete(model);
+    }
+
+    public boolean hasPasajes(List<PrecioModel> precios) {
+        Integer nPasajes;
+        for (PrecioModel precio : precios) {
+            nPasajes = precioRepository.calculateNPasajes(precio.getId());
+            if (nPasajes != null && nPasajes > 0)
+                return true;
+        }
+        return false;
+    }
+
+    public void validarAutobus(Integer idAutobus) {
+        var autobus = autobusService.findById(idAutobus);
+
     }
 }
 /*Restos

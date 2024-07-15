@@ -46,6 +46,8 @@ public class ViajeModel {
     @Column(name = "cobrado", nullable = false)
     private boolean isCobrado;
 
+    private boolean cancelado = false;
+
     @Column(nullable = false, name = "data_hora_salida")
     private LocalDateTime dataHoraSalida;
 
