@@ -5,6 +5,7 @@ import com.alvaro.empresas.passagens.paradas.dtos.LugarDtoUpdate;
 import com.alvaro.empresas.passagens.paradas.models.CiudadModel;
 import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import com.alvaro.empresas.passagens.paradas.repositories.LugarRepository;
+import com.alvaro.empresas.passagens.paradas.repositories.ParadaRepository;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,6 +16,9 @@ import org.springframework.stereotype.Service;
 public class LugarService {
     @Autowired
     private LugarRepository lugarRepository;
+
+    @Autowired
+    private ParadaRepository paradaRepository;
 
     public LugarModel findById(Integer id) {
         var model = lugarRepository.findById(id);
@@ -39,6 +43,12 @@ public class LugarService {
     }
 
     public void delete(LugarModel model) {
-        lugarRepository.delete(model);
+        var parada = paradaRepository.findFirst1ByLugarId(model.getId());
+        if (parada.isPresent()) {
+            model.setEnable(false);
+            lugarRepository.save(model);
+        } else {
+            lugarRepository.delete(model);
+        }
     }
 }

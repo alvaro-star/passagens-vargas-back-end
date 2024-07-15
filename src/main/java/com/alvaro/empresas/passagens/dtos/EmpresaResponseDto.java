@@ -11,9 +11,10 @@ public record EmpresaResponseDto(
         String nombre,
         String logo,
         BigDecimal valorViajesEfectivo,
+        BigDecimal valorViajesNoWeb,
         BigDecimal valorViajesWeb
 ) {
-    public EmpresaResponseDto(EmpresaModel model, BigDecimal valorViajesEfectivo, BigDecimal valorViajesWeb) {
-        this(model.getId(), model.getNombre(), model.getLogo(), valorViajesEfectivo, valorViajesWeb);
+    public EmpresaResponseDto(EmpresaModel model, BigDecimal valorViajesEfectivo, BigDecimal valorViajesNoWeb,BigDecimal valorViajesWeb) {
+        this(model.getId(), model.getNombre(), model.getLogo(), valorViajesEfectivo, valorViajesNoWeb,valorViajesWeb);
     }
 }

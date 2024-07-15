@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -37,6 +38,7 @@ public class LugarResource {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public ResponseEntity<LugarDTO> save(@RequestBody @Valid LugarDTO dto) {
         var ciudad = ciudadService.findById(dto.idCiudad());
         var model = lugarService.save(dto, ciudad);
@@ -45,6 +47,7 @@ public class LugarResource {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public ResponseEntity<LugarDTO> update(@PathVariable(value = "id") Integer id, @RequestBody @Valid LugarDtoUpdate dto) {
         var model = lugarService.update(dto, id);
         int idCiudad = model.getCiudad().getId();
@@ -52,6 +55,7 @@ public class LugarResource {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public ResponseEntity<Mensaje> delete(@PathVariable(value = "id") Integer id) {
         var model = lugarService.findById(id);
         lugarService.delete(model);

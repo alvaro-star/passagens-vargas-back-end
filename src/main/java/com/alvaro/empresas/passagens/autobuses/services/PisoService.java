@@ -7,6 +7,7 @@ import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import com.alvaro.empresas.passagens.autobuses.repositories.PisoRepository;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
+import com.alvaro.empresas.passagens.repositories.ViajeRepository;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -20,6 +21,8 @@ import java.util.Optional;
 public class PisoService {
     @Autowired
     private PisoRepository pisoRepository;
+    @Autowired
+    private ViajeRepository viajeRepository;
 
     public PisoModel findById(Integer id) {
         Optional<PisoModel> model = pisoRepository.findById(id);
@@ -53,10 +56,9 @@ public class PisoService {
     }
 
     @Transactional
-    public PisoDTOResponse update(PisoDTOUpdate dto, Integer id) {
-        var model = this.findById(id);
-
-        if (!model.getAutobus().getViajes().isEmpty())
+    public PisoDTOResponse update(PisoDTOUpdate dto, PisoModel model) {
+        var viaje = viajeRepository.findFirst1ByAutobusId(model.getAutobus().getId());
+        if (!viaje.isEmpty())
             return null;
 
         int produto = dto.getNLinhas() * dto.getNColunas();

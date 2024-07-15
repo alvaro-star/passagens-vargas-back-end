@@ -8,30 +8,28 @@ public class FormatarDataHora {
 
 
     public static DataHoraFormatada getDataHoraToString(LocalDateTime dataHora) {
-        String data = "", hora = "";
-        if (dataHora.getDayOfMonth() < 10)
-            data = data + "0" + dataHora.getDayOfMonth();
-        else
-            data = data + dataHora.getDayOfMonth();
-        data = data + "/";
-        if (dataHora.getMonthValue() < 10)
-            data = data + "0" + dataHora.getMonthValue();
-        else
-            data = data + dataHora.getMonthValue();
-        data = data + "/" + dataHora.getYear();
+        if (dataHora == null) {
+            throw new IllegalArgumentException("A data e hora não podem ser nulas.");
+        }
 
-        if (dataHora.getHour() < 10)
-            hora = hora + "0" + dataHora.getHour();
-        else
-            hora = hora + dataHora.getHour();
-        data = data + ":";
-        if (dataHora.getMinute() < 10)
-            hora = hora + "0" + dataHora.getMinute();
-        else
-            hora = hora + dataHora.getMinute();
-        return new DataHoraFormatada(data, hora);
+        StringBuilder dataBuilder = new StringBuilder();
+        StringBuilder horaBuilder = new StringBuilder();
 
+        // Formatação da data
+        dataBuilder.append(String.format("%02d", dataHora.getDayOfMonth()))
+                .append("/")
+                .append(String.format("%02d", dataHora.getMonthValue()))
+                .append("/")
+                .append(dataHora.getYear());
+
+        // Formatação da hora
+        horaBuilder.append(String.format("%02d", dataHora.getHour()))
+                .append(":")
+                .append(String.format("%02d", dataHora.getMinute()));
+
+        return new DataHoraFormatada(dataBuilder.toString(), horaBuilder.toString());
     }
+
 }
 
 

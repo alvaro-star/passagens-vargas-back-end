@@ -7,6 +7,7 @@ import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTOVenta;
 import com.alvaro.empresas.passagens.enums.MetodoPagamentoEnum;
 import com.alvaro.empresas.passagens.helpers.beans.MyUserService;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
+import com.alvaro.empresas.passagens.services.EmpresaService;
 import com.alvaro.empresas.passagens.services.PasajeService;
 import com.alvaro.empresas.passagens.services.PrecioService;
 import com.alvaro.empresas.passagens.services.ViajeService;
@@ -34,17 +35,24 @@ public class PasajeResource {
     private final MyUserService myUserService;
     private final ViajeService viajeService;
     private final PrecioService precioService;
+    private final EmpresaService empresaService;
 
     @Autowired
-    public PasajeResource(PasajeService pasajeService, MyUserService myUserService, ViajeService viajeService, PrecioService precioService) {
+    public PasajeResource(
+            PasajeService pasajeService,
+            MyUserService myUserService,
+            ViajeService viajeService,
+            PrecioService precioService,
+            EmpresaService empresaService
+    ) {
         this.pasajeService = pasajeService;
         this.myUserService = myUserService;
         this.viajeService = viajeService;
         this.precioService = precioService;
+        this.empresaService = empresaService;
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ROLE_CLIENTE', 'ROLE_ADMIN')")
     public ResponseEntity<PasajeDTOEmpresaResponse> getOne(@PathVariable(value = "id") UUID id) {
         var model = pasajeService.findById(id);
         var salida = new ParadaDTOComplete(model.getSalida(), null);
@@ -57,7 +65,8 @@ public class PasajeResource {
         var model = pasajeService.findById(id);
         byte[] pasajePdf = pasajeService.getOnePasajeDownload(id);
         HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=pasaje.pdf");
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=pasaje.pdf");
+        //headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=pasaje.pdf");
         headers.add(HttpHeaders.CONTENT_TYPE, "application/pdf");
         return new ResponseEntity<>(pasajePdf, headers, HttpStatus.OK);
     }
@@ -87,6 +96,8 @@ public class PasajeResource {
         ValidationErrorsWithList validacao;
         var usuario = myUserService.getUser();
         var viaje = viajeService.findById(dto.idViaje());
+        if (viaje.getEmpresa().getBloqued() || !viaje.getEmpresa().getEnabled())
+            return ResponseEntity.badRequest().body(new Mensaje("La empresa esta suspendida"));
         if (!usuario.isMyEmpresa(viaje.getEmpresa().getId()))
             return ResponseEntity.unprocessableEntity().body(new Mensaje("No se puede vender el pasaje de otra empresa"));
         validacao = ValidarCompraPasajes.validarPasajesDTOVenta(bindingResult, dto, "/pasajes/vender");

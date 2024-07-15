@@ -12,6 +12,7 @@ import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import com.alvaro.empresas.passagens.autobuses.repositories.AutobusRepository;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationError;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
+import com.alvaro.empresas.passagens.repositories.ViajeRepository;
 import com.alvaro.empresas.passagens.services.EmpresaService;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,12 +33,19 @@ public class AutobusService {
     private final AutobusRepository autobusRepository;
     private final EmpresaService empresaService;
     private final PisoService pisoService;
+    private final ViajeRepository viajeRepository;
 
     @Autowired
-    public AutobusService(AutobusRepository autobusRepository, EmpresaService empresaService, PisoService pisoService) {
+    public AutobusService(
+            AutobusRepository autobusRepository,
+            EmpresaService empresaService,
+            PisoService pisoService,
+            ViajeRepository viajeRepository
+    ) {
         this.autobusRepository = autobusRepository;
         this.empresaService = empresaService;
         this.pisoService = pisoService;
+        this.viajeRepository = viajeRepository;
     }
 
     public AutobusModel findById(Integer id) {
@@ -125,8 +133,7 @@ public class AutobusService {
         return new AutobusDTOResponse(save, save.getEmpresa().getId(), pisosGuardados);
     }
 
-    public AutobusDTOList update(AutobusDTOUpdate dto, Integer id) {
-        var model = this.findById(id);
+    public AutobusDTOList update(AutobusDTOUpdate dto, AutobusModel model) {
         model.updateValues(dto);
         var update = autobusRepository.save(model);
         ValoresArrecadadosDTO valorViajes = autobusRepository.getArrecadacao(model.getId());
@@ -137,6 +144,13 @@ public class AutobusService {
 
     @Transactional
     public void delete(AutobusModel model) {
-        autobusRepository.delete(model);
+        var viaje = viajeRepository.findFirst1ByAutobusId(model.getId());
+        if (viaje.isEmpty())
+            autobusRepository.delete(model);
+        else {
+            model.setEnable(false);
+            autobusRepository.save(model);
+        }
+
     }
 }

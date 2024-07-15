@@ -11,7 +11,6 @@ import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.time.LocalDateTime;
 
 public class PasajesPDF {
     private PDDocument document;
@@ -21,12 +20,12 @@ public class PasajesPDF {
     private float startY = 0f;
     private final PDType1Font standardFont;
     private final PDType1Font standardFontBold;
-    private final int standardFontSize = 12;
+    private final int standardFontSize = 8;
 
     public PasajesPDF() {
         document = new PDDocument();
-        rectangle = new PDRectangle(12 * 72 / 2.54f, 21.0f * 72 / 2.54f); // 12 cm largura e altura padrão A4
-        float margin = 72 / 2.54f; // 1 cm de margem em cada lado
+        rectangle = new PDRectangle(5.08f * 72 / 2.54f, 21.0f * 72 / 2.54f); // 12 cm largura e altura padrão A4
+        float margin = (0.5f * 72) / 2.54f; // 1 cm de margem em cada lado
         width = rectangle.getWidth() - 2 * margin;
         startX = rectangle.getLowerLeftX() + margin;
         startY = rectangle.getUpperRightY() - margin;
@@ -57,14 +56,13 @@ public class PasajesPDF {
 
         PDPageContentStream contentStream = new PDPageContentStream(document, page);
         contentStream.beginText();
-        contentStream.setFont(standardFont, 12);
+        contentStream.setFont(standardFont, 8);
         contentStream.setLeading(14.5f);
         contentStream.newLineAtOffset(startX, startY);
 
-        addRowBold(contentStream, "Empresa: " + empresaName, 13);
-        addRowBold(contentStream, "Datos del Viaje", 13);
-        addParada(contentStream, "Origen", salida);
-        addParada(contentStream, "Destino", destino);
+        addRowBold(contentStream, "Empresa: " + empresaName, 9);
+        addRowBold(contentStream, "Datos del Viaje", 9);
+
         var dataHora = FormatarDataHora.getDataHoraToString(salida.getDataHora());
         contentStream.showText("Fecha y Hora: " + dataHora.data() + " - " + dataHora.hora());
         contentStream.newLine();
@@ -72,7 +70,11 @@ public class PasajesPDF {
         contentStream.newLine();
         contentStream.showText("Silla: " + model.getNSilla());
         contentStream.newLine();
-        addRowBold(contentStream, "Datos del Pasajero", 13);
+
+        addParada(contentStream, "Origen", salida);
+        addParada(contentStream, "Destino", destino);
+
+        addRowBold(contentStream, "Datos del Pasajero", 9);
         contentStream.showText("Nombre: " + model.getNombre());
         contentStream.newLine();
         contentStream.showText("Carnet: " + model.getCarnet());

@@ -23,11 +23,9 @@ public class FacturaPasajeResource {
 
     @GetMapping("/{id}")
     public ResponseEntity<Object> pagarQR(@PathVariable(value = "id") UUID id) {
-
         if (facturaPasajeService.pagarQr(id)) {
             return ResponseEntity.ok(new Mensaje("El pago fue hecho con exito"));
         }
-
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Mensaje("Falla ala hora del pago"));
     }
 }

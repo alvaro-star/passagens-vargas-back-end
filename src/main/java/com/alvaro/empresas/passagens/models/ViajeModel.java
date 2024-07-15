@@ -71,7 +71,7 @@ public class ViajeModel {
     private List<ParadaModel> paradas = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "viaje")
-    private List<FacturaPasajeModel> pagos = new ArrayList<>();
+    private List<FacturaPasajeModel> facturasPasajes = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "viaje")
     private List<PrecioModel> precios = new ArrayList<>();

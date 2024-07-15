@@ -1,9 +1,9 @@
 package com.alvaro.empresas.passagens.paradas.resources;
 
+import com.alvaro.empresas.passagens.dtos.Mensaje;
 import com.alvaro.empresas.passagens.paradas.dtos.CiudadDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.CiudadDtoUpdate;
 import com.alvaro.empresas.passagens.paradas.dtos.LugarDTO;
-import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import com.alvaro.empresas.passagens.paradas.services.CiudadService;
 import com.alvaro.empresas.passagens.paradas.services.DepartamentoService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -54,18 +55,24 @@ public class CiudadResource {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public ResponseEntity<CiudadDTO> save(@Valid @RequestBody CiudadDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(ciudadService.save(dto));
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public ResponseEntity<CiudadDTO> update(@Valid @RequestBody CiudadDtoUpdate dto, @PathVariable(value = "id") Integer id) {
         return ResponseEntity.ok().body(ciudadService.update(dto, id));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public ResponseEntity<Object> delete(@PathVariable(value = "id") Integer id) {
+        //Causas de posible lentitud, la ciudad posee muchos lugares
         var model = ciudadService.findById(id);
+        if (!model.getLugares().isEmpty())
+            return ResponseEntity.badRequest().body(new Mensaje("La ciudad posee lugarees registrados"));
         ciudadService.delete(model);
         return ResponseEntity.noContent().build();
     }

@@ -75,7 +75,7 @@ public class ParadaService {
         }
 
         if (!viaje.dataHoraValido(dataParadaAjustada))
-            throw new ValidationException("dataHora", "La parada no puede ser maior o menor que las dos primeras");
+            throw new ValidationException("dataHora", "El horario debe estar dentro del intervalo dela salida y del destino");
 
         var model = new ParadaModel(dtoSended, EnumParada.CAMINO);
         model.setLugar(lugar);

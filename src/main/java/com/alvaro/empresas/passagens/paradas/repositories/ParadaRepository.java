@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -61,8 +62,7 @@ public interface ParadaRepository extends JpaRepository<ParadaModel, Integer> {
             "AND data_hora BETWEEN :data_start AND :data_end", nativeQuery = true)*/
     List<ParadaModel> findByViajeCodigoAndTipo(UUID codigoViaje, EnumParada tipo);
 
-    List<ParadaModel> findByViajeCodigoAndLugarId(UUID codigoViaje, Integer idLugar);
-
+    Optional<ParadaModel> findFirst1ByLugarId(Integer idLugar);
 }
 //List<LugarModel> findByCiudadId(Integer idCiudad);
     /*

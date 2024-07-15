@@ -76,9 +76,9 @@ public class ShareProfile {
         var empresaFuncionario = roleService.save(new RoleModel(RoleList.ROLE_EMPRESA_FUNCIONARIO));
 
         //Empresas
-        EmpresaModel marzo = empresaRepository.save(new EmpresaModel("27 de Marzo", "https://github.com/alvaro-star.png", "202345"));
-        EmpresaModel abril = empresaRepository.save(new EmpresaModel("20 de Abril", "https://github.com/alvaro-star.png", "202345"));
-        EmpresaModel copacabana = empresaRepository.save(new EmpresaModel("Copacabana", "https://github.com/alvaro-star.png", "202345"));
+        EmpresaModel marzo = empresaRepository.save(new EmpresaModel("27 de Marzo", "https://github.com/alvaro-star.png", "202345", true, false));
+        EmpresaModel abril = empresaRepository.save(new EmpresaModel("20 de Abril", "https://github.com/alvaro-star.png", "202345", true, false));
+        EmpresaModel copacabana = empresaRepository.save(new EmpresaModel("Copacabana", "https://github.com/alvaro-star.png", "202345", true, false));
 
         var usuarioCliente = new UsuarioModel("cliente@gmail.com", "Rick Sanchez", "(11) - 11111-1111", criptogrador.encode("cliente"));
         usuarioCliente.setRoles(new HashSet<RoleModel>(Arrays.asList(cliente)));
@@ -103,10 +103,10 @@ public class ShareProfile {
         }
         //Autobuses
         ArrayList<AutobusModel> autobuses = new ArrayList<>();
-        autobuses.add(autobusRepository.save(new AutobusModel("2023J", marzo)));
-        autobuses.add(autobusRepository.save(new AutobusModel("2023K", abril)));
-        autobuses.add(autobusRepository.save(new AutobusModel("2023N", copacabana)));
-        autobuses.add(autobusRepository.save(new AutobusModel("2023P", marzo)));
+        autobuses.add(autobusRepository.save(new AutobusModel("2023J", true, marzo)));
+        autobuses.add(autobusRepository.save(new AutobusModel("2023K", true, abril)));
+        autobuses.add(autobusRepository.save(new AutobusModel("2023N", true, copacabana)));
+        autobuses.add(autobusRepository.save(new AutobusModel("2023P", true, marzo)));
 
         //Cria os Pisos
         int indice = 0;
@@ -117,7 +117,6 @@ public class ShareProfile {
             pisos.add(pisoRepository.save(new PisoModel(nLinhas, nColunas, EnumPosicao.IZQUIERDA, 1, EnumPosicao.DERECHA, nLinhas * nColunas, 1, autobus)));
             if (indice % 2 == 0)
                 pisos.add(pisoRepository.save(new PisoModel(nLinhas, nColunas, EnumPosicao.IZQUIERDA, 2, EnumPosicao.DERECHA, nLinhas * nColunas, nLinhas * nColunas + 1, autobus)));
-
             indice++;
 
             //Cria os trayectos y las paradas de cada autobus

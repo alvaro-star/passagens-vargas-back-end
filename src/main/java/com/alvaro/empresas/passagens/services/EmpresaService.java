@@ -4,7 +4,6 @@ import com.alvaro.empresas.passagens.autobuses.dtos.ValoresArrecadadosDTO;
 import com.alvaro.empresas.passagens.dtos.EmpresaDto;
 import com.alvaro.empresas.passagens.dtos.EmpresaResponseDto;
 import com.alvaro.empresas.passagens.dtos.Mensaje;
-import com.alvaro.empresas.passagens.helpers.services.EmailService;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.repositories.EmpresaRepository;
 import com.alvaro.empresas.passagens.security.dtos.RegisterDtoEmpresaAdmin;
@@ -34,8 +33,6 @@ public class EmpresaService {
     private UsuarioRepository usuarioRepository;
     @Autowired
     private RoleService roleService;
-    @Autowired
-    private EmailService emailService;
 
 
     public EmpresaModel findById(UUID id) {
@@ -46,13 +43,13 @@ public class EmpresaService {
     public EmpresaResponseDto getOne(UUID id) {
         EmpresaModel model = this.findById(id);
         ValoresArrecadadosDTO valorArrecadado = empresaRepository.getArrecadacao(id);
-        return new EmpresaResponseDto(model, valorArrecadado.valorArrecadadoEfectivo(), valorArrecadado.valorArrecadadoWeb());
+        return new EmpresaResponseDto(model, valorArrecadado.valorArrecadadoEfectivo(), valorArrecadado.valorArrecadadoNoWeb(), valorArrecadado.valorArrecadadoWeb());
     }
 
     public Page<EmpresaResponseDto> findAll(Pageable pageable) {
         return empresaRepository.findAll(pageable).map(model -> {
             ValoresArrecadadosDTO valorArrecadado = empresaRepository.getArrecadacao(model.getId());
-            return new EmpresaResponseDto(model, valorArrecadado.valorArrecadadoEfectivo(), valorArrecadado.valorArrecadadoWeb());
+            return new EmpresaResponseDto(model, valorArrecadado.valorArrecadadoEfectivo(), valorArrecadado.valorArrecadadoNoWeb(), valorArrecadado.valorArrecadadoWeb());
         });
     }
 
@@ -60,8 +57,10 @@ public class EmpresaService {
     public EmpresaResponseDto save(EmpresaDto dto) {
         var model = new EmpresaModel();
         BeanUtils.copyProperties(dto, model, "id", "autobuses");
+        model.setEnabled(true);
+        model.setBloqued(false);
         var modelSaved = empresaRepository.save(model);
-        return new EmpresaResponseDto(modelSaved, new BigDecimal("00.0"), new BigDecimal("00.0"));
+        return new EmpresaResponseDto(modelSaved, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
     }
 
     public Mensaje saveAdmin(RegisterDtoEmpresaAdmin empresaAdmin) {
@@ -73,7 +72,6 @@ public class EmpresaService {
         if (usuario.get().hasRole(RoleList.ROLE_EMPRESA_ADMIN.toString()))
             return new Mensaje("El usuario ya es un administrador");
 
-        boolean adicionou;
         Set<RoleModel> roles = new HashSet<>();
         var roleEmpresaAdmin = roleService.getByRoleName(RoleList.ROLE_EMPRESA_ADMIN);
         var roleEmpresaFuncionario = roleService.getByRoleName(RoleList.ROLE_EMPRESA_FUNCIONARIO);
@@ -94,7 +92,7 @@ public class EmpresaService {
 
     public Mensaje removerAdmin(String email) {
         var usuario = usuarioRepository.findByEmail(email);
-        if (email.equals("")) return new Mensaje("El email no puede ser nulo");
+        if (email.isEmpty()) return new Mensaje("El email no puede ser nulo");
         if (!usuario.isPresent()) return new Mensaje("El usuario no esta registrado en el sistema");
 
         Set<RoleModel> roles = new HashSet<>();
@@ -111,13 +109,22 @@ public class EmpresaService {
         BeanUtils.copyProperties(dto, model, "id", "autobuses");
         ValoresArrecadadosDTO valorArrecadado = empresaRepository.getArrecadacao(id);
         EmpresaModel update = empresaRepository.save(model);
-        return new EmpresaResponseDto(update, valorArrecadado.valorArrecadadoEfectivo(), valorArrecadado.valorArrecadadoWeb());
+        return new EmpresaResponseDto(update, valorArrecadado.valorArrecadadoEfectivo(), valorArrecadado.valorArrecadadoNoWeb(), valorArrecadado.valorArrecadadoWeb());
+    }
+
+    public void bloquedCount(UUID id) {
+        var model = findById(id);
+        model.setBloqued(!model.getBloqued());
+        empresaRepository.save(model);
     }
 
     @Transactional
     public void delete(UUID id) {
         var model = this.findById(id);
-        empresaRepository.delete(model);
+        model.setEnabled(false);
+        model.setBloqued(true);
+        empresaRepository.save(model);
+        //empresaRepository.delete(model);
     }
 
 }

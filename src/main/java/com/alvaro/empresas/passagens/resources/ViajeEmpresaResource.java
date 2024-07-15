@@ -99,7 +99,7 @@ public class ViajeEmpresaResource {
         if (!model.getPrecios().isEmpty())
             return ResponseEntity.badRequest().body(new Mensaje("El trayecto tiene precios associados"));
 
-        if (!model.getPagos().isEmpty())
+        if (!model.getFacturasPasajes().isEmpty())
             return ResponseEntity.badRequest().body(new Mensaje("El trayecto tiene pagos associados"));
 
         if (!model.getParadas().isEmpty())

@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "tb_autobus", indexes = @Index(name="idxtb_autobus_empresa_criado", columnList = "fk_idtb_empresa, created_at"))
+@Table(name = "tb_autobus", indexes = @Index(name = "idxtb_autobus_empresa_criado", columnList = "fk_idtb_empresa, created_at"))
 @Getter
 @Setter
 @NoArgsConstructor
@@ -32,7 +32,7 @@ public class AutobusModel {
     private String placa;
 
     @Column(nullable = false)
-    private boolean enable = true;
+    private boolean enable;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -53,17 +53,12 @@ public class AutobusModel {
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "autobus")
     private List<ViajeModel> viajes = new ArrayList<>();
 
-    public AutobusModel(String placa, EmpresaModel empresa) {
+    public AutobusModel(String placa, Boolean enable, EmpresaModel empresa) {
         this.placa = placa;
         this.empresa = empresa;
+        this.enable = enable;
     }
 
-    public PisoModel getPisoByNumero(Integer nPiso) {
-        for (PisoModel piso : this.pisos)
-            if (piso.getNPiso().equals(nPiso))
-                return piso;
-        return null;
-    }
 
     public AutobusModel(AutobusDTO dto) {
         placa = dto.placa();
@@ -75,5 +70,13 @@ public class AutobusModel {
         if (dto.enable() != null) {
             enable = dto.enable();
         }
+    }
+
+
+    public PisoModel getPisoByNumero(Integer nPiso) {
+        for (PisoModel piso : this.pisos)
+            if (piso.getNPiso().equals(nPiso))
+                return piso;
+        return null;
     }
 }

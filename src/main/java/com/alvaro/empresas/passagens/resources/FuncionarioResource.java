@@ -4,6 +4,7 @@ import com.alvaro.empresas.passagens.dtos.FuncionarioDTO;
 import com.alvaro.empresas.passagens.dtos.Mensaje;
 import com.alvaro.empresas.passagens.helpers.beans.MyUserService;
 import com.alvaro.empresas.passagens.security.dtos.RegisterDtoFuncionario;
+import com.alvaro.empresas.passagens.services.EmpresaService;
 import com.alvaro.empresas.passagens.services.FuncionarioService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -23,11 +24,17 @@ import java.util.UUID;
 public class FuncionarioResource {
     private final MyUserService myUserService;
     private final FuncionarioService funcionarioService;
+    private final EmpresaService empresaService;
 
     @Autowired
-    public FuncionarioResource(MyUserService myUserService, FuncionarioService funcionarioService) {
+    public FuncionarioResource(
+            MyUserService myUserService,
+            FuncionarioService funcionarioService,
+            EmpresaService empresaService
+    ) {
         this.myUserService = myUserService;
         this.funcionarioService = funcionarioService;
+        this.empresaService = empresaService;
     }
 
     @GetMapping("/{idEmpresa}")
@@ -36,7 +43,6 @@ public class FuncionarioResource {
         var user = myUserService.getUser();
         if (user.hasRole("ROLE_ADMIN") || user.isMyEmpresa(idEmpresa))
             return ResponseEntity.ok(funcionarioService.findAllFromEmpresa(idEmpresa, pageable));
-
         return ResponseEntity.badRequest().build();
     }
 
@@ -44,6 +50,9 @@ public class FuncionarioResource {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN')")
     public ResponseEntity<Object> save(@RequestBody @Valid RegisterDtoFuncionario registerDto, @PathVariable(value = "idEmpresa") UUID idEmpresa) {
         var user = myUserService.getUser();
+        var empresa = empresaService.findById(idEmpresa);
+        if (empresa.getBloqued() || !empresa.getEnabled())
+            return ResponseEntity.badRequest().body(new Mensaje("La empresa esta bloqueada"));
         if (!(user.hasRole("ROLE_ADMIN") || user.isMyEmpresa(idEmpresa)))
             return ResponseEntity.badRequest().body(new Mensaje("El administrador no esta relacionado con ninguna empresa"));
         Mensaje mensaje = funcionarioService.save(registerDto, idEmpresa);
@@ -56,6 +65,9 @@ public class FuncionarioResource {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN')")
     public ResponseEntity<Object> delete(@PathVariable(value = "idEmpresa") UUID idEmpresa, @PathVariable(value = "email") String email) {
         var user = myUserService.getUser();
+        var empresa = empresaService.findById(idEmpresa);
+        if (empresa.getBloqued() || !empresa.getEnabled())
+            return ResponseEntity.badRequest().body(new Mensaje("La empresa esta suspendida"));
         if (!(user.hasRole("ROLE_ADMIN") || user.isMyEmpresa(idEmpresa)))
             return ResponseEntity.badRequest().body(new Mensaje("El administrador no esta relacionado con ninguna empresa"));
         if (user.getLogin().equals(email))

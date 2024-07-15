@@ -16,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 
 @RestController
@@ -30,22 +29,24 @@ public class EmpresaResource {
 
     @PostMapping("/admin")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<Mensaje> registerEmpresaAdmin(@RequestBody @Valid RegisterDtoEmpresaAdmin empresaAdmin){
+    public ResponseEntity<Mensaje> registerEmpresaAdmin(@RequestBody @Valid RegisterDtoEmpresaAdmin empresaAdmin) {
         Mensaje mensaje;
         mensaje = empresaService.saveAdmin(empresaAdmin);
-        if (mensaje.conteudo().equals(""))
+        if (mensaje.conteudo().isEmpty())
             return ResponseEntity.ok(new Mensaje("Criado con exito"));
-        return  ResponseEntity.badRequest().body(mensaje);
+        return ResponseEntity.badRequest().body(mensaje);
     }
+
     @DeleteMapping("/admin/{email}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<Mensaje> removerEmpresario(@PathVariable(value = "email") String email){
+    public ResponseEntity<Mensaje> removerEmpresario(@PathVariable(value = "email") String email) {
         Mensaje mensaje;
         mensaje = empresaService.removerAdmin(email);
-        if (mensaje.conteudo().equals(""))
+        if (mensaje.conteudo().isEmpty())
             return ResponseEntity.noContent().build();
-        return  ResponseEntity.badRequest().body(mensaje);
+        return ResponseEntity.badRequest().body(mensaje);
     }
+
     @GetMapping
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Page<EmpresaResponseDto>> getAll(@PageableDefault(size = 10) Pageable pageable) {
@@ -67,6 +68,13 @@ public class EmpresaResource {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<EmpresaResponseDto> update(@PathVariable(value = "id") UUID id, @RequestBody @Valid EmpresaDto dto) {
         return ResponseEntity.status(HttpStatus.OK).body(empresaService.update(dto, id));
+    }
+
+    @GetMapping("/{id}/bloquedCount")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<EmpresaResponseDto> disabled(@PathVariable(value = "id") UUID id) {
+        empresaService.bloquedCount(id);
+        return ResponseEntity.noContent().build();
     }
 
 
