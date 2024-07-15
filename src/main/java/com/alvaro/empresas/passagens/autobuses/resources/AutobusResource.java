@@ -53,7 +53,7 @@ public class AutobusResource {
         if (user.getIdEmpresa() == null)
             return new Mensaje("Usted no esta relacionado a una empresa");
         var empresa = empresaService.findById(user.getIdEmpresa());
-        if (empresa.getBloqued())
+        if (empresa.getBloqued() || !empresa.getEnabled())
             return new Mensaje("La empresa esta bloqueada");
         if (!user.isMyEmpresa(idEmpresa))
             return new Mensaje("Usted no esta relacionado a esta empresa");
