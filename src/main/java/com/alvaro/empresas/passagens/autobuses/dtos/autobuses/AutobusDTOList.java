@@ -8,6 +8,7 @@ import java.util.UUID;
 public record AutobusDTOList(
         Integer id,
         String placa,
+        Boolean enabled,
         BigDecimal valorViajesEfectivo,
         BigDecimal valorViajesNoWeb,
         BigDecimal valorViajesWeb,
@@ -15,6 +16,6 @@ public record AutobusDTOList(
 ) {
 
     public AutobusDTOList(AutobusModel model, BigDecimal valorViajesEfectivo, BigDecimal valorViajesNoWeb, BigDecimal valorViajesWeb, UUID idEmpresa) {
-        this(model.getId(), model.getPlaca(), valorViajesEfectivo, valorViajesNoWeb, valorViajesWeb, idEmpresa);
+        this(model.getId(), model.getPlaca(), model.isEnable(), valorViajesEfectivo, valorViajesNoWeb, valorViajesWeb, idEmpresa);
     }
 }

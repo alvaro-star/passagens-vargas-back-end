@@ -9,6 +9,7 @@ import com.alvaro.empresas.passagens.autobuses.services.AutobusService;
 import com.alvaro.empresas.passagens.autobuses.services.validacao.ValidarPiso;
 import com.alvaro.empresas.passagens.dtos.Mensaje;
 import com.alvaro.empresas.passagens.helpers.beans.MyUserService;
+import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.services.EmpresaService;
 import com.alvaro.empresas.passagens.services.validacao.ValidationErrorsWithList;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -48,14 +49,13 @@ public class AutobusResource {
         this.autobusRepository = autobusRepository;
     }
 
-    private Mensaje validarUsuario(UUID idEmpresa) {
+    private Mensaje validarUsuario(EmpresaModel empresa) {
         var user = myUserService.getUser();
         if (user.getIdEmpresa() == null)
             return new Mensaje("Usted no esta relacionado a una empresa");
-        var empresa = empresaService.findById(user.getIdEmpresa());
         if (empresa.getBloqued() || !empresa.getEnabled())
             return new Mensaje("La empresa esta bloqueada");
-        if (!user.isMyEmpresa(idEmpresa))
+        if (!user.isMyEmpresa(empresa.getId()))
             return new Mensaje("Usted no esta relacionado a esta empresa");
         return new Mensaje("");
     }
@@ -83,9 +83,10 @@ public class AutobusResource {
         ValidationErrorsWithList validacao = ValidarPiso.validarAutobusDTO(bindingResult, dto, autobusRepository);
         if (!validacao.getErrors().isEmpty() || !validacao.getErrorsList().isEmpty())
             return ResponseEntity.unprocessableEntity().body(validacao);
-        Mensaje mensaje = this.validarUsuario(dto.idEmpresa());
+        var empresa = empresaService.findById(dto.idEmpresa());
+        Mensaje mensaje = this.validarUsuario(empresa);
         if (mensaje.conteudo().isEmpty())
-            return ResponseEntity.status(HttpStatus.CREATED).body(autobusService.salvar(dto));
+            return ResponseEntity.status(HttpStatus.CREATED).body(autobusService.salvar(dto, empresa));
         else
             return ResponseEntity.badRequest().body(mensaje);
     }
@@ -100,7 +101,7 @@ public class AutobusResource {
             return ResponseEntity.unprocessableEntity().body(validacao);
 
         var autobus = autobusService.findById(id);
-        Mensaje mensaje = this.validarUsuario(autobus.getEmpresa().getId());
+        Mensaje mensaje = this.validarUsuario(autobus.getEmpresa());
         if (mensaje.conteudo().isEmpty())
             return ResponseEntity.ok().body(autobusService.update(dto, autobus));
         else
@@ -111,10 +112,13 @@ public class AutobusResource {
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN')")
     public ResponseEntity<Object> delete(@PathVariable(value = "id") Integer id) {
         var model = autobusService.findById(id);
-        Mensaje mensaje = this.validarUsuario(model.getEmpresa().getId());
+        Mensaje mensaje = this.validarUsuario(model.getEmpresa());
         if (mensaje.conteudo().isEmpty()) {
-            autobusService.delete(model);
-            return ResponseEntity.noContent().build();
+            String resposta = autobusService.delete(model);
+            if (resposta.isBlank())
+                return ResponseEntity.noContent().build();
+            else
+                return ResponseEntity.badRequest().body(new Mensaje(resposta));
         } else
             return ResponseEntity.badRequest().body(mensaje);
     }

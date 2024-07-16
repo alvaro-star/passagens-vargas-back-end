@@ -11,6 +11,7 @@ import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacaoFromAu
 import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOEmpresaResponse;
 import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOForm;
 import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOListBusquedaEmpresa;
+import com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQL;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOUpdate;
 import com.alvaro.empresas.passagens.enums.EnumParada;
 import com.alvaro.empresas.passagens.helpers.DateAuxiliarFunctions;
@@ -94,20 +95,18 @@ public class ViajeEmpresaService {
     }
 
     public Page<ViajeDTOListBusquedaEmpresa> findAllFromAutobus(AutobusModel autobusModel, ViajeDTOSolicitacaoFromAutobus solicitacao, Pageable pageable) {
-        Page<ViajeModel> models;
+        Page<ViajeDTOJPQL> models;
         LocalDateTime dataInicio = helperDate.getDateWithFirstDayOfMonth(solicitacao.dataAnalise());
         LocalDateTime dataFim = helperDate.getDateWithLastDayOfMonth(solicitacao.dataAnalise());
 
         models = viajeRepository.findByEmpresaIdAndAutobusId(autobusModel.getEmpresa().getId(), autobusModel.getId(), dataInicio, dataFim, pageable);
 
         return models.map(model -> {
-            var salida = paradaRepository.findByViajeCodigoAndTipo(model.getCodigo(), EnumParada.SALIDA);
-            var destino = paradaRepository.findByViajeCodigoAndTipo(model.getCodigo(), EnumParada.DESTINO);
-            if (salida.isEmpty() || destino.isEmpty())
+            if (model.salida() == null || model.destino() == null)
                 throw new ValidationException("lista", "Hay un viaje que no posse ninguna parada");
-            ParadaDTOComplete salidaDTO = new ParadaDTOComplete(salida.get(0), model.getCodigo());
-            ParadaDTOComplete destinoDTO = new ParadaDTOComplete(destino.get(0), model.getCodigo());
-            return new ViajeDTOListBusquedaEmpresa(model, "", salidaDTO, destinoDTO, new ArrayList<>());
+            ParadaDTOComplete salidaDTO = new ParadaDTOComplete(model.salida(), model.viaje().getCodigo());
+            ParadaDTOComplete destinoDTO = new ParadaDTOComplete(model.destino(), model.viaje().getCodigo());
+            return new ViajeDTOListBusquedaEmpresa(model.viaje(), "", salidaDTO, destinoDTO, new ArrayList<>());
         });
 
     }
@@ -310,10 +309,6 @@ public class ViajeEmpresaService {
         return false;
     }
 
-    public void validarAutobus(Integer idAutobus) {
-        var autobus = autobusService.findById(idAutobus);
-
-    }
 }
 /*Restos
         /*for (LugarModel lugarSalida : lugaresSalida) {

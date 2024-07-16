@@ -67,9 +67,6 @@ public class AutobusModel {
 
     public void updateValues(AutobusDTOUpdate dto) {
         placa = dto.placa();
-        if (dto.enable() != null) {
-            enable = dto.enable();
-        }
     }
 
 

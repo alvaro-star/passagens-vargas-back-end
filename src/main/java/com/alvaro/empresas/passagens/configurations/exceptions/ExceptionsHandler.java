@@ -48,7 +48,7 @@ public class ExceptionsHandler {
                 "A classe tem associados",
                 e.getMessage(),
                 request.getRequestURI());
-        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(err);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(err);
     }
 
     @ExceptionHandler(ValidationException.class)

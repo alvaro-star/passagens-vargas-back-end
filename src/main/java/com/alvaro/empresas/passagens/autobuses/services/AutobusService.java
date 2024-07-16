@@ -10,15 +10,18 @@ import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import com.alvaro.empresas.passagens.autobuses.repositories.AutobusRepository;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
+import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.repositories.ViajeRepository;
 import com.alvaro.empresas.passagens.services.EmpresaService;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -80,8 +83,7 @@ public class AutobusService {
 
 
     @Transactional
-    public AutobusDTOResponse salvar(AutobusDTO dto) {
-        EmpresaModel empresa = empresaService.findById(dto.idEmpresa());
+    public AutobusDTOResponse salvar(AutobusDTO dto, EmpresaModel empresa) {
         var model = new AutobusModel(dto);
         model.setEmpresa(empresa);
         var save = autobusRepository.save(model);
@@ -106,13 +108,21 @@ public class AutobusService {
     }
 
     @Transactional
-    public void delete(AutobusModel model) {
+    public String delete(AutobusModel model) {
+        var now = LocalDateTime.now();
+        Pageable pageable = PageRequest.of(0, 1);
+        Page<ViajeModel> viajesFuturos = viajeRepository.findViajesFuturos(model.getEmpresa().getId(), now, pageable);
+
         var viaje = viajeRepository.findFirst1ByAutobusId(model.getId());
         if (viaje.isEmpty())
             autobusRepository.delete(model);
         else {
-            model.setEnable(false);
-            autobusRepository.save(model);
+            if (viajesFuturos.getTotalElements() == 0) {
+                model.setEnable(false);
+                autobusRepository.save(model);
+            } else
+                return "El atobus tiene un viaje programado en el futuro";
         }
+        return "";
     }
 }

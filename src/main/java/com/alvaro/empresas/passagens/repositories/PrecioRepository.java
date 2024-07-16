@@ -13,6 +13,6 @@ import java.util.UUID;
 public interface PrecioRepository extends JpaRepository<PrecioModel, UUID> {
     List<PrecioModel> findByViajeCodigo(UUID codigo);
 
-    @Query("SELECT sum(p.id) FROM PasajeModel p WHERE p.precio.id = :idPrecio")
+    @Query("SELECT count(p.id) FROM PasajeModel p WHERE p.precio.id = :idPrecio")
     Integer calculateNPasajes(@Param(value = "idPrecio") UUID idPrecio);
 }

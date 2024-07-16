@@ -1,11 +1,11 @@
 package com.alvaro.empresas.passagens.repositories;
 
+import com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQL;
 import com.alvaro.empresas.passagens.models.ViajeModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -27,8 +27,14 @@ public interface ViajeRepository extends JpaRepository<ViajeModel, UUID> {
     Page<ViajeModel> findViajesPassados(UUID empresaId, LocalDateTime dataHoraSalida, Pageable pageable);
 
 
-    @Query("SELECT v FROM ViajeModel v WHERE v.empresa.id = :empresaId AND v.dataHoraSalida BETWEEN :dataInicio AND :dataFim AND v.autobus.id = :autobusId")
-    Page<ViajeModel> findByEmpresaIdAndAutobusId(UUID empresaId, Integer autobusId, LocalDateTime dataInicio, LocalDateTime dataFim, Pageable pageable);
+    @Query("SELECT new com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQL(v, s, d) " +
+            "FROM ViajeModel v, ParadaModel s, ParadaModel d " +
+            "WHERE v.empresa.id = :empresaId " +
+            "AND v.dataHoraSalida BETWEEN :dataInicio AND :dataFim " +
+            "AND v.autobus.id = :autobusId " +
+            "AND s.viaje.codigo = v.codigo AND s.tipo = 'SALIDA' " +
+            "AND d.viaje.codigo = v.codigo AND d.tipo = 'DESTINO' ")
+    Page<ViajeDTOJPQL> findByEmpresaIdAndAutobusId(UUID empresaId, Integer autobusId, LocalDateTime dataInicio, LocalDateTime dataFim, Pageable pageable);
 
     Optional<ViajeModel> findFirst1ByAutobusId(Integer idAutobus);
 }
