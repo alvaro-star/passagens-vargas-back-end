@@ -3,6 +3,8 @@ package com.alvaro.empresas.passagens.autobuses.dtos.pisos;
 import com.alvaro.empresas.passagens.autobuses.enums.EnumPosicao;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -18,8 +20,11 @@ import java.util.List;
 public class PisoDTOUpdate {
 
     @NotNull
+    @Min(value = 1)
     private Integer nLinhas;
     @NotNull
+    @Min(value = 1)
+    @Max(value = 2)
     private Integer nColunas;
 
     @NotBlank

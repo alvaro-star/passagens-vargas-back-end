@@ -9,7 +9,6 @@ import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOUpdate;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.alvaro.empresas.passagens.paradas.services.ParadaService;
 import com.alvaro.empresas.passagens.security.models.RoleList;
-import com.alvaro.empresas.passagens.services.EmpresaService;
 import com.alvaro.empresas.passagens.services.ViajeEmpresaService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -31,19 +30,16 @@ public class ParadaResource {
     private final ParadaService paradaService;
     private final MyUserService myUserService;
     private final ViajeEmpresaService viajeEmpresaService;
-    private final EmpresaService empresaService;
 
     @Autowired
     public ParadaResource(
             ParadaService paradaService,
             MyUserService myUserService,
-            ViajeEmpresaService viajeEmpresaService,
-            EmpresaService empresaService
+            ViajeEmpresaService viajeEmpresaService
     ) {
         this.paradaService = paradaService;
         this.myUserService = myUserService;
         this.viajeEmpresaService = viajeEmpresaService;
-        this.empresaService = empresaService;
     }
 
 
@@ -70,7 +66,10 @@ public class ParadaResource {
         var empresa = viajeModel.getEmpresa();
         if (empresa.getBloqued() || !empresa.getEnabled())
             return ResponseEntity.badRequest().body(new Mensaje("La empresa esta bloqueada"));
-
+        if (!viajeModel.getAutobus().isEnable())
+            return ResponseEntity.badRequest().body(new Mensaje("El autobus esta inhabilitado"));
+        if (viajeEmpresaService.hasPasajes(viajeModel.getPrecios()))
+            return ResponseEntity.badRequest().body(new Mensaje("El viaje ya posee un pasaje registrado"));
         return ResponseEntity.status(HttpStatus.CREATED).body(paradaService.save(dto, viajeModel));
     }
 
@@ -85,6 +84,10 @@ public class ParadaResource {
         var empresa = paradaModel.getEmpresa();
         if (empresa.getBloqued() || !empresa.getEnabled())
             return ResponseEntity.badRequest().body(new Mensaje("La empresa esta bloqueada"));
+        if (!paradaModel.getViaje().getAutobus().isEnable())
+            return ResponseEntity.badRequest().body(new Mensaje("El autobus esta inhabilitado"));
+        if (viajeEmpresaService.hasPasajes(paradaModel.getViaje().getPrecios()))
+            return ResponseEntity.badRequest().body(new Mensaje("El viaje ya posee un pasaje registrado"));
         return ResponseEntity.ok(paradaService.update(dto, paradaModel));
     }
 
@@ -99,7 +102,8 @@ public class ParadaResource {
             if (model.getEmpresa().getBloqued() || !model.getEmpresa().getEnabled())
                 return ResponseEntity.badRequest().body(new Mensaje("La empresa esta bloqueada"));
         }
-
+        if (!model.getViaje().getAutobus().isEnable())
+            return ResponseEntity.badRequest().body(new Mensaje("El autobus esta inhabilitado"));
         int indice = -1;
 
         if (!model.getTipo().equals(EnumParada.CAMINO))

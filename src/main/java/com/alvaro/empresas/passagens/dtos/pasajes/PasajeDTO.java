@@ -1,10 +1,6 @@
 package com.alvaro.empresas.passagens.dtos.pasajes;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Past;
-import jakarta.validation.constraints.Size;
-import org.hibernate.validator.constraints.Length;
+import jakarta.validation.constraints.*;
 
 import java.util.Date;
 
@@ -18,8 +14,10 @@ public record PasajeDTO(
         @Size(max = 50)
         String nombre,
         @Past
+        @NotNull
         Date nascimento,
         @NotNull
+        @Positive
         Integer nSilla
 ) {
 

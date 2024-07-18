@@ -10,8 +10,10 @@ import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.alvaro.empresas.passagens.paradas.repositories.ParadaRepository;
 import com.alvaro.empresas.passagens.repositories.ViajeRepository;
+import com.alvaro.empresas.passagens.services.validacao.TempoMaxViajeValidation;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,8 @@ import java.util.UUID;
 
 @Service
 public class ParadaService {
+    @Value("${api.viaje.max-time-viaje-day}")
+    private Integer tempoMaxViajeDias;
     private final ParadaRepository paradaRepository;
     private final LugarService lugarService;
     private final ViajeRepository viajeRepository;
@@ -66,12 +70,12 @@ public class ParadaService {
 
         var dataParadaAjustada = dtoSended.dataHora().withSecond(0).withNano(0);
         for (ParadaModel parada : viaje.getParadas()) {
+            if (parada.getTipo().equals(EnumParada.SALIDA) && parada.getDataHora().isBefore(LocalDateTime.now()))
+                throw new ValidationException("dataHora", "No se puede agregar una parada a un viaje que ya inicio");
             if (parada.getDataHora().isEqual(dataParadaAjustada))
                 throw new ValidationException("dataHora", "Ya hay una parada registrada en esta fecha");
             if (parada.getLugar().getId() == dtoSended.idLugar())
                 throw new ValidationException("idLugar", "Ya hay una parada registrada que passara por este lugar");
-            if (parada.getTipo().equals(EnumParada.DESTINO) && parada.getDataHora().isBefore(LocalDateTime.now()))
-                throw new ValidationException("dataHora", "No se puede agregar una parada a un viaje del passado");
         }
 
         if (!viaje.dataHoraValido(dataParadaAjustada))
@@ -92,7 +96,7 @@ public class ParadaService {
         var dataParadaAjustada = dtoSended.dataHora().withSecond(0).withNano(0);
         for (ParadaModel parada : model.getViaje().getParadas()) {
             if (parada.getTipo().equals(EnumParada.SALIDA) && parada.getDataHora().isBefore(LocalDateTime.now()))
-                throw new ValidationException("entity", "No se puede editar una parada del passado");
+                throw new ValidationException("dataHora", "No se puede editar una parada de un viaje que ya inicio");
             if (parada.getDataHora().isEqual(dataParadaAjustada) && !parada.getId().equals(model.getId()))
                 throw new ValidationException("dataHora", "Ya hay una parada registrada en esta fecha");
             if (parada.getLugar().getId() == dtoSended.idLugar() && !parada.getId().equals(model.getId()))
@@ -129,10 +133,46 @@ public class ParadaService {
             viajeRepository.save(model.getViaje());
         }
 
+        boolean valido = true;
+        if (!model.getTipo().equals(EnumParada.CAMINO)) {
+            valido = validarHorarioParadaExterno(model, dataParadaAjustada);
+        }
+        if (!valido)
+            throw new ValidationException("dataHora", "El autobus esta ocupado en esta hora");
+
         var modelUpdated = paradaRepository.save(model);
         UUID idViaje = modelUpdated.getViaje().getCodigo();
 
         return new ParadaDTOComplete(modelUpdated, idViaje);
+    }
+
+    private boolean validarHorarioParadaExterno(ParadaModel modelEscolhido, LocalDateTime novoDataHoraAjustada) {
+        var existe = true;
+        var valido = false;
+        System.out.println(modelEscolhido.getViaje().toString());
+        if (modelEscolhido.getTipo().equals(EnumParada.SALIDA)) {
+            existe = TempoMaxViajeValidation.existViajeInActiveInIntervaloFromAutobus(
+                    viajeRepository,
+                    tempoMaxViajeDias,
+                    modelEscolhido.getViaje().getAutobus().getEmpresa().getId(),
+                    modelEscolhido.getViaje().getAutobus().getId(),
+                    modelEscolhido.getViaje().getCodigo(),
+                    novoDataHoraAjustada,
+                    modelEscolhido.getViaje().getDestino().getDataHora());
+            valido = TempoMaxViajeValidation.validarTempoMaximoViaje(tempoMaxViajeDias, novoDataHoraAjustada, modelEscolhido.getViaje().getDestino().getDataHora());
+        } else if (modelEscolhido.getTipo().equals(EnumParada.DESTINO)) {
+            existe = TempoMaxViajeValidation.existViajeInActiveInIntervaloFromAutobus(
+                    viajeRepository,
+                    tempoMaxViajeDias,
+                    modelEscolhido.getViaje().getAutobus().getEmpresa().getId(),
+                    modelEscolhido.getViaje().getAutobus().getId(),
+                    modelEscolhido.getViaje().getCodigo(),
+                    modelEscolhido.getViaje().getSalida().getDataHora(),
+                    novoDataHoraAjustada);
+            valido = TempoMaxViajeValidation.validarTempoMaximoViaje(tempoMaxViajeDias, modelEscolhido.getViaje().getSalida().getDataHora(), novoDataHoraAjustada);
+        }
+
+        return !existe && valido;
     }
 
     @Transactional

@@ -109,7 +109,7 @@ public class ViajeEmpresaResource {
             return ResponseEntity.badRequest().body(new Mensaje("Este autobus le pertenece a otra empresa"));
         if (!autobusNuevo.isEnable())
             return ResponseEntity.badRequest().body(new Mensaje("El nuevo autobus esta inhabilitado"));
-        return ResponseEntity.ok(viajeEmpresaService.update(dto, viajeModel, autobusNuevo));
+        return ResponseEntity.ok(viajeEmpresaService.update(viajeModel, autobusNuevo));
     }
 
     @DeleteMapping("/{id}")

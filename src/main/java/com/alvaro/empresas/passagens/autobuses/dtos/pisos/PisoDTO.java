@@ -5,7 +5,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,8 +19,10 @@ import java.util.List;
 @NoArgsConstructor
 public class PisoDTO {
     @NotNull
+    @Min(value = 1)
     private Integer nLinhas;
     @NotNull
+    @Min(value = 1)
     @Max(value = 4)
     private Integer nColunas;//Tipo Onibus
 
@@ -31,7 +33,6 @@ public class PisoDTO {
     @Enumerated(EnumType.STRING)
     private EnumPosicao inicioContagem;
 
-    @Valid
     private List<Integer> posicionesBloqueadas = new ArrayList<>();
 
 }

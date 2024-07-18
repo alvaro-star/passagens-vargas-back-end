@@ -71,7 +71,7 @@ public class PasajeService {
             throw new ValidationException(new FieldMessage("idLugarDestino", "El destino no hace parte del trayecto"));
 
         BigDecimal valorTotal = precio.getPrecio().multiply(BigDecimal.valueOf(dto.pasajes().size()));
-        FacturaPasajeModel pago = facturaPasajeService.save(dto.contacto(), valorTotal, viaje, metodo, guardarContacto);
+        FacturaPasajeModel pago = facturaPasajeService.save(dto.contacto(), valorTotal, null, metodo, guardarContacto);
 
         BigDecimal valorArrecadadoWeb = viaje.getValorArrecadadoWeb() != null ? viaje.getValorArrecadadoWeb() : BigDecimal.ZERO;
         viaje.setValorArrecadadoWeb(valorArrecadadoWeb.add(pago.getValorTotal()));
@@ -93,7 +93,7 @@ public class PasajeService {
 
 
     @Transactional
-    public byte[] saveEmpresa(String empresaNombre, PasajesDTOVenta dto, MetodoPagamentoEnum metodo, ViajeModel viaje, boolean guardarContacto, boolean compradoWeb) {
+    public UUID saveEmpresa(String empresaNombre, PasajesDTOVenta dto, MetodoPagamentoEnum metodo, ViajeModel viaje, boolean guardarContacto, boolean compradoWeb) {
         ParadaModel salida;
         ParadaModel destino;
 
@@ -187,17 +187,7 @@ public class PasajeService {
             }
 
         pasajeRepository.saveAll(pasajesModels);
-        PasajesPDF pasajesPDF = new PasajesPDF();
-        byte[] emptyByteArray = new byte[0];
-
-        try {
-            for (PasajeModel pasajeModel : pasajesModels)
-                pasajesPDF.addPasaje(pasajeModel, empresaNombre, salida, destino);
-            emptyByteArray = pasajesPDF.closeAndGetBytes();
-            return emptyByteArray;
-        } catch (IOException exception) {
-            throw new ValidationException("pasajes", "Hubo un error ala hora de crear los boletos");
-        }
+        return pago.getId();
     }
 
     public byte[] getOnePasajeDownload(UUID idPasaje) {

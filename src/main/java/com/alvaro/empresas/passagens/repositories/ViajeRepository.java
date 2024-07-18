@@ -37,6 +37,22 @@ public interface ViajeRepository extends JpaRepository<ViajeModel, UUID> {
     Page<ViajeDTOJPQL> findByEmpresaIdAndAutobusId(UUID empresaId, Integer autobusId, LocalDateTime dataInicio, LocalDateTime dataFim, Pageable pageable);
 
     Optional<ViajeModel> findFirst1ByAutobusId(Integer idAutobus);
+
+    /*Query("SELECT v from ViejModel v, ParadaModel d " +
+            "WHERE v.empresa.id = :empresaId " +
+            "AND v.dataHoraSalida BETWEEN :inicioAlterado AND :fim " +
+            "AND v.autobus.id = :autobusId " +
+            "AND d.viaje.codigo = v.codigo AND d.tipo = 'DESTINO' AND v.dataHora >= :inicio")*/
+    //Usado e ideal para verificar a existencia de um viaje de un autobus dentro de un intervalo
+    @Query(value = "SELECT v.* FROM tb_viaje v, tb_parada d " +
+            "WHERE v.fk_idtb_empresa = :empresaId " +
+            "AND v.data_hora_salida BETWEEN :inicioAlterado AND :fim " +
+            "AND v.fk_idtb_autobus = :autobusId " +
+            "AND v.idtb_viaje != :codigoViaje " +
+            "AND d.fk_idtb_viaje = v.idtb_viaje AND d.tipo = 'DESTINO' AND d.data_hora >= :inicio " +
+            "LIMIT 1",
+            nativeQuery = true)
+    Optional<ViajeModel> findViajeFromAutobusInIntervalo(UUID empresaId, Integer autobusId, LocalDateTime inicio, LocalDateTime inicioAlterado, LocalDateTime fim, UUID codigoViaje);
 }
 
 /* No usage

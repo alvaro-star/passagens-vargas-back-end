@@ -4,7 +4,9 @@ import com.alvaro.empresas.passagens.configurations.exceptions.FieldMessage;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
 import com.alvaro.empresas.passagens.dtos.pasajes.ContactoDTO;
 import com.alvaro.empresas.passagens.enums.MetodoPagamentoEnum;
+import com.alvaro.empresas.passagens.helpers.PasajesPDF;
 import com.alvaro.empresas.passagens.models.*;
+import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.alvaro.empresas.passagens.repositories.FacturaPasajeRepository;
 import com.alvaro.empresas.passagens.repositories.PasajeRepository;
 import com.alvaro.empresas.passagens.repositories.ViajeRepository;
@@ -13,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -136,5 +139,27 @@ public class FacturaPasajeService {
 
     public void mandarEmail(String mensaje) {
 
+    }
+
+    public byte[] downloadFactura(UUID id) {
+        var factura = facturaPasajeRepository.findById(id);
+        PasajesPDF pasajesPDF = new PasajesPDF();
+        byte[] emptyByteArray = new byte[0];
+
+        if (!factura.isPresent())
+            throw new ObjectNotFoundException(id, FacturaEmpresaModel.class.getName());
+        if (factura.get().getViaje() == null)
+            throw new ValidationException("protocolo", "El comprobante posso un viaje null");
+        String empresaNombre = factura.get().getViaje().getEmpresa().getNombre();
+        ParadaModel salida = factura.get().getPasajes().get(0).getSalida();
+        ParadaModel destino = factura.get().getPasajes().get(0).getDestino();
+        try {
+            for (PasajeModel pasajeModel : factura.get().getPasajes())
+                pasajesPDF.addPasaje(pasajeModel, empresaNombre, salida, destino);
+            emptyByteArray = pasajesPDF.closeAndGetBytes();
+            return emptyByteArray;
+        } catch (IOException exception) {
+            throw new ValidationException("pasajes", "Hubo un error ala hora de crear los boletos");
+        }
     }
 }

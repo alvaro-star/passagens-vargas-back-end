@@ -26,8 +26,10 @@ import com.alvaro.empresas.passagens.paradas.repositories.LugarRepository;
 import com.alvaro.empresas.passagens.paradas.repositories.ParadaRepository;
 import com.alvaro.empresas.passagens.repositories.PrecioRepository;
 import com.alvaro.empresas.passagens.repositories.ViajeRepository;
+import com.alvaro.empresas.passagens.services.validacao.TempoMaxViajeValidation;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -43,6 +45,9 @@ import java.util.UUID;
 
 @Service
 public class ViajeEmpresaService {
+
+    @Value("${api.viaje.max-time-viaje-day}")
+    private Integer tempoMaxViajeDias;
     private final ViajeRepository viajeRepository;
     private final ParadaRepository paradaRepository;
     private final PrecioService precioService;
@@ -108,7 +113,6 @@ public class ViajeEmpresaService {
             ParadaDTOComplete destinoDTO = new ParadaDTOComplete(model.destino(), model.viaje().getCodigo());
             return new ViajeDTOListBusquedaEmpresa(model.viaje(), "", salidaDTO, destinoDTO, new ArrayList<>());
         });
-
     }
 
 
@@ -161,9 +165,7 @@ public class ViajeEmpresaService {
     }
 
     public List<ViajeDTOListBusquedaEmpresa> getViajesFromSalida(UUID idEmpresa, ViajeDTOSolicitacaoEmpresa dto) {
-
         List<LugarModel> lugaresSalida = lugarRepository.findByCiudadId(dto.idCiudadSalida());
-
         if (lugaresSalida.isEmpty())
             throw new ObjectNotFoundException(dto.idCiudadSalida(), CiudadModel.class.getName());
 
@@ -186,9 +188,7 @@ public class ViajeEmpresaService {
             for (ViajeEmpresaDTOJPQ ViajeEmpresaDTOJPQ : salidasDia) {
                 salidaDTO = new ParadaDTOComplete(ViajeEmpresaDTOJPQ.getSalida(), ViajeEmpresaDTOJPQ.getViaje().getCodigo());
                 destinoDTO = new ParadaDTOComplete(ViajeEmpresaDTOJPQ.getDestino(), ViajeEmpresaDTOJPQ.getViaje().getCodigo());
-
                 if (!destinoDTO.dataHora().isAfter(salidaDTO.dataHora())) continue;
-
                 precios = new ArrayList<>();
                 for (PrecioModel precio : ViajeEmpresaDTOJPQ.getViaje().getPrecios())
                     if (!precio.getLleno()) precios.add(new PrecioDTO(precio));
@@ -227,6 +227,13 @@ public class ViajeEmpresaService {
 
         if (!dataHoraDestinoAjustada.isAfter(dataHoraSalidaAjustada))
             throw new ValidationException("salida", "La salida posee un horario superior al del destino");
+        if (!TempoMaxViajeValidation.validarTempoMaximoViaje(tempoMaxViajeDias, dataHoraSalidaAjustada, dataHoraDestinoAjustada))
+            throw new ValidationException("destino.dataHora", "Un viaje puede durar maximo 3 dias");
+
+        boolean viajeInIntervalo = TempoMaxViajeValidation.existViajeInActiveInIntervaloFromAutobus(viajeRepository, tempoMaxViajeDias, autobus.getEmpresa().getId(), autobus.getId(), null, dataHoraSalidaAjustada, dataHoraDestinoAjustada);
+        if (viajeInIntervalo)
+            throw new ValidationException("destino.dataHora", "Existe un viaje del autobus que ocurre en este intervalo");
+
         //Adicionando la hora de salida, -> nota: es conveniencia
         var model = new ViajeModel(autobus, autobus.getEmpresa(), new BigDecimal("0.00"), new BigDecimal("0.00"), new BigDecimal("0.00"), false, dataHoraSalidaAjustada);
 
@@ -246,14 +253,18 @@ public class ViajeEmpresaService {
             case 2 -> {
                 if (pisos.get(0).getNPiso() == 1) {
                     precios.add(new PrecioModel(dto.precioPiso1(), 1, pisos.get(0).getNSillas()));
-                    if (dto.precioPiso2() == null)
+                    if (dto.precioPiso2() == null || dto.precioPiso2().compareTo(new BigDecimal("10")) < 0)
                         precios.add(new PrecioModel(dto.precioPiso1(), 2, pisos.get(1).getNSillas()));
-                    else precios.add(new PrecioModel(dto.precioPiso2(), 2, pisos.get(1).getNSillas()));
+                    else {
+                        precios.add(new PrecioModel(dto.precioPiso2(), 2, pisos.get(1).getNSillas()));
+                    }
                 } else {//Numero piso for 2
                     precios.add(new PrecioModel(dto.precioPiso1(), 1, pisos.get(1).getNSillas()));
-                    if (dto.precioPiso2() == null)
+                    if (dto.precioPiso2() == null || dto.precioPiso2().compareTo(new BigDecimal("10")) < 0)
                         precios.add(new PrecioModel(dto.precioPiso1(), 2, pisos.get(0).getNSillas()));
-                    else precios.add(new PrecioModel(dto.precioPiso2(), 2, pisos.get(0).getNSillas()));
+                    else {
+                        precios.add(new PrecioModel(dto.precioPiso2(), 2, pisos.get(0).getNSillas()));
+                    }
                 }
             }
         }
@@ -268,15 +279,25 @@ public class ViajeEmpresaService {
         return new ViajeDTOEmpresaResponse(saved, autobus.getId(), paradas, preciosSalvos);
     }
 
-    public ViajeDTOUpdate update(ViajeDTOUpdate dto, ViajeModel model, AutobusModel autobus) {//Validacao para que a mudanca seja feita
+    public ViajeDTOUpdate update(ViajeModel model, AutobusModel autobus) {//Validacao para que a mudanca seja feita
+        boolean viajeInIntervalo = TempoMaxViajeValidation.existViajeInActiveInIntervaloFromAutobus(
+                viajeRepository,
+                tempoMaxViajeDias,
+                autobus.getEmpresa().getId(),
+                autobus.getId(),
+                null,
+                model.getSalida().getDataHora(),
+                model.getDestino().getDataHora());
+        if (viajeInIntervalo)
+            throw new ValidationException("idAutobus", "El autobus esta ocupado con otro viaje");
+
         int size = model.getAutobus().getPisos().size();
         if (size != autobus.getPisos().size())
             throw new ValidationException(new FieldMessage("idAutobus", "El autobus no es compatible"));
 
         if (size == 1) {
-            if (model.getAutobus().getPisos().get(0) != autobus.getPisos().get(0)) {
+            if (model.getAutobus().getPisos().get(0) != autobus.getPisos().get(0))
                 throw new ValidationException(new FieldMessage("idAutobus", "El autobus no es compatible"));
-            }
         } else if (size == 2) {
             if (model.getAutobus().getPisos().get(0) != autobus.getPisos().get(0))
                 throw new ValidationException(new FieldMessage("idAutobus", "El autobus no es compatible"));

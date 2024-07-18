@@ -1,8 +1,6 @@
 package com.alvaro.empresas.passagens.dtos.pasajes;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 
 public record ContactoDTO(
         @NotBlank
@@ -10,6 +8,8 @@ public record ContactoDTO(
         @Email
         String email,
         @NotNull
+        @Min(value = 11111111)
+        @Max(value = 99999999)
         Integer telefono
 ) {
 

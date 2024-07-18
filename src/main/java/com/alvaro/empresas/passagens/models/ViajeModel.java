@@ -1,6 +1,7 @@
 package com.alvaro.empresas.passagens.models;
 
 import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
+import com.alvaro.empresas.passagens.enums.EnumParada;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
@@ -96,6 +97,21 @@ public class ViajeModel {
         }
         return null;
     }
+
+    public ParadaModel getSalida() {
+        for (ParadaModel parada : this.paradas)
+            if (parada.getTipo().equals(EnumParada.SALIDA))
+                return parada;
+        return null;
+    }
+
+    public ParadaModel getDestino() {
+        for (ParadaModel parada : this.paradas)
+            if (parada.getTipo().equals(EnumParada.DESTINO))
+                return parada;
+        return null;
+    }
+
 
     public PrecioModel getPrecioByNPiso(Integer nPiso) {
         for (PrecioModel precio : this.precios) {

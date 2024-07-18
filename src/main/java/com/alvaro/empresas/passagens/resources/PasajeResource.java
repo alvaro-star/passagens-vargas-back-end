@@ -1,13 +1,13 @@
 package com.alvaro.empresas.passagens.resources;
 
 import com.alvaro.empresas.passagens.dtos.Mensaje;
+import com.alvaro.empresas.passagens.dtos.pasajes.CodigoPago;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajeDTOEmpresaResponse;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTO;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTOVenta;
 import com.alvaro.empresas.passagens.enums.MetodoPagamentoEnum;
 import com.alvaro.empresas.passagens.helpers.beans.MyUserService;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
-import com.alvaro.empresas.passagens.services.EmpresaService;
 import com.alvaro.empresas.passagens.services.PasajeService;
 import com.alvaro.empresas.passagens.services.PrecioService;
 import com.alvaro.empresas.passagens.services.ViajeService;
@@ -88,7 +88,7 @@ public class PasajeResource {
 
     @PostMapping("/vender")
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_FUNCIONARIO', 'ROLE_EMPRESA_ADMIN')")
-    public ResponseEntity<?> vender(@RequestBody @Valid PasajesDTOVenta dto, BindingResult bindingResult) {
+    public ResponseEntity<Object> vender(@RequestBody @Valid PasajesDTOVenta dto, BindingResult bindingResult) {
         ValidationErrorsWithList validacao;
         var usuario = myUserService.getUser();
         var viaje = viajeService.findById(dto.idViaje());
@@ -102,12 +102,9 @@ public class PasajeResource {
         if (!validacao.getErrorsList().isEmpty() || !validacao.getErrors().isEmpty())
             return ResponseEntity.unprocessableEntity().body(validacao);
 
-        byte[] pasajesPDF = pasajeService.saveEmpresa(viaje.getEmpresa().getNombre(), dto, dto.metodo(), viaje, false, false);
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=pasajes.pdf");
-        headers.add(HttpHeaders.CONTENT_TYPE, "application/pdf");
+        var idPago = pasajeService.saveEmpresa(viaje.getEmpresa().getNombre(), dto, dto.metodo(), viaje, false, false);
 
-        return new ResponseEntity<>(pasajesPDF, headers, HttpStatus.OK);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new CodigoPago(idPago));
     }
 
 }

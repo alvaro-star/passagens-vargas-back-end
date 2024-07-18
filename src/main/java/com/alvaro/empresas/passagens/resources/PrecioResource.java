@@ -41,7 +41,7 @@ public class PrecioResource {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
-    public ResponseEntity<Object> update(@PathVariable(value = "id") UUID id, @Valid @RequestBody PrecioDTOUpdate dto) {
+    public ResponseEntity<Object> update(@PathVariable(value = "id") UUID id, @RequestBody @Valid PrecioDTOUpdate dto) {
         var precio = precioService.findById(id);
         var usuario = myUserService.getUser();
         if (!usuario.isMyEmpresa(precio.getEmpresa().getId()))
