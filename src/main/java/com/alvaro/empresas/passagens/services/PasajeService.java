@@ -199,7 +199,8 @@ public class PasajeService {
                     pasajeModel,
                     pasajeModel.getPrecio().getEmpresa().getNombre(),
                     pasajeModel.getSalida(),
-                    pasajeModel.getDestino());
+                    pasajeModel.getDestino(),
+                    pasajeModel.getFacturaPasaje().getMetodoPago());
             emptyByteArray = pasajePDF.closeAndGetBytes();
             return emptyByteArray;
         } catch (IOException exception) {

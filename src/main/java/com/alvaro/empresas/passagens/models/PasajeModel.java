@@ -38,6 +38,8 @@ public class PasajeModel {
     private Boolean compradoWeb;
     @Column(name = "pagado", nullable = false)
     private Boolean estaPagado;
+    @Column(name = "rembolsado", nullable = false)
+    private Boolean fueRembolsado = false;
     @Column(nullable = false)
     private Boolean enEfectivo;
 

@@ -10,6 +10,7 @@ import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacaoEmpres
 import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacaoFromAutobus;
 import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOEmpresaResponse;
 import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOForm;
+import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOFormCopy;
 import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOListBusquedaEmpresa;
 import com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQL;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOUpdate;
@@ -31,14 +32,18 @@ import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
@@ -277,6 +282,131 @@ public class ViajeEmpresaService {
         paradas.add(new ParadaDTOComplete(destinoSaved, model.getCodigo()));
 
         return new ViajeDTOEmpresaResponse(saved, autobus.getId(), paradas, preciosSalvos);
+    }
+
+    @Transactional
+    public int saveOneCopy(ViajeDTOFormCopy dto, ViajeModel viaje) {
+        long diffDias;
+        LocalDateTime dataViajeOriginal = viaje.getDataHoraSalida();
+
+        if (dto.dataNovo().isEqual(viaje.getDataHoraSalida().toLocalDate()))
+            throw new ValidationException("dataNovo", "La nueva fecha es identico al del viaje");
+        LocalDateTime firsHourViaje = viaje.getSalida().getDataHora();
+        LocalDateTime lastHourViaje = viaje.getDestino().getDataHora();
+        diffDias = ChronoUnit.DAYS.between(firsHourViaje.toLocalDate(), lastHourViaje.toLocalDate());
+
+        firsHourViaje = dto.dataNovo().atTime(
+                firsHourViaje.getHour(),
+                firsHourViaje.getMinute(),
+                firsHourViaje.getSecond(),
+                firsHourViaje.getNano()
+        );
+
+        lastHourViaje = dto.dataNovo().atTime(
+                lastHourViaje.getHour(),
+                lastHourViaje.getMinute(),
+                lastHourViaje.getSecond(),
+                lastHourViaje.getNano()
+        );
+
+
+        diffDias = (diffDias < 0) ? -diffDias : diffDias;
+        if (diffDias > 0)
+            lastHourViaje = lastHourViaje.plusDays(diffDias);
+        boolean existe = TempoMaxViajeValidation.existViajeInActiveInIntervaloFromAutobus(
+                viajeRepository, tempoMaxViajeDias,
+                viaje.getEmpresa().getId(), viaje.getAutobus().getId(), null, firsHourViaje, lastHourViaje);
+        System.out.println("\n\nOpen");
+        System.out.println(existe);
+        System.out.println("\nClose");
+        if (existe)
+            return -1;
+        System.out.println("\nPassou");
+
+        diffDias = ChronoUnit.DAYS.between(dataViajeOriginal.toLocalDate(), firsHourViaje.toLocalDate());
+        diffDias = (diffDias < 0) ? -diffDias : diffDias;
+
+        List<ParadaModel> paradaModelSave = new ArrayList<>();
+        List<PrecioModel> preciosModelSave = new ArrayList<>();
+        var viajeNew = new ViajeModel(viaje.getDataHoraSalida().plusDays(diffDias), viaje.getAutobus(), viaje.getEmpresa());
+
+        ParadaModel auxParada;
+        for (ParadaModel aux : viaje.getParadas()) {
+            auxParada = new ParadaModel(aux.getDataHora().plusDays(diffDias), aux.getPlataforma(), aux.getTipo(), aux.getLugar(), viajeNew, viajeNew.getEmpresa());
+            paradaModelSave.add(auxParada);
+        }
+        PrecioModel precioAux;
+        for (PrecioModel precio : viaje.getPrecios()) {
+            precioAux = new PrecioModel(precio.getPrecio(), precio.getNPiso(), viaje.getAutobus().getPisoByNumero(precio.getNPiso()).getNSillas(), viajeNew, viajeNew.getEmpresa());
+            preciosModelSave.add(precioAux);
+        }
+
+        viajeRepository.save(viajeNew);
+        paradaRepository.saveAll(paradaModelSave);
+        precioRepository.saveAll(preciosModelSave);
+        return 1;
+    }
+
+
+    public int saveCopyDay(ViajeDTOFormCopy dto, AutobusModel autobus) {
+        LocalDateTime dataViajeOriginal;
+        LocalDateTime startDaySerch = dto.dataNovo().atTime(0, 0, 0, 0);
+        LocalDateTime endDaySearch = startDaySerch.plusDays(1).minusSeconds(1);
+
+        Sort sort = Sort.by("dataHoraSalida").ascending();
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, sort);
+        Page<ViajeDTOJPQL> viajes = viajeRepository.findByEmpresaIdAndAutobusId(autobus.getEmpresa().getId(), autobus.getId(), startDaySerch, endDaySearch, pageable);
+
+        if (viajes.getContent().isEmpty())
+            return 1;
+
+        long diffDias;
+
+
+        dataViajeOriginal = viajes.getContent().get(0).salida().getDataHora();
+        LocalDateTime firsHourViaje = viajes.getContent().get(0).salida().getDataHora();
+        LocalDateTime lastHourViaje = viajes.getContent().get(viajes.getContent().size() - 1).salida().getDataHora();
+
+        diffDias = ChronoUnit.DAYS.between(firsHourViaje.toLocalDate(), lastHourViaje.toLocalDate());
+        diffDias = (diffDias < 0) ? -diffDias : diffDias;
+
+        firsHourViaje = dto.dataNovo().atTime(firsHourViaje.getHour(), firsHourViaje.getMinute(), firsHourViaje.getSecond(), firsHourViaje.getNano());
+        lastHourViaje = dto.dataNovo().atTime(lastHourViaje.getHour(), lastHourViaje.getMinute(), lastHourViaje.getSecond(), lastHourViaje.getNano());
+
+
+        if (diffDias > 0)
+            lastHourViaje = lastHourViaje.plusDays(diffDias);
+
+        boolean existe = TempoMaxViajeValidation.existViajeInActiveInIntervaloFromAutobus(
+                viajeRepository, tempoMaxViajeDias,
+                autobus.getEmpresa().getId(), autobus.getId(), null, firsHourViaje, lastHourViaje);
+        if (existe)
+            return -1;
+
+        List<ViajeModel> viajeModelsSave = new LinkedList<>();
+        List<ParadaModel> paradaModelSave = new LinkedList<>();
+
+        ViajeModel viajeAuxiliar;
+
+        diffDias = ChronoUnit.DAYS.between(dataViajeOriginal.toLocalDate(), firsHourViaje.toLocalDate());
+        diffDias = (diffDias < 0) ? -diffDias : diffDias;
+
+
+        for (ViajeDTOJPQL viajeDTOJPQL : viajes.getContent()) {
+            viajeAuxiliar = viajeDTOJPQL.viaje();
+            viajeAuxiliar.setCodigo(null);
+            viajeAuxiliar.setDataHoraSalida(viajeAuxiliar.getDataHoraSalida().plusDays(diffDias));
+            for (ParadaModel aux : viajeAuxiliar.getParadas()) {
+                aux.setId(null);
+                aux.setViaje(viajeAuxiliar);
+                aux.setDataHora(aux.getDataHora().plusDays(diffDias));
+                paradaModelSave.add(aux);
+            }
+            viajeModelsSave.add(viajeAuxiliar);
+        }
+        viajeRepository.saveAll(viajeModelsSave);
+        paradaRepository.saveAll(paradaModelSave);
+        return 1;
     }
 
     public ViajeDTOUpdate update(ViajeModel model, AutobusModel autobus) {//Validacao para que a mudanca seja feita

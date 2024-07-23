@@ -18,6 +18,7 @@ import com.alvaro.empresas.passagens.paradas.repositories.DepartamentoRepository
 import com.alvaro.empresas.passagens.paradas.repositories.LugarRepository;
 import com.alvaro.empresas.passagens.paradas.repositories.ParadaRepository;
 import com.alvaro.empresas.passagens.repositories.EmpresaRepository;
+import com.alvaro.empresas.passagens.repositories.PasajeRepository;
 import com.alvaro.empresas.passagens.repositories.PrecioRepository;
 import com.alvaro.empresas.passagens.repositories.ViajeRepository;
 import com.alvaro.empresas.passagens.security.models.RoleList;
@@ -32,15 +33,13 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.math.BigDecimal;
-import java.time.DayOfWeek;
 import java.time.LocalDateTime;
-import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
-@Profile({"dev", "share"})
+@Profile({"dev", "devsql", "share"})
 @Configuration
 public class ShareProfile {
     @Autowired
@@ -65,6 +64,8 @@ public class ShareProfile {
     private PrecioRepository precioRepository;
     @Autowired
     private UsuarioRepository usuarioRepository;
+    @Autowired
+    private PasajeRepository pasajeRepository;
 
     @Bean
     public String loadData() {
@@ -98,72 +99,95 @@ public class ShareProfile {
         for (String nombreDepartamento : nombresDepartamentos) {
             var depModel = departamentoRepository.save(new DepartamentoModel(nombreDepartamento, "SC"));
             var ciudad = ciudadRepository.save(new CiudadModel(nombreDepartamento, depModel));
-            var lugar = lugarRepository.save(new LugarModel("Terminal " + nombreDepartamento, ciudad));
+            var lugar = lugarRepository.save(new LugarModel("Terminal de " + nombreDepartamento, ciudad));
             lugares.add(lugar);
         }
         //Autobuses
         ArrayList<AutobusModel> autobuses = new ArrayList<>();
-        autobuses.add(autobusRepository.save(new AutobusModel("2023J", true, marzo)));
-        autobuses.add(autobusRepository.save(new AutobusModel("2023K", true, abril)));
-        autobuses.add(autobusRepository.save(new AutobusModel("2023N", true, copacabana)));
-        autobuses.add(autobusRepository.save(new AutobusModel("2023P", true, marzo)));
+        int nRepeticoes = 10;
+        for (int k = 0; k < nRepeticoes; k++) {
+            autobuses.add(new AutobusModel(k + "JJJ", true, marzo));
+        }
+        for (int l = 0; l < nRepeticoes; l++) {
+            autobuses.add(new AutobusModel(l + "KKK", true, abril));
+        }
 
+
+        autobusRepository.saveAll(autobuses);
         //Cria os Pisos
         int indice = 0;
         int nLinhas = 12;
-        int nColunas = 4;
+        int nColunas = 3;
         for (AutobusModel autobus : autobuses) {
             List<PisoModel> pisos = new ArrayList<>();
-            pisos.add(pisoRepository.save(new PisoModel(nLinhas, nColunas, EnumPosicao.IZQUIERDA, 1, EnumPosicao.DERECHA, nLinhas * nColunas, 1, autobus)));
-            if (indice % 2 == 0)
-                pisos.add(pisoRepository.save(new PisoModel(nLinhas, nColunas, EnumPosicao.IZQUIERDA, 2, EnumPosicao.DERECHA, nLinhas * nColunas, nLinhas * nColunas + 1, autobus)));
+            pisos.add(new PisoModel(nLinhas, nColunas, EnumPosicao.IZQUIERDA, 1, EnumPosicao.DERECHA, nLinhas * nColunas, 1, autobus));
+            if (indice % 2 == 0) {
+                pisos.add(new PisoModel(nLinhas, nColunas, EnumPosicao.IZQUIERDA, 2, EnumPosicao.DERECHA, nLinhas * nColunas, nLinhas * nColunas + 1, autobus));
+            }
+            pisoRepository.saveAll(pisos);
+
             indice++;
 
             //Cria os trayectos y las paradas de cada autobus
-            for (DayOfWeek dia : DayOfWeek.values()) {
-                var dataInicio = LocalDateTime.now().with(TemporalAdjusters.next(dia)).withHour(8).withSecond(0).withNano(0);
+            LocalDateTime dia1SemanaAntes = LocalDateTime.now().minusDays(10);
+            int j;
+            for (j = 0; j < 30; j++) {
+                dia1SemanaAntes = dia1SemanaAntes.plusDays(1);
+                var dataInicio = dia1SemanaAntes.withHour(15).withMinute(0).withSecond(0).withNano(0);
                 var viaje = viajeRepository.save(new ViajeModel(autobus, autobus.getEmpresa(), new BigDecimal("0.00"), new BigDecimal("0.00"), new BigDecimal("0.00"), false, dataInicio));
 
                 int nLista = 1;
                 List<ParadaModel> paradas = new ArrayList<>();
                 //Registra as paradas
                 if (lugares.size() > 5) {
-                    var parada = paradaRepository.save(new ParadaModel(dataInicio, 10, EnumParada.SALIDA, lugares.get(0), viaje, viaje.getEmpresa()));
-                    dataInicio = dataInicio.plusHours(1);
+                    var parada = new ParadaModel(dataInicio, 10, EnumParada.SALIDA, lugares.get(0), viaje, viaje.getEmpresa());
+                    dataInicio = dataInicio.plusHours(2);
                     paradas.add(parada);
                     nLista++;
                     for (int i = 1; i < 4; i++) {
-                        dataInicio = dataInicio.plusHours(1);
-                        parada = paradaRepository.save(new ParadaModel(dataInicio, 10, EnumParada.CAMINO, lugares.get(i), viaje, viaje.getEmpresa()));
+                        dataInicio = dataInicio.plusHours(2);
+                        parada = new ParadaModel(dataInicio, 10, EnumParada.CAMINO, lugares.get(i), viaje, viaje.getEmpresa());
                         paradas.add(parada);
                         nLista++;
                     }
-                    dataInicio = dataInicio.plusHours(1);
-                    parada = paradaRepository.save(new ParadaModel(dataInicio, 20, EnumParada.DESTINO, lugares.get(5), viaje, viaje.getEmpresa()));
+                    dataInicio = dataInicio.plusHours(2);
+                    parada = new ParadaModel(dataInicio, 20, EnumParada.DESTINO, lugares.get(5), viaje, viaje.getEmpresa());
                     paradas.add(parada);
                     nLista++;
                 } else {
                     var tamanhoMaximo = lugares.size();
                     var parada = paradaRepository.save(new ParadaModel(dataInicio, 10, EnumParada.SALIDA, lugares.get(0), viaje, viaje.getEmpresa()));
-                    dataInicio = dataInicio.plusHours(1);
+                    dataInicio = dataInicio.plusHours(2);
                     paradas.add(parada);
                     nLista++;
                     for (int i = 1; i < tamanhoMaximo - 1; i++) {
-                        dataInicio = dataInicio.plusHours(1);
+                        dataInicio = dataInicio.plusHours(2);
                         parada = paradaRepository.save(new ParadaModel(dataInicio, 10, EnumParada.CAMINO, lugares.get(i), viaje, viaje.getEmpresa()));
                         paradas.add(parada);
                         nLista++;
                     }
-                    dataInicio = dataInicio.plusHours(1);
+                    dataInicio = dataInicio.plusHours(2);
                     parada = paradaRepository.save(new ParadaModel(dataInicio, 20, EnumParada.DESTINO, lugares.get(tamanhoMaximo - 1), viaje, viaje.getEmpresa()));
                     paradas.add(parada);
-                    nLista++;
                 }
+
+                paradaRepository.saveAll(paradas);
 
                 BigDecimal precioBruto = BigDecimal.valueOf(200);
                 for (PisoModel piso : pisos) {
                     var precio = precioRepository.save(new PrecioModel(precioBruto, piso.getNPiso(), piso.getNSillas(), viaje, viaje.getEmpresa()));
-                    precioBruto = precioBruto.subtract(BigDecimal.valueOf(2));
+                    precioBruto = precioBruto.subtract(BigDecimal.valueOf(20));
+
+                    /*for (int n = 0; n < 20; n++) {
+                        pasajeRepository.save(new PasajeModel(n,
+                                false,
+                                precio.getPrecio(),
+                                true,
+                                true,
+                                "Alvaro Vargas ALvarez",
+                                "3308731",
+                                new Date(2006, 03, 15), paradas.get(0), paradas.get(3), precio, ));
+                    }*/
                 }
             }
         }

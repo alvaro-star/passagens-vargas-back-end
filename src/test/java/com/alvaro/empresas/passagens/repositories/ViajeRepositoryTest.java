@@ -1,8 +1,20 @@
 package com.alvaro.empresas.passagens.repositories;
 
+import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
+import com.alvaro.empresas.passagens.enums.EnumParada;
+import com.alvaro.empresas.passagens.models.EmpresaModel;
+import com.alvaro.empresas.passagens.models.ViajeModel;
+import com.alvaro.empresas.passagens.paradas.models.CiudadModel;
+import com.alvaro.empresas.passagens.paradas.models.DepartamentoModel;
+import com.alvaro.empresas.passagens.paradas.models.LugarModel;
+import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import jakarta.persistence.EntityManager;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
@@ -14,15 +26,52 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
+@ActiveProfiles("test")
 class ViajeRepositoryTest {
     @Autowired
     private ViajeRepository viajeRepository;
     @Autowired
     private EntityManager em;
+    @Value("${api.viaje.max-time-viaje-day}")
+    private Integer tempoMaxViajeDias;
+
+    @Test
+    @DisplayName("Este teste verifica se o metodo pode retornar dois viajes que esten en el mismo intervalo de tiempo")
+    void getFromTrayectoCenario1() {
+        var empresa = cadastrarEmpresa("23 de Abril");
+        var autobus = cadastrarAutobus("2345L", empresa);
+        var dataInicioViaje = LocalDateTime.now().with(TemporalAdjusters.next(DayOfWeek.MONDAY)).withHour(15);
+        var viaje1 = cadastrarViaje(dataInicioViaje, autobus, empresa);
+        var viaje2 = cadastrarViaje(dataInicioViaje, autobus, empresa);
+        var lugares = cadastrarLugares();
+
+        List<ParadaModel> paradas1 = new ArrayList<>();
+        List<ParadaModel> paradas2 = new ArrayList<>();
+        //Hay nueve lugares registrados
+        int finalLista;
+        int contador = 0;
+        paradas1.add(cadastrarParada(dataInicioViaje.plusHours(contador), lugares.get(0), EnumParada.SALIDA, viaje1, empresa));
+        paradas2.add(cadastrarParada(dataInicioViaje.plusHours(contador), lugares.get(0), EnumParada.SALIDA, viaje2, empresa));
+        contador++;
+        for (int i = 1; i < lugares.size() - 1; i++) {
+            paradas1.add(cadastrarParada(dataInicioViaje.plusHours(contador), lugares.get(i), EnumParada.CAMINO, viaje1, empresa));
+            paradas2.add(cadastrarParada(dataInicioViaje.plusHours(contador), lugares.get(i), EnumParada.CAMINO, viaje2, empresa));
+            contador++;
+        }
+        paradas1.add(cadastrarParada(dataInicioViaje.plusHours(contador), lugares.get(lugares.size() - 1), EnumParada.DESTINO, viaje1, empresa));
+        paradas2.add(cadastrarParada(dataInicioViaje.plusHours(contador), lugares.get(lugares.size() - 1), EnumParada.DESTINO, viaje2, empresa));
+        contador++;
+
+        List<ViajeModel> viaje = viajeRepository.findViajeFromAutobusInIntervalo(
+                empresa.getId(), autobus.getId(), dataInicioViaje,
+                dataInicioViaje.minusDays(tempoMaxViajeDias), dataInicioViaje.plusHours(contador - 1));
+        assertThat(viaje.isEmpty()).isEqualTo(false);
+        assertThat(viaje.size()).isEqualTo(2);
+    }
     /*
     @DisplayName("Deveria mostrar un viaje que contenga un intervalo de tiempo")
     *Sabendo que un trayecto tiene un viaje, mas muchas paradas, si quiero realizar un viaje que pase por dos
-    paradas mas no por la primera ni por la ultima necessáriamente, el viaje deveria contener el itervalo de un trayecto dado
+    paradas mas no por la primera ni por la ultima necessáriamente, el viaje deveria contener el itervalo de un trayecto dado*
     void getFromTrayectoCenario1() {
         var empresa = cadastrarEmpresa("23 de Abril");
         var autobus = cadastrarAutobus("2345L", empresa);
@@ -105,24 +154,24 @@ class ViajeRepositoryTest {
         assertThat(viajesEncontrados.size()).isEqualTo(0);
         viajesEncontrados = viajeRepository.getFromTrayecto(trayecto1.getCodigo(), manha7.plusHours(2), paradas1.get(size - 1).getDataHora().plusHours(3));
         assertThat(viajesEncontrados.size()).isEqualTo(0);
-    }
+    }*/
 
     private EmpresaModel cadastrarEmpresa(String nombre) {
-        var empresa = new EmpresaModel(nombre, "logo", "numerocuenta");
+        var empresa = new EmpresaModel(nombre, "logo", "numerocuenta", true, false);
         em.persist(empresa);
         return empresa;
     }
 
     private AutobusModel cadastrarAutobus(String placa, EmpresaModel empresaModel) {
-        var autobus = new AutobusModel(placa, empresaModel);
+        var autobus = new AutobusModel(placa, true, empresaModel);
         em.persist(autobus);
         return autobus;
     }
 
-    private TrayectoModel cadastrarTrayecto(AutobusModel autobusModel) {
-        var trayecto = new TrayectoModel(autobusModel);
-        em.persist(trayecto);
-        return trayecto;
+    private ViajeModel cadastrarViaje(LocalDateTime dataHoraSalida, AutobusModel autobusModel, EmpresaModel empresaModel) {
+        var viaje = new ViajeModel(dataHoraSalida, autobusModel, empresaModel);
+        em.persist(viaje);
+        return viaje;
     }
 
     private List<LugarModel> cadastrarLugares() {
@@ -140,16 +189,9 @@ class ViajeRepositoryTest {
         return lugares;
     }
 
-    private ParadaModel cadastrarParada(LocalDateTime data, LugarModel lugar, TrayectoModel trayecto) {
-        var parada = new ParadaModel(data, 10, lugar, trayecto);
+    private ParadaModel cadastrarParada(LocalDateTime data, LugarModel lugar, EnumParada tipo, ViajeModel viaje, EmpresaModel empresaModel) {
+        var parada = new ParadaModel(data, 10, tipo, lugar, viaje, empresaModel);
         em.persist(parada);
         return parada;
     }
-
-    private ViajeModel cadastrarViaje(ParadaModel salida, ParadaModel destino, TrayectoModel trayecto) {
-        var viaje = new ViajeModel(salida, destino, trayecto);
-        em.persist(viaje);
-        return viaje;
-    }
-    */
 }

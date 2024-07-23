@@ -6,6 +6,7 @@ import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacaoEmpres
 import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacaoFromAutobus;
 import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOEmpresaResponse;
 import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOForm;
+import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOFormCopy;
 import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOListBusquedaEmpresa;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOUpdate;
 import com.alvaro.empresas.passagens.helpers.beans.MyUserService;
@@ -92,6 +93,24 @@ public class ViajeEmpresaResource {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Mensaje("Las paradas no son validas"));
         else
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/create/copy")
+    @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
+    public ResponseEntity<Object> saveViajesCopyFromDay(@RequestBody @Valid ViajeDTOFormCopy dto) {
+        var viaje = viajeEmpresaService.findById(dto.idViaje());
+        var user = myUserService.getUser();
+        if (!viaje.getAutobus().isEnable())
+            return ResponseEntity.badRequest().body(new Mensaje("El autobus esta inhabilitado"));
+        if (viaje.getEmpresa().getBloqued() || !viaje.getEmpresa().getEnabled())
+            return ResponseEntity.badRequest().body(new Mensaje("La empresa esta inhabilitada"));
+        if (!user.isMyEmpresa(viaje.getEmpresa().getId()))
+            return ResponseEntity.badRequest().body(new Mensaje("El autobus no esta relacionado con esta empresa"));
+        int response = viajeEmpresaService.saveOneCopy(dto, viaje);
+        if (response == -1)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Mensaje("El autobus esta ocupado en esa fecha con otro viaje"));
+        else
+            return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PutMapping("/{id}")

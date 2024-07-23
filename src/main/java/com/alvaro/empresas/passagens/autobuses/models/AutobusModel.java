@@ -17,7 +17,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "tb_autobus", indexes = @Index(name = "idxtb_autobus_empresa_criado", columnList = "fk_idtb_empresa, created_at"))
+@Table(name = "tb_autobus", indexes = {
+        @Index(name = "idxtb_autobus_empresa_criado", columnList = "fk_idtb_empresa, created_at"),
+        @Index(name = "idxtb_autobus_placa", columnList = "placa")
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -28,7 +31,7 @@ public class AutobusModel {
     @Column(name = "idtb_autobus")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String placa;
 
     @Column(nullable = false)

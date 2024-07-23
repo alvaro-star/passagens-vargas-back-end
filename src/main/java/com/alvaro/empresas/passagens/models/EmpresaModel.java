@@ -62,6 +62,5 @@ public class EmpresaModel {
         this.numeroCuenta = numeroCuenta;
         this.enabled = enabled;
         this.bloqued = bloqued;
-
     }
 }

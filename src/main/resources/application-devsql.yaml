@@ -1,0 +1,13 @@
+server:
+  address: 192.168.100.100 # Substitua pelo IP desejado
+  port: 8080 # Substitua pela porta desejada
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3311/spring
+    username: root
+    password: StrTit24815032006*
+  jpa:
+    hibernate:
+      ddl-auto: create-drop  # Use 'update', 'create', 'create-drop' ou 'none' conforme necessário
+    show-sql: true

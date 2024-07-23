@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: dev
+    active: devsql
   jackson:
     time-zone: America/La_Paz
   mail:
@@ -16,7 +16,7 @@ spring:
             enable: true
             required: true
           connectiontimeout: 5000
-          timeout: 3000
+          timeout: 5000
           writetimeout: 5000
     test-connection: false
 api:

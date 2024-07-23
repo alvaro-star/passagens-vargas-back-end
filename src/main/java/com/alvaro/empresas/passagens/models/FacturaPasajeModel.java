@@ -33,6 +33,8 @@ public class FacturaPasajeModel {
     private BigDecimal tasaServicio;
     @Column(nullable = false, name = "pagado?")
     private Boolean estaPagado;
+    @Column(nullable = false, name = "rembolsado")
+    private Boolean rembolsado = false;
     @Column(nullable = false, name = "metodo_pago")
     @Enumerated(EnumType.STRING)
     private MetodoPagamentoEnum metodoPago;

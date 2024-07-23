@@ -46,8 +46,8 @@ public class ViajeModel {
 
     @Column(name = "cobrado", nullable = false)
     private boolean isCobrado;
-
-    private boolean cancelado = false;
+    @Column(name = "cancelado", nullable = false)
+    private boolean isCancelado = false;
 
     @Column(nullable = false, name = "data_hora_salida")
     private LocalDateTime dataHoraSalida;
@@ -89,6 +89,17 @@ public class ViajeModel {
         this.dataHoraSalida = dataHoraSalida;
     }
 
+    public ViajeModel(LocalDateTime dataHoraSalida, AutobusModel autobus, EmpresaModel empresa) {
+        valorArrecadadoEfectivo = BigDecimal.ZERO;
+        valorArrecadadoNoWeb = BigDecimal.ZERO;
+        valorArrecadadoWeb = BigDecimal.ZERO;
+        isCobrado = false;
+        isCancelado = false;
+        this.dataHoraSalida = dataHoraSalida;
+        this.autobus = autobus;
+        this.empresa = empresa;
+        this.paradas = new ArrayList<>();
+    }
 
     public ParadaModel getParadaByLugarId(Integer idLugar) {
         for (ParadaModel parada : this.getParadas()) {

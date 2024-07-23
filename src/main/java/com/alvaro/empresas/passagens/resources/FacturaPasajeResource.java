@@ -1,10 +1,15 @@
 package com.alvaro.empresas.passagens.resources;
 
 
+import com.alvaro.empresas.passagens.dtos.FacturaPasajeDTO;
 import com.alvaro.empresas.passagens.dtos.Mensaje;
 import com.alvaro.empresas.passagens.services.FacturaPasajeService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +28,14 @@ public class FacturaPasajeResource {
     @Autowired
     private FacturaPasajeService facturaPasajeService;
 
+
+    @GetMapping("/{idViaje}/from/viaje")
+    public ResponseEntity<Page<FacturaPasajeDTO>> findAll(@PathVariable(value = "idViaje") UUID idViaje,
+                                                          @PageableDefault(sort = "created_at", direction = Sort.Direction.DESC) Pageable pageable) {
+        if (idViaje != null)
+            return ResponseEntity.ok(facturaPasajeService.findAllFromViaje(idViaje, pageable));
+        return ResponseEntity.badRequest().build();
+    }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public ResponseEntity<Object> pagarQR(@PathVariable(value = "id") UUID id) {

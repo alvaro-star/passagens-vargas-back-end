@@ -2,6 +2,7 @@ package com.alvaro.empresas.passagens.services;
 
 import com.alvaro.empresas.passagens.configurations.exceptions.FieldMessage;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
+import com.alvaro.empresas.passagens.dtos.FacturaPasajeDTO;
 import com.alvaro.empresas.passagens.dtos.pasajes.ContactoDTO;
 import com.alvaro.empresas.passagens.enums.MetodoPagamentoEnum;
 import com.alvaro.empresas.passagens.helpers.PasajesPDF;
@@ -12,6 +13,8 @@ import com.alvaro.empresas.passagens.repositories.PasajeRepository;
 import com.alvaro.empresas.passagens.repositories.ViajeRepository;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -155,11 +158,16 @@ public class FacturaPasajeService {
         ParadaModel destino = factura.get().getPasajes().get(0).getDestino();
         try {
             for (PasajeModel pasajeModel : factura.get().getPasajes())
-                pasajesPDF.addPasaje(pasajeModel, empresaNombre, salida, destino);
+                pasajesPDF.addPasaje(pasajeModel, empresaNombre, salida, destino, factura.get().getMetodoPago());
             emptyByteArray = pasajesPDF.closeAndGetBytes();
             return emptyByteArray;
         } catch (IOException exception) {
             throw new ValidationException("pasajes", "Hubo un error ala hora de crear los boletos");
         }
+    }
+
+    public Page<FacturaPasajeDTO> findAllFromViaje(UUID idViaje, Pageable pageable) {
+        Page<FacturaPasajeModel> models = facturaPasajeRepository.findByViajeCodigo(idViaje, pageable);
+        return models.map(FacturaPasajeDTO::new);
     }
 }

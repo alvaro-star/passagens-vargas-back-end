@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -48,11 +49,10 @@ public interface ViajeRepository extends JpaRepository<ViajeModel, UUID> {
             "WHERE v.fk_idtb_empresa = :empresaId " +
             "AND v.data_hora_salida BETWEEN :inicioAlterado AND :fim " +
             "AND v.fk_idtb_autobus = :autobusId " +
-            "AND v.idtb_viaje != :codigoViaje " +
             "AND d.fk_idtb_viaje = v.idtb_viaje AND d.tipo = 'DESTINO' AND d.data_hora >= :inicio " +
-            "LIMIT 1",
+            "LIMIT 2",
             nativeQuery = true)
-    Optional<ViajeModel> findViajeFromAutobusInIntervalo(UUID empresaId, Integer autobusId, LocalDateTime inicio, LocalDateTime inicioAlterado, LocalDateTime fim, UUID codigoViaje);
+    List<ViajeModel> findViajeFromAutobusInIntervalo(UUID empresaId, Integer autobusId, LocalDateTime inicio, LocalDateTime inicioAlterado, LocalDateTime fim);
 }
 
 /* No usage
