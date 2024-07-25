@@ -6,10 +6,10 @@ import jakarta.validation.constraints.Size;
 
 public record LoginDto(
         @NotBlank
-        @Email
+        @Email(message = "Debe ser un email valido")
         String login,
         @NotBlank
-        @Size(min = 8)
+        @Size(min = 8, message = "Debe tener un minimo de 8 caracteres")
         String contrasena
 ) {
 

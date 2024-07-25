@@ -10,4 +10,4 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop  # Use 'update', 'create', 'create-drop' ou 'none' conforme necessário
-    show-sql: true
+    show-sql: false

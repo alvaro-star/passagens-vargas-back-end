@@ -112,8 +112,7 @@ public class EmpresaService {
         return new EmpresaResponseDto(update, valorArrecadado.valorArrecadadoEfectivo(), valorArrecadado.valorArrecadadoNoWeb(), valorArrecadado.valorArrecadadoWeb());
     }
 
-    public void bloquedCount(UUID id) {
-        var model = findById(id);
+    public void bloquedCount(EmpresaModel model) {
         model.setBloqued(!model.getBloqued());
         empresaRepository.save(model);
     }

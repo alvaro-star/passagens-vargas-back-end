@@ -4,10 +4,12 @@ import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import com.alvaro.empresas.passagens.autobuses.services.AutobusService;
 import com.alvaro.empresas.passagens.configurations.exceptions.FieldMessage;
+import com.alvaro.empresas.passagens.configurations.exceptions.InternalException.BadRequestException;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
 import com.alvaro.empresas.passagens.dtos.precios.PrecioDTO;
 import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacaoEmpresa;
 import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacaoFromAutobus;
+import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacaoFromEmpresa;
 import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOEmpresaResponse;
 import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOForm;
 import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOFormCopy;
@@ -16,6 +18,7 @@ import com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQL;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOUpdate;
 import com.alvaro.empresas.passagens.enums.EnumParada;
 import com.alvaro.empresas.passagens.helpers.DateAuxiliarFunctions;
+import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.models.PrecioModel;
 import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.paradas.dtos.JPQL.ViajeEmpresaDTOJPQ;
@@ -53,6 +56,8 @@ public class ViajeEmpresaService {
 
     @Value("${api.viaje.max-time-viaje-day}")
     private Integer tempoMaxViajeDias;
+    @Value("${api.viaje.min-time-before-buy-pasaje-min}")
+    private Integer minTimeBeforeBuyPasaje;
     private final ViajeRepository viajeRepository;
     private final ParadaRepository paradaRepository;
     private final PrecioService precioService;
@@ -104,6 +109,22 @@ public class ViajeEmpresaService {
         });
     }
 
+    public Page<ViajeDTOListBusquedaEmpresa> findAllFromEmpresaBetweenDates(EmpresaModel empresa, ViajeDTOSolicitacaoFromEmpresa solicitacao, Pageable pageable) {
+        Page<ViajeDTOJPQL> models;
+        LocalDateTime dataInicio = helperDate.getDateWithFirstDayOfMonth(solicitacao.dataAnalise());
+        LocalDateTime dataFim = helperDate.getDateWithLastDayOfMonth(solicitacao.dataAnalise());
+
+        models = viajeRepository.findByEmpresaIdInInterval(empresa.getId(), dataInicio, dataFim, pageable);
+
+        return models.map(model -> {
+            if (model.salida() == null || model.destino() == null)
+                throw new BadRequestException("Hay un viaje que no posse ninguna parada");
+            ParadaDTOComplete salidaDTO = new ParadaDTOComplete(model.salida(), model.viaje().getCodigo());
+            ParadaDTOComplete destinoDTO = new ParadaDTOComplete(model.destino(), model.viaje().getCodigo());
+            return new ViajeDTOListBusquedaEmpresa(model.viaje(), "", salidaDTO, destinoDTO, new ArrayList<>());
+        });
+    }
+
     public Page<ViajeDTOListBusquedaEmpresa> findAllFromAutobus(AutobusModel autobusModel, ViajeDTOSolicitacaoFromAutobus solicitacao, Pageable pageable) {
         Page<ViajeDTOJPQL> models;
         LocalDateTime dataInicio = helperDate.getDateWithFirstDayOfMonth(solicitacao.dataAnalise());
@@ -141,7 +162,7 @@ public class ViajeEmpresaService {
         List<ViajeDTOListBusquedaEmpresa> viajesSelecionados = new ArrayList<>();
 
         if (hj.toLocalDate().isEqual(dto.fechaSalida())) {
-            startDay = hj.plusMinutes(30);
+            startDay = hj.plusMinutes(minTimeBeforeBuyPasaje);
             if (hj.toLocalTime().isAfter(LocalTime.of(23, 30))) return new ArrayList<>();
         } else startDay = dto.fechaSalida().atTime(LocalTime.MIN);
 
@@ -181,7 +202,7 @@ public class ViajeEmpresaService {
         List<ViajeDTOListBusquedaEmpresa> viajesSelecionados = new ArrayList<>();
 
         if (hj.toLocalDate().isEqual(dto.fechaSalida())) {
-            startDay = hj.plusMinutes(30);
+            startDay = hj.plusMinutes(minTimeBeforeBuyPasaje);
             if (hj.toLocalTime().isAfter(LocalTime.of(23, 30))) return new ArrayList<>();
         } else startDay = dto.fechaSalida().atTime(LocalTime.MIN);
 
@@ -459,6 +480,7 @@ public class ViajeEmpresaService {
         }
         return false;
     }
+
 
 }
 /*Restos

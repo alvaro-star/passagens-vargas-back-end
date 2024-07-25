@@ -1,5 +1,7 @@
 package com.alvaro.empresas.passagens.configurations.exceptions;
 
+import com.alvaro.empresas.passagens.configurations.exceptions.InternalException.BadRequestError;
+import com.alvaro.empresas.passagens.configurations.exceptions.InternalException.BadRequestException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -61,6 +63,18 @@ public class ExceptionsHandler {
                 request.getRequestURI());
         err.getErrors().add(e.getCampo());
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(err);
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<Object> badRequestException(BadRequestException e, HttpServletRequest request) {
+        BadRequestError err = new BadRequestError(
+                System.currentTimeMillis(),
+                HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                "Erro de Validacao",
+                e.getMessage(),
+                request.getRequestURI());
+        err.setConteudo(e.getMensaje().conteudo());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err);
     }
 
     @ExceptionHandler(InvalidDataAccessApiUsageException.class)

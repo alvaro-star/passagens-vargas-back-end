@@ -4,6 +4,7 @@ import com.alvaro.empresas.passagens.autobuses.services.AutobusService;
 import com.alvaro.empresas.passagens.dtos.Mensaje;
 import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacaoEmpresa;
 import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacaoFromAutobus;
+import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacaoFromEmpresa;
 import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOEmpresaResponse;
 import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOForm;
 import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOFormCopy;
@@ -11,6 +12,7 @@ import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOListBusquedaEmp
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOUpdate;
 import com.alvaro.empresas.passagens.helpers.beans.MyUserService;
 import com.alvaro.empresas.passagens.security.models.RoleList;
+import com.alvaro.empresas.passagens.services.EmpresaService;
 import com.alvaro.empresas.passagens.services.ViajeEmpresaService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -32,14 +34,21 @@ import java.util.UUID;
 @SecurityRequirement(name = "bearer-key")
 public class ViajeEmpresaResource {
     private final ViajeEmpresaService viajeEmpresaService;
+    private final EmpresaService empresaService;
     private final MyUserService myUserService;
     private final AutobusService autobusService;
 
     @Autowired
-    public ViajeEmpresaResource(ViajeEmpresaService viajeEmpresaService, MyUserService myUserService, AutobusService autobusService) {
+    public ViajeEmpresaResource(
+            ViajeEmpresaService viajeEmpresaService,
+            MyUserService myUserService,
+            AutobusService autobusService,
+            EmpresaService empresaService
+    ) {
         this.viajeEmpresaService = viajeEmpresaService;
         this.myUserService = myUserService;
         this.autobusService = autobusService;
+        this.empresaService = empresaService;
     }
 
 
@@ -49,6 +58,17 @@ public class ViajeEmpresaResource {
                                                                                @PageableDefault(sort = "dataHoraSalida", direction = Sort.Direction.DESC) Pageable pageable,
                                                                                @PathVariable(value = "type") String type) {
         return ResponseEntity.ok(viajeEmpresaService.findAllEmpresa(id, pageable, type));
+    }
+
+    @PostMapping("/from/empresa")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
+    public ResponseEntity<Page<ViajeDTOListBusquedaEmpresa>> getAllFromEmpresaBetweenMonth(@RequestBody @Valid ViajeDTOSolicitacaoFromEmpresa solicitacao,
+                                                                                           @PageableDefault(sort = "dataHoraSalida") Pageable pageable) {
+        var empresa = empresaService.findById(solicitacao.idEmpresa());
+        var usuarioLogado = myUserService.getUser();
+        if (usuarioLogado.hasRole(RoleList.ROLE_ADMIN.toString()) || usuarioLogado.isMyEmpresa(empresa.getId()))
+            return ResponseEntity.ok(viajeEmpresaService.findAllFromEmpresaBetweenDates(empresa, solicitacao, pageable));
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
     @PostMapping("/from/autobus")

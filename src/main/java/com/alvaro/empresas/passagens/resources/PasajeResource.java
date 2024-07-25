@@ -77,7 +77,7 @@ public class PasajeResource {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ArrayList<>());
     }
 
-    @PostMapping
+
     public ResponseEntity<Object> save(@Valid @RequestBody PasajesDTO dto, BindingResult bindingResult) {
         ValidationErrorsWithList validacao;
         validacao = ValidarCompraPasajes.validarPasajesDTO(bindingResult, dto, "/pasajes");
@@ -94,9 +94,9 @@ public class PasajeResource {
         var viaje = viajeService.findById(dto.idViaje());
 
         if (!usuario.isMyEmpresa(viaje.getEmpresa().getId()))
-            return ResponseEntity.unprocessableEntity().body(new Mensaje("No se puede vender el pasaje de otra empresa"));
+            return ResponseEntity.badRequest().body(new Mensaje("No se puede vender el pasaje de otra empresa"));
         if (viaje.getEmpresa().getBloqued() || !viaje.getEmpresa().getEnabled())
-            return ResponseEntity.badRequest().body(new Mensaje("La empresa esta suspendida"));
+            return ResponseEntity.badRequest().body(new Mensaje("La empresa esta bloqueada"));
 
         validacao = ValidarCompraPasajes.validarPasajesDTOVenta(bindingResult, dto, "/pasajes/vender");
         if (!validacao.getErrorsList().isEmpty() || !validacao.getErrors().isEmpty())

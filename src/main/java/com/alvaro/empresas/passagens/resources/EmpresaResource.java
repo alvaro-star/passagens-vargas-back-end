@@ -72,8 +72,11 @@ public class EmpresaResource {
 
     @GetMapping("/{id}/bloquedCount")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<EmpresaResponseDto> disabled(@PathVariable(value = "id") UUID id) {
-        empresaService.bloquedCount(id);
+    public ResponseEntity<Object> disabled(@PathVariable(value = "id") UUID id) {
+        var empresa = empresaService.findById(id);
+        if (!empresa.getEnabled())
+            return ResponseEntity.badRequest().body(new Mensaje("La empresa esta deshabilitada"));
+        empresaService.bloquedCount(empresa);
         return ResponseEntity.noContent().build();
     }
 

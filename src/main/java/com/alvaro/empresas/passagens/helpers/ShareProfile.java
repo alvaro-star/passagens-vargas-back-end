@@ -84,14 +84,21 @@ public class ShareProfile {
         var usuarioCliente = new UsuarioModel("cliente@gmail.com", "Rick Sanchez", "(11) - 11111-1111", criptogrador.encode("cliente"));
         usuarioCliente.setRoles(new HashSet<RoleModel>(Arrays.asList(cliente)));
         usuarioRepository.save(usuarioCliente);
-        var usuarioAdmin = new UsuarioModel("admin@gmail.com", "Darth Vader", "(11) - 11111-1111", criptogrador.encode("admin"));
-        usuarioAdmin.setRoles(new HashSet<RoleModel>(Arrays.asList(admin)));
+        var usuarioAdmin = new UsuarioModel("admin@gmail.com", "Darth Vader", "(11) - 11111-1111", criptogrador.encode("admin123"));
+        usuarioAdmin.setRoles(new HashSet<RoleModel>(Arrays.asList(admin, cliente)));
         usuarioRepository.save(usuarioAdmin);
-        var usuarioEmpresaAdmin = new UsuarioModel("empresaadmin@gmail.com", "Hero Nakamura", "(33) - 33333-3333", criptogrador.encode("empresaadmin"), marzo.getId());
-        usuarioEmpresaAdmin.setRoles(new HashSet<RoleModel>(Arrays.asList(empresaAdmin)));
+        var usuarioEmpresaAdmin = new UsuarioModel("marzoadmin@gmail.com", "Hero Nakamura", "(33) - 33333-3333", criptogrador.encode("marzoadmin"), marzo.getId());
+        usuarioEmpresaAdmin.setRoles(new HashSet<RoleModel>(Arrays.asList(empresaAdmin, empresaFuncionario, cliente)));
         usuarioRepository.save(usuarioEmpresaAdmin);
-        var usuarioFuncionario = new UsuarioModel("empresafuncionario@gmail.com", "Rick Sanchez", "(11) - 11111-1111", criptogrador.encode("empresafuncionario"), marzo.getId());
-        usuarioFuncionario.setRoles(new HashSet<RoleModel>(Arrays.asList(empresaFuncionario)));
+        var usuarioFuncionario = new UsuarioModel("marzofuncionario@gmail.com", "Rick Sanchez", "(11) - 11111-1111", criptogrador.encode("marzofuncionario"), marzo.getId());
+        usuarioFuncionario.setRoles(new HashSet<RoleModel>(Arrays.asList(empresaFuncionario, cliente)));
+        usuarioRepository.save(usuarioFuncionario);
+
+        usuarioEmpresaAdmin = new UsuarioModel("abriladmin@gmail.com", "Hero Nakamura", "(33) - 33333-3333", criptogrador.encode("abriladmin"), abril.getId());
+        usuarioEmpresaAdmin.setRoles(new HashSet<RoleModel>(Arrays.asList(empresaAdmin, empresaFuncionario, cliente)));
+        usuarioRepository.save(usuarioEmpresaAdmin);
+        usuarioFuncionario = new UsuarioModel("abrilfuncionario@gmail.com", "Rick Sanchez", "(11) - 11111-1111", criptogrador.encode("abrilfuncionario"), abril.getId());
+        usuarioFuncionario.setRoles(new HashSet<RoleModel>(Arrays.asList(empresaFuncionario, cliente)));
         usuarioRepository.save(usuarioFuncionario);
 
         List<String> nombresDepartamentos = Arrays.asList("Santa Cruz", "La Paz", "Cochabamba", "Oruro", "Potosí", "Tarija", "Chuquisaca", "Pando", "Beni");

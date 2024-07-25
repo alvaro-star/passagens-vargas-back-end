@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -66,6 +67,8 @@ public class PasajeService {
         salida = viaje.getParadaByLugarId(dto.idLugarSalida());
         if (salida == null)
             throw new ValidationException(new FieldMessage("idLugarSalida", "La salida no hace parte del trayecto"));
+        else if (salida.getDataHora().isBefore(LocalDateTime.now().minusMinutes(10)))
+            throw new ValidationException(new FieldMessage("idLugarSalida", "El autobus ya inicio el viaje"));
         destino = viaje.getParadaByLugarId(dto.idLugarDestino());
         if (destino == null)
             throw new ValidationException(new FieldMessage("idLugarDestino", "El destino no hace parte del trayecto"));
@@ -100,6 +103,8 @@ public class PasajeService {
         salida = viaje.getParadaByLugarId(dto.idLugarSalida());
         if (salida == null)
             throw new ValidationException(new FieldMessage("idLugarSalida", "La salida no hace parte del trayecto"));
+        else if (salida.getDataHora().isBefore(LocalDateTime.now().minusMinutes(10)))
+            throw new ValidationException(new FieldMessage("idLugarSalida", "El autobus ya inicio el viaje"));
         destino = viaje.getParadaByLugarId(dto.idLugarDestino());
         if (destino == null)
             throw new ValidationException(new FieldMessage("idLugarDestino", "El destino no hace parte del trayecto"));

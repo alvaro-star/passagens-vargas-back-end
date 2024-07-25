@@ -23,8 +23,6 @@ public class FuncionarioService {
     private UsuarioRepository usuarioRepository;
     @Autowired
     private RoleService roleService;
-    @Autowired
-    private EmailService emailService;
 
     public String determinarRole(UsuarioModel model) {
         var isAdmin = model.hasRole(RoleList.ROLE_EMPRESA_ADMIN.toString());
@@ -60,7 +58,6 @@ public class FuncionarioService {
         if (!adicionou || roleEmpresaFuncionario == null)
             return new Mensaje("No se pudo elevar el cargo");
         usuarioRepository.save(usuario.get());
-        emailService.mandarEmail(usuario.get().getLogin(), "Contrato en la empresa", "Bien benido a la empresa, a partir de ahora eres un funcionario");
         return new Mensaje("");
     }
 

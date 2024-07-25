@@ -20,7 +20,6 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
-
 public class PasajeModel {
     @Id
     @Column(name = "idtb_pasaje")

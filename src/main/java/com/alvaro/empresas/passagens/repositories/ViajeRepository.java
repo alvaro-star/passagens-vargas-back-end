@@ -27,6 +27,13 @@ public interface ViajeRepository extends JpaRepository<ViajeModel, UUID> {
     @Query("SELECT v FROM ViajeModel v WHERE v.empresa.id = :empresaId AND v.dataHoraSalida < :dataHoraSalida")
     Page<ViajeModel> findViajesPassados(UUID empresaId, LocalDateTime dataHoraSalida, Pageable pageable);
 
+    @Query("SELECT new com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQL(v, s, d) " +
+            "FROM ViajeModel v, ParadaModel s, ParadaModel d " +
+            "WHERE v.empresa.id = :empresaId " +
+            "AND v.dataHoraSalida BETWEEN :dataInicio AND :dataFim " +
+            "AND s.viaje.codigo = v.codigo AND s.tipo = 'SALIDA' " +
+            "AND d.viaje.codigo = v.codigo AND d.tipo = 'DESTINO' ")
+    Page<ViajeDTOJPQL> findByEmpresaIdInInterval(UUID empresaId, LocalDateTime dataInicio, LocalDateTime dataFim, Pageable pageable);
 
     @Query("SELECT new com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQL(v, s, d) " +
             "FROM ViajeModel v, ParadaModel s, ParadaModel d " +
