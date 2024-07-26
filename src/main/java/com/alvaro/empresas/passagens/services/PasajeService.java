@@ -2,6 +2,7 @@ package com.alvaro.empresas.passagens.services;
 
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import com.alvaro.empresas.passagens.configurations.exceptions.FieldMessage;
+import com.alvaro.empresas.passagens.configurations.exceptions.InternalException.BadRequestException;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajeDTO;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajeDTOEmpresaResponse;
@@ -19,6 +20,7 @@ import com.alvaro.empresas.passagens.repositories.PasajeRepository;
 import com.alvaro.empresas.passagens.repositories.ViajeRepository;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +33,8 @@ import java.util.UUID;
 
 @Service
 public class PasajeService {
+    @Value("${api.viaje.min-time-before-buy-pasaje-min}")
+    private Integer minTimeBeforeBuyPasaje;
     private final PasajeRepository pasajeRepository;
     private final PrecioService precioService;
     private final FacturaPasajeService facturaPasajeService;
@@ -67,7 +71,7 @@ public class PasajeService {
         salida = viaje.getParadaByLugarId(dto.idLugarSalida());
         if (salida == null)
             throw new ValidationException(new FieldMessage("idLugarSalida", "La salida no hace parte del trayecto"));
-        else if (salida.getDataHora().isBefore(LocalDateTime.now().minusMinutes(10)))
+        else if (salida.getDataHora().isBefore(LocalDateTime.now().minusMinutes(minTimeBeforeBuyPasaje)))
             throw new ValidationException(new FieldMessage("idLugarSalida", "El autobus ya inicio el viaje"));
         destino = viaje.getParadaByLugarId(dto.idLugarDestino());
         if (destino == null)
@@ -96,15 +100,15 @@ public class PasajeService {
 
 
     @Transactional
-    public UUID saveEmpresa(String empresaNombre, PasajesDTOVenta dto, MetodoPagamentoEnum metodo, ViajeModel viaje, boolean guardarContacto, boolean compradoWeb) {
+    public UUID saveEmpresa(PasajesDTOVenta dto, MetodoPagamentoEnum metodo, ViajeModel viaje, boolean guardarContacto, boolean compradoWeb) {
         ParadaModel salida;
         ParadaModel destino;
 
         salida = viaje.getParadaByLugarId(dto.idLugarSalida());
         if (salida == null)
             throw new ValidationException(new FieldMessage("idLugarSalida", "La salida no hace parte del trayecto"));
-        else if (salida.getDataHora().isBefore(LocalDateTime.now().minusMinutes(10)))
-            throw new ValidationException(new FieldMessage("idLugarSalida", "El autobus ya inicio el viaje"));
+        else if (salida.getDataHora().isBefore(LocalDateTime.now()))
+            throw new BadRequestException("El autobus ya inicio el viaje");
         destino = viaje.getParadaByLugarId(dto.idLugarDestino());
         if (destino == null)
             throw new ValidationException(new FieldMessage("idLugarDestino", "El destino no hace parte del trayecto"));
@@ -117,8 +121,7 @@ public class PasajeService {
         for (PasajeDTO pasajeFor : dto.pasajes()) {
             if (pasajeFor.nSilla() > 0 && pasajeFor.nSilla() <= piso1.getNSillas())
                 sillasPiso1.add(pasajeFor);
-            else
-                sillasPiso2.add(pasajeFor);
+            else sillasPiso2.add(pasajeFor);
         }
 
         PrecioModel precio1 = viaje.getPrecioByNPiso(1);

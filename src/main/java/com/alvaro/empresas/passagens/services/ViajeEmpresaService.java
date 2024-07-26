@@ -56,8 +56,6 @@ public class ViajeEmpresaService {
 
     @Value("${api.viaje.max-time-viaje-day}")
     private Integer tempoMaxViajeDias;
-    @Value("${api.viaje.min-time-before-buy-pasaje-min}")
-    private Integer minTimeBeforeBuyPasaje;
     private final ViajeRepository viajeRepository;
     private final ParadaRepository paradaRepository;
     private final PrecioService precioService;
@@ -155,21 +153,14 @@ public class ViajeEmpresaService {
         if (lugaresDestino.isEmpty())
             throw new ObjectNotFoundException(dto.idCiudadDestino(), CiudadModel.class.getName());
 
-        LocalDateTime hj = LocalDateTime.now();
-        LocalDateTime startDay;
+        LocalDateTime startDay = dto.fechaSalida().atTime(LocalTime.MIN);
         LocalDateTime endDay = dto.fechaSalida().atTime(LocalTime.MAX);
 
         List<ViajeDTOListBusquedaEmpresa> viajesSelecionados = new ArrayList<>();
-
-        if (hj.toLocalDate().isEqual(dto.fechaSalida())) {
-            startDay = hj.plusMinutes(minTimeBeforeBuyPasaje);
-            if (hj.toLocalTime().isAfter(LocalTime.of(23, 30))) return new ArrayList<>();
-        } else startDay = dto.fechaSalida().atTime(LocalTime.MIN);
-
-
         ParadaDTOComplete salidaDTO;
         ParadaDTOComplete destinoDTO;
         List<PrecioDTO> precios;
+
         for (LugarModel lugarSalida : lugaresSalida) {
             for (LugarModel lugarDestino : lugaresDestino) {
                 List<ViajeEmpresaDTOJPQ> salidasDia = paradaRepository.cargarSalidasDelDiaFromEmpresa(idEmpresa, lugarSalida.getId(), lugarDestino.getId(), startDay, endDay);
@@ -195,29 +186,24 @@ public class ViajeEmpresaService {
         if (lugaresSalida.isEmpty())
             throw new ObjectNotFoundException(dto.idCiudadSalida(), CiudadModel.class.getName());
 
-        LocalDateTime hj = LocalDateTime.now();
-        LocalDateTime startDay;
+        LocalDateTime startDay = dto.fechaSalida().atTime(LocalTime.MIN);
         LocalDateTime endDay = dto.fechaSalida().atTime(LocalTime.MAX);
 
         List<ViajeDTOListBusquedaEmpresa> viajesSelecionados = new ArrayList<>();
-
-        if (hj.toLocalDate().isEqual(dto.fechaSalida())) {
-            startDay = hj.plusMinutes(minTimeBeforeBuyPasaje);
-            if (hj.toLocalTime().isAfter(LocalTime.of(23, 30))) return new ArrayList<>();
-        } else startDay = dto.fechaSalida().atTime(LocalTime.MIN);
-
         ParadaDTOComplete salidaDTO;
         ParadaDTOComplete destinoDTO;
         List<PrecioDTO> precios;
+
         for (LugarModel lugarSalida : lugaresSalida) {
             List<ViajeEmpresaDTOJPQ> salidasDia = paradaRepository.cargarSalidasDelDiaFromEmpresa2(idEmpresa, lugarSalida.getId(), startDay, endDay);
             for (ViajeEmpresaDTOJPQ ViajeEmpresaDTOJPQ : salidasDia) {
                 salidaDTO = new ParadaDTOComplete(ViajeEmpresaDTOJPQ.getSalida(), ViajeEmpresaDTOJPQ.getViaje().getCodigo());
                 destinoDTO = new ParadaDTOComplete(ViajeEmpresaDTOJPQ.getDestino(), ViajeEmpresaDTOJPQ.getViaje().getCodigo());
+
                 if (!destinoDTO.dataHora().isAfter(salidaDTO.dataHora())) continue;
                 precios = new ArrayList<>();
                 for (PrecioModel precio : ViajeEmpresaDTOJPQ.getViaje().getPrecios())
-                    if (!precio.getLleno()) precios.add(new PrecioDTO(precio));
+                    precios.add(new PrecioDTO(precio));
 
                 viajesSelecionados.add(new ViajeDTOListBusquedaEmpresa(ViajeEmpresaDTOJPQ.getViaje(), null, salidaDTO, destinoDTO, precios));
             }
