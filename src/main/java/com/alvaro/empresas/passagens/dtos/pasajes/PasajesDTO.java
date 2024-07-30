@@ -19,7 +19,7 @@ public record PasajesDTO(
         @NotNull
         @Positive
         Integer idLugarDestino,
-        @Size(min = 1)
+        @Size(min = 1, max = 7)
         List<PasajeDTO> pasajes
 ) {
 }

@@ -78,7 +78,7 @@ public class PasajesPDF {
         contentStream.newLine();
         contentStream.showText("Piso: piso " + model.getPrecio().getNPiso());
         contentStream.newLine();
-        contentStream.showText("Silla: " + model.getNSilla());
+        contentStream.showText("Asiento: " + model.getNSilla());
         contentStream.newLine();
 
         addParada(contentStream, "Origen", salida);

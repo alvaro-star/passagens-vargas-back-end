@@ -77,9 +77,19 @@ public class ValidarCompraPasajes {
     private static String validateCarnet(String carnet) {
         if (carnet == null || carnet.isBlank())
             return "El carnet no puede estar en blanco";
-        if (carnet.length() != 7)
-            return "El carnet debe tener exactamente 7 caracteres";
+        if (carnet.length() < 7 || carnet.length() > 8)
+            return "El carnet debe tener exactamente 7 o 8 caracteres";
+        if (!saoTodosDigitos(carnet))
+            return "El carnet debe tener solo caracteres numericos";
         return "";
+    }
+
+    public static boolean saoTodosDigitos(String str) {
+        for (int i = 0; i < str.length(); i++) {
+            if (!Character.isDigit(str.charAt(i)))
+                return false;
+        }
+        return true;
     }
 
     private static String validateNombre(String nombre, int size) {

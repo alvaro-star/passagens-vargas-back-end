@@ -1,6 +1,5 @@
 package com.alvaro.empresas.passagens.autobuses.services;
 
-import com.alvaro.empresas.passagens.autobuses.dtos.ValoresArrecadadosDTO;
 import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTO;
 import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTOList;
 import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTOResponse;
@@ -21,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,23 +53,20 @@ public class AutobusService {
 
     public Page<AutobusDTOList> findAll(Pageable pageable) {
         Page<AutobusModel> models = autobusRepository.findAll(pageable);
-        return models.map(model -> {
-            ValoresArrecadadosDTO valores = autobusRepository.getArrecadacao(model.getId());
-            return new AutobusDTOList(model,
-                    valores.valorArrecadadoEfectivo(), valores.valorArrecadadoNoWeb(), valores.valorArrecadadoWeb(),
-                    model.getEmpresa().getId());
-        });
+        return models.map(model ->
+                new AutobusDTOList(model,
+                        BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
+                        model.getEmpresa().getId())
+        );
     }
 
     public Page<AutobusDTOList> findAllFromEmpresa(UUID idEmpresa, Pageable pageable) {
         var empresa = empresaService.findById(idEmpresa);
         Page<AutobusModel> autobuses = autobusRepository.findByEmpresaId(empresa.getId(), pageable);
-        return autobuses.map((autobus) -> {
-            ValoresArrecadadosDTO valorViajes = autobusRepository.getArrecadacao(autobus.getId());
-            return new AutobusDTOList(autobus,
-                    valorViajes.valorArrecadadoEfectivo(), valorViajes.valorArrecadadoNoWeb(), valorViajes.valorArrecadadoWeb(),
-                    empresa.getId());
-        });
+        return autobuses.map((autobus) -> new AutobusDTOList(autobus,
+                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
+                empresa.getId())
+        );
     }
 
     public AutobusDTOResponse getOne(Integer id) {
@@ -101,9 +98,8 @@ public class AutobusService {
     public AutobusDTOList update(AutobusDTOUpdate dto, AutobusModel model) {
         model.updateValues(dto);
         var update = autobusRepository.save(model);
-        ValoresArrecadadosDTO valorViajes = autobusRepository.getArrecadacao(model.getId());
         return new AutobusDTOList(update,
-                valorViajes.valorArrecadadoEfectivo(), valorViajes.valorArrecadadoNoWeb(), valorViajes.valorArrecadadoWeb(),
+                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
                 update.getEmpresa().getId());
     }
 

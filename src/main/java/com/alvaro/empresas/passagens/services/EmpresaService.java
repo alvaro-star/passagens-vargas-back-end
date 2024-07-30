@@ -1,6 +1,5 @@
 package com.alvaro.empresas.passagens.services;
 
-import com.alvaro.empresas.passagens.autobuses.dtos.ValoresArrecadadosDTO;
 import com.alvaro.empresas.passagens.dtos.EmpresaDto;
 import com.alvaro.empresas.passagens.dtos.EmpresaResponseDto;
 import com.alvaro.empresas.passagens.dtos.Mensaje;
@@ -42,15 +41,13 @@ public class EmpresaService {
 
     public EmpresaResponseDto getOne(UUID id) {
         EmpresaModel model = this.findById(id);
-        ValoresArrecadadosDTO valorArrecadado = empresaRepository.getArrecadacao(id);
-        return new EmpresaResponseDto(model, valorArrecadado.valorArrecadadoEfectivo(), valorArrecadado.valorArrecadadoNoWeb(), valorArrecadado.valorArrecadadoWeb());
+        return new EmpresaResponseDto(model, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
     }
 
     public Page<EmpresaResponseDto> findAll(Pageable pageable) {
-        return empresaRepository.findAll(pageable).map(model -> {
-            ValoresArrecadadosDTO valorArrecadado = empresaRepository.getArrecadacao(model.getId());
-            return new EmpresaResponseDto(model, valorArrecadado.valorArrecadadoEfectivo(), valorArrecadado.valorArrecadadoNoWeb(), valorArrecadado.valorArrecadadoWeb());
-        });
+        return empresaRepository.findAll(pageable).map(model ->
+                new EmpresaResponseDto(model, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO)
+        );
     }
 
     @Transactional
@@ -107,9 +104,8 @@ public class EmpresaService {
     public EmpresaResponseDto update(EmpresaDto dto, UUID id) {
         var model = this.findById(id);
         BeanUtils.copyProperties(dto, model, "id", "autobuses");
-        ValoresArrecadadosDTO valorArrecadado = empresaRepository.getArrecadacao(id);
         EmpresaModel update = empresaRepository.save(model);
-        return new EmpresaResponseDto(update, valorArrecadado.valorArrecadadoEfectivo(), valorArrecadado.valorArrecadadoNoWeb(), valorArrecadado.valorArrecadadoWeb());
+        return new EmpresaResponseDto(update, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
     }
 
     public void bloquedCount(EmpresaModel model) {

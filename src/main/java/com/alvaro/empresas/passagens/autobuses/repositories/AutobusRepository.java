@@ -19,8 +19,8 @@ public interface AutobusRepository extends JpaRepository<AutobusModel, Integer> 
 
     Page<AutobusModel> findByEmpresaId(UUID idEmpresa, Pageable pageable);
 
-    @Query("SELECT new com.alvaro.empresas.passagens.autobuses.dtos.ValoresArrecadadosDTO(SUM(v.valorArrecadadoEfectivo), SUM(v.valorArrecadadoNoWeb), SUM(v.valorArrecadadoWeb)) FROM ViajeModel v WHERE v.autobus.id = :idAutobus AND v.isCobrado = false")
-    ValoresArrecadadosDTO getArrecadacao(@Param("idAutobus") Integer idAutobus);
+    //@Query("SELECT new com.alvaro.empresas.passagens.autobuses.dtos.ValoresArrecadadosDTO(SUM(v.valorArrecadadoEfectivo), SUM(v.valorArrecadadoNoWeb), SUM(v.valorArrecadadoWeb)) FROM ViajeModel v WHERE v.autobus.id = :idAutobus AND v.isCobrado = false")
+    //ValoresArrecadadosDTO getArrecadacao(@Param("idAutobus") Integer idAutobus);
 
 }
 

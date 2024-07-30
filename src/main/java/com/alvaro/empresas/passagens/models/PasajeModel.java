@@ -75,7 +75,7 @@ public class PasajeModel {
         this.estaPagado = estaPagado;
         this.enEfectivo = enEfectivo;
         this.carnet = carnet;
-        this.nombre = nombre;
+        this.nombre = nombre.toUpperCase();
         this.nascimento = nascimento;
         this.precioPagado = precioPagado;
         this.precio = precio;
