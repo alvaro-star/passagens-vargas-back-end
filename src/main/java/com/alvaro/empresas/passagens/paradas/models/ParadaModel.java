@@ -23,7 +23,6 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 public class ParadaModel {
-
     @Id
     @Column(name = "idtb_parada", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,7 +40,8 @@ public class ParadaModel {
     @JoinColumn(name = "fk_idtb_lugar")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private LugarModel lugar;
-
+    @Column(name = "fk_idtb_lugar", updatable = false, insertable = false)
+    private Integer lugarId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_viaje")
@@ -64,14 +64,14 @@ public class ParadaModel {
         this.plataforma = plataforma;
         this.tipo = tipo;
         this.lugar = lugar;
+        this.lugarId = lugar.getId();
         this.viaje = viaje;
         this.empresa = empresa;
     }
 
     public void updateValues(ParadaDTOUpdate dtoUpdate) {
         dataHora = dtoUpdate.dataHora();
-        if (dtoUpdate.plataforma() != null) {
+        if (dtoUpdate.plataforma() != null)
             plataforma = dtoUpdate.plataforma();
-        }
     }
 }

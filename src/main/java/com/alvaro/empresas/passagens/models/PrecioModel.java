@@ -42,11 +42,15 @@ public class PrecioModel {
     @JoinColumn(name = "fk_idtb_viaje")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private ViajeModel viaje;
+    @Column(name = "fk_idtb_viaje", updatable = false, insertable = false)
+    private UUID viajeCodigo;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_empresa")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private EmpresaModel empresa;
+    @Column(name = "fk_idtb_empresa", updatable = false, insertable = false)
+    private UUID empresaId;
 
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "precio")
     private List<PasajeModel> pasajes = new ArrayList<>();
@@ -66,7 +70,9 @@ public class PrecioModel {
         this.precio = precio;
         this.nPiso = nPiso;
         this.nSillasDisponibles = nSillasDisponibles;
+        this.viajeCodigo = viaje.getCodigo();
         this.viaje = viaje;
+        this.empresaId = empresa.getId();
         this.empresa = empresa;
     }
 

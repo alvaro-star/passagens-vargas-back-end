@@ -42,7 +42,7 @@ public class PrecioService {
 
     public PrecioDTO getOne(UUID id) {
         var model = findById(id);
-        return new PrecioDTO(model, model.getViaje().getCodigo());
+        return new PrecioDTO(model, model.getViajeCodigo());
     }
 
     public PrecioDTOResponseViaje vender(UUID id) {
@@ -57,14 +57,14 @@ public class PrecioService {
 
         PisoDTOResponse pisoDto = new PisoDTOResponse(pisoElegido, model.getViaje().getAutobus().getId());
 
-        List<Integer> ocupados = pasajeRepository.getPasajesVendidos(model.getId());
+        List<Integer> ocupados = pasajeRepository.getPasajesVendidosAndNoRembolso(model.getId());
         return new PrecioDTOResponseViaje(model, pisoDto, ocupados);
     }
 
     public PrecioDTO update(PrecioDTOUpdate dto, PrecioModel model) {
         model.updateValues(dto);
         var update = precioRepository.save(model);
-        return new PrecioDTO(update, model.getViaje().getCodigo());
+        return new PrecioDTO(update, model.getViajeCodigo());
     }
 
     public PrecioModel updateFromService(PrecioModel precioModel) {

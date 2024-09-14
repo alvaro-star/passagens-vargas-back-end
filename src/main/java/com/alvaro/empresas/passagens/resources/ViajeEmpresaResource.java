@@ -93,7 +93,6 @@ public class ViajeEmpresaResource {
             else
                 return ResponseEntity.ok(viajeEmpresaService.getViajesFromDia(idEmpresa, dto));
         }
-
         return ResponseEntity.badRequest().build();
     }
 

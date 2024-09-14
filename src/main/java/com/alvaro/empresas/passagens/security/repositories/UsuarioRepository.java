@@ -18,5 +18,7 @@ public interface UsuarioRepository extends JpaRepository<UsuarioModel, UUID> {
     @Query("SELECT u FROM UsuarioModel as u WHERE u.login = :email")
     Optional<UsuarioModel> findByEmail(String email);
 
+    Boolean existsByLogin(String email);
+
     Page<UsuarioModel> findByIdEmpresa(UUID idEmpresa, Pageable pageable);
 }

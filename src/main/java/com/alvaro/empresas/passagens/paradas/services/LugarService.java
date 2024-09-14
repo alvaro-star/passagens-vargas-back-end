@@ -12,6 +12,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Set;
+
 @Service
 public class LugarService {
     @Autowired
@@ -23,6 +26,10 @@ public class LugarService {
     public LugarModel findById(Integer id) {
         var model = lugarRepository.findById(id);
         return model.orElseThrow(() -> new ObjectNotFoundException(id, LugarModel.class.getName()));
+    }
+
+    public List<LugarModel> findAllById(Set<Integer> ids){
+        return lugarRepository.findAllById(ids);
     }
 
     public Page<LugarDTO> findAll(Pageable pageable) {

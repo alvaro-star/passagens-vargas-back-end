@@ -1,5 +1,6 @@
 package com.alvaro.empresas.passagens.models;
 
+import com.alvaro.empresas.passagens.enums.MetodoPagamentoEnum;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
@@ -31,16 +32,17 @@ public class PasajeModel {
 
     @Column(nullable = false)
     private BigDecimal precioPagado;
-
-
     @Column(name = "comprado_na_web", nullable = false)
     private Boolean compradoWeb;
     @Column(name = "pagado", nullable = false)
     private Boolean estaPagado;
     @Column(name = "rembolsado", nullable = false)
-    private Boolean fueRembolsado = false;
+    private Boolean fueRembolsado;
     @Column(nullable = false)
     private Boolean enEfectivo;
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private MetodoPagamentoEnum metodoPago;
 
     @Column(nullable = false, length = 9)
     private String carnet;
@@ -80,7 +82,9 @@ public class PasajeModel {
         this.precioPagado = precioPagado;
         this.precio = precio;
         this.facturaPasaje = facturaPasaje;
+        this.metodoPago = facturaPasaje.getMetodoPago();
         this.salida = salida;
         this.destino = destino;
+        this.fueRembolsado = false;
     }
 }

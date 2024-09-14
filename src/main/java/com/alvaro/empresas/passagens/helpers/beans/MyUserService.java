@@ -15,6 +15,7 @@ import java.util.List;
 public class MyUserService {
 
     private final UsuarioRepository usuarioRepository;
+
     @Autowired
     public MyUserService(UsuarioRepository usuarioRepository) {
         this.usuarioRepository = usuarioRepository;
@@ -28,5 +29,11 @@ public class MyUserService {
         return new UsuarioBean(usuarioModel.orElseThrow(
                 () -> new ObjectNotFoundException(0, UsuarioModel.class.getName())
         ), roles);
+    }
+
+    public UsuarioModel getUserModel() {
+        var usuario = SecurityContextHolder.getContext().getAuthentication();
+        var usuarioModel = usuarioRepository.findByEmail(usuario.getName());
+        return usuarioModel.orElseThrow(() -> new ObjectNotFoundException(0, UsuarioModel.class.getName()));
     }
 }

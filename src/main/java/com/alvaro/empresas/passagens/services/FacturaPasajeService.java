@@ -74,7 +74,7 @@ public class FacturaPasajeService {
         }
 
         PrecioModel precio = pago.getPasajes().get(0).getPrecio();
-        List<Integer> sillasVendidas = pasajeRepository.getPasajesVendidos(precio.getId());
+        List<Integer> sillasVendidas = pasajeRepository.getPasajesVendidosAndNoRembolso(precio.getId());
 
         int nPasajes = 0;
         for (PasajeModel pasaje : pago.getPasajes()) {

@@ -1,5 +1,7 @@
 package com.alvaro.empresas.passagens.services.validacao;
 
+import com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQL;
+import com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQLRelatorio;
 import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.repositories.ViajeRepository;
 
@@ -10,6 +12,17 @@ import java.util.UUID;
 public class TempoMaxViajeValidation {
     public static boolean validarTempoMaximoViaje(Integer tempoMaximoViajeDias, LocalDateTime dataHoraSalida, LocalDateTime dataHoraDestino) {
         return dataHoraDestino.isBefore(dataHoraSalida.plusDays(tempoMaximoViajeDias).plusSeconds(2));
+    }
+
+    public static List<ViajeDTOJPQLRelatorio> findAllViajesFromEmpresaInInterval(
+            ViajeRepository viajeRepository,
+            Integer tempoMaximoViajeDias,
+            UUID empresaId,
+            LocalDateTime dataInicio,
+            LocalDateTime dataFim
+    ) {
+        LocalDateTime dataInicioAlterado = dataInicio.minusDays(tempoMaximoViajeDias).minusSeconds(2);
+        return viajeRepository.findByEmpresaIdMakedInInterval(empresaId, dataInicio, dataInicioAlterado, dataFim);
     }
 
     public static boolean existViajeInActiveInIntervaloFromAutobus(

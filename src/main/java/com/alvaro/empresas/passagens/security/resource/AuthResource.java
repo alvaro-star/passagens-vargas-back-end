@@ -2,11 +2,10 @@ package com.alvaro.empresas.passagens.security.resource;
 
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
 import com.alvaro.empresas.passagens.dtos.Mensaje;
+import com.alvaro.empresas.passagens.enums.EnumTypeSolicitudOperation;
+import com.alvaro.empresas.passagens.helpers.beans.MyUserService;
 import com.alvaro.empresas.passagens.helpers.services.EmailService;
-import com.alvaro.empresas.passagens.security.dtos.LoginDto;
-import com.alvaro.empresas.passagens.security.dtos.LoginResponseDto;
-import com.alvaro.empresas.passagens.security.dtos.RegisterDto;
-import com.alvaro.empresas.passagens.security.dtos.ValidadorDTO;
+import com.alvaro.empresas.passagens.security.dtos.*;
 import com.alvaro.empresas.passagens.security.dtos.password.PasswordForm;
 import com.alvaro.empresas.passagens.security.dtos.password.SolicitudNewPassword;
 import com.alvaro.empresas.passagens.security.models.RoleList;
@@ -47,6 +46,7 @@ public class AuthResource {
     private final EmailService emailService;
     private final CodigoRepository codigoRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final MyUserService myUserService;
 
     @Autowired
     public AuthResource(
@@ -57,11 +57,13 @@ public class AuthResource {
             UsuarioSolicitudRepository usuarioSolicitudRepository,
             EmailService emailService,
             CodigoRepository codigoRepository,
+            MyUserService myUserService,
             BCryptPasswordEncoder passwordEncoder
     ) {
         this.usuarioRepository = usuarioRepository;
         this.roleService = roleService;
         this.authenticationManager = authenticationManager;
+        this.myUserService = myUserService;
         this.tokenService = tokenService;
         this.usuarioSolicitudRepository = usuarioSolicitudRepository;
         this.emailService = emailService;
@@ -90,7 +92,7 @@ public class AuthResource {
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime startDay = now.withHour(0).withMinute(0).withSecond(0).withNano(1);
-        var solicitudes = usuarioSolicitudRepository.findByEmailAfterTime(registerDto.login(), startDay);
+        var solicitudes = usuarioSolicitudRepository.findByEmailAfterTime(registerDto.login(), startDay, EnumTypeSolicitudOperation.CREATE.toString());
         if (solicitudes.size() > 5)
             return ResponseEntity.badRequest().body(new Mensaje("Ya hubo bastantes intentos con este email por hoy"));
 
@@ -101,15 +103,13 @@ public class AuthResource {
         if (logado)
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Mensaje("Hay un usuario que inicio session"));
         String encriptedPassword = this.passwordEncoder.encode(registerDto.contrasena());
-        UUID codigoAleatorio = UUID.randomUUID();
-        UsuarioSolicitudModel newUser = new UsuarioSolicitudModel(registerDto.login(), registerDto.nombre(), registerDto.telefono(), encriptedPassword);
-        newUser.setCodigoVerificacion(codigoAleatorio);
+        UsuarioSolicitudModel newUser = new UsuarioSolicitudModel(registerDto.login(), registerDto.nombre(), registerDto.telefono(), encriptedPassword, EnumTypeSolicitudOperation.CREATE);
         usuarioSolicitudRepository.save(newUser);
         boolean valorLogico;
 
         valorLogico = emailService.mandarEmail(newUser.getEmail(), "Codigo de Verificacion", newUser.getNombre()
                 + ", este es tu codigo de verificacion para tu cuenta en la aplicacion: \n"
-                + codigoAleatorio.toString()
+                + newUser.getId().toString()
                 + "\nNo lo compartas con nadie");
         if (valorLogico)
             return ResponseEntity.ok(new Mensaje("Verifique el codigo de seguridad"));
@@ -120,14 +120,14 @@ public class AuthResource {
     public ResponseEntity<Mensaje> verificarRegistro(@RequestBody ValidadorDTO validadorDTO) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime halfHourAgo = now.minus(Duration.ofMinutes(30));
-        var solicitudes = usuarioSolicitudRepository.findByEmailAfterTime(validadorDTO.email(), halfHourAgo);
+        var solicitudes = usuarioSolicitudRepository.findByEmailAfterTime(validadorDTO.email(), halfHourAgo, EnumTypeSolicitudOperation.CREATE.toString());
         var usuario = usuarioRepository.findByEmail(validadorDTO.email());
         if (usuario.isPresent())
             return ResponseEntity.badRequest().body(new Mensaje("El usuario ya esta registrado"));
         if (solicitudes.isEmpty()) {
             return ResponseEntity.badRequest().body(new Mensaje("No hay solicitudes recientes"));
         }
-        if (!solicitudes.get(0).getCodigoVerificacion().equals(validadorDTO.codigo()))
+        if (!solicitudes.get(0).getId().equals(validadorDTO.codigo()))
             return ResponseEntity.badRequest().body(new Mensaje("El codigo de verificacion es incorrecto"));
 
         usuarioSolicitudRepository.deleteByEmailBeforeTime(validadorDTO.email(), halfHourAgo);
@@ -189,5 +189,52 @@ public class AuthResource {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/update")
+    public ResponseEntity<Object> updateProfile(@RequestBody @Valid UsuarioDTOUpdate solicitud) {
+        var usuarioModel = myUserService.getUserModel();
+        Boolean emailOcuped = false;
+        if (solicitud.email() != null && !solicitud.email().isBlank() && !solicitud.email().equals(usuarioModel.getLogin()))
+            emailOcuped = usuarioRepository.existsByLogin(solicitud.email());
 
+        if (emailOcuped)
+            return ResponseEntity.badRequest().body(new Mensaje("El email esta indisponible"));
+        LocalDateTime thrityMinutesBefore = LocalDateTime.now().minusMinutes(60);
+        var solicitudes = usuarioSolicitudRepository.findByEmailAfterTime(solicitud.email(), thrityMinutesBefore, EnumTypeSolicitudOperation.UPDATE.toString());
+        if (solicitudes.size() >= 5)
+            return ResponseEntity.badRequest().body(new Mensaje("Fueron intentadas muchas solicitaciones"));
+
+        String passwordEncode = "";
+        if (solicitud.contrasena() != null && !solicitud.contrasena().isBlank())
+            passwordEncode = passwordEncoder.encode(solicitud.contrasena());
+        var usuarioSolicitud = new UsuarioSolicitudModel(solicitud, usuarioModel, passwordEncode, EnumTypeSolicitudOperation.UPDATE);
+
+        usuarioSolicitudRepository.save(usuarioSolicitud);
+        emailService.mandarEmail(usuarioModel.getLogin(), "Cambio de datos del perfil",
+                "Este es tu codigo de verificacion para editar tud datos: \n"
+                        + usuarioSolicitud.getId().toString()
+                        + "\nNo lo compartas con nadie");
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/validar_update")
+    public ResponseEntity<Object> vaidateUpdate(@RequestBody @Valid UsuarioDTOUpdateValidation form) {
+        var userLogado = myUserService.getUserModel();
+        var usuarioSolicitud = usuarioSolicitudRepository.findById(form.codigo());
+        if (usuarioSolicitud.isEmpty())
+            throw new ValidationException("codigo", "El codigo de verificacion es invalido");
+
+        LocalDateTime thyrtyMinutesBefore = LocalDateTime.now().minusMinutes(30);
+
+        if (usuarioSolicitud.get().getCreatedAt().isBefore(thyrtyMinutesBefore)) {
+            usuarioSolicitudRepository.delete(usuarioSolicitud.get());
+            throw new ValidationException("codigo", "El codigo ha expirado");
+        }
+
+        if (!usuarioSolicitud.get().getEmail().equals(userLogado.getLogin()))
+            throw new ValidationException("email", "El codigo no le pertenece a este usuario");
+
+        userLogado.updateValues(usuarioSolicitud.get());
+        usuarioRepository.save(userLogado);
+        return ResponseEntity.noContent().build();
+    }
 }

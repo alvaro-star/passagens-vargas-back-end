@@ -1,6 +1,7 @@
 package com.alvaro.empresas.passagens.repositories;
 
 import com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQL;
+import com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQLRelatorio;
 import com.alvaro.empresas.passagens.models.ViajeModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -60,6 +61,14 @@ public interface ViajeRepository extends JpaRepository<ViajeModel, UUID> {
             "LIMIT 2",
             nativeQuery = true)
     List<ViajeModel> findViajeFromAutobusInIntervalo(UUID empresaId, Integer autobusId, LocalDateTime inicio, LocalDateTime inicioAlterado, LocalDateTime fim);
+
+    @Query("SELECT new com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQLRelatorio(v, s.lugarId, d.lugarId) " +
+            "FROM ViajeModel v, ParadaModel s, ParadaModel d " +
+            "WHERE v.empresa.id = :empresaId " +
+            "AND v.dataHoraSalida BETWEEN :dataInicioAlterado AND :dataFim " +
+            "AND s.viaje.codigo = v.codigo AND s.tipo = 'SALIDA' " +
+            "AND d.viaje.codigo = v.codigo AND d.tipo = 'DESTINO' AND d.dataHora >= :dataInicio")
+    List<ViajeDTOJPQLRelatorio> findByEmpresaIdMakedInInterval(UUID empresaId, LocalDateTime dataInicio, LocalDateTime dataInicioAlterado, LocalDateTime dataFim);
 }
 
 /* No usage

@@ -7,6 +7,7 @@ import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTO;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTOVenta;
 import com.alvaro.empresas.passagens.enums.MetodoPagamentoEnum;
 import com.alvaro.empresas.passagens.helpers.beans.MyUserService;
+import com.alvaro.empresas.passagens.models.PasajeModel;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
 import com.alvaro.empresas.passagens.services.PasajeService;
 import com.alvaro.empresas.passagens.services.PrecioService;
@@ -62,7 +63,6 @@ public class PasajeResource {
         byte[] pasajePdf = pasajeService.getOnePasajeDownload(id);
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=pasaje.pdf");
-        //headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=pasaje.pdf");
         headers.add(HttpHeaders.CONTENT_TYPE, "application/pdf");
         return new ResponseEntity<>(pasajePdf, headers, HttpStatus.OK);
     }
@@ -105,6 +105,15 @@ public class PasajeResource {
         var idPago = pasajeService.saveEmpresa(dto, dto.metodo(), viaje, false, false);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(new CodigoPago(idPago));
+    }
+
+    @DeleteMapping("/{id}")//Habiliado solo para el rembolso fijo
+    @PreAuthorize("hasAnyRole('ROLE_EMPRESA_FUNCIONARIO', 'ROLE_EMPRESA_ADMIN')")
+    public ResponseEntity<Mensaje> rembolso(@PathVariable(name = "id") UUID idPasaje) {
+        var mensaje = pasajeService.delete(idPasaje);
+        if (mensaje == null)
+            return ResponseEntity.noContent().build();
+        else return ResponseEntity.badRequest().body(mensaje);
     }
 
 }

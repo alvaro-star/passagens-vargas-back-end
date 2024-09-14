@@ -21,8 +21,8 @@ public class DateAuxiliarFunctions {
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
-
-        ZoneId zoneId = ZoneId.of(timeZone);
+        System.out.println(timeZone);
+        ZoneId zoneId = ZoneId.of("America/La_Paz");
         return calendar.getTime().toInstant().atZone(zoneId).toLocalDateTime();
     }
 
@@ -34,7 +34,7 @@ public class DateAuxiliarFunctions {
         calendar.set(Calendar.MINUTE, 59);
         calendar.set(Calendar.SECOND, 59);
         calendar.set(Calendar.MILLISECOND, 999);
-        ZoneId zoneId = ZoneId.of(timeZone);
+        ZoneId zoneId = ZoneId.of("America/La_Paz");
         return calendar.getTime().toInstant().atZone(zoneId).toLocalDateTime();
 
     }

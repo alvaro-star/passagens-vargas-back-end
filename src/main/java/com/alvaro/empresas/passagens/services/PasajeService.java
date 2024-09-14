@@ -4,6 +4,7 @@ import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import com.alvaro.empresas.passagens.configurations.exceptions.FieldMessage;
 import com.alvaro.empresas.passagens.configurations.exceptions.InternalException.BadRequestException;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
+import com.alvaro.empresas.passagens.dtos.Mensaje;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajeDTO;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajeDTOEmpresaResponse;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTO;
@@ -21,6 +22,7 @@ import com.alvaro.empresas.passagens.repositories.ViajeRepository;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -66,7 +68,7 @@ public class PasajeService {
         ParadaModel salida;
         ParadaModel destino;
 
-        List<Integer> ocupados = pasajeRepository.getPasajesVendidos(precio.getId());
+        List<Integer> ocupados = pasajeRepository.getPasajesVendidosAndNoRembolso(precio.getId());
         validarSilla(viaje, precio, dto.pasajes(), ocupados);
         salida = viaje.getParadaByLugarId(dto.idLugarSalida());
         if (salida == null)
@@ -238,7 +240,7 @@ public class PasajeService {
         int numeroMinimo = piso.getPrimeraSilla();
         int numeroMaximo = piso.getNSillas() + piso.getPrimeraSilla() - 1;
 
-        List<Integer> ocupados = pasajeRepository.getPasajesVendidos(precio.getId());
+        List<Integer> ocupados = pasajeRepository.getPasajesVendidosAndNoRembolso(precio.getId());
 
         if (precio.getNSillasDisponibles() < sillasSolicitadas.size())
             throw new ValidationException("pasajes", "No hay tantas sillas disponibles");
@@ -271,5 +273,14 @@ public class PasajeService {
             if (pasajeDTO.nSilla() > numeroMaximo || pasajeDTO.nSilla() < numeroMinimo)
                 throw new ValidationException(new FieldMessage("nSilla", "El numero de Silla informado es invalido"));
         }
+    }
+
+    public Mensaje delete(UUID idPasaje) {
+        var pasajeModel = findById(idPasaje);
+        // Para este caso se necessita la API
+        if (pasajeModel.getCompradoWeb())
+            return new Mensaje("El pasaje fue comprado en la web, no esta disponible");
+        pasajeModel.setFueRembolsado(true);
+        return null;
     }
 }

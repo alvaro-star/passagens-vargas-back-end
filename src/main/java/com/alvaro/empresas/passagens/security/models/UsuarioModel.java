@@ -20,7 +20,6 @@ import java.util.*;
 @Setter
 @NoArgsConstructor
 public class UsuarioModel implements UserDetails {
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "idtb_usuario")
@@ -33,6 +32,7 @@ public class UsuarioModel implements UserDetails {
     private String telefono;
     @Column(nullable = false)
     private String contrasena;
+
     private UUID idEmpresa;
 
     @CreationTimestamp
@@ -127,5 +127,12 @@ public class UsuarioModel implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public void updateValues(UsuarioSolicitudModel usuarioSolicitud) {
+        this.login = usuarioSolicitud.getNewEmail();
+        this.contrasena = usuarioSolicitud.getContrasena();
+        this.telefono = usuarioSolicitud.getTelefono();
+        this.nombre = usuarioSolicitud.getNombre();
     }
 }
