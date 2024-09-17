@@ -1,6 +1,8 @@
 package com.alvaro.empresas.passagens.models;
 
 import com.alvaro.empresas.passagens.enums.MetodoPagamentoEnum;
+import com.alvaro.empresas.passagens.pagos.models.FacturaPasajeModel;
+import com.alvaro.empresas.passagens.pagos.models.FacturaRembolsoModel;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
@@ -36,8 +38,13 @@ public class PasajeModel {
     private Boolean compradoWeb;
     @Column(name = "pagado", nullable = false)
     private Boolean estaPagado;
-    @Column(name = "rembolsado", nullable = false)
-    private Boolean fueRembolsado;
+
+    @OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    @JoinColumn(name = "fk_idtb_factura_rembolso")
+    private FacturaRembolsoModel facturaRembolso;
+    @Column(name = "fk_idtb_factura_rembolso", insertable = false, updatable = false)
+    private UUID facturaRembolsoId;
+
     @Column(nullable = false)
     private Boolean enEfectivo;
     @Column(nullable = false)
@@ -85,6 +92,7 @@ public class PasajeModel {
         this.metodoPago = facturaPasaje.getMetodoPago();
         this.salida = salida;
         this.destino = destino;
-        this.fueRembolsado = false;
+        this.facturaRembolso = null;
+        this.facturaRembolsoId = null;
     }
 }

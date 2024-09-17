@@ -2,6 +2,7 @@ package com.alvaro.empresas.passagens.models;
 
 import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.enums.EnumParada;
+import com.alvaro.empresas.passagens.pagos.models.FacturaPasajeModel;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
@@ -99,6 +100,27 @@ public class ViajeModel {
         this.autobus = autobus;
         this.empresa = empresa;
         this.paradas = new ArrayList<>();
+    }
+
+    public boolean substractValueEfectivo(BigDecimal valor) {
+        int comparacao = valorArrecadadoEfectivo.compareTo(valor);
+        if (comparacao < 0) return false;
+        this.valorArrecadadoEfectivo = valorArrecadadoEfectivo.subtract(valor);
+        return true;
+    }
+
+    public boolean substractValueWeb(BigDecimal valor) {
+        int comparacao = valorArrecadadoWeb.compareTo(valor);
+        if (comparacao < 0) return false;
+        this.valorArrecadadoWeb = valorArrecadadoWeb.subtract(valor);
+        return true;
+    }
+
+    public boolean substractValueNoWeb(BigDecimal valor) {
+        int comparacao = valorArrecadadoNoWeb.compareTo(valor);
+        if (comparacao < 0) return false;
+        this.valorArrecadadoNoWeb = valorArrecadadoNoWeb.subtract(valor);
+        return true;
     }
 
     public ParadaModel getParadaByLugarId(Integer idLugar) {

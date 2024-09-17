@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.repositories;
 
-import com.alvaro.empresas.passagens.models.FacturaPasajeModel;
+import com.alvaro.empresas.passagens.pagos.models.FacturaPasajeModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

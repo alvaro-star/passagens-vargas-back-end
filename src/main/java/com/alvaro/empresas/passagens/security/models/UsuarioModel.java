@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.security.models;
 
-import com.alvaro.empresas.passagens.models.FacturaPasajeModel;
+import com.alvaro.empresas.passagens.pagos.models.FacturaPasajeModel;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -131,7 +131,6 @@ public class UsuarioModel implements UserDetails {
 
     public void updateValues(UsuarioSolicitudModel usuarioSolicitud) {
         this.login = usuarioSolicitud.getNewEmail();
-        this.contrasena = usuarioSolicitud.getContrasena();
         this.telefono = usuarioSolicitud.getTelefono();
         this.nombre = usuarioSolicitud.getNombre();
     }

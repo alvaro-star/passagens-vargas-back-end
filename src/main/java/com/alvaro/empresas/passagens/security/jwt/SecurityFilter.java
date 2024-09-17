@@ -2,6 +2,7 @@ package com.alvaro.empresas.passagens.security.jwt;
 
 import com.alvaro.empresas.passagens.security.repositories.UsuarioRepository;
 import com.alvaro.empresas.passagens.security.services.TokenService;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,7 +27,6 @@ public class SecurityFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-
         try {
             var token = this.getToken(request);
             var subject = tokenService.validateToken(token);
@@ -35,6 +35,12 @@ public class SecurityFilter extends OncePerRequestFilter {
                 var authenticate = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(authenticate);
             }
+        } catch (JWTVerificationException e) {
+            logger.error(e.getMessage());
+            //response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            //response.setContentType("application/json");
+            //response.getWriter().write("{\"conteudo\": \"Inicie Sesion nuevamente\"}");
+            //return; -> finaliza sem continuar
         } catch (Exception e) {
             logger.error(e.getMessage());
         }

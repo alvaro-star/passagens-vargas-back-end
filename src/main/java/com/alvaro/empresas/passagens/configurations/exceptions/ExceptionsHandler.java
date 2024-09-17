@@ -16,6 +16,18 @@ import java.sql.SQLIntegrityConstraintViolationException;
 
 @RestControllerAdvice
 public class ExceptionsHandler {
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<StandardError> exception(Exception ex, HttpServletRequest request) {
+        StandardError error = new StandardError(
+                System.currentTimeMillis(),
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Não Encontrado",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    }
+
     @ExceptionHandler(ObjectNotFoundException.class)
     public ResponseEntity<StandardError> objectNotFound(ObjectNotFoundException ex, HttpServletRequest request) {
         StandardError error = new StandardError(

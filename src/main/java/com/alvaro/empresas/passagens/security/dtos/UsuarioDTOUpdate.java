@@ -1,15 +1,16 @@
 package com.alvaro.empresas.passagens.security.dtos;
 
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record UsuarioDTOUpdate(
         @Email
         String email,
-        @NotNull
+        @NotBlank
         String contrasena,
         @NotNull
-        String telefone,
+        String telefono,
         @NotNull
         String nombre
 ) {

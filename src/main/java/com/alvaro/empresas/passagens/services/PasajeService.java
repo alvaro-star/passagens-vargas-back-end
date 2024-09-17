@@ -10,8 +10,9 @@ import com.alvaro.empresas.passagens.dtos.pasajes.PasajeDTOEmpresaResponse;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTO;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTOVenta;
 import com.alvaro.empresas.passagens.enums.MetodoPagamentoEnum;
+import com.alvaro.empresas.passagens.pagos.models.FacturaRembolsoModel;
 import com.alvaro.empresas.passagens.helpers.PasajesPDF;
-import com.alvaro.empresas.passagens.models.FacturaPasajeModel;
+import com.alvaro.empresas.passagens.pagos.models.FacturaPasajeModel;
 import com.alvaro.empresas.passagens.models.PasajeModel;
 import com.alvaro.empresas.passagens.models.PrecioModel;
 import com.alvaro.empresas.passagens.models.ViajeModel;
@@ -20,9 +21,10 @@ import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.alvaro.empresas.passagens.repositories.PasajeRepository;
 import com.alvaro.empresas.passagens.repositories.ViajeRepository;
 import org.hibernate.ObjectNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +43,8 @@ public class PasajeService {
     private final PrecioService precioService;
     private final FacturaPasajeService facturaPasajeService;
     private final ViajeRepository viajeRepository;
+
+    private static final Logger logger = LoggerFactory.getLogger(PasajeService.class);
 
     @Autowired
     public PasajeService(PasajeRepository pasajeRepository, PrecioService precioService, FacturaPasajeService facturaPasajeService, ViajeRepository viajeRepository) {
@@ -121,8 +125,7 @@ public class PasajeService {
         PisoModel piso2 = viaje.getAutobus().getPisoByNumero(2);
 
         for (PasajeDTO pasajeFor : dto.pasajes()) {
-            if (pasajeFor.nSilla() > 0 && pasajeFor.nSilla() <= piso1.getNSillas())
-                sillasPiso1.add(pasajeFor);
+            if (pasajeFor.nSilla() > 0 && pasajeFor.nSilla() <= piso1.getNSillas()) sillasPiso1.add(pasajeFor);
             else sillasPiso2.add(pasajeFor);
         }
 
@@ -131,8 +134,7 @@ public class PasajeService {
 
         BigDecimal valorTotal = BigDecimal.ZERO;
         if (piso2 == null) {
-            if (!sillasPiso2.isEmpty())
-                throw new ValidationException("pasajes", "Hay un numero dela silla invalida");
+            if (!sillasPiso2.isEmpty()) throw new ValidationException("pasajes", "Hay un numero dela silla invalida");
             validarSillasEmpresa(piso1, precio1, sillasPiso1);
             valorTotal = precio1.getPrecio().multiply(BigDecimal.valueOf(sillasPiso1.size()));
         } else {
@@ -184,17 +186,14 @@ public class PasajeService {
         PasajeModel pasaje;
         List<PasajeModel> pasajesModels = new ArrayList<>();
         for (PasajeDTO pasajeDTO : sillasPiso1) {
-            pasaje = new PasajeModel(
-                    pasajeDTO.nSilla(), compradoWeb, precio1.getPrecio(), estaPago, enEfectivo, pasajeDTO.nombre(),
-                    pasajeDTO.carnet(), pasajeDTO.nascimento(), salida, destino, precio1, pago);
+            pasaje = new PasajeModel(pasajeDTO.nSilla(), compradoWeb, precio1.getPrecio(), estaPago, enEfectivo, pasajeDTO.nombre(), pasajeDTO.carnet(), pasajeDTO.nascimento(), salida, destino, precio1, pago);
             pasajesModels.add(pasaje);
         }
 
-        if (precio2 != null)
-            for (PasajeDTO pasajeDTO : sillasPiso2) {
-                pasaje = new PasajeModel(pasajeDTO.nSilla(), compradoWeb, precio1.getPrecio(), estaPago, enEfectivo, pasajeDTO.nombre(), pasajeDTO.carnet(), pasajeDTO.nascimento(), salida, destino, precio2, pago);
-                pasajesModels.add(pasaje);
-            }
+        if (precio2 != null) for (PasajeDTO pasajeDTO : sillasPiso2) {
+            pasaje = new PasajeModel(pasajeDTO.nSilla(), compradoWeb, precio1.getPrecio(), estaPago, enEfectivo, pasajeDTO.nombre(), pasajeDTO.carnet(), pasajeDTO.nascimento(), salida, destino, precio2, pago);
+            pasajesModels.add(pasaje);
+        }
 
         pasajeRepository.saveAll(pasajesModels);
         return pago.getId();
@@ -205,12 +204,7 @@ public class PasajeService {
         PasajesPDF pasajePDF = new PasajesPDF();
         byte[] emptyByteArray = new byte[0];
         try {
-            pasajePDF.addPasaje(
-                    pasajeModel,
-                    pasajeModel.getPrecio().getEmpresa().getNombre(),
-                    pasajeModel.getSalida(),
-                    pasajeModel.getDestino(),
-                    pasajeModel.getFacturaPasaje().getMetodoPago());
+            pasajePDF.addPasaje(pasajeModel, pasajeModel.getPrecio().getEmpresa().getNombre(), pasajeModel.getSalida(), pasajeModel.getDestino(), pasajeModel.getFacturaPasaje().getMetodoPago());
             emptyByteArray = pasajePDF.closeAndGetBytes();
             return emptyByteArray;
         } catch (IOException exception) {
@@ -231,8 +225,7 @@ public class PasajeService {
         int nSillasDisponibles = precio.getNSillasDisponibles() - sillasPiso.size();
         if (nSillasDisponibles < 0)
             throw new ValidationException(new FieldMessage("pasajes", "No hay sillas disponibles"));
-        if (nSillasDisponibles == 0)
-            precio.setLleno(true);
+        if (nSillasDisponibles == 0) precio.setLleno(true);
         precio.setNSillasDisponibles(nSillasDisponibles);
     }
 
@@ -257,8 +250,7 @@ public class PasajeService {
 
     public void validarSilla(ViajeModel viaje, PrecioModel precio, List<PasajeDTO> pasajesDTO, List<Integer> ocupados) {
         PisoModel piso = viaje.getAutobus().getPisoByNumero(precio.getNPiso());
-        if (piso == null)
-            throw new ValidationException(new FieldMessage("piso", "El piso informado no existe"));
+        if (piso == null) throw new ValidationException(new FieldMessage("piso", "El piso informado no existe"));
 
         int numeroMinimo = piso.getPrimeraSilla();
         int numeroMaximo = piso.getNSillas() + piso.getPrimeraSilla() - 1;
@@ -277,10 +269,30 @@ public class PasajeService {
 
     public Mensaje delete(UUID idPasaje) {
         var pasajeModel = findById(idPasaje);
-        // Para este caso se necessita la API
-        if (pasajeModel.getCompradoWeb())
+
+        if (!pasajeModel.getFacturaPasaje().getEstaPagado()) {
+            logger.error("Se intento reembolsar un pasaje no pagado");
+            return new Mensaje("El pasaje no fue pagado");
+        }
+        if (pasajeModel.getFacturaRembolsoId() != null) return new Mensaje("El pasaje ya fue rembolsado");
+        var viaje = pasajeModel.getPrecio().getViaje();
+        boolean resultado;
+        if (pasajeModel.getEnEfectivo()) {
+            resultado = viaje.substractValueEfectivo(pasajeModel.getPrecioPagado());
+        } else if (!pasajeModel.getCompradoWeb()) resultado = viaje.substractValueNoWeb(pasajeModel.getPrecioPagado());
+        else {
+            // Para este caso se necessita la API
+            logger.warn("Se necessita una API para esta operacion");
             return new Mensaje("El pasaje fue comprado en la web, no esta disponible");
-        pasajeModel.setFueRembolsado(true);
+        }
+        if (!resultado) {
+            logger.warn("Se intento retirar un valor que no se debia del valor arrecadado");
+            return new Mensaje("El valor arrecadado es menor que el de pasajes");
+        }
+
+        var facturaRembolsada = new FacturaRembolsoModel(pasajeModel.getPrecioPagado(), pasajeModel.getFacturaPasaje(), pasajeModel);
+        pasajeModel.setFacturaRembolso(facturaRembolsada);
+        pasajeRepository.save(pasajeModel);
         return null;
     }
 }

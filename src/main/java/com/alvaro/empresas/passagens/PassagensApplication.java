@@ -1,7 +1,6 @@
 package com.alvaro.empresas.passagens;
 
-import com.alvaro.empresas.passagens.services.RelatorioModel;
-import com.alvaro.empresas.passagens.services.RelatorioService;
+import com.alvaro.empresas.passagens.services.relatorios.RelatorioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -12,13 +11,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
 
 @SpringBootApplication
-@RestController("/familia")
 public class PassagensApplication {
     @Autowired
     private RelatorioService relatorioService;

@@ -1,5 +1,6 @@
 package com.alvaro.empresas.passagens.models;
 
+import com.alvaro.empresas.passagens.pagos.models.FacturaPasajeModel;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;

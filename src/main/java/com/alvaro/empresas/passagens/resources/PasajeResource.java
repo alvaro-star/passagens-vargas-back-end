@@ -115,5 +115,4 @@ public class PasajeResource {
             return ResponseEntity.noContent().build();
         else return ResponseEntity.badRequest().body(mensaje);
     }
-
 }

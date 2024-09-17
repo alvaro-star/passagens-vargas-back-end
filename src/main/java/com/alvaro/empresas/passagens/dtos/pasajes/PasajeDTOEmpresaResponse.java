@@ -11,11 +11,13 @@ public record PasajeDTOEmpresaResponse(
         String carnet,
         String nombre,
         Date nascimento,
+        Boolean rembolsado,
+        Boolean pagado,
         Integer nSilla,
         ParadaDTOComplete salida,
         ParadaDTOComplete destino
 ) {
-    public PasajeDTOEmpresaResponse(PasajeModel model, ParadaDTOComplete salida, ParadaDTOComplete destino){
-        this(model.getId(), model.getCarnet(), model.getNombre(), model.getNascimento(), model.getNSilla(), salida, destino);
+    public PasajeDTOEmpresaResponse(PasajeModel model, ParadaDTOComplete salida, ParadaDTOComplete destino) {
+        this(model.getId(), model.getCarnet(), model.getNombre(), model.getNascimento(), model.getFacturaRembolsoId() != null, model.getEstaPagado(), model.getNSilla(), salida, destino);
     }
 }

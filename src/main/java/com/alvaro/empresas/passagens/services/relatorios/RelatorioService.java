@@ -1,4 +1,4 @@
-package com.alvaro.empresas.passagens.services;
+package com.alvaro.empresas.passagens.services.relatorios;
 
 import com.alvaro.empresas.passagens.dtos.viajes.JPQL.PasajeJPQLBusca;
 import com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQLRelatorio;
@@ -10,6 +10,7 @@ import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import com.alvaro.empresas.passagens.paradas.services.LugarService;
 import com.alvaro.empresas.passagens.repositories.PasajeRepository;
 import com.alvaro.empresas.passagens.repositories.ViajeRepository;
+import com.alvaro.empresas.passagens.services.EmpresaService;
 import com.alvaro.empresas.passagens.services.validacao.TempoMaxViajeValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,7 +23,6 @@ import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -54,13 +54,15 @@ public class RelatorioService {
     @Value("${api.viaje.max-time-viaje-day}")
     private Integer tempoMaxViajeDias;
 
+    // Categorizar las ciudades por el numero de pasajeros que van a ella y no por os autobuses
+    // Ordenar las lisdas de ciudades con base en el numero de pasajes vendidos
     public byte[] makeRelatorioMensual(UUID idEmpresa, Date dateAnalize) {
         var empresa = empresaService.findById(idEmpresa);
         LocalDateTime inicio = dateAuxiliarFunctions.getDateWithFirstDayOfMonth(dateAnalize);
         LocalDateTime fim = dateAuxiliarFunctions.getDateWithLastDayOfMonth(dateAnalize);
         List<ViajeDTOJPQLRelatorio> viajes = TempoMaxViajeValidation.findAllViajesFromEmpresaInInterval(viajeRepository, tempoMaxViajeDias, idEmpresa, inicio, fim);
 
-        HashMap<Integer, Integer> salidasId = new HashMap<>(), destinosId = new HashMap<>();
+        HashMap<Integer, Integer> salidasIdNPasajes = new HashMap<>(), destinosIdNPasajes = new HashMap<>();
         List<PasajeJPQLBusca> pasajesBD;
         RelatorioModel relatorio = new RelatorioModel(empresa);
 
@@ -71,42 +73,55 @@ public class RelatorioService {
         }
 
         for (ViajeDTOJPQLRelatorio viaje : viajes) {
-            addValueInHashMap(viaje.idSalida(), salidasId);
-            addValueInHashMap(viaje.idDestino(), destinosId);
-
             relatorio.nViajes++;
             if (viaje.viaje().isCancelado())
                 relatorio.nViajesCancelados++;
 
             for (PrecioModel precio : viaje.viaje().getPrecios()) {
                 pasajesBD = pasajeRepository.getPasajesPagados(precio.getId());
-                classificarPasajeFromPrecio(pasajesBD, pagamentosWeb, pagamentosNoWeb, relatorio);
+                classificarPasajeFromPrecio(pasajesBD, salidasIdNPasajes, destinosIdNPasajes, pagamentosWeb, pagamentosNoWeb, relatorio);
             }
         }
 
-        List<LugarModel> salidas = lugarService.findAllById(salidasId.keySet());
-        List<LugarModel> destinos = lugarService.findAllById(destinosId.keySet());
+        List<LugarModel> salidas = lugarService.findAllById(salidasIdNPasajes.keySet());
+        List<LugarModel> destinos = lugarService.findAllById(destinosIdNPasajes.keySet());
+
+        ordenarLugares(salidas, salidasIdNPasajes);
+        ordenarLugares(destinos, destinosIdNPasajes);
 
         relatorio.setValorArrecadadoWeb(getValorTotalArrecadado(pagamentosWeb));
         relatorio.setValorArrecadadoNoWeb(getValorTotalArrecadado(pagamentosNoWeb));
         relatorio.setDineroPorMetodoNoWeb(pagamentosNoWeb);
         relatorio.setDineroPorMetodoWeb(pagamentosWeb);
-        byte[] relatorioBytes = generatePdfFromHtml(
+        return generatePdfFromHtml(
                 relatorio,
                 inicio.getMonthValue(),
                 inicio.getYear(),
                 salidas,
-                salidasId,
+                salidasIdNPasajes,
                 destinos,
-                destinosId
+                destinosIdNPasajes
         );
-        return relatorioBytes;
     }
 
-    public void classificarPasajeFromPrecio(List<PasajeJPQLBusca> pasajes, HashMap<String, HashMetodoPagamentoValor> pagamentosWeb, HashMap<String, HashMetodoPagamentoValor> pagamentosNoWeb, RelatorioModel relatorio) {
+    public void ordenarLugares(List<LugarModel> lugares, HashMap<Integer, Integer> lugaresNPasajes) {
+        lugares.sort(Comparator.comparingInt(l -> lugaresNPasajes.get(l.getId())));
+    }
+
+    public void classificarPasajeFromPrecio(
+            List<PasajeJPQLBusca> pasajes,
+            HashMap<Integer, Integer> salidasId,
+            HashMap<Integer, Integer> destinosId,
+            HashMap<String, HashMetodoPagamentoValor> pagamentosWeb, HashMap<String, HashMetodoPagamentoValor> pagamentosNoWeb, RelatorioModel relatorio) {
+
         relatorio.nPasajesTotal += pasajes.size();
         for (PasajeJPQLBusca pasaje : pasajes) {
-            if (pasaje.fueRembolsado()) relatorio.nPasajesCancelados++;
+            addValueInHashMap(salidasId, pasaje.salidaLugarId());
+            addValueInHashMap(destinosId, pasaje.destinoLugarId());
+            if (pasaje.facturaRembolsoId() != null) {
+                relatorio.nPasajesCancelados++;
+                continue;
+            }
             if (pasaje.compradoWeb()) {
                 pagamentosWeb.get(pasaje.metodoPago().toString()).valor += pasaje.precioPagado().doubleValue();
                 if (pasaje.enEfectivo())
@@ -124,7 +139,7 @@ public class RelatorioService {
         return soma;
     }
 
-    public void addValueInHashMap(Integer key, HashMap<Integer, Integer> hashMap) {
+    public void addValueInHashMap(HashMap<Integer, Integer> hashMap, Integer key) {
         Integer auxMap = hashMap.get(key);
         if (auxMap == null) hashMap.put(key, 0);
         else hashMap.put(key, auxMap + 1);

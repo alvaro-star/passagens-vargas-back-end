@@ -5,6 +5,8 @@ import com.alvaro.empresas.passagens.configurations.exceptions.ValidationExcepti
 import com.alvaro.empresas.passagens.dtos.FacturaPasajeDTO;
 import com.alvaro.empresas.passagens.dtos.pasajes.ContactoDTO;
 import com.alvaro.empresas.passagens.enums.MetodoPagamentoEnum;
+import com.alvaro.empresas.passagens.pagos.models.FacturaEmpresaModel;
+import com.alvaro.empresas.passagens.pagos.models.FacturaPasajeModel;
 import com.alvaro.empresas.passagens.helpers.PasajesPDF;
 import com.alvaro.empresas.passagens.models.*;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;

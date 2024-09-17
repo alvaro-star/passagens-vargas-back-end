@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.dtos;
 
-import com.alvaro.empresas.passagens.models.FacturaPasajeModel;
+import com.alvaro.empresas.passagens.pagos.models.FacturaPasajeModel;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

@@ -79,7 +79,7 @@ public class AuthResource {
             var token = tokenService.generateToken((UsuarioModel) auth.getPrincipal());
             return ResponseEntity.ok(new LoginResponseDto(token));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new Mensaje("Credenciales Invalidos"));
+            return ResponseEntity.badRequest().body(new Mensaje("El email o la contrasenha es invalido"));
         }
     }
 
@@ -204,9 +204,10 @@ public class AuthResource {
             return ResponseEntity.badRequest().body(new Mensaje("Fueron intentadas muchas solicitaciones"));
 
         String passwordEncode = "";
-        if (solicitud.contrasena() != null && !solicitud.contrasena().isBlank())
-            passwordEncode = passwordEncoder.encode(solicitud.contrasena());
-        var usuarioSolicitud = new UsuarioSolicitudModel(solicitud, usuarioModel, passwordEncode, EnumTypeSolicitudOperation.UPDATE);
+        passwordEncode = passwordEncoder.encode(solicitud.contrasena());
+        if (!usuarioModel.getPassword().equals(passwordEncode))
+            return ResponseEntity.badRequest().body(new Mensaje("La contrasena es invalida"));
+        var usuarioSolicitud = new UsuarioSolicitudModel(solicitud, usuarioModel, usuarioModel.getPassword(), EnumTypeSolicitudOperation.UPDATE);
 
         usuarioSolicitudRepository.save(usuarioSolicitud);
         emailService.mandarEmail(usuarioModel.getLogin(), "Cambio de datos del perfil",

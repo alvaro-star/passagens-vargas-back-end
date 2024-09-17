@@ -22,7 +22,7 @@ public class LugarModel {
     @Id
     @Column(name = "idtb_lugar")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
     @NotBlank
     private String nombre;
     @Column(nullable = false)
@@ -32,6 +32,8 @@ public class LugarModel {
     @JoinColumn(name = "fk_idtb_ciudad")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private CiudadModel ciudad;
+
+
 
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "lugar")
     private List<ParadaModel> paradas = new ArrayList<>();

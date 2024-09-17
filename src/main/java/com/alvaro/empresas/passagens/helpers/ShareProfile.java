@@ -111,7 +111,7 @@ public class ShareProfile {
         }
         //Autobuses
         ArrayList<AutobusModel> autobuses = new ArrayList<>();
-        int nRepeticoes = 10;
+        int nRepeticoes = 3;
         for (int k = 0; k < nRepeticoes; k++) {
             autobuses.add(new AutobusModel(k + "JJJ", true, marzo));
         }
@@ -136,9 +136,9 @@ public class ShareProfile {
             indice++;
 
             //Cria os trayectos y las paradas de cada autobus
-            LocalDateTime dia1SemanaAntes = LocalDateTime.now().minusDays(10);
+            LocalDateTime dia1SemanaAntes = LocalDateTime.now().minusDays(2);
             int j;
-            for (j = 0; j < 30; j++) {
+            for (j = 0; j < 15; j++) {
                 dia1SemanaAntes = dia1SemanaAntes.plusDays(1);
                 var dataInicio = dia1SemanaAntes.withHour(15).withMinute(0).withSecond(0).withNano(0);
                 var viaje = viajeRepository.save(new ViajeModel(autobus, autobus.getEmpresa(), new BigDecimal("0.00"), new BigDecimal("0.00"), new BigDecimal("0.00"), false, dataInicio));

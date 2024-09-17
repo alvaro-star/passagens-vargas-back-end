@@ -34,7 +34,7 @@ public class MainSecurity {
                 .cors(cors -> cors.configurationSource(corsConfigurationSourceMy()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(HttpMethod.GET, "/teste/{id}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/facturas/{idEmpresa}").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/forget_password").permitAll()

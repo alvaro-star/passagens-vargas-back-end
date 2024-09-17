@@ -32,18 +32,13 @@ public class TokenService {
         }
     }
 
-    public String validateToken(String token) {
-        try {
-            Algorithm algorithm = Algorithm.HMAC256(secret);
-            return JWT.require(algorithm)
-                    .withIssuer("API passagens-back")
-                    .build()
-                    .verify(token)
-                    .getSubject();
-        } catch (JWTVerificationException exception) {
-            //System.out.println("O token falhou");
-            return "";
-        }
+    public String validateToken(String token) throws JWTVerificationException {
+        Algorithm algorithm = Algorithm.HMAC256(secret);
+        return JWT.require(algorithm)
+                .withIssuer("API passagens-back")
+                .build()
+                .verify(token)
+                .getSubject();
     }
 
     private Instant getExpirationDate() {
