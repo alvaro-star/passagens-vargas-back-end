@@ -66,8 +66,8 @@ public class UsuarioSolicitudModel {
         if (solicitud.nombre() == null || solicitud.nombre().isBlank()) this.nombre = usuario.getNombre();
         else this.nombre = solicitud.nombre();
 
-        if (solicitud.telefone() == null || solicitud.telefone().isBlank()) this.telefono = usuario.getTelefono();
-        else this.telefono = solicitud.telefone();
+        if (solicitud.telefono() == null || solicitud.telefono().isBlank()) this.telefono = usuario.getTelefono();
+        else this.telefono = solicitud.telefono();
         this.tipo = tipo;
     }
 }
