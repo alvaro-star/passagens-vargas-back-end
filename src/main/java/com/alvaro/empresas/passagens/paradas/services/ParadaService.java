@@ -74,7 +74,7 @@ public class ParadaService {
                 throw new ValidationException("dataHora", "No se puede agregar una parada a un viaje que ya inicio");
             if (parada.getDataHora().isEqual(dataParadaAjustada))
                 throw new ValidationException("dataHora", "Ya hay una parada registrada en esta fecha");
-            if (parada.getLugar().getId() == dtoSended.idLugar())
+            if (parada.getLugar().getId().equals(dtoSended.idLugar()))
                 throw new ValidationException("idLugar", "Ya hay una parada registrada que passara por este lugar");
         }
 

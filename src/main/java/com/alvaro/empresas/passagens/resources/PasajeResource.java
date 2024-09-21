@@ -102,7 +102,7 @@ public class PasajeResource {
         if (!validacao.getErrorsList().isEmpty() || !validacao.getErrors().isEmpty())
             return ResponseEntity.unprocessableEntity().body(validacao);
 
-        var idPago = pasajeService.saveEmpresa(dto, dto.metodo(), viaje, false, false);
+        var idPago = pasajeService.saveEmpresa(dto, dto.metodo(), viaje, false);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(new CodigoPago(idPago));
     }

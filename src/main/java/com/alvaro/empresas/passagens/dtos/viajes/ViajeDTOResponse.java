@@ -10,10 +10,11 @@ import java.util.UUID;
 public record ViajeDTOResponse(
         UUID codigo,
         Integer idAutobus,
+        Boolean cancelado,
         List<ParadaDTOComplete> paradas,
         List<PrecioDTO> precios
 ) {
     public ViajeDTOResponse(ViajeModel model, Integer idAutobus, List<ParadaDTOComplete> paradas, List<PrecioDTO> precios) {
-        this(model.getCodigo(), idAutobus, paradas, precios);
+        this(model.getCodigo(), idAutobus, model.isCancelado(), paradas, precios);
     }
 }

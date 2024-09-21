@@ -14,11 +14,12 @@ public record ViajeDTOListBusquedaEmpresa(
         BigDecimal valorArrecadadoEfectivo,
         BigDecimal valorArrecadadoWeb,
         boolean isCobrado,
+        boolean cancelado,
         ParadaDTOComplete salida,
         ParadaDTOComplete destino,
         List<PrecioDTO> precios
 ) {
     public ViajeDTOListBusquedaEmpresa(ViajeModel model, String logo, ParadaDTOComplete salida, ParadaDTOComplete destino, List<PrecioDTO> precios) {
-        this(model.getCodigo(), logo, model.getValorArrecadadoEfectivo(), model.getValorArrecadadoWeb(), model.isCobrado(), salida, destino, precios);
+        this(model.getCodigo(), logo, model.getValorArrecadadoEfectivo(), model.getValorArrecadadoWeb(), model.isCobrado(), model.isCancelado(), salida, destino, precios);
     }
 }

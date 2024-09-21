@@ -13,11 +13,12 @@ public record ViajeDTOEmpresaResponse(
         BigDecimal valorArrecadadoEfectivo,
         BigDecimal valorArrecadadoWeb,
         boolean isCobrado,
+        boolean cancelado,
         Integer idAutobus,
         List<ParadaDTOComplete> paradas,
         List<PrecioDTO> precios
 ) {
     public ViajeDTOEmpresaResponse(ViajeModel model, Integer idAutobus, List<ParadaDTOComplete> paradas, List<PrecioDTO> precios) {
-        this(model.getCodigo(), model.getValorArrecadadoEfectivo(), model.getValorArrecadadoWeb(), model.isCobrado(), idAutobus, paradas, precios);
+        this(model.getCodigo(), model.getValorArrecadadoEfectivo(), model.getValorArrecadadoWeb(), model.isCobrado(), model.isCancelado(), idAutobus, paradas, precios);
     }
 }

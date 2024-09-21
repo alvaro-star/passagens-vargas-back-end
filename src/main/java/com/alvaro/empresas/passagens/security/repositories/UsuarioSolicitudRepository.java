@@ -1,5 +1,6 @@
 package com.alvaro.empresas.passagens.security.repositories;
 
+import com.alvaro.empresas.passagens.enums.EnumTypeSolicitudOperation;
 import com.alvaro.empresas.passagens.security.models.UsuarioSolicitudModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -18,7 +19,7 @@ public interface UsuarioSolicitudRepository extends JpaRepository<UsuarioSolicit
     List<UsuarioSolicitudModel> findByEmailAfterTime(
             @Param("email") String email,
             @Param("createdAt") LocalDateTime createdAt,
-            @Param("tipo") String tipoOperacao);
+            @Param("tipo") EnumTypeSolicitudOperation tipoOperacao);
 
     @Modifying
     @Transactional

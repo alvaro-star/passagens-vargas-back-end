@@ -30,10 +30,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -49,17 +46,7 @@ public class AuthResource {
     private final MyUserService myUserService;
 
     @Autowired
-    public AuthResource(
-            UsuarioRepository usuarioRepository,
-            RoleService roleService,
-            AuthenticationManager authenticationManager,
-            TokenService tokenService,
-            UsuarioSolicitudRepository usuarioSolicitudRepository,
-            EmailService emailService,
-            CodigoRepository codigoRepository,
-            MyUserService myUserService,
-            BCryptPasswordEncoder passwordEncoder
-    ) {
+    public AuthResource(UsuarioRepository usuarioRepository, RoleService roleService, AuthenticationManager authenticationManager, TokenService tokenService, UsuarioSolicitudRepository usuarioSolicitudRepository, EmailService emailService, CodigoRepository codigoRepository, MyUserService myUserService, BCryptPasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
         this.roleService = roleService;
         this.authenticationManager = authenticationManager;
@@ -77,9 +64,24 @@ public class AuthResource {
             var usernamePassword = new UsernamePasswordAuthenticationToken(loginDto.login(), loginDto.contrasena());
             var auth = authenticationManager.authenticate(usernamePassword);
             var token = tokenService.generateToken((UsuarioModel) auth.getPrincipal());
-            return ResponseEntity.ok(new LoginResponseDto(token));
+            var refreshToken = tokenService.generateRefreshToken((UsuarioModel) auth.getPrincipal());
+            return ResponseEntity.ok(new LoginResponseDto(token, refreshToken));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new Mensaje("El email o la contrasenha es invalido"));
+        }
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<Object> refresh(@RequestBody Map<String, String> request) {
+        String refreshToken = request.get("refreshToken");
+        try {
+            String user = tokenService.validateToken(refreshToken);
+            var usuario = usuarioRepository.findByEmail(user);
+            if (usuario.isEmpty()) throw new Exception("Usuario invalido");
+            String accessToken = tokenService.generateToken(usuario.get());
+            return ResponseEntity.ok(new LoginResponseDto(accessToken, null));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new Mensaje("El token es invalido"));
         }
     }
 
@@ -92,7 +94,7 @@ public class AuthResource {
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime startDay = now.withHour(0).withMinute(0).withSecond(0).withNano(1);
-        var solicitudes = usuarioSolicitudRepository.findByEmailAfterTime(registerDto.login(), startDay, EnumTypeSolicitudOperation.CREATE.toString());
+        var solicitudes = usuarioSolicitudRepository.findByEmailAfterTime(registerDto.login(), startDay, EnumTypeSolicitudOperation.CREATE);
         if (solicitudes.size() > 5)
             return ResponseEntity.badRequest().body(new Mensaje("Ya hubo bastantes intentos con este email por hoy"));
 
@@ -107,12 +109,8 @@ public class AuthResource {
         usuarioSolicitudRepository.save(newUser);
         boolean valorLogico;
 
-        valorLogico = emailService.mandarEmail(newUser.getEmail(), "Codigo de Verificacion", newUser.getNombre()
-                + ", este es tu codigo de verificacion para tu cuenta en la aplicacion: \n"
-                + newUser.getId().toString()
-                + "\nNo lo compartas con nadie");
-        if (valorLogico)
-            return ResponseEntity.ok(new Mensaje("Verifique el codigo de seguridad"));
+        valorLogico = emailService.mandarEmail(newUser.getEmail(), "Codigo de Verificacion", newUser.getNombre() + ", este es tu codigo de verificacion para tu cuenta en la aplicacion: \n" + newUser.getId().toString() + "\nNo lo compartas con nadie");
+        if (valorLogico) return ResponseEntity.ok(new Mensaje("Verifique el codigo de seguridad"));
         return ResponseEntity.badRequest().body(new Mensaje("Hubo un problema con el destinatario del email"));
     }
 
@@ -120,10 +118,9 @@ public class AuthResource {
     public ResponseEntity<Mensaje> verificarRegistro(@RequestBody ValidadorDTO validadorDTO) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime halfHourAgo = now.minus(Duration.ofMinutes(30));
-        var solicitudes = usuarioSolicitudRepository.findByEmailAfterTime(validadorDTO.email(), halfHourAgo, EnumTypeSolicitudOperation.CREATE.toString());
+        var solicitudes = usuarioSolicitudRepository.findByEmailAfterTime(validadorDTO.email(), halfHourAgo, EnumTypeSolicitudOperation.CREATE);
         var usuario = usuarioRepository.findByEmail(validadorDTO.email());
-        if (usuario.isPresent())
-            return ResponseEntity.badRequest().body(new Mensaje("El usuario ya esta registrado"));
+        if (usuario.isPresent()) return ResponseEntity.badRequest().body(new Mensaje("El usuario ya esta registrado"));
         if (solicitudes.isEmpty()) {
             return ResponseEntity.badRequest().body(new Mensaje("No hay solicitudes recientes"));
         }
@@ -144,8 +141,7 @@ public class AuthResource {
     @PostMapping("/forget_password")
     public ResponseEntity<Object> getCodigoToRestorePassword(@RequestBody @Valid SolicitudNewPassword solicitud) {
         var usuario = usuarioRepository.findByEmail(solicitud.email());
-        if (usuario.isEmpty())
-            return ResponseEntity.badRequest().body(new Mensaje("Informe un email valido"));
+        if (usuario.isEmpty()) return ResponseEntity.badRequest().body(new Mensaje("Informe un email valido"));
         LocalDateTime thrityMinutesBefore = LocalDateTime.now().minusMinutes(60);
         List<CodigoVerificacao> codigos = codigoRepository.findByEmailAfterDate(solicitud.email(), thrityMinutesBefore);
         if (codigos.size() >= 5)
@@ -154,18 +150,14 @@ public class AuthResource {
         CodigoVerificacao codigo = new CodigoVerificacao();
         codigo.setEmail(solicitud.email());
         codigoRepository.save(codigo);
-        emailService.mandarEmail(solicitud.email(), "Cambio de contrasena",
-                "Este es tu codigo de verificacion para cambiar tu contrasena: \n"
-                        + codigo.getId()
-                        + "\nNo lo compartas con nadie");
+        emailService.mandarEmail(solicitud.email(), "Cambio de contrasena", "Este es tu codigo de verificacion para cambiar tu contrasena: \n" + codigo.getId() + "\nNo lo compartas con nadie");
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/reset_password")
     public ResponseEntity<Object> validarPassword(@RequestBody @Valid PasswordForm form) {
         var codigo = codigoRepository.findById(form.codigo());
-        if (codigo.isEmpty())
-            throw new ValidationException("codigo", "El codigo de verificacion es invalido");
+        if (codigo.isEmpty()) throw new ValidationException("codigo", "El codigo de verificacion es invalido");
 
         LocalDateTime thyrtyMinutesBefore = LocalDateTime.now().minusMinutes(30);
 
@@ -180,8 +172,7 @@ public class AuthResource {
 
         String passwordEncoder = this.passwordEncoder.encode(form.password());
         var usuario = usuarioRepository.findByEmail(form.email());
-        if (usuario.isEmpty())
-            throw new ValidationException("email", "El usuario no existe");
+        if (usuario.isEmpty()) throw new ValidationException("email", "El usuario no existe");
         usuario.get().setContrasena(passwordEncoder);
         usuarioRepository.save(usuario.get());
 
@@ -196,24 +187,19 @@ public class AuthResource {
         if (solicitud.email() != null && !solicitud.email().isBlank() && !solicitud.email().equals(usuarioModel.getLogin()))
             emailOcuped = usuarioRepository.existsByLogin(solicitud.email());
 
-        if (emailOcuped)
-            return ResponseEntity.badRequest().body(new Mensaje("El email esta indisponible"));
+        if (emailOcuped) return ResponseEntity.badRequest().body(new Mensaje("El email esta indisponible"));
         LocalDateTime thrityMinutesBefore = LocalDateTime.now().minusMinutes(60);
-        var solicitudes = usuarioSolicitudRepository.findByEmailAfterTime(solicitud.email(), thrityMinutesBefore, EnumTypeSolicitudOperation.UPDATE.toString());
+        var solicitudes = usuarioSolicitudRepository.findByEmailAfterTime(solicitud.email(), thrityMinutesBefore, EnumTypeSolicitudOperation.UPDATE);
         if (solicitudes.size() >= 5)
             return ResponseEntity.badRequest().body(new Mensaje("Fueron intentadas muchas solicitaciones"));
 
-        String passwordEncode = "";
-        passwordEncode = passwordEncoder.encode(solicitud.contrasena());
-        if (!usuarioModel.getPassword().equals(passwordEncode))
+        String passwordEncode = passwordEncoder.encode(solicitud.contrasena());
+        if (!passwordEncoder.matches(solicitud.contrasena(), passwordEncode))
             return ResponseEntity.badRequest().body(new Mensaje("La contrasena es invalida"));
         var usuarioSolicitud = new UsuarioSolicitudModel(solicitud, usuarioModel, usuarioModel.getPassword(), EnumTypeSolicitudOperation.UPDATE);
 
         usuarioSolicitudRepository.save(usuarioSolicitud);
-        emailService.mandarEmail(usuarioModel.getLogin(), "Cambio de datos del perfil",
-                "Este es tu codigo de verificacion para editar tud datos: \n"
-                        + usuarioSolicitud.getId().toString()
-                        + "\nNo lo compartas con nadie");
+        emailService.mandarEmail(usuarioModel.getLogin(), "Cambio de datos del perfil", "Este es tu codigo de verificacion para editar tud datos: \n" + usuarioSolicitud.getId().toString() + "\nNo lo compartas con nadie");
         return ResponseEntity.noContent().build();
     }
 
@@ -223,6 +209,7 @@ public class AuthResource {
         var usuarioSolicitud = usuarioSolicitudRepository.findById(form.codigo());
         if (usuarioSolicitud.isEmpty())
             throw new ValidationException("codigo", "El codigo de verificacion es invalido");
+
 
         LocalDateTime thyrtyMinutesBefore = LocalDateTime.now().minusMinutes(30);
 

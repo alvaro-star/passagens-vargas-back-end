@@ -1,5 +1,5 @@
 package com.alvaro.empresas.passagens.enums;
 
 public enum MetodoPagamentoEnum {
-    QR, EFECTIVO;
+    QR, EFECTIVO, DEBITO, CREDITO;
 }

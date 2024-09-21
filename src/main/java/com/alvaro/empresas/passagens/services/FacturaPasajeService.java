@@ -64,6 +64,13 @@ public class FacturaPasajeService {
         return facturaPasajeRepository.save(pago);
     }
 
+    public FacturaPasajeModel saveEmpresa(BigDecimal precioTotal, ViajeModel viaje, MetodoPagamentoEnum metodo, boolean estaPago) {
+        LocalDateTime fechaPago = LocalDateTime.now();
+        BigDecimal tasaServicio = new BigDecimal("0.00");
+        var pago = new FacturaPasajeModel(precioTotal, BigDecimal.valueOf(0), tasaServicio, estaPago, metodo, viaje, fechaPago, null);
+        return facturaPasajeRepository.save(pago);
+    }
+
     //O tipo de retorno é vazio, mas estamos colocando booleano por teste
 
     @Transactional

@@ -36,6 +36,7 @@ public class MainSecurity {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.GET, "/facturas/{idEmpresa}").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/refresh").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/forget_password").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/auth/reset_password").permitAll()

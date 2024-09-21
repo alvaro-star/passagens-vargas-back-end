@@ -106,7 +106,7 @@ public class PasajeService {
 
 
     @Transactional
-    public UUID saveEmpresa(PasajesDTOVenta dto, MetodoPagamentoEnum metodo, ViajeModel viaje, boolean guardarContacto, boolean compradoWeb) {
+    public UUID saveEmpresa(PasajesDTOVenta dto, MetodoPagamentoEnum metodo, ViajeModel viaje, boolean guardarContacto) {
         ParadaModel salida;
         ParadaModel destino;
 
@@ -119,8 +119,8 @@ public class PasajeService {
         if (destino == null)
             throw new ValidationException(new FieldMessage("idLugarDestino", "El destino no hace parte del trayecto"));
 
-        List<PasajeDTO> sillasPiso1 = new ArrayList<>();
-        List<PasajeDTO> sillasPiso2 = new ArrayList<>();
+        List<PasajeDTO> sillasPiso1 = new ArrayList<>(), sillasPiso2 = new ArrayList<>();
+
         PisoModel piso1 = viaje.getAutobus().getPisoByNumero(1);
         PisoModel piso2 = viaje.getAutobus().getPisoByNumero(2);
 
@@ -151,34 +151,32 @@ public class PasajeService {
         if (valorTotal.compareTo(BigDecimal.ZERO) == 0)
             throw new ValidationException("pasajes", "La suma delos pasajes es zero");
 
-        boolean estaPago;
         boolean enEfectivo = false;
 
-        FacturaPasajeModel pago = facturaPasajeService.save(dto.contacto(), valorTotal, viaje, metodo, guardarContacto);
+        boolean estaPago = true;
+        FacturaPasajeModel pago = facturaPasajeService.saveEmpresa(valorTotal, viaje, metodo, estaPago);
 
         BigDecimal valorArrecadadoNoWeb = viaje.getValorArrecadadoNoWeb() != null ? viaje.getValorArrecadadoNoWeb() : BigDecimal.ZERO;
         BigDecimal valorTotalPago = pago.getValorTotal() != null ? pago.getValorTotal() : BigDecimal.ZERO;
         viaje.setValorArrecadadoNoWeb(valorArrecadadoNoWeb.add(valorTotalPago));
-        switch (metodo) {
-            case QR -> estaPago = false;
-            case EFECTIVO -> {
-                estaPago = true;
-                enEfectivo = true;
 
+
+        switch (metodo) {
+            case EFECTIVO -> {
+                enEfectivo = true;
                 BigDecimal valorArrecadadoEfectivo = viaje.getValorArrecadadoEfectivo() != null ? viaje.getValorArrecadadoEfectivo() : BigDecimal.ZERO;
                 viaje.setValorArrecadadoEfectivo(valorArrecadadoEfectivo.add(valorTotalPago));
-
-                if (!sillasPiso1.isEmpty()) {
-                    actualizarNSillasDisponibles(precio1, sillasPiso1);
-                    precioService.updateFromService(precio1);
-                }
-
-                if (precio2 != null && !sillasPiso2.isEmpty()) {
-                    actualizarNSillasDisponibles(precio2, sillasPiso2);
-                    precioService.updateFromService(precio1);
-                }
             }
-            default -> throw new ValidationException("metodo", "Metodo de Pago invalido");
+        }
+
+        if (!sillasPiso1.isEmpty()) {
+            actualizarNSillasDisponibles(precio1, sillasPiso1);
+            precioService.updateFromService(precio1);
+        }
+
+        if (precio2 != null && !sillasPiso2.isEmpty()) {
+            actualizarNSillasDisponibles(precio2, sillasPiso2);
+            precioService.updateFromService(precio1);
         }
 
         viajeRepository.save(viaje);//Actualizar los valores arrecadados
@@ -186,12 +184,12 @@ public class PasajeService {
         PasajeModel pasaje;
         List<PasajeModel> pasajesModels = new ArrayList<>();
         for (PasajeDTO pasajeDTO : sillasPiso1) {
-            pasaje = new PasajeModel(pasajeDTO.nSilla(), compradoWeb, precio1.getPrecio(), estaPago, enEfectivo, pasajeDTO.nombre(), pasajeDTO.carnet(), pasajeDTO.nascimento(), salida, destino, precio1, pago);
+            pasaje = new PasajeModel(pasajeDTO.nSilla(), false, precio1.getPrecio(), estaPago, enEfectivo, pasajeDTO.nombre(), pasajeDTO.carnet(), pasajeDTO.nascimento(), salida, destino, precio1, pago);
             pasajesModels.add(pasaje);
         }
 
         if (precio2 != null) for (PasajeDTO pasajeDTO : sillasPiso2) {
-            pasaje = new PasajeModel(pasajeDTO.nSilla(), compradoWeb, precio1.getPrecio(), estaPago, enEfectivo, pasajeDTO.nombre(), pasajeDTO.carnet(), pasajeDTO.nascimento(), salida, destino, precio2, pago);
+            pasaje = new PasajeModel(pasajeDTO.nSilla(), false, precio1.getPrecio(), estaPago, enEfectivo, pasajeDTO.nombre(), pasajeDTO.carnet(), pasajeDTO.nascimento(), salida, destino, precio2, pago);
             pasajesModels.add(pasaje);
         }
 
