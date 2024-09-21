@@ -193,8 +193,7 @@ public class AuthResource {
         if (solicitudes.size() >= 5)
             return ResponseEntity.badRequest().body(new Mensaje("Fueron intentadas muchas solicitaciones"));
 
-        String passwordEncode = passwordEncoder.encode(solicitud.contrasena());
-        if (!passwordEncoder.matches(solicitud.contrasena(), passwordEncode))
+        if (!passwordEncoder.matches(solicitud.contrasena(), usuarioModel.getPassword()))
             return ResponseEntity.badRequest().body(new Mensaje("La contrasena es invalida"));
         var usuarioSolicitud = new UsuarioSolicitudModel(solicitud, usuarioModel, usuarioModel.getPassword(), EnumTypeSolicitudOperation.UPDATE);
 
