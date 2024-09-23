@@ -57,7 +57,7 @@ public interface ViajeRepository extends JpaRepository<ViajeModel, UUID> {
             "WHERE v.fk_idtb_empresa = :empresaId " +
             "AND v.data_hora_salida BETWEEN :inicioAlterado AND :fim " +
             "AND v.fk_idtb_autobus = :autobusId " +
-            "AND v.cancelado = false d.fk_idtb_viaje = v.idtb_viaje AND d.tipo = 'DESTINO' AND d.data_hora >= :inicio " +
+            "AND v.cancelado = false AND d.fk_idtb_viaje = v.idtb_viaje AND d.tipo = 'DESTINO' AND d.data_hora >= :inicio " +
             "LIMIT 2",
             nativeQuery = true)
     List<ViajeModel> findViajeFromAutobusInIntervalo(UUID empresaId, Integer autobusId, LocalDateTime inicio, LocalDateTime inicioAlterado, LocalDateTime fim);
