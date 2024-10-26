@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: dev
+    active: h2
   jackson:
     time-zone: America/La_Paz
   mail:

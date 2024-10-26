@@ -12,6 +12,7 @@ import java.util.List;
 @Setter
 public class RelatorioModel {
     private EmpresaModel empresa;
+    private int nMes, nAno;
     private List<LugarModel> lugaresSalida, lugaresDestino;
     protected Integer nViajes, nViajesCancelados;
     protected Integer nPasajesTotal, nPasajesCancelados;

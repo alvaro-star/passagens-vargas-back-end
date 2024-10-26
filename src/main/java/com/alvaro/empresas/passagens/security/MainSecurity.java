@@ -4,12 +4,15 @@ import com.alvaro.empresas.passagens.security.jwt.SecurityFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,28 +30,60 @@ public class MainSecurity {
     @Autowired
     SecurityFilter securityFilter;
 
+    @Autowired
+    private Environment env;
+
+    private boolean isProfileActive(String name) {
+        for (String activeProfile : env.getActiveProfiles())
+            if (activeProfile.equals(name))
+                return true;
+        return false;
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        return httpSecurity
+        var http = httpSecurity
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSourceMy()))
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(HttpMethod.GET, "/facturas/{idEmpresa}").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/refresh").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/forget_password").permitAll()
-                        .requestMatchers(HttpMethod.PUT, "/auth/reset_password").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/validar").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/viajes").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/viajes/{id}").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/pasajes").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/ciudades/{nombre}/like").permitAll()
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        if (isProfileActive("h2"))
+            http.authorizeHttpRequests(authorize -> authorize
+                    .requestMatchers(HttpMethod.GET, "/facturas/{idEmpresa}").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/auth/refresh").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/auth/forget_password").permitAll()
+                    .requestMatchers(HttpMethod.PUT, "/auth/reset_password").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/auth/validar").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/viajes").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/viajes/{id}").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/pasajes").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/ciudades/{nombre}/like").permitAll()
+                    .requestMatchers("/h2-console/**").permitAll()
+                    .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll()
+                    .anyRequest().authenticated()
+            ).headers(h -> h.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
+        else if (isProfileActive("prod"))
+            http.authorizeHttpRequests(authorize -> authorize
+                    .requestMatchers(HttpMethod.GET, "/facturas/{idEmpresa}").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/auth/refresh").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/auth/forget_password").permitAll()
+                    .requestMatchers(HttpMethod.PUT, "/auth/reset_password").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/auth/validar").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/viajes").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/viajes/{id}").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/pasajes").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/ciudades/{nombre}/like").permitAll()
+                    .anyRequest().authenticated()
+            );
+        else http.authorizeHttpRequests(authorize -> authorize
+                    .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
+                    .anyRequest().authenticated()
+            );
+        return http.addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

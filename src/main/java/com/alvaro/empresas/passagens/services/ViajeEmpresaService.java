@@ -32,6 +32,10 @@ import com.alvaro.empresas.passagens.paradas.repositories.ParadaRepository;
 import com.alvaro.empresas.passagens.repositories.PrecioRepository;
 import com.alvaro.empresas.passagens.repositories.ViajeRepository;
 import com.alvaro.empresas.passagens.services.validacao.TempoMaxViajeValidation;
+import com.itextpdf.html2pdf.ConverterProperties;
+import com.itextpdf.html2pdf.HtmlConverter;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,14 +46,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 
 @Service
@@ -173,7 +175,6 @@ public class ViajeEmpresaService {
                     precios = new ArrayList<>();
                     for (PrecioModel precio : ViajeEmpresaDTOJPQ.getViaje().getPrecios())
                         if (!precio.getLleno()) precios.add(new PrecioDTO(precio));
-
                     viajesSelecionados.add(new ViajeDTOListBusquedaEmpresa(ViajeEmpresaDTOJPQ.getViaje(), null, salidaDTO, destinoDTO, precios));
                 }
             }
@@ -468,12 +469,15 @@ public class ViajeEmpresaService {
         return false;
     }
 
+    private String dateToString(Date data) {
+        return data.toString();
+    }
+
     private byte[] getListPaginas(List<PasajeModel> pasajes) {
         StringBuilder str = new StringBuilder();
         str.append("""
                                 <!DOCTYPE html>
                                 <html lang="en">
-                
                                 <head>
                                     <meta charset="UTF-8">
                                     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -484,27 +488,13 @@ public class ViajeEmpresaService {
                                     body {padding: 5px;}
                                     .tabela {border: solid 1px;width: 100%;margin: 0;}
                 
-                                    .primeiraColuna {
-                                            padding-left: 1rem;
-                                            padding-top: 1rem;
-                                            padding-bottom: 1rem
-                                        }
+                                    .primeiraColuna {padding-left: 1rem;padding-top: 1rem;padding-bottom: 1rem}
                 
-                                    .datosViaje {
-                                            padding: 5px;
-                                            border: solid 1px;
-                                            border-bottom: 0;
-                                            display: flex;
-                                            justify-content: space-between;
-                                        }
+                                    .datosViaje {padding: 5px;border: solid 1px;border-bottom: 0;display: flex;justify-content: space-between;}
                 
-                                    .datosViaje div h4 {
-                                            margin: 0;
-                                        }
+                                    .datosViaje div h4 {margin: 0;}
                 
-                                    .datosViaje div p {
-                                            margin: 0;
-                                        }
+                                    .datosViaje div p {margin: 0;}
                                 </style>
                 <body>
                     <div>
@@ -522,29 +512,30 @@ public class ViajeEmpresaService {
                             </tr>
                         </thead>
                         <tbody>
-                                        ${pasajeros.map((pasajero: IPasajeComplete) => {
-                                                    return `<tr class="hover:bg-slate-100">
-                                                <td>
-                                                            ${pasajero.nSilla}
-                                            </td>
-                                            <td>${pasajero.carnet}</td>
-                                            <td>${pasajero.nombre}</td>
-                                            <td  style="text-align: center;">
-                                                            ${(new DataHora(pasajero.nascimento)).data.imprimir()}
-                                            </td>
-                                            <td>
-                                                            ${pasajero.salida.ciudad} - ${pasajero.salida.abreviacion}
-                                            </td>
-                                            <td>
-                                                            ${pasajero.destino.ciudad} - ${pasajero.destino.abreviacion}
-                                            </td>
-                                                    </tr>`}).join()}
-                                                </tbody>
-                                            </table>
-                                        </body>
-                                 </html>
                 """);
-        return new byte[1];
+        for (PasajeModel pasaje : pasajes) {
+            str.append("<tr class=\"hover:bg-slate-100\">");
+            str.append(String.format("<td>%s</td>", pasaje.getNSilla()));
+            str.append(String.format("<td>%s</td>", pasaje.getCarnet()));
+            str.append(String.format("<td>%s</td>", pasaje.getNombre()));
+            str.append(String.format("<td style=\"text-align: center;\">%s</td>", this.dateToString(pasaje.getNascimento())));
+            str.append(String.format("<td>%s - %s</td>", pasaje.getSalida().getLugar().getCiudad().getNombre(), pasaje.getSalida().getLugar().getCiudad().getDepartamento().getAbreviacion()));
+            str.append(String.format("<td>%s - %s</td>", pasaje.getDestino().getLugar().getCiudad().getNombre(), pasaje.getDestino().getLugar().getCiudad().getDepartamento().getAbreviacion()));
+            str.append("</tr>");
+        }
+        str.append("""
+                </tbody>
+                </table>
+                </body>
+                </html>
+                """);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        PdfWriter writer = new PdfWriter(byteArrayOutputStream);
+        PdfDocument pdfDocument = new PdfDocument(writer);
+        ConverterProperties converterProperties = new ConverterProperties();
+        HtmlConverter.convertToPdf(str.toString(), pdfDocument, converterProperties);
+        pdfDocument.close();
+        return byteArrayOutputStream.toByteArray();
     }
 
 }

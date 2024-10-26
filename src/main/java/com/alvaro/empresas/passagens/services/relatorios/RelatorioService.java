@@ -5,6 +5,8 @@ import com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQLRelatorio;
 import com.alvaro.empresas.passagens.enums.MetodoPagamentoEnum;
 import com.alvaro.empresas.passagens.helpers.DateAuxiliarFunctions;
 import com.alvaro.empresas.passagens.helpers.services.EmailService;
+import com.alvaro.empresas.passagens.helpers.tymeleaf.CiudadTHModel;
+import com.alvaro.empresas.passagens.helpers.tymeleaf.MetodoTHModel;
 import com.alvaro.empresas.passagens.models.PrecioModel;
 import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import com.alvaro.empresas.passagens.paradas.services.LugarService;
@@ -16,12 +18,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-
 import com.itextpdf.html2pdf.ConverterProperties;
 import com.itextpdf.html2pdf.HtmlConverter;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
+import org.springframework.ui.Model;
+import org.springframework.ui.freemarker.SpringTemplateLoader;
+import org.thymeleaf.context.Context;
 
+import javax.swing.*;
 import java.io.ByteArrayOutputStream;
 
 import java.time.LocalDateTime;
@@ -42,7 +47,8 @@ public class RelatorioService {
             EmpresaService empresaService,
             PasajeRepository pasajeRepository,
             EmailService emailService,
-            LugarService lugarService) {
+            LugarService lugarService,
+            SpringTemplateLoader templateLoader) {
         this.viajeRepository = viajeRepository;
         this.empresaService = empresaService;
         this.pasajeRepository = pasajeRepository;
@@ -56,7 +62,7 @@ public class RelatorioService {
 
     // Categorizar las ciudades por el numero de pasajeros que van a ella y no por os autobuses
     // Ordenar las lisdas de ciudades con base en el numero de pasajes vendidos
-    public byte[] makeRelatorioMensual(UUID idEmpresa, Date dateAnalize) {
+    public byte[] makeRelatorioMensual(UUID idEmpresa, Date dateAnalize, Model model) {
         var empresa = empresaService.findById(idEmpresa);
         LocalDateTime inicio = dateAuxiliarFunctions.getDateWithFirstDayOfMonth(dateAnalize);
         LocalDateTime fim = dateAuxiliarFunctions.getDateWithLastDayOfMonth(dateAnalize);
@@ -93,15 +99,25 @@ public class RelatorioService {
         relatorio.setValorArrecadadoNoWeb(getValorTotalArrecadado(pagamentosNoWeb));
         relatorio.setDineroPorMetodoNoWeb(pagamentosNoWeb);
         relatorio.setDineroPorMetodoWeb(pagamentosWeb);
-        return generatePdfFromHtml(
-                relatorio,
-                inicio.getMonthValue(),
-                inicio.getYear(),
-                salidas,
-                salidasIdNPasajes,
-                destinos,
-                destinosIdNPasajes
-        );
+        relatorio.setNMes(inicio.getMonthValue());
+        relatorio.setNAno(inicio.getYear());
+
+        List<CiudadTHModel> salidasThModels = new ArrayList<>(), destinosTHModels = new ArrayList<>();
+        List<MetodoTHModel> metodos = new ArrayList<>();
+        for (LugarModel salida : salidas)
+            salidasThModels.add(new CiudadTHModel(salida.getCiudad().getNombre(), salidasIdNPasajes.get(salida.getId())));
+        for (LugarModel destino : destinos)
+            destinosTHModels.add(new CiudadTHModel(destino.getCiudad().getNombre(), destinosIdNPasajes.get(destino.getId())));
+
+        for (MetodoPagamentoEnum value : MetodoPagamentoEnum.values()) {
+            metodos.add(new MetodoTHModel(
+                    value.toString(),
+                    relatorio.getDineroPorMetodoWeb().get(value.toString()).valor,
+                    relatorio.getDineroPorMetodoNoWeb().get(value.toString()).valor
+            ));
+        }
+
+        return generatePdfFromHtml(relatorio, salidasThModels, destinosTHModels, metodos);
     }
 
     public void ordenarLugares(List<LugarModel> lugares, HashMap<Integer, Integer> lugaresNPasajes) {
@@ -147,138 +163,30 @@ public class RelatorioService {
 
     public byte[] generatePdfFromHtml(
             RelatorioModel relatorio,
-            int nMes,
-            int nAno,
-            List<LugarModel> salidas,
-            HashMap<Integer, Integer> salidasId,
-            List<LugarModel> destinos,
-            HashMap<Integer, Integer> destinosId) {
-        StringBuilder str = new StringBuilder();
-        str.append("""
-                <!DOCTYPE html>
-                <html lang="pt-br">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Relatório de Viagens</title>
-                    <style>
-                        body {font-family: Arial, sans-serif;background-color: white;margin: 0;}
-                        .container {background-color: #fff;padding: 20px;box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);max-width: 800px;margin: auto;}
-                        h1,h2 {text-align: start;color: #333;}
-                        table {width: 100%;border-collapse: collapse;margin-bottom: 20px;}
-                        table,th,td {border: 1px solid #ddd;}
-                        th,td {padding: 12px;text-align: left;}
-                        th {background-color: #4CAF50;color: white;}
-                        .total {text-align: right;font-weight: bold;}
-                        .total-title {font-weight: bold;}
-                        .total-row {background-color: #f9f9f9;text-align: start;}
-                        ul {list-style-type: square;padding-left: 20px;}
-                        .footer {text-align: center;font-size: 0.9em;color: #666;}
-                        .text-right {text-align: right;}
-                        .text-left {text-align: start;}
-                    </style>
-                </head>
-                <body>
-                    <div class="container">
-                        <h1>Relatorio de Ventas</h1>
-                """);
-        str.append(String.format("<h2>Empresa: %s</h2>", relatorio.getEmpresa().getNombre()));
-        str.append(String.format("<p><strong>Mês de Faturação:</strong> %s %s</p>", nMes, nAno));
-        str.append("""
-                <h3>Datos delos Viajes Realizados</h3>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Nombre</th>
-                                    <th>Valor (Unid)</th>
-                                </tr>
-                            </thead>
-                            <tbody class="">
-                """);
-        str.append(String.format("<tr><td>N Viajes registrados</td><td class=\"text-right\">%s</td></tr>", relatorio.getNViajes()));
-        str.append(String.format("<tr><td>N Viajes Cancelados</td><td class=\"text-right\">%s</td></tr>", relatorio.getNViajesCancelados()));
-        str.append(String.format("<tr><td>N Pasajes Vendidos</td><td class=\"text-right\">%s</td></tr>", relatorio.getNPasajesTotal()));
-        str.append(String.format("<tr><td>N Pasajes Rembolsados</td><td class=\"text-right\">%s</td></tr>", relatorio.getNPasajesCancelados()));
-        str.append("""
-                            </tbody>
-                        </table>
-                        <h3>Ciudades de Origen mas Compradas</h3>
-                        <table>
-                            <thead>
-                                <tr><th>Ciudad</th><th>N Pasajes</th></tr>
-                            </thead>
-                            <tbody>
-                """);
-        for (LugarModel salida : salidas)
-            str.append(String.format("<tr><td>%s</td><td>%s</td></tr>", salida.getCiudad().getNombre(), salidasId.get(salida.getId())));
+            List<CiudadTHModel> salidasThModels,
+            List<CiudadTHModel> destinosTHModels,
+            List<MetodoTHModel> metodos
+    ) {
+        var conext = new Context();
+        conext.setVariable("empresaNombre", relatorio.getEmpresa().getNombre());
+        conext.setVariable("nMes", relatorio.getNMes());
+        conext.setVariable("nAno", relatorio.getNAno());
+        conext.setVariable("nViajes", relatorio.getNViajes());
+        conext.setVariable("nViajesCancelados", relatorio.getNViajesCancelados());
+        conext.setVariable("nPasajesVendidos", relatorio.getNPasajesTotal());
+        conext.setVariable("nPasajesCancelados", relatorio.getNPasajesCancelados());
+        conext.setVariable("salidas", salidasThModels);
+        conext.setVariable("destinos", destinosTHModels);
+        conext.setVariable("metodos", metodos);
+        conext.setVariable("valorArrecadadoWeb", relatorio.getValorArrecadadoWeb());
+        conext.setVariable("valorArrecadadoNoWeb", relatorio.getValorArrecadadoNoWeb());
+        conext.setVariable("valorTotal", relatorio.getValorArrecadadoNoWeb() + relatorio.getValorArrecadadoWeb());
 
-        str.append("""
-                    </tbody>
-                        </table>
-                        <h3>
-                            Ciudades de Destino mas Compradas
-                        </h3>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Ciudad</th>
-                                    <th>N Pasajes</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                """);
-        for (LugarModel destino : destinos)
-            str.append(String.format("<tr><td>%s</td><td>%s</td></tr>", destino.getCiudad().getNombre(), destinosId.get(destino.getId())));
-        str.append("""
-                            </tbody>
-                        </table>
-                        <h3>Arrecadação por Métodos de Pagamento</h3>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Metodo de Pago</th>
-                                    <th>En el Sitio Web</th>
-                                    <th>En las boleterias</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                """);
-
-        for (MetodoPagamentoEnum value : MetodoPagamentoEnum.values()) {
-            str.append(String.format("<tr><td>%s</td><td class=\"text-right\">%s bs</td><td class=\"text-right\">%s bs</td></tr>",
-                    value.toString(),
-                    relatorio.getDineroPorMetodoWeb().get(value.toString()).valor,
-                    relatorio.getDineroPorMetodoNoWeb().get(value.toString()).valor
-            ));
-        }
-        str.append(String.format("""
-                <tr class="total-row">
-                    <td class="total-title">Total</td>
-                    <td class="total">%s Bs</td>
-                    <td class="total">%s Bs</td>
-                </tr>
-                """, relatorio.getValorArrecadadoWeb(), relatorio.getValorArrecadadoNoWeb()));
-        str.append(String.format("""
-                <tr class="total-row">
-                    <td class="total-title" colspan="2">Suma Total</td>
-                    <td class="total">%s Bs</td>
-                </tr>
-                """, relatorio.getValorArrecadadoWeb() + relatorio.getValorArrecadadoNoWeb()));
-        str.append("""
-                            </tbody>
-                        </table>
-                        <div class="footer">
-                            <p>&copy; 2024 Viagens XYZ. Todos os direitos reservados.</p>
-                        </div>
-                    </div>
-                </body>
-                </html>
-                """);
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         PdfWriter writer = new PdfWriter(byteArrayOutputStream);
         PdfDocument pdfDocument = new PdfDocument(writer);
         ConverterProperties converterProperties = new ConverterProperties();
-        HtmlConverter.convertToPdf(str.toString(), pdfDocument, converterProperties);
+        HtmlConverter.convertToPdf("Teste", pdfDocument, converterProperties);
         pdfDocument.close();
         return byteArrayOutputStream.toByteArray();
     }
