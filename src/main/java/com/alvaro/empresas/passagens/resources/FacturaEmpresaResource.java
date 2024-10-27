@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,9 +25,9 @@ public class FacturaEmpresaResource {
 
     @GetMapping("/{idEmpresa}")
     //@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    public ResponseEntity<byte[]> getRelatorioByEmpresa(@PathVariable("idEmpresa") UUID idEmpresa) {
+    public ResponseEntity<byte[]> getRelatorioByEmpresa(@PathVariable("idEmpresa") UUID idEmpresa, Model model) {
         Date data = new Date(2024, Calendar.SEPTEMBER, 15);
-        byte[] relatorioPDF = relatorioService.makeRelatorioMensual(idEmpresa, data);
+        byte[] relatorioPDF = relatorioService.makeRelatorioMensual(idEmpresa, data, model);
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=relatorio.pdf");
         headers.add(HttpHeaders.CONTENT_TYPE, "application/pdf");

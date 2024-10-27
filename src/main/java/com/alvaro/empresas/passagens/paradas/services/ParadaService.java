@@ -10,10 +10,9 @@ import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.alvaro.empresas.passagens.paradas.repositories.ParadaRepository;
 import com.alvaro.empresas.passagens.repositories.ViajeRepository;
-import com.alvaro.empresas.passagens.services.validacao.TempoMaxViajeValidation;
+import com.alvaro.empresas.passagens.services.validacao.TiempoViajeService;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,18 +23,19 @@ import java.util.UUID;
 
 @Service
 public class ParadaService {
-    @Value("${api.viaje.max-time-viaje-day}")
-    private Integer tempoMaxViajeDias;
+    private final TiempoViajeService tiempoViajeService;
     private final ParadaRepository paradaRepository;
     private final LugarService lugarService;
     private final ViajeRepository viajeRepository;
 
     @Autowired
     public ParadaService(
+            TiempoViajeService tiempoViajeService,
             ParadaRepository paradaRepository,
             LugarService lugarService,
             ViajeRepository viajeRepository
     ) {
+        this.tiempoViajeService = tiempoViajeService;
         this.paradaRepository = paradaRepository;
         this.lugarService = lugarService;
         this.viajeRepository = viajeRepository;
@@ -151,25 +151,24 @@ public class ParadaService {
         var valido = false;
         System.out.println(modelEscolhido.getViaje().toString());
         if (modelEscolhido.getTipo().equals(EnumParada.SALIDA)) {
-            existe = TempoMaxViajeValidation.existViajeInActiveInIntervaloFromAutobus(
-                    viajeRepository,
-                    tempoMaxViajeDias,
+            existe = tiempoViajeService.existsViajesActiveFromAutobus(
                     modelEscolhido.getViaje().getAutobus().getEmpresa().getId(),
                     modelEscolhido.getViaje().getAutobus().getId(),
-                    modelEscolhido.getViaje().getCodigo(),
                     novoDataHoraAjustada,
-                    modelEscolhido.getViaje().getDestino().getDataHora());
-            valido = TempoMaxViajeValidation.validarTempoMaximoViaje(tempoMaxViajeDias, novoDataHoraAjustada, modelEscolhido.getViaje().getDestino().getDataHora());
+                    modelEscolhido.getViaje().getDestino().getDataHora(),
+                    modelEscolhido.getViaje().getCodigo()
+            );
+            valido = tiempoViajeService.
+                    validarTempoMaximoViaje(novoDataHoraAjustada, modelEscolhido.getViaje().getDestino().getDataHora());
         } else if (modelEscolhido.getTipo().equals(EnumParada.DESTINO)) {
-            existe = TempoMaxViajeValidation.existViajeInActiveInIntervaloFromAutobus(
-                    viajeRepository,
-                    tempoMaxViajeDias,
+            existe = tiempoViajeService.existsViajesActiveFromAutobus(
                     modelEscolhido.getViaje().getAutobus().getEmpresa().getId(),
                     modelEscolhido.getViaje().getAutobus().getId(),
-                    modelEscolhido.getViaje().getCodigo(),
                     modelEscolhido.getViaje().getSalida().getDataHora(),
-                    novoDataHoraAjustada);
-            valido = TempoMaxViajeValidation.validarTempoMaximoViaje(tempoMaxViajeDias, modelEscolhido.getViaje().getSalida().getDataHora(), novoDataHoraAjustada);
+                    novoDataHoraAjustada,
+                    modelEscolhido.getViaje().getCodigo()
+            );
+            valido = tiempoViajeService.validarTempoMaximoViaje(modelEscolhido.getViaje().getSalida().getDataHora(), novoDataHoraAjustada);
         }
 
         return !existe && valido;

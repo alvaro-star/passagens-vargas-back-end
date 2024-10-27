@@ -17,6 +17,8 @@ import com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQL;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOUpdate;
 import com.alvaro.empresas.passagens.enums.EnumParada;
 import com.alvaro.empresas.passagens.helpers.DateAuxiliarFunctions;
+import com.alvaro.empresas.passagens.helpers.PDFTymeleaf;
+import com.alvaro.empresas.passagens.helpers.thymeleaf.PasajeTHModel;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.models.PasajeModel;
 import com.alvaro.empresas.passagens.models.PrecioModel;
@@ -30,55 +32,56 @@ import com.alvaro.empresas.passagens.paradas.repositories.LugarRepository;
 import com.alvaro.empresas.passagens.paradas.repositories.ParadaRepository;
 import com.alvaro.empresas.passagens.repositories.PrecioRepository;
 import com.alvaro.empresas.passagens.repositories.ViajeRepository;
-import com.alvaro.empresas.passagens.services.validacao.TempoMaxViajeValidation;
-import com.itextpdf.html2pdf.ConverterProperties;
-import com.itextpdf.html2pdf.HtmlConverter;
-import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfWriter;
+import com.alvaro.empresas.passagens.services.validacao.TiempoViajeService;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.thymeleaf.context.Context;
 
-import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
 
 
 @Service
 public class ViajeEmpresaService {
-
-    @Value("${api.viaje.max-time-viaje-day}")
-    private Integer tempoMaxViajeDias;
+    private final TiempoViajeService tiempoViajeService;
     private final ViajeRepository viajeRepository;
     private final ParadaRepository paradaRepository;
     private final PrecioService precioService;
     private final LugarRepository lugarRepository;
     private final DateAuxiliarFunctions helperDate;
     private final PrecioRepository precioRepository;
+    private final PDFTymeleaf pdfTymeleaf;
 
     @Autowired
     public ViajeEmpresaService(
             ViajeRepository viajeRepository,
+            TiempoViajeService tiempoViajeService,
             ParadaRepository paradaRepository,
             PrecioService precioService,
             LugarRepository lugarRepository,
             DateAuxiliarFunctions helperDate,
-            PrecioRepository precioRepository) {
+            PrecioRepository precioRepository,
+            PDFTymeleaf pdfTymeleaf) {
         this.viajeRepository = viajeRepository;
         this.paradaRepository = paradaRepository;
+        this.tiempoViajeService = tiempoViajeService;
         this.precioService = precioService;
         this.lugarRepository = lugarRepository;
         this.helperDate = helperDate;
         this.precioRepository = precioRepository;
+        this.pdfTymeleaf = pdfTymeleaf;
     }
 
     public ViajeModel findById(UUID id) {
@@ -237,10 +240,10 @@ public class ViajeEmpresaService {
 
         if (!dataHoraDestinoAjustada.isAfter(dataHoraSalidaAjustada))
             throw new ValidationException("salida", "La salida posee un horario superior al del destino");
-        if (!TempoMaxViajeValidation.validarTempoMaximoViaje(tempoMaxViajeDias, dataHoraSalidaAjustada, dataHoraDestinoAjustada))
+        if (!tiempoViajeService.validarTempoMaximoViaje(dataHoraSalidaAjustada, dataHoraDestinoAjustada))
             throw new ValidationException("destino.dataHora", "Un viaje puede durar maximo 3 dias");
 
-        boolean viajeInIntervalo = TempoMaxViajeValidation.existViajeInActiveInIntervaloFromAutobus(viajeRepository, tempoMaxViajeDias, autobus.getEmpresa().getId(), autobus.getId(), null, dataHoraSalidaAjustada, dataHoraDestinoAjustada);
+        boolean viajeInIntervalo = tiempoViajeService.existsViajesActiveFromAutobus(autobus.getEmpresa().getId(), autobus.getId(), dataHoraSalidaAjustada, dataHoraDestinoAjustada);
         if (viajeInIntervalo)
             throw new ValidationException("destino.dataHora", "Existe un viaje del autobus que ocurre en este intervalo");
 
@@ -318,9 +321,8 @@ public class ViajeEmpresaService {
         diffDias = (diffDias < 0) ? -diffDias : diffDias;
         if (diffDias > 0)
             lastHourViaje = lastHourViaje.plusDays(diffDias);
-        boolean existe = TempoMaxViajeValidation.existViajeInActiveInIntervaloFromAutobus(
-                viajeRepository, tempoMaxViajeDias,
-                viaje.getEmpresa().getId(), viaje.getAutobus().getId(), null, firsHourViaje, lastHourViaje);
+        boolean existe = tiempoViajeService.existsViajesActiveFromAutobus(
+                viaje.getEmpresa().getId(), viaje.getAutobus().getId(), firsHourViaje, lastHourViaje);
         System.out.println("\n\nOpen");
         System.out.println(existe);
         System.out.println("\nClose");
@@ -381,9 +383,8 @@ public class ViajeEmpresaService {
         if (diffDias > 0)
             lastHourViaje = lastHourViaje.plusDays(diffDias);
 
-        boolean existe = TempoMaxViajeValidation.existViajeInActiveInIntervaloFromAutobus(
-                viajeRepository, tempoMaxViajeDias,
-                autobus.getEmpresa().getId(), autobus.getId(), null, firsHourViaje, lastHourViaje);
+        boolean existe = tiempoViajeService.existsViajesActiveFromAutobus(
+                autobus.getEmpresa().getId(), autobus.getId(), firsHourViaje, lastHourViaje);
         if (existe)
             return -1;
 
@@ -414,12 +415,9 @@ public class ViajeEmpresaService {
     }
 
     public ViajeDTOUpdate update(ViajeModel model, AutobusModel autobus) {//Validacao para que a mudanca seja feita
-        boolean viajeInIntervalo = TempoMaxViajeValidation.existViajeInActiveInIntervaloFromAutobus(
-                viajeRepository,
-                tempoMaxViajeDias,
+        boolean viajeInIntervalo = tiempoViajeService.existsViajesActiveFromAutobus(
                 autobus.getEmpresa().getId(),
                 autobus.getId(),
-                null,
                 model.getSalida().getDataHora(),
                 model.getDestino().getDataHora());
         if (viajeInIntervalo)
@@ -464,73 +462,11 @@ public class ViajeEmpresaService {
         return false;
     }
 
-    private String dateToString(Date data) {
-        return data.toString();
-    }
-
     private byte[] getListPaginas(List<PasajeModel> pasajes) {
-        StringBuilder str = new StringBuilder();
-        str.append("""
-                                <!DOCTYPE html>
-                                <html lang="en">
-                                <head>
-                                    <meta charset="UTF-8">
-                                    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-                                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                                    <title>Lista de Pasajeros</title>
-                                </head>
-                                <style>
-                                    body {padding: 5px;}
-                                    .tabela {border: solid 1px;width: 100%;margin: 0;}
-                
-                                    .primeiraColuna {padding-left: 1rem;padding-top: 1rem;padding-bottom: 1rem}
-                
-                                    .datosViaje {padding: 5px;border: solid 1px;border-bottom: 0;display: flex;justify-content: space-between;}
-                
-                                    .datosViaje div h4 {margin: 0;}
-                
-                                    .datosViaje div p {margin: 0;}
-                                </style>
-                <body>
-                    <div>
-                        <h2>Datos del Viaje</h2>
-                    </div>
-                    <table class="tabela">
-                        <thead>
-                            <tr style="text-align:start">
-                                <th style="text-align:start; width: 50px;">Asiento</th>
-                                <th style="text-align:start; width: 70px;">Carnet</th>
-                                <th style="text-align:start;">Nombre</th>
-                                <th style="text-align:center; width: 120px;">Fecha de Nacimiento</th>
-                                <th style="text-align:start">Salida</th>
-                                <th style="text-align:start">Destino</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                """);
-        for (PasajeModel pasaje : pasajes) {
-            str.append("<tr class=\"hover:bg-slate-100\">");
-            str.append(String.format("<td>%s</td>", pasaje.getNSilla()));
-            str.append(String.format("<td>%s</td>", pasaje.getCarnet()));
-            str.append(String.format("<td>%s</td>", pasaje.getNombre()));
-            str.append(String.format("<td style=\"text-align: center;\">%s</td>", this.dateToString(pasaje.getNascimento())));
-            str.append(String.format("<td>%s - %s</td>", pasaje.getSalida().getLugar().getCiudad().getNombre(), pasaje.getSalida().getLugar().getCiudad().getDepartamento().getAbreviacion()));
-            str.append(String.format("<td>%s - %s</td>", pasaje.getDestino().getLugar().getCiudad().getNombre(), pasaje.getDestino().getLugar().getCiudad().getDepartamento().getAbreviacion()));
-            str.append("</tr>");
-        }
-        str.append("""
-                </tbody>
-                </table>
-                </body>
-                </html>
-                """);
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        PdfWriter writer = new PdfWriter(byteArrayOutputStream);
-        PdfDocument pdfDocument = new PdfDocument(writer);
-        ConverterProperties converterProperties = new ConverterProperties();
-        HtmlConverter.convertToPdf(str.toString(), pdfDocument, converterProperties);
-        pdfDocument.close();
-        return byteArrayOutputStream.toByteArray();
+        List<PasajeTHModel> pasajesTh = pasajes.stream().map(PasajeTHModel::new).toList();
+        Context context = new Context();
+        context.setVariable("pasajes", pasajesTh);
+        return pdfTymeleaf.generatePDFByTemplate("/empresa/pasajerosList", context);
     }
 
 }

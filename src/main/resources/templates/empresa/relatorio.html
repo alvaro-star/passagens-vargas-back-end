@@ -10,7 +10,6 @@
             background-color: white;
             margin: 0;
         }
-
         .container {
             background-color: #fff;
             padding: 20px;
@@ -18,7 +17,6 @@
             max-width: 800px;
             margin: auto;
         }
-
         h1,
         h2 {
             text-align: start;
@@ -84,99 +82,99 @@
 </head>
 
 <body>
-    <div class="container">
-        <h1>Relatorio de Ventas</h1>
-        <h2>Empresa: <span th:text="${empresaNombre}"></span></h2>
-        <p><strong>Mês de Faturação:</strong> <span th:text="${nMes}"></span> <span th:text="${nAno}"></span></p>
-        <h3>Datos delos Viajes Realizados</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Valor (Unid)</th>
-                </tr>
-            </thead>
-            <tbody class="">
-                <tr>
-                    <td>N Viajes registrados</td>
-                    <td class="text-right" th:text="${nViajes}">NViajes</td>
-                </tr>
-                <tr>
-                    <td>N Viajes Cancelados</td>
-                    <td class="text-right" th:text="${nViajesCancelados}">N Viajes Cancelados</td>
-                </tr>
-                <tr>
-                    <td>N Pasajes Vendidos</td>
-                    <td class="text-right" th:text="${nPasajesVendidos}">N Pasajes Vendidos</td>
-                </tr>
-                <tr>
-                    <td>N Pasajes Rembolsados</td>
-                    <td class="text-right" th:text="${nPasajesCancelados}">N Viajes Cancelados</td>
-                </tr>
-            </tbody>
-        </table>
-        <h3>Ciudades de Origen mas Compradas</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Ciudad</th>
-                    <th>N Pasajes</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="salida : ${salidas}">
-                    <td th:text="${salida.nombre}">Nombre</td>
-                    <td th:text="${salida.nPasajes}">N Pasajes</td>
-                </tr>
-            </tbody>
-        </table>
-        <h3>
-            Ciudades de Destino mas Compradas
-        </h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Ciudad</th>
-                    <th>N Pasajes</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="destino : ${destinos}">
-                    <td th:text="${destino.nombre}">Nombre</td>
-                    <td th:text="${destino.nPasajes}">N Pasajes</td>
-                </tr>
-            </tbody>
-        </table>
-        <h3>Arrecadação por Métodos de Pagamento</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Metodo de Pago</th>
-                    <th>En el Sitio Web</th>
-                    <th>En las boleterias</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="metodo : ${metodos}">
-                    <td th:text="${metodo.nombre}">Nombre</td>
-                    <td th:text="${metodo.valueWeb}" class="text-right">Valor web</td>
-                    <td th:text="${metodo.valueNoWeb}" class="text-right">Valor no Web</td>
-                </tr>
-                <tr class="total-row">
-                    <td class="total-title">Total</td>
-                    <td th:text="${valorArrecadadoWeb}" class="total">Valor Arrecadado web</td>
-                    <td th:text="${valorArrecadadoNoWeb}" class="total">Valor Arrecadado no web</td>
-                </tr>
-                <tr class="total-row">
-                    <td class="total-title" colspan="2">Suma Total</td>
-                    <td th:text="${valorTotal}" class="total">Valor total</td>
-                </tr>
-            </tbody>
-        </table>
-        <div class="footer">
-            <p>&copy; 2024 Viagens XYZ. Todos os direitos reservados.</p>
-        </div>
+<div class="container">
+    <h1>Relatorio de Ventas</h1>
+    <h2>Empresa: <span th:text="${empresaNombre}"></span></h2>
+    <p><strong>Mês de Faturação:</strong> <span th:text="${nMes}"></span> <span th:text="${nAno}"></span></p>
+    <h3>Datos delos Viajes Realizados</h3>
+    <table>
+        <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Valor (Unid)</th>
+        </tr>
+        </thead>
+        <tbody class="">
+        <tr>
+            <td>N Viajes registrados</td>
+            <td class="text-right" th:text="${nViajes}">NViajes</td>
+        </tr>
+        <tr>
+            <td>N Viajes Cancelados</td>
+            <td class="text-right" th:text="${nViajesCancelados}">N Viajes Cancelados</td>
+        </tr>
+        <tr>
+            <td>N Pasajes Vendidos</td>
+            <td class="text-right" th:text="${nPasajesVendidos}">N Pasajes Vendidos</td>
+        </tr>
+        <tr>
+            <td>N Pasajes Rembolsados</td>
+            <td class="text-right" th:text="${nPasajesCancelados}">N Viajes Cancelados</td>
+        </tr>
+        </tbody>
+    </table>
+    <h3>Ciudades de Origen mas Compradas</h3>
+    <table>
+        <thead>
+        <tr>
+            <th>Ciudad</th>
+            <th>N Pasajes</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="salida : ${salidas}">
+            <td th:text="${salida.nombre}">Nombre</td>
+            <td th:text="${salida.nPasajes}">N Pasajes</td>
+        </tr>
+        </tbody>
+    </table>
+    <h3>
+        Ciudades de Destino mas Compradas
+    </h3>
+    <table>
+        <thead>
+        <tr>
+            <th>Ciudad</th>
+            <th>N Pasajes</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="destino : ${destinos}">
+            <td th:text="${destino.nombre}">Nombre</td>
+            <td th:text="${destino.nPasajes}">N Pasajes</td>
+        </tr>
+        </tbody>
+    </table>
+    <h3>Arrecadação por Métodos de Pagamento</h3>
+    <table>
+        <thead>
+        <tr>
+            <th>Metodo de Pago</th>
+            <th>En el Sitio Web</th>
+            <th>En las boleterias</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="metodo : ${metodos}">
+            <td th:text="${metodo.nombre}">Nombre</td>
+            <td th:text="${metodo.valueWeb}" class="text-right">Valor web</td>
+            <td th:text="${metodo.valueNoWeb}" class="text-right">Valor no Web</td>
+        </tr>
+        <tr class="total-row">
+            <td class="total-title">Total</td>
+            <td th:text="${valorArrecadadoWeb}" class="total">Valor Arrecadado web</td>
+            <td th:text="${valorArrecadadoNoWeb}" class="total">Valor Arrecadado no web</td>
+        </tr>
+        <tr class="total-row">
+            <td class="total-title" colspan="2">Suma Total</td>
+            <td th:text="${valorTotal}" class="total">Valor total</td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="footer">
+        <p>&copy; 2024 Viagens XYZ. Todos os direitos reservados.</p>
     </div>
+</div>
 </body>
 
 </html>

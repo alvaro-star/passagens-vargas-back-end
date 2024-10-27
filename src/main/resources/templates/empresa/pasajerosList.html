@@ -34,14 +34,14 @@
     </tr>
     </thead>
     <tbody>
-        <tr th:each="pasaje : ${pasajes}" class="hover:bg-slate-100">
-            <td th:text="${pasaje.nsilla}"></td>
-            <td th:text="${pasaje.carnet}"></td>
-            <td th:text="${pasaje.nombre}"></td>
-            <td th:text="${pasaje.nascimento}" style="text-align: center;"></td>
-            <td th:text="${pasaje.salida.lugar.ciudad.nombre} + ' - ' + ${pasaje.salida.lugar.ciudad.departamento.abreviacion}"></td>
-            <td th:text="${pasaje.destino.lugar.ciudad.nombre} + ' - ' + ${pasaje.destino.lugar.ciudad.departamento.abreviacion}"></td>
-        </tr>
+    <tr th:each="pasaje : ${pasajes}" class="hover:bg-slate-100">
+        <td th:text="${pasaje.nsilla}"></td>
+        <td th:text="${pasaje.carnet}"></td>
+        <td th:text="${pasaje.nombre}"></td>
+        <td th:text="${pasaje.nascimento}" style="text-align: center;"></td>
+        <td th:text="${pasaje.salida}"></td>
+        <td th:text="${pasaje.destino}"></td>
+    </tr>
     </tbody>
 </table>
 </body>

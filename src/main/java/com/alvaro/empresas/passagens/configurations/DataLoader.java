@@ -39,7 +39,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
-@Profile({"dev", "devsql", "share"})
+@Profile({"h2", "devsql", "share"})
 @Configuration
 public class DataLoader {
     @Autowired
@@ -191,7 +191,7 @@ public class DataLoader {
                                 precio.getPrecio(),
                                 true,
                                 true,
-                                "Alvaro Vargas ALvarez",
+                                "Alvaro Vargas Alvarez",
                                 "3308731",
                                 new Date(2006, 03, 15), paradas.get(0), paradas.get(3), precio, ));
                     }*/

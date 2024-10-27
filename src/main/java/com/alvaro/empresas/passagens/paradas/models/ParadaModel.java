@@ -74,4 +74,8 @@ public class ParadaModel {
         if (dtoUpdate.plataforma() != null)
             plataforma = dtoUpdate.plataforma();
     }
+
+    public String toStringCiudadDepartamentoFormat() {
+        return lugar.getCiudad().getNombre() + " - " + lugar.getCiudad().getDepartamento().getAbreviacion();
+    }
 }

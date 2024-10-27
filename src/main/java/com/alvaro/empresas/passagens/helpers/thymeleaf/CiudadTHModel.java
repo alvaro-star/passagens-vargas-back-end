@@ -1,4 +1,4 @@
-package com.alvaro.empresas.passagens.helpers.tymeleaf;
+package com.alvaro.empresas.passagens.helpers.thymeleaf;
 
 public record CiudadTHModel(
         String nombre,

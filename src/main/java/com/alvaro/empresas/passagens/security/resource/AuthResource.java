@@ -47,7 +47,14 @@ public class AuthResource {
     private UsuarioService usuarioService;
 
     @Autowired
-    public AuthResource(UsuarioRepository usuarioRepository, RoleService roleService, UsuarioSolicitudRepository usuarioSolicitudRepository, EmailService emailService, CodigoRepository codigoRepository, MyUserService myUserService, BCryptPasswordEncoder passwordEncoder) {
+    public AuthResource(UsuarioRepository usuarioRepository,
+                        RoleService roleService,
+                        UsuarioSolicitudRepository usuarioSolicitudRepository,
+                        EmailService emailService,
+                        CodigoRepository codigoRepository,
+                        MyUserService myUserService,
+                        BCryptPasswordEncoder passwordEncoder
+    ) {
         this.usuarioRepository = usuarioRepository;
         this.roleService = roleService;
         this.myUserService = myUserService;

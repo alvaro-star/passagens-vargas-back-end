@@ -23,7 +23,9 @@ public class RoutesConfiguration {
         loadCommonRoutes(routesConfigurations);
         routesConfigurations.requestMatchers(HttpMethod.GET, "/facturas/{idEmpresa}").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
+                .requestMatchers("/teste/**").permitAll()
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll()
+                .requestMatchers("/thymeleaf/**").permitAll()
                 .anyRequest().authenticated();
     }
 

@@ -4,57 +4,44 @@ import com.alvaro.empresas.passagens.dtos.viajes.JPQL.PasajeJPQLBusca;
 import com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQLRelatorio;
 import com.alvaro.empresas.passagens.enums.MetodoPagamentoEnum;
 import com.alvaro.empresas.passagens.helpers.DateAuxiliarFunctions;
+import com.alvaro.empresas.passagens.helpers.PDFTymeleaf;
 import com.alvaro.empresas.passagens.helpers.services.EmailService;
-import com.alvaro.empresas.passagens.helpers.tymeleaf.CiudadTHModel;
-import com.alvaro.empresas.passagens.helpers.tymeleaf.MetodoTHModel;
+import com.alvaro.empresas.passagens.helpers.thymeleaf.CiudadTHModel;
+import com.alvaro.empresas.passagens.helpers.thymeleaf.MetodoTHModel;
 import com.alvaro.empresas.passagens.models.PrecioModel;
 import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import com.alvaro.empresas.passagens.paradas.services.LugarService;
 import com.alvaro.empresas.passagens.repositories.PasajeRepository;
-import com.alvaro.empresas.passagens.repositories.ViajeRepository;
 import com.alvaro.empresas.passagens.services.EmpresaService;
-import com.alvaro.empresas.passagens.services.validacao.TempoMaxViajeValidation;
+import com.alvaro.empresas.passagens.services.validacao.TiempoViajeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import com.itextpdf.html2pdf.ConverterProperties;
-import com.itextpdf.html2pdf.HtmlConverter;
-import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfWriter;
 import org.springframework.ui.Model;
-import org.springframework.ui.freemarker.SpringTemplateLoader;
 import org.thymeleaf.context.Context;
-
-import javax.swing.*;
-import java.io.ByteArrayOutputStream;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
 public class RelatorioService {
-    private final ViajeRepository viajeRepository;
     private final EmpresaService empresaService;
     private final PasajeRepository pasajeRepository;
     private final EmailService emailService;
-    private DateAuxiliarFunctions dateAuxiliarFunctions;
+    private final DateAuxiliarFunctions dateAuxiliarFunctions;
+    private final PDFTymeleaf pdfTymeleaf;
     private final LugarService lugarService;
+    private final TiempoViajeService tiempoViajeService;
 
     @Autowired
-    public RelatorioService(
-            ViajeRepository viajeRepository,
-            EmpresaService empresaService,
-            PasajeRepository pasajeRepository,
-            EmailService emailService,
-            LugarService lugarService,
-            SpringTemplateLoader templateLoader) {
-        this.viajeRepository = viajeRepository;
+    public RelatorioService(EmpresaService empresaService, PasajeRepository pasajeRepository, EmailService emailService, LugarService lugarService, TiempoViajeService tiempoViajeService, PDFTymeleaf pdfTymeleaf) {
         this.empresaService = empresaService;
         this.pasajeRepository = pasajeRepository;
         this.emailService = emailService;
         this.dateAuxiliarFunctions = new DateAuxiliarFunctions();
         this.lugarService = lugarService;
+        this.tiempoViajeService = tiempoViajeService;
+        this.pdfTymeleaf = pdfTymeleaf;
     }
 
     @Value("${api.viaje.max-time-viaje-day}")
@@ -66,7 +53,7 @@ public class RelatorioService {
         var empresa = empresaService.findById(idEmpresa);
         LocalDateTime inicio = dateAuxiliarFunctions.getDateWithFirstDayOfMonth(dateAnalize);
         LocalDateTime fim = dateAuxiliarFunctions.getDateWithLastDayOfMonth(dateAnalize);
-        List<ViajeDTOJPQLRelatorio> viajes = TempoMaxViajeValidation.findAllViajesFromEmpresaInInterval(viajeRepository, tempoMaxViajeDias, idEmpresa, inicio, fim);
+        List<ViajeDTOJPQLRelatorio> viajes = tiempoViajeService.findViajesFromEmpresa(idEmpresa, inicio, fim);
 
         HashMap<Integer, Integer> salidasIdNPasajes = new HashMap<>(), destinosIdNPasajes = new HashMap<>();
         List<PasajeJPQLBusca> pasajesBD;
@@ -80,8 +67,7 @@ public class RelatorioService {
 
         for (ViajeDTOJPQLRelatorio viaje : viajes) {
             relatorio.nViajes++;
-            if (viaje.viaje().isCancelado())
-                relatorio.nViajesCancelados++;
+            if (viaje.viaje().isCancelado()) relatorio.nViajesCancelados++;
 
             for (PrecioModel precio : viaje.viaje().getPrecios()) {
                 pasajesBD = pasajeRepository.getPasajesPagados(precio.getId());
@@ -110,11 +96,7 @@ public class RelatorioService {
             destinosTHModels.add(new CiudadTHModel(destino.getCiudad().getNombre(), destinosIdNPasajes.get(destino.getId())));
 
         for (MetodoPagamentoEnum value : MetodoPagamentoEnum.values()) {
-            metodos.add(new MetodoTHModel(
-                    value.toString(),
-                    relatorio.getDineroPorMetodoWeb().get(value.toString()).valor,
-                    relatorio.getDineroPorMetodoNoWeb().get(value.toString()).valor
-            ));
+            metodos.add(new MetodoTHModel(value.toString(), relatorio.getDineroPorMetodoWeb().get(value.toString()).valor, relatorio.getDineroPorMetodoNoWeb().get(value.toString()).valor));
         }
 
         return generatePdfFromHtml(relatorio, salidasThModels, destinosTHModels, metodos);
@@ -124,11 +106,7 @@ public class RelatorioService {
         lugares.sort(Comparator.comparingInt(l -> lugaresNPasajes.get(l.getId())));
     }
 
-    public void classificarPasajeFromPrecio(
-            List<PasajeJPQLBusca> pasajes,
-            HashMap<Integer, Integer> salidasId,
-            HashMap<Integer, Integer> destinosId,
-            HashMap<String, HashMetodoPagamentoValor> pagamentosWeb, HashMap<String, HashMetodoPagamentoValor> pagamentosNoWeb, RelatorioModel relatorio) {
+    public void classificarPasajeFromPrecio(List<PasajeJPQLBusca> pasajes, HashMap<Integer, Integer> salidasId, HashMap<Integer, Integer> destinosId, HashMap<String, HashMetodoPagamentoValor> pagamentosWeb, HashMap<String, HashMetodoPagamentoValor> pagamentosNoWeb, RelatorioModel relatorio) {
 
         relatorio.nPasajesTotal += pasajes.size();
         for (PasajeJPQLBusca pasaje : pasajes) {
@@ -161,33 +139,21 @@ public class RelatorioService {
         else hashMap.put(key, auxMap + 1);
     }
 
-    public byte[] generatePdfFromHtml(
-            RelatorioModel relatorio,
-            List<CiudadTHModel> salidasThModels,
-            List<CiudadTHModel> destinosTHModels,
-            List<MetodoTHModel> metodos
-    ) {
-        var conext = new Context();
-        conext.setVariable("empresaNombre", relatorio.getEmpresa().getNombre());
-        conext.setVariable("nMes", relatorio.getNMes());
-        conext.setVariable("nAno", relatorio.getNAno());
-        conext.setVariable("nViajes", relatorio.getNViajes());
-        conext.setVariable("nViajesCancelados", relatorio.getNViajesCancelados());
-        conext.setVariable("nPasajesVendidos", relatorio.getNPasajesTotal());
-        conext.setVariable("nPasajesCancelados", relatorio.getNPasajesCancelados());
-        conext.setVariable("salidas", salidasThModels);
-        conext.setVariable("destinos", destinosTHModels);
-        conext.setVariable("metodos", metodos);
-        conext.setVariable("valorArrecadadoWeb", relatorio.getValorArrecadadoWeb());
-        conext.setVariable("valorArrecadadoNoWeb", relatorio.getValorArrecadadoNoWeb());
-        conext.setVariable("valorTotal", relatorio.getValorArrecadadoNoWeb() + relatorio.getValorArrecadadoWeb());
-
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        PdfWriter writer = new PdfWriter(byteArrayOutputStream);
-        PdfDocument pdfDocument = new PdfDocument(writer);
-        ConverterProperties converterProperties = new ConverterProperties();
-        HtmlConverter.convertToPdf("Teste", pdfDocument, converterProperties);
-        pdfDocument.close();
-        return byteArrayOutputStream.toByteArray();
+    public byte[] generatePdfFromHtml(RelatorioModel relatorio, List<CiudadTHModel> salidasThModels, List<CiudadTHModel> destinosTHModels, List<MetodoTHModel> metodos) {
+        var context = new Context();
+        context.setVariable("empresaNombre", relatorio.getEmpresa().getNombre());
+        context.setVariable("nMes", relatorio.getNMes());
+        context.setVariable("nAno", relatorio.getNAno());
+        context.setVariable("nViajes", relatorio.getNViajes());
+        context.setVariable("nViajesCancelados", relatorio.getNViajesCancelados());
+        context.setVariable("nPasajesVendidos", relatorio.getNPasajesTotal());
+        context.setVariable("nPasajesCancelados", relatorio.getNPasajesCancelados());
+        context.setVariable("salidas", salidasThModels);
+        context.setVariable("destinos", destinosTHModels);
+        context.setVariable("metodos", metodos);
+        context.setVariable("valorArrecadadoWeb", relatorio.getValorArrecadadoWeb());
+        context.setVariable("valorArrecadadoNoWeb", relatorio.getValorArrecadadoNoWeb());
+        context.setVariable("valorTotal", relatorio.getValorArrecadadoNoWeb() + relatorio.getValorArrecadadoWeb());
+        return pdfTymeleaf.generatePDFByTemplate("/empresa/relatorio", context);
     }
 }
