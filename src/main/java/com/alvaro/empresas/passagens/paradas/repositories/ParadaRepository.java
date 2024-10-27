@@ -64,12 +64,3 @@ public interface ParadaRepository extends JpaRepository<ParadaModel, Integer> {
 
     Optional<ParadaModel> findFirst1ByLugarId(Integer idLugar);
 }
-//List<LugarModel> findByCiudadId(Integer idCiudad);
-    /*
-        SELECT v.* FROM ViajeModel v RIGHT Join ParadaModel p where v.id = "teste"
-        List<ViajeModel> viajes
-
-     @Query(value = "SELECT * FROM tb_parada WHERE fk_idtb_lugar = :idLugar " +
-            "AND fk_idtb_viaje = :codigo", nativeQuery = true)
-    List<ParadaModel> nVezesViajePassa(@Param("idLugar") Integer idLugar, @Param("codigo") UUID codigoViaje);
-     */

@@ -29,12 +29,9 @@ public class UsuarioBean {
     }
 
     public boolean hasRole(String role) {
-        for (String roleList : this.roles) {
-            //System.out.println("\n" + roleList + "   ->  " + role);
+        for (String roleList : this.roles)
             if (roleList.equals(role))
                 return true;
-        }
-
         return false;
     }
 }

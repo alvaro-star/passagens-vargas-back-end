@@ -7,9 +7,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -25,9 +25,9 @@ public class PassagensApplication {
     }
 
     @GetMapping("/teste/{id}")
-    public ResponseEntity<byte[]> index(@PathVariable(value = "id") UUID id) {
+    public ResponseEntity<byte[]> index(@PathVariable(value = "id") UUID id, Model model) {
         Date data = new Date(2024, Calendar.SEPTEMBER, 15);
-        byte[] pasajePdf = relatorioService.makeRelatorioMensual(id, data);
+        byte[] pasajePdf = relatorioService.makeRelatorioMensual(id, data, model);
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=pasaje.pdf");
         headers.add(HttpHeaders.CONTENT_TYPE, "application/pdf");

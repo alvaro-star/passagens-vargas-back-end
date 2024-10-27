@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Pasajeros</title>
+</head>
+<style>
+    body {padding: 5px;}
+    .tabela {border: solid 1px;width: 100%;margin: 0;}
+
+    .primeiraColuna {padding-left: 1rem;padding-top: 1rem;padding-bottom: 1rem}
+
+    .datosViaje {padding: 5px;border: solid 1px;border-bottom: 0;display: flex;justify-content: space-between;}
+
+    .datosViaje div h4 {margin: 0;}
+
+    .datosViaje div p {margin: 0;}
+</style>
+<body>
+<div>
+    <h2>Datos del Viaje</h2>
+</div>
+<table class="tabela">
+    <thead>
+    <tr style="text-align:start">
+        <th style="text-align:start; width: 50px;">Asiento</th>
+        <th style="text-align:start; width: 70px;">Carnet</th>
+        <th style="text-align:start;">Nombre</th>
+        <th style="text-align:center; width: 120px;">Fecha de Nacimiento</th>
+        <th style="text-align:start">Salida</th>
+        <th style="text-align:start">Destino</th>
+    </tr>
+    </thead>
+    <tbody>
+        <tr th:each="pasaje : ${pasajes}" class="hover:bg-slate-100">
+            <td th:text="${pasaje.nsilla}"></td>
+            <td th:text="${pasaje.carnet}"></td>
+            <td th:text="${pasaje.nombre}"></td>
+            <td th:text="${pasaje.nascimento}" style="text-align: center;"></td>
+            <td th:text="${pasaje.salida.lugar.ciudad.nombre} + ' - ' + ${pasaje.salida.lugar.ciudad.departamento.abreviacion}"></td>
+            <td th:text="${pasaje.destino.lugar.ciudad.nombre} + ' - ' + ${pasaje.destino.lugar.ciudad.departamento.abreviacion}"></td>
+        </tr>
+    </tbody>
+</table>
+</body>
+</html>

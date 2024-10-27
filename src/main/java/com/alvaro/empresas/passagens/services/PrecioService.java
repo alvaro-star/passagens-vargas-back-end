@@ -50,13 +50,11 @@ public class PrecioService {
         List<PisoModel> pisos = model.getViaje().getAutobus().getPisos();
         var pisoElegido = new PisoModel();
 
-        for (PisoModel piso : pisos) {
+        for (PisoModel piso : pisos)
             if (piso.getNPiso().equals(model.getNPiso()))
                 pisoElegido = piso;
-        }
 
         PisoDTOResponse pisoDto = new PisoDTOResponse(pisoElegido, model.getViaje().getAutobus().getId());
-
         List<Integer> ocupados = pasajeRepository.getPasajesVendidosAndNoRembolso(model.getId());
         return new PrecioDTOResponseViaje(model, pisoDto, ocupados);
     }
@@ -67,7 +65,7 @@ public class PrecioService {
         return new PrecioDTO(update, model.getViajeCodigo());
     }
 
-    public PrecioModel updateFromService(PrecioModel precioModel) {
-        return precioRepository.save(precioModel);
+    public void updateFromService(PrecioModel precioModel) {
+        precioRepository.save(precioModel);
     }
 }

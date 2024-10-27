@@ -1,6 +1,5 @@
 package com.alvaro.empresas.passagens.services.validacao;
 
-import com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQL;
 import com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQLRelatorio;
 import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.repositories.ViajeRepository;
@@ -40,10 +39,9 @@ public class TempoMaxViajeValidation {
         if (viajeCodigo == null)
             return !viaje.isEmpty();
 
-        for (ViajeModel viajeModel : viaje) {
+        for (ViajeModel viajeModel : viaje)
             if (!viajeCodigo.equals(viajeModel.getCodigo()))
                 return true;
-        }
         return false;
     }
 }

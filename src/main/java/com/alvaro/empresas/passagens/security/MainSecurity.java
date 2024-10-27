@@ -1,5 +1,6 @@
 package com.alvaro.empresas.passagens.security;
 
+import com.alvaro.empresas.passagens.configurations.RoutesConfiguration;
 import com.alvaro.empresas.passagens.security.jwt.SecurityFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -11,7 +12,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -43,41 +44,14 @@ public class MainSecurity {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         var http = httpSecurity
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSourceMy()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-        if (isProfileActive("h2"))
-            http.authorizeHttpRequests(authorize -> authorize
-                    .requestMatchers(HttpMethod.GET, "/facturas/{idEmpresa}").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/auth/refresh").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/auth/forget_password").permitAll()
-                    .requestMatchers(HttpMethod.PUT, "/auth/reset_password").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/auth/validar").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/viajes").permitAll()
-                    .requestMatchers(HttpMethod.GET, "/viajes/{id}").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/pasajes").permitAll()
-                    .requestMatchers(HttpMethod.GET, "/ciudades/{nombre}/like").permitAll()
-                    .requestMatchers("/h2-console/**").permitAll()
-                    .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll()
-                    .anyRequest().authenticated()
-            ).headers(h -> h.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
+        if (isProfileActive("h2") || isProfileActive("mysql"))
+            http.authorizeHttpRequests(RoutesConfiguration::loadDevRoutes)
+                    .headers(h -> h.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
         else if (isProfileActive("prod"))
-            http.authorizeHttpRequests(authorize -> authorize
-                    .requestMatchers(HttpMethod.GET, "/facturas/{idEmpresa}").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/auth/refresh").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/auth/forget_password").permitAll()
-                    .requestMatchers(HttpMethod.PUT, "/auth/reset_password").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/auth/validar").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/viajes").permitAll()
-                    .requestMatchers(HttpMethod.GET, "/viajes/{id}").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/pasajes").permitAll()
-                    .requestMatchers(HttpMethod.GET, "/ciudades/{nombre}/like").permitAll()
-                    .anyRequest().authenticated()
-            );
+            http.authorizeHttpRequests(RoutesConfiguration::loadProdRoutes);
         else http.authorizeHttpRequests(authorize -> authorize
                     .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                     .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()

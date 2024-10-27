@@ -1,4 +1,4 @@
-package com.alvaro.empresas.passagens.helpers;
+package com.alvaro.empresas.passagens.configurations;
 
 import com.alvaro.empresas.passagens.autobuses.enums.EnumPosicao;
 import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
@@ -41,7 +41,7 @@ import java.util.List;
 
 @Profile({"dev", "devsql", "share"})
 @Configuration
-public class ShareProfile {
+public class DataLoader {
     @Autowired
     private RoleService roleService;
     @Autowired

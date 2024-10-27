@@ -10,12 +10,12 @@ import com.alvaro.empresas.passagens.dtos.pasajes.PasajeDTOEmpresaResponse;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTO;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTOVenta;
 import com.alvaro.empresas.passagens.enums.MetodoPagamentoEnum;
-import com.alvaro.empresas.passagens.pagos.models.FacturaRembolsoModel;
 import com.alvaro.empresas.passagens.helpers.PasajesPDF;
-import com.alvaro.empresas.passagens.pagos.models.FacturaPasajeModel;
 import com.alvaro.empresas.passagens.models.PasajeModel;
 import com.alvaro.empresas.passagens.models.PrecioModel;
 import com.alvaro.empresas.passagens.models.ViajeModel;
+import com.alvaro.empresas.passagens.pagos.models.FacturaPasajeModel;
+import com.alvaro.empresas.passagens.pagos.models.FacturaRembolsoModel;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.alvaro.empresas.passagens.repositories.PasajeRepository;
@@ -57,11 +57,6 @@ public class PasajeService {
     public PasajeModel findById(UUID id) {
         var model = pasajeRepository.findById(id);
         return model.orElseThrow(() -> new ObjectNotFoundException(id, PasajeModel.class.getName()));
-    }
-
-    //En desarrollo
-    public void getOne(UUID id) {
-        var model = findById(id);
     }
 
     //Exclusivo para el servicio online

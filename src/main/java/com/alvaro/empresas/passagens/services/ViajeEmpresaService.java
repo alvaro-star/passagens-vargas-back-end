@@ -2,7 +2,6 @@ package com.alvaro.empresas.passagens.services;
 
 import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
-import com.alvaro.empresas.passagens.autobuses.services.AutobusService;
 import com.alvaro.empresas.passagens.configurations.exceptions.FieldMessage;
 import com.alvaro.empresas.passagens.configurations.exceptions.InternalException.BadRequestException;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
@@ -63,7 +62,6 @@ public class ViajeEmpresaService {
     private final ParadaRepository paradaRepository;
     private final PrecioService precioService;
     private final LugarRepository lugarRepository;
-    private final AutobusService autobusService;
     private final DateAuxiliarFunctions helperDate;
     private final PrecioRepository precioRepository;
 
@@ -73,14 +71,12 @@ public class ViajeEmpresaService {
             ParadaRepository paradaRepository,
             PrecioService precioService,
             LugarRepository lugarRepository,
-            AutobusService autobusService,
             DateAuxiliarFunctions helperDate,
             PrecioRepository precioRepository) {
         this.viajeRepository = viajeRepository;
         this.paradaRepository = paradaRepository;
         this.precioService = precioService;
         this.lugarRepository = lugarRepository;
-        this.autobusService = autobusService;
         this.helperDate = helperDate;
         this.precioRepository = precioRepository;
     }
@@ -371,7 +367,6 @@ public class ViajeEmpresaService {
 
         long diffDias;
 
-
         dataViajeOriginal = viajes.getContent().get(0).salida().getDataHora();
         LocalDateTime firsHourViaje = viajes.getContent().get(0).salida().getDataHora();
         LocalDateTime lastHourViaje = viajes.getContent().get(viajes.getContent().size() - 1).salida().getDataHora();
@@ -539,56 +534,3 @@ public class ViajeEmpresaService {
     }
 
 }
-/*Restos
-        /*for (LugarModel lugarSalida : lugaresSalida) {
-            List<ParadaModel> salidasDia = paradaRepository.cargarSalidasDelDiaFromEmpresa(idEmpresa, lugarSalida.getId(), startDay, endDay);
-
-            if (!salidasDia.isEmpty()) {
-                for (ParadaModel salidaFor : salidasDia) {
-                    ViajeModel viaje = salidaFor.getViaje();
-
-                    List<ParadaModel> nVezesTrayectoPassaDestino = paradaRepository.findByViajeCodigoAndTipo(viaje.getCodigo(), EnumParada.DESTINO);
-                    if (nVezesTrayectoPassaDestino.size() != 1) continue;
-
-                    ParadaModel destino = nVezesTrayectoPassaDestino.get(0);
-                    if (!destino.getDataHora().isAfter(salidaFor.getDataHora())) continue;
-
-                    ParadaDTOComplete salidaDTO = new ParadaDTOComplete(salidaFor, viaje.getCodigo());
-                    ParadaDTOComplete destinoDTO = new ParadaDTOComplete(destino, viaje.getCodigo());
-
-                    List<PrecioDTO> precios = new ArrayList<>();
-                    for (PrecioModel precio : viaje.getPrecios())
-                        if (!precio.getLleno()) precios.add(new PrecioDTO(precio));
-
-                    viajesSelecionados.add(new ViajeDTOListBusquedaEmpresa(viaje, viaje.getEmpresa().getLogo(), salidaDTO, destinoDTO, precios));
-                }
-            }
-        }*/
-        /*
-        for (LugarModel lugarSalida : lugaresSalida) {
-            List<ParadaModel> salidasDia = paradaRepository.cargarSalidasDelDiaFromEmpresa(idEmpresa, lugarSalida.getId(), startDay, endDay);
-
-            if (!salidasDia.isEmpty()) {
-                for (ParadaModel salidaFor : salidasDia) {
-                    ViajeModel viaje = salidaFor.getViaje();
-
-                    for (LugarModel lugarDestino : lugaresDestino) {
-                        List<ParadaModel> nVezesTrayectoPassaDestino = paradaRepository.findByViajeCodigoAndLugarId(viaje.getCodigo(), lugarDestino.getId());
-                        if (nVezesTrayectoPassaDestino.size() != 1) continue;
-
-                        ParadaModel destino = nVezesTrayectoPassaDestino.get(0);
-                        if (!destino.getDataHora().isAfter(salidaFor.getDataHora())) continue;
-
-                        ParadaDTOComplete salidaDTO = new ParadaDTOComplete(salidaFor, viaje.getCodigo());
-                        ParadaDTOComplete destinoDTO = new ParadaDTOComplete(destino, viaje.getCodigo());
-
-                        List<PrecioDTO> precios = new ArrayList<>();
-                        for (PrecioModel precio : viaje.getPrecios())
-                            if (!precio.getLleno()) precios.add(new PrecioDTO(precio));
-
-                        viajesSelecionados.add(new ViajeDTOListBusquedaEmpresa(viaje, viaje.getEmpresa().getLogo(), salidaDTO, destinoDTO, precios));
-                    }
-                }
-            }}*/
-
-

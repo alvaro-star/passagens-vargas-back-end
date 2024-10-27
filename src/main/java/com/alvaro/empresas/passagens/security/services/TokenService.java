@@ -18,32 +18,22 @@ public class TokenService {
     @Value("${api.security.token.secret}")
     private String secret;
 
-    public String generateToken(UsuarioModel usuarioModel) {
-        try {
-            Algorithm algorithm = Algorithm.HMAC256(secret);
-            String token = JWT.create()
-                    .withIssuer("API passagens-back")
-                    .withSubject(usuarioModel.getLogin())
-                    .withExpiresAt(this.getExpirationDate())
-                    .sign(algorithm);
-            return token;
-        } catch (JWTCreationException exception) {
-            throw new RuntimeException("Erro na geracao do token", exception);
-        }
+    public String generateToken(UsuarioModel usuarioModel) throws JWTCreationException {
+        Algorithm algorithm = Algorithm.HMAC256(secret);
+        return JWT.create()
+                .withIssuer("API passagens-back")
+                .withSubject(usuarioModel.getLogin())
+                .withExpiresAt(this.getExpirationDate())
+                .sign(algorithm);
     }
 
-    public String generateRefreshToken(UsuarioModel usuarioModel) {
-        try {
-            Algorithm algorithm = Algorithm.HMAC256(secret);
-            String token = JWT.create()
-                    .withIssuer("API passagens-back")
-                    .withSubject(usuarioModel.getLogin())
-                    .withExpiresAt(this.getExpirationRefreshDate())
-                    .sign(algorithm);
-            return token;
-        } catch (JWTCreationException exception) {
-            throw new RuntimeException("Erro na geracao do token", exception);
-        }
+    public String generateRefreshToken(UsuarioModel usuarioModel) throws JWTCreationException {
+        Algorithm algorithm = Algorithm.HMAC256(secret);
+        return JWT.create()
+                .withIssuer("API passagens-back")
+                .withSubject(usuarioModel.getLogin())
+                .withExpiresAt(this.getExpirationRefreshDate())
+                .sign(algorithm);
     }
 
 

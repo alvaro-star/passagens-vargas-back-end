@@ -8,21 +8,18 @@ public class FormatarDataHora {
 
 
     public static DataHoraFormatada getDataHoraToString(LocalDateTime dataHora) {
-        if (dataHora == null) {
+        if (dataHora == null)
             throw new IllegalArgumentException("A data e hora não podem ser nulas.");
-        }
 
         StringBuilder dataBuilder = new StringBuilder();
         StringBuilder horaBuilder = new StringBuilder();
 
-        // Formatação da data
         dataBuilder.append(String.format("%02d", dataHora.getDayOfMonth()))
                 .append("/")
                 .append(String.format("%02d", dataHora.getMonthValue()))
                 .append("/")
                 .append(dataHora.getYear());
-
-        // Formatação da hora
+        
         horaBuilder.append(String.format("%02d", dataHora.getHour()))
                 .append(":")
                 .append(String.format("%02d", dataHora.getMinute()));

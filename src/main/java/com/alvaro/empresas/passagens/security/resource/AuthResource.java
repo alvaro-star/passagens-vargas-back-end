@@ -17,41 +17,40 @@ import com.alvaro.empresas.passagens.security.repositories.CodigoRepository;
 import com.alvaro.empresas.passagens.security.repositories.UsuarioRepository;
 import com.alvaro.empresas.passagens.security.repositories.UsuarioSolicitudRepository;
 import com.alvaro.empresas.passagens.security.services.RoleService;
-import com.alvaro.empresas.passagens.security.services.TokenService;
+import com.alvaro.empresas.passagens.security.services.UsuarioService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthResource {
     private final UsuarioRepository usuarioRepository;
     private final RoleService roleService;
-    private final AuthenticationManager authenticationManager;
-    private final TokenService tokenService;
     private final UsuarioSolicitudRepository usuarioSolicitudRepository;
     private final EmailService emailService;
     private final CodigoRepository codigoRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final MyUserService myUserService;
+    @Autowired
+    private UsuarioService usuarioService;
 
     @Autowired
-    public AuthResource(UsuarioRepository usuarioRepository, RoleService roleService, AuthenticationManager authenticationManager, TokenService tokenService, UsuarioSolicitudRepository usuarioSolicitudRepository, EmailService emailService, CodigoRepository codigoRepository, MyUserService myUserService, BCryptPasswordEncoder passwordEncoder) {
+    public AuthResource(UsuarioRepository usuarioRepository, RoleService roleService, UsuarioSolicitudRepository usuarioSolicitudRepository, EmailService emailService, CodigoRepository codigoRepository, MyUserService myUserService, BCryptPasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
         this.roleService = roleService;
-        this.authenticationManager = authenticationManager;
         this.myUserService = myUserService;
-        this.tokenService = tokenService;
         this.usuarioSolicitudRepository = usuarioSolicitudRepository;
         this.emailService = emailService;
         this.codigoRepository = codigoRepository;
@@ -61,11 +60,8 @@ public class AuthResource {
     @PostMapping("/login")
     public ResponseEntity<Object> login(@RequestBody @Valid LoginDto loginDto) {
         try {
-            var usernamePassword = new UsernamePasswordAuthenticationToken(loginDto.login(), loginDto.contrasena());
-            var auth = authenticationManager.authenticate(usernamePassword);
-            var token = tokenService.generateToken((UsuarioModel) auth.getPrincipal());
-            var refreshToken = tokenService.generateRefreshToken((UsuarioModel) auth.getPrincipal());
-            return ResponseEntity.ok(new LoginResponseDto(token, refreshToken));
+            var loginDtoResponse = usuarioService.login(loginDto);
+            return ResponseEntity.ok(loginDtoResponse);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new Mensaje("El email o la contrasenha es invalido"));
         }
@@ -73,13 +69,9 @@ public class AuthResource {
 
     @PostMapping("/refresh")
     public ResponseEntity<Object> refresh(@RequestBody Map<String, String> request) {
-        String refreshToken = request.get("refreshToken");
         try {
-            String user = tokenService.validateToken(refreshToken);
-            var usuario = usuarioRepository.findByEmail(user);
-            if (usuario.isEmpty()) throw new Exception("Usuario invalido");
-            String accessToken = tokenService.generateToken(usuario.get());
-            return ResponseEntity.ok(new LoginResponseDto(accessToken, null));
+            var loginDtoResponse = usuarioService.refresh(request.get("refreshToken"));
+            return ResponseEntity.ok(loginDtoResponse);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new Mensaje("El token es invalido"));
         }
