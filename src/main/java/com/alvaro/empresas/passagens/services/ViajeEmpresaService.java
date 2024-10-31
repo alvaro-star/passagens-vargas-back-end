@@ -17,8 +17,8 @@ import com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQL;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOUpdate;
 import com.alvaro.empresas.passagens.enums.EnumParada;
 import com.alvaro.empresas.passagens.helpers.DateAuxiliarFunctions;
-import com.alvaro.empresas.passagens.helpers.PDFTymeleaf;
-import com.alvaro.empresas.passagens.helpers.thymeleaf.PasajeTHModel;
+import com.alvaro.empresas.passagens.helpers.thymeleaf.PDFThymeleaf;
+import com.alvaro.empresas.passagens.helpers.thymeleaf.PasajeItemListTHModel;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.models.PasajeModel;
 import com.alvaro.empresas.passagens.models.PrecioModel;
@@ -33,6 +33,7 @@ import com.alvaro.empresas.passagens.paradas.repositories.ParadaRepository;
 import com.alvaro.empresas.passagens.repositories.PrecioRepository;
 import com.alvaro.empresas.passagens.repositories.ViajeRepository;
 import com.alvaro.empresas.passagens.services.validacao.TiempoViajeService;
+import com.itextpdf.kernel.geom.PageSize;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -62,7 +63,7 @@ public class ViajeEmpresaService {
     private final LugarRepository lugarRepository;
     private final DateAuxiliarFunctions helperDate;
     private final PrecioRepository precioRepository;
-    private final PDFTymeleaf pdfTymeleaf;
+    private final PDFThymeleaf pdfThymeleaf;
 
     @Autowired
     public ViajeEmpresaService(
@@ -73,7 +74,7 @@ public class ViajeEmpresaService {
             LugarRepository lugarRepository,
             DateAuxiliarFunctions helperDate,
             PrecioRepository precioRepository,
-            PDFTymeleaf pdfTymeleaf) {
+            PDFThymeleaf pdfThymeleaf) {
         this.viajeRepository = viajeRepository;
         this.paradaRepository = paradaRepository;
         this.tiempoViajeService = tiempoViajeService;
@@ -81,32 +82,12 @@ public class ViajeEmpresaService {
         this.lugarRepository = lugarRepository;
         this.helperDate = helperDate;
         this.precioRepository = precioRepository;
-        this.pdfTymeleaf = pdfTymeleaf;
+        this.pdfThymeleaf = pdfThymeleaf;
     }
 
     public ViajeModel findById(UUID id) {
         var model = viajeRepository.findById(id);
         return model.orElseThrow(() -> new ObjectNotFoundException(id, ViajeModel.class.getName()));
-    }
-
-    public Page<ViajeDTOListBusquedaEmpresa> findAllEmpresa(UUID idEmpresa, Pageable pageable, String type) {
-        Page<ViajeModel> models;
-        LocalDateTime data = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
-        switch (type) {
-            case "before" -> models = viajeRepository.findViajesPassados(idEmpresa, data, pageable);
-            case "after" -> models = viajeRepository.findViajesFuturos(idEmpresa, data, pageable);
-            default -> models = viajeRepository.findByEmpresaId(idEmpresa, pageable);
-        }
-
-        return models.map(model -> {
-            var salida = paradaRepository.findByViajeCodigoAndTipo(model.getCodigo(), EnumParada.SALIDA);
-            var destino = paradaRepository.findByViajeCodigoAndTipo(model.getCodigo(), EnumParada.DESTINO);
-            if (salida.isEmpty() || destino.isEmpty())
-                throw new ValidationException("lista", "Hay un viaje que no posse ninguna parada");
-            ParadaDTOComplete salidaDTO = new ParadaDTOComplete(salida.get(0), model.getCodigo());
-            ParadaDTOComplete destinoDTO = new ParadaDTOComplete(destino.get(0), model.getCodigo());
-            return new ViajeDTOListBusquedaEmpresa(model, "", salidaDTO, destinoDTO, new ArrayList<>());
-        });
     }
 
     public Page<ViajeDTOListBusquedaEmpresa> findAllFromEmpresaBetweenDates(EmpresaModel empresa, ViajeDTOSolicitacaoFromEmpresa solicitacao, Pageable pageable) {
@@ -205,7 +186,6 @@ public class ViajeEmpresaService {
                 precios = new ArrayList<>();
                 for (PrecioModel precio : ViajeEmpresaDTOJPQ.getViaje().getPrecios())
                     precios.add(new PrecioDTO(precio));
-
                 viajesSelecionados.add(new ViajeDTOListBusquedaEmpresa(ViajeEmpresaDTOJPQ.getViaje(), null, salidaDTO, destinoDTO, precios));
             }
         }
@@ -213,19 +193,17 @@ public class ViajeEmpresaService {
         return viajesSelecionados;
     }
 
-    public ViajeDTOEmpresaResponse getOne(UUID id) {
+    public byte[] getPdfFromViaje(UUID id) {
         var model = this.findById(id);
-        Integer idAutobus = model.getAutobus().getId();
-        List<ParadaDTOComplete> paradasDTOs = new ArrayList<>();
+        List<PasajeModel> pasajes = new ArrayList<>();
+        for (PrecioModel precio : model.getPrecios())
+            pasajes.addAll(precio.getPasajes());
 
-        for (ParadaModel paradaModel : model.getParadas())
-            paradasDTOs.add(new ParadaDTOComplete(paradaModel, model.getCodigo()));
-
-        List<PrecioDTO> precios = new ArrayList<>();
-        for (PrecioModel precioModel : model.getPrecios())
-            precios.add(new PrecioDTO(precioModel, model.getCodigo()));
-
-        return new ViajeDTOEmpresaResponse(model, idAutobus, paradasDTOs, precios);
+        List<PasajeItemListTHModel> pasajesTh = pasajes.stream().map(PasajeItemListTHModel::new).toList();
+        Context context = new Context();
+        context.setVariable("pasajes", pasajesTh);
+        PageSize pageSize = new PageSize(PageSize.A4.getHeight(), PageSize.A4.getWidth());
+        return pdfThymeleaf.generatePDFByTemplate("/empresa/pasajerosList", context, pageSize);
     }
 
     @Transactional
@@ -235,6 +213,7 @@ public class ViajeEmpresaService {
 
         var lugarDestino = lugarRepository.findById(dto.destino().idLugar());
         if (lugarDestino.isEmpty()) throw new ValidationException("destino.idLugar", "El lugarDestino no fue allado");
+
         LocalDateTime dataHoraSalidaAjustada = dto.salida().dataHora().withSecond(0).withNano(0);
         LocalDateTime dataHoraDestinoAjustada = dto.destino().dataHora().withSecond(0).withNano(0);
 
@@ -248,8 +227,7 @@ public class ViajeEmpresaService {
             throw new ValidationException("destino.dataHora", "Existe un viaje del autobus que ocurre en este intervalo");
 
         //Adicionando la hora de salida, -> nota: es conveniencia
-        var model = new ViajeModel(autobus, autobus.getEmpresa(), new BigDecimal("0.00"), new BigDecimal("0.00"), new BigDecimal("0.00"), false, dataHoraSalidaAjustada);
-
+        var model = new ViajeModel(autobus, autobus.getEmpresa(), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, false, dataHoraSalidaAjustada);
         var saved = viajeRepository.save(model);
 
         var salida = new ParadaModel(dataHoraSalidaAjustada, dto.salida().plataforma(), EnumParada.SALIDA, lugarSalida.get(), saved, saved.getEmpresa());
@@ -259,28 +237,16 @@ public class ViajeEmpresaService {
         List<PisoModel> pisos = autobus.getPisos();
 
         List<PrecioModel> precios = new ArrayList<>();
-
-        //Solo pueden existir dos precios -> Por el momento
-        switch (pisos.size()) {
-            case 1 -> precios.add(new PrecioModel(dto.precioPiso1(), 1, pisos.get(0).getNSillas()));
-            case 2 -> {
-                if (pisos.get(0).getNPiso() == 1) {
-                    precios.add(new PrecioModel(dto.precioPiso1(), 1, pisos.get(0).getNSillas()));
-                    if (dto.precioPiso2() == null || dto.precioPiso2().compareTo(new BigDecimal("10")) < 0)
-                        precios.add(new PrecioModel(dto.precioPiso1(), 2, pisos.get(1).getNSillas()));
-                    else {
-                        precios.add(new PrecioModel(dto.precioPiso2(), 2, pisos.get(1).getNSillas()));
-                    }
-                } else {//Numero piso for 2
-                    precios.add(new PrecioModel(dto.precioPiso1(), 1, pisos.get(1).getNSillas()));
-                    if (dto.precioPiso2() == null || dto.precioPiso2().compareTo(new BigDecimal("10")) < 0)
-                        precios.add(new PrecioModel(dto.precioPiso1(), 2, pisos.get(0).getNSillas()));
-                    else {
-                        precios.add(new PrecioModel(dto.precioPiso2(), 2, pisos.get(0).getNSillas()));
-                    }
-                }
-            }
+        List<BigDecimal> preciodDto = List.of(dto.precioPiso1(), dto.precioPiso2());
+        PisoModel aux;
+        for (int i = 1; i <= autobus.getPisos().size(); i++) {
+            aux = autobus.getPisoByNumero(i);
+            BigDecimal precioItemList = preciodDto.get(i - 1);
+            if (precioItemList == null)
+                precioItemList = preciodDto.get(i - 2);
+            precios.add(new PrecioModel(precioItemList, i, aux.getNSillas()));
         }
+
         //Guardando los precios
         List<PrecioDTO> preciosSalvos = precioService.saveAll(precios, saved);
         List<ParadaDTOComplete> paradas = new ArrayList<>();
@@ -299,8 +265,10 @@ public class ViajeEmpresaService {
 
         if (dto.dataNovo().isEqual(viaje.getDataHoraSalida().toLocalDate()))
             throw new ValidationException("dataNovo", "La nueva fecha es identico al del viaje");
+
         LocalDateTime firsHourViaje = viaje.getSalida().getDataHora();
         LocalDateTime lastHourViaje = viaje.getDestino().getDataHora();
+
         diffDias = ChronoUnit.DAYS.between(firsHourViaje.toLocalDate(), lastHourViaje.toLocalDate());
 
         firsHourViaje = dto.dataNovo().atTime(
@@ -323,12 +291,7 @@ public class ViajeEmpresaService {
             lastHourViaje = lastHourViaje.plusDays(diffDias);
         boolean existe = tiempoViajeService.existsViajesActiveFromAutobus(
                 viaje.getEmpresa().getId(), viaje.getAutobus().getId(), firsHourViaje, lastHourViaje);
-        System.out.println("\n\nOpen");
-        System.out.println(existe);
-        System.out.println("\nClose");
-        if (existe)
-            return -1;
-        System.out.println("\nPassou");
+        if (existe) return -1;
 
         diffDias = ChronoUnit.DAYS.between(dataViajeOriginal.toLocalDate(), firsHourViaje.toLocalDate());
         diffDias = (diffDias < 0) ? -diffDias : diffDias;
@@ -342,6 +305,7 @@ public class ViajeEmpresaService {
             auxParada = new ParadaModel(aux.getDataHora().plusDays(diffDias), aux.getPlataforma(), aux.getTipo(), aux.getLugar(), viajeNew, viajeNew.getEmpresa());
             paradaModelSave.add(auxParada);
         }
+
         PrecioModel precioAux;
         for (PrecioModel precio : viaje.getPrecios()) {
             precioAux = new PrecioModel(precio.getPrecio(), precio.getNPiso(), viaje.getAutobus().getPisoByNumero(precio.getNPiso()).getNSillas(), viajeNew, viajeNew.getEmpresa());
@@ -427,17 +391,13 @@ public class ViajeEmpresaService {
         if (size != autobus.getPisos().size())
             throw new ValidationException(new FieldMessage("idAutobus", "El autobus no es compatible"));
 
-        if (size == 1) {
-            if (model.getAutobus().getPisos().get(0) != autobus.getPisos().get(0))
+        PisoModel pisoModel, pisoAutobus;
+        for (int i = 1; i <= model.getAutobus().getPisos().size(); i++) {
+            pisoModel = model.getAutobus().getPisoByNumero(i);
+            pisoAutobus = autobus.getPisoByNumero(i);
+            if (!pisoModel.getNSillas().equals(pisoAutobus.getNSillas()))
                 throw new ValidationException(new FieldMessage("idAutobus", "El autobus no es compatible"));
-        } else if (size == 2) {
-            if (model.getAutobus().getPisos().get(0) != autobus.getPisos().get(0))
-                throw new ValidationException(new FieldMessage("idAutobus", "El autobus no es compatible"));
-
-            if (model.getAutobus().getPisos().get(1) != autobus.getPisos().get(1))
-                throw new ValidationException(new FieldMessage("idAutobus", "El autobus no es compatible"));
-
-        } else throw new ValidationException(new FieldMessage("idAutobus", "El autobus no es compatible"));
+        }
 
         model.setAutobus(autobus);
         var update = viajeRepository.save(model);
@@ -460,13 +420,6 @@ public class ViajeEmpresaService {
                 return true;
         }
         return false;
-    }
-
-    private byte[] getListPaginas(List<PasajeModel> pasajes) {
-        List<PasajeTHModel> pasajesTh = pasajes.stream().map(PasajeTHModel::new).toList();
-        Context context = new Context();
-        context.setVariable("pasajes", pasajesTh);
-        return pdfTymeleaf.generatePDFByTemplate("/empresa/pasajerosList", context);
     }
 
 }

@@ -10,7 +10,10 @@ import com.alvaro.empresas.passagens.dtos.pasajes.PasajeDTOEmpresaResponse;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTO;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTOVenta;
 import com.alvaro.empresas.passagens.enums.MetodoPagamentoEnum;
-import com.alvaro.empresas.passagens.helpers.PasajesPDF;
+import com.alvaro.empresas.passagens.helpers.DateAuxiliarFunctions;
+import com.alvaro.empresas.passagens.helpers.thymeleaf.PDFThymeleaf;
+import com.alvaro.empresas.passagens.helpers.thymeleaf.ParadaTHModel;
+import com.alvaro.empresas.passagens.helpers.thymeleaf.PasajeTHModel;
 import com.alvaro.empresas.passagens.models.PasajeModel;
 import com.alvaro.empresas.passagens.models.PrecioModel;
 import com.alvaro.empresas.passagens.models.ViajeModel;
@@ -20,6 +23,7 @@ import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.alvaro.empresas.passagens.repositories.PasajeRepository;
 import com.alvaro.empresas.passagens.repositories.ViajeRepository;
+import com.itextpdf.kernel.geom.PageSize;
 import org.hibernate.ObjectNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,8 +31,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.thymeleaf.context.Context;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -43,20 +47,69 @@ public class PasajeService {
     private final PrecioService precioService;
     private final FacturaPasajeService facturaPasajeService;
     private final ViajeRepository viajeRepository;
+    private final PDFThymeleaf pdfThymeleaf;
 
     private static final Logger logger = LoggerFactory.getLogger(PasajeService.class);
 
     @Autowired
-    public PasajeService(PasajeRepository pasajeRepository, PrecioService precioService, FacturaPasajeService facturaPasajeService, ViajeRepository viajeRepository) {
+    public PasajeService(
+            PasajeRepository pasajeRepository,
+            PrecioService precioService,
+            FacturaPasajeService facturaPasajeService,
+            ViajeRepository viajeRepository,
+            PDFThymeleaf pdfThymeleaf
+    ) {
         this.pasajeRepository = pasajeRepository;
         this.precioService = precioService;
         this.facturaPasajeService = facturaPasajeService;
         this.viajeRepository = viajeRepository;
+        this.pdfThymeleaf = pdfThymeleaf;
     }
 
     public PasajeModel findById(UUID id) {
         var model = pasajeRepository.findById(id);
         return model.orElseThrow(() -> new ObjectNotFoundException(id, PasajeModel.class.getName()));
+    }
+
+    public byte[] getOnePasajeDownload(UUID idPasaje) {
+        var pasajeModel = findById(idPasaje);
+        var horaSalida = DateAuxiliarFunctions.getDataHoraToString(pasajeModel.getSalida().getDataHora());
+        PasajeTHModel thymeleafModel = new PasajeTHModel(pasajeModel.getPrecio().getEmpresa().getNombre(), pasajeModel, horaSalida.data() + horaSalida.hora(), pasajeModel.getMetodoPago().toString());
+        //PageSize pageSize = new PageSize(5.08f * 72 / 2.54f, 21.0f * 72 / 2.54f);
+        System.out.println("Chaguei aqui");
+        try {
+            byte[] pdf = pdfThymeleaf.generatePDFByTemplate("/pasaje", thymeleafModel.toContextThymeleaf(), PageSize.A7);
+            return pdf;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return new byte[0];
+/*System.out.println("Inicio do conext");
+            Context context = new Context();
+            context.setVariable("empresa", pasajeModel.getPrecio().getEmpresa().getNombre());
+            context.setVariable("fechaHora", horaSalida.data() + horaSalida.hora());
+            context.setVariable("piso", pasajeModel.getPrecio().getNPiso());
+            context.setVariable("nsilla", pasajeModel.getNSilla());
+            context.setVariable("carril", pasajeModel.getSalida().getPlataforma());
+            context.setVariable("nombre", pasajeModel.getNombre());
+            context.setVariable("carnet", pasajeModel.getCarnet());
+            context.setVariable("nascimiento", pasajeModel.getNascimento().toString());
+            context.setVariable("origen", new ParadaTHModel(pasajeModel.getSalida()));
+            context.setVariable("destino", new ParadaTHModel(pasajeModel.getDestino()));
+            context.setVariable("precio", pasajeModel.getPrecioPagado().toString());
+            context.setVariable("metodoPago", pasajeModel.getMetodoPago().toString());
+            context.setVariable("descuento", 0f);
+            System.out.println("Inicio da conversao");*/
+
+        /*PasajesPDF pasajePDF = new PasajesPDF();
+        byte[] emptyByteArray = new byte[0];
+        try {
+            pasajePDF.addPasaje(pasajeModel, pasajeModel.getPrecio().getEmpresa().getNombre(), pasajeModel.getSalida(), pasajeModel.getDestino(), pasajeModel.getFacturaPasaje().getMetodoPago());
+            emptyByteArray = pasajePDF.closeAndGetBytes();
+            return emptyByteArray;
+        } catch (IOException exception) {
+            throw new ValidationException("pasaje", "Hubo un error ala hra de crear el boleto");
+        }*/
     }
 
     //Exclusivo para el servicio online
@@ -192,18 +245,6 @@ public class PasajeService {
         return pago.getId();
     }
 
-    public byte[] getOnePasajeDownload(UUID idPasaje) {
-        var pasajeModel = findById(idPasaje);
-        PasajesPDF pasajePDF = new PasajesPDF();
-        byte[] emptyByteArray = new byte[0];
-        try {
-            pasajePDF.addPasaje(pasajeModel, pasajeModel.getPrecio().getEmpresa().getNombre(), pasajeModel.getSalida(), pasajeModel.getDestino(), pasajeModel.getFacturaPasaje().getMetodoPago());
-            emptyByteArray = pasajePDF.closeAndGetBytes();
-            return emptyByteArray;
-        } catch (IOException exception) {
-            throw new ValidationException("pasaje", "Hubo un error ala hra de crear el boleto");
-        }
-    }
 
     public List<PasajeDTOEmpresaResponse> getPasajesFromPrecio(UUID idPrecio) {
         return pasajeRepository.findByPrecioIdAndEstaPagado(idPrecio, true).stream().map(model -> {

@@ -91,9 +91,9 @@ public class AuthResource {
         if (usuarioLogin.isPresent())
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Mensaje("Ya hay un usuario registrado"));
 
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime startDay = now.withHour(0).withMinute(0).withSecond(0).withNano(1);
+        LocalDateTime startDay = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(1);
         var solicitudes = usuarioSolicitudRepository.findByEmailAfterTime(registerDto.login(), startDay, EnumTypeSolicitudOperation.CREATE);
+
         if (solicitudes.size() > 5)
             return ResponseEntity.badRequest().body(new Mensaje("Ya hubo bastantes intentos con este email por hoy"));
 
@@ -163,7 +163,6 @@ public class AuthResource {
         if (codigo.get().getCreatedAt().isBefore(thyrtyMinutesBefore)) {
             codigoRepository.delete(codigo.get());
             throw new ValidationException("codigo", "El codigo ha expirado");
-            //Util para eliminar todos los codigos del usuario
         }
 
         if (!codigo.get().getEmail().equals(form.email()))

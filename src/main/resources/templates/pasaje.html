@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Pasaje</title>
+</head>
+<style>
+    .text-center {
+        text-align: center;
+    }
+    .bold {
+        font-weight: bold;
+    }
+    body {
+        margin: 2px;
+    }
+    .campo {
+        white-space: nowrap;
+    }
+    p {
+        margin: 3px;
+    }
+    h4,h2,h3 {
+        margin: 0;
+    }
+</style>
+
+<body>
+<h3 class="text-center">
+    Empresa: <span th:text="${empresa}">Nombre</span>
+</h3>
+<h4>Datos del Viaje</h4>
+<p class="space-between">
+    <span class="campo">Fecha y Hora: </span>
+    <span th:text="${fechaHora}">Teste</span>
+</p>
+<p class="space-between">
+    <span class="campo">Carril: </span>
+    <span th:text="${carril}">Teste</span>
+</p>
+<p class="space-between">
+    <span class="campo">Piso: </span>
+    <span th:text="${piso}">Teste</span>
+</p>
+<p class="space-between">
+    <span class="campo">Asiento: </span>
+    <span th:text="${nsilla}">Teste</span>
+</p>
+<h4>
+    Origen
+</h4>
+<p class="space-between">
+    <span class="campo">Ciudad: </span>
+    <span th:text="${origen.ciudad}">Teste</span>
+</p>
+<p class="space-between">
+    <span class="campo">Departamento: </span>
+    <span th:text="${origen.departamento}">Teste</span>
+</p>
+<p class="space-between">
+    <span class="campo">Lugar: </span>
+    <span th:text="${origen.lugar}">Teste</span>
+</p>
+<h4>
+    Destino
+</h4>
+<p class="space-between">
+    <span class="campo">Ciudad: </span>
+    <span th:text="${destino.ciudad}">Teste</span>
+</p>
+<p class="space-between">
+    <span class="campo">Departamento: </span>
+    <span th:text="${destino.departamento}">Teste</span>
+</p>
+<p class="space-between">
+    <span class="campo">Lugar: </span>
+    <span th:text="${destino.lugar}">Teste</span>
+</p>
+<h4>
+    Datos del Pasajero
+</h4>
+<p class="space-between">
+    <span class="campo">Nombre: </span>
+    <span th:text="${nombre}">Teste</span>
+</p>
+<p class="space-between">
+    <span class="campo">Carnet: </span>
+    <span th:text="${carnet}">Teste</span>
+</p>
+<p class="space-between">
+    <span class="campo">Fecha de Nascimiento: </span>
+    <span th:text="${nascimiento}">Teste</span>
+</p>
+<h4>
+    Datos del Pago
+</h4>
+<p class="space-between">
+    <span class="campo">Precio: </span>
+    <span th:text="${precio}">Teste</span>
+</p>
+<p class="space-between">
+    <span class="campo">Metodo de Pago: </span>
+    <span th:text="${metodoPago}">Teste</span>
+</p>
+<p class="space-between">
+    <span class="campo">Descuento: </span>
+    <span th:text="${descuento}">Teste</span>
+</p>
+</body>
+
+</html>

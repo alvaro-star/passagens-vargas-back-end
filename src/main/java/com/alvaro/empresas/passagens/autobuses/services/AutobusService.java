@@ -54,9 +54,7 @@ public class AutobusService {
     public Page<AutobusDTOList> findAll(Pageable pageable) {
         Page<AutobusModel> models = autobusRepository.findAll(pageable);
         return models.map(model ->
-                new AutobusDTOList(model,
-                        BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
-                        model.getEmpresa().getId())
+                new AutobusDTOList(model, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, model.getEmpresa().getId())
         );
     }
 
@@ -116,8 +114,7 @@ public class AutobusService {
             if (viajesFuturos.getTotalElements() == 0) {
                 model.setEnable(false);
                 autobusRepository.save(model);
-            } else
-                return "El atobus tiene un viaje programado en el futuro";
+            } else return "El atobus tiene un viaje programado en el futuro";
         }
         return "";
     }

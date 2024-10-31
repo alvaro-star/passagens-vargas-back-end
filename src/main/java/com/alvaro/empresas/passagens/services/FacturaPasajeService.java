@@ -5,10 +5,13 @@ import com.alvaro.empresas.passagens.configurations.exceptions.ValidationExcepti
 import com.alvaro.empresas.passagens.dtos.FacturaPasajeDTO;
 import com.alvaro.empresas.passagens.dtos.pasajes.ContactoDTO;
 import com.alvaro.empresas.passagens.enums.MetodoPagamentoEnum;
+import com.alvaro.empresas.passagens.helpers.PasajesPDF;
+import com.alvaro.empresas.passagens.models.ContactoModel;
+import com.alvaro.empresas.passagens.models.PasajeModel;
+import com.alvaro.empresas.passagens.models.PrecioModel;
+import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.pagos.models.FacturaEmpresaModel;
 import com.alvaro.empresas.passagens.pagos.models.FacturaPasajeModel;
-import com.alvaro.empresas.passagens.helpers.PasajesPDF;
-import com.alvaro.empresas.passagens.models.*;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.alvaro.empresas.passagens.repositories.FacturaPasajeRepository;
 import com.alvaro.empresas.passagens.repositories.PasajeRepository;
@@ -108,14 +111,9 @@ public class FacturaPasajeService {
         }
 
         precioService.updateFromService(precio);
-
-
         pasajeRepository.updateValuePagado(pago.getId(), true);
-
         var viaje = calculateValorArrecadado(pago);
-
         viajeRepository.save(viaje);
-
         pago.setEstaPagado(true);
         pago.setFechaPago(LocalDateTime.now());
         facturaPasajeRepository.save(pago);
@@ -150,7 +148,6 @@ public class FacturaPasajeService {
     }
 
     public void mandarEmail(String mensaje) {
-
     }
 
     public byte[] downloadFactura(UUID id) {

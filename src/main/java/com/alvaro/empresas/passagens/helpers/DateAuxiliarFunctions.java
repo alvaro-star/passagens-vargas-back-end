@@ -1,5 +1,6 @@
 package com.alvaro.empresas.passagens.helpers;
 
+import com.alvaro.empresas.passagens.helpers.dtos.DataHoraFormatada;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -36,6 +37,25 @@ public class DateAuxiliarFunctions {
         calendar.set(Calendar.MILLISECOND, 999);
         ZoneId zoneId = ZoneId.of("America/La_Paz");
         return calendar.getTime().toInstant().atZone(zoneId).toLocalDateTime();
+    }
 
+    public static DataHoraFormatada getDataHoraToString(LocalDateTime dataHora) {
+        if (dataHora == null)
+            throw new IllegalArgumentException("A data e hora não podem ser nulas.");
+
+        StringBuilder dataBuilder = new StringBuilder();
+        StringBuilder horaBuilder = new StringBuilder();
+
+        dataBuilder.append(String.format("%02d", dataHora.getDayOfMonth()))
+                .append("/")
+                .append(String.format("%02d", dataHora.getMonthValue()))
+                .append("/")
+                .append(dataHora.getYear());
+
+        horaBuilder.append(String.format("%02d", dataHora.getHour()))
+                .append(":")
+                .append(String.format("%02d", dataHora.getMinute()));
+
+        return new DataHoraFormatada(dataBuilder.toString(), horaBuilder.toString());
     }
 }

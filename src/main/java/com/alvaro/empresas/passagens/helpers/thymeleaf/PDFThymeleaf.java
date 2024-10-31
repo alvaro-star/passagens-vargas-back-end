@@ -1,7 +1,8 @@
-package com.alvaro.empresas.passagens.helpers;
+package com.alvaro.empresas.passagens.helpers.thymeleaf;
 
 import com.itextpdf.html2pdf.ConverterProperties;
 import com.itextpdf.html2pdf.HtmlConverter;
+import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import org.springframework.stereotype.Service;
@@ -13,17 +14,19 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import java.io.ByteArrayOutputStream;
 
 @Service
-public class PDFTymeleaf {
+public class PDFThymeleaf {
     private final String classpath = "templates";
 
-    public byte[] generatePDFByTemplate(String templateName, Context context) {
+    public byte[] generatePDFByTemplate(String templateName, Context context, PageSize pageSize) {
         String html = parseThymeleafTemplate(templateName, context);
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         PdfWriter writer = new PdfWriter(byteArrayOutputStream);
-        PdfDocument pdfDocument = new PdfDocument(writer);
-        ConverterProperties converterProperties = new ConverterProperties();
 
+        PdfDocument pdfDocument = new PdfDocument(writer);
+        pdfDocument.setDefaultPageSize(pageSize);
+
+        ConverterProperties converterProperties = new ConverterProperties();
         HtmlConverter.convertToPdf(html, pdfDocument, converterProperties);
         pdfDocument.close();
         return byteArrayOutputStream.toByteArray();

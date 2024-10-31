@@ -4,7 +4,7 @@ import com.alvaro.empresas.passagens.dtos.viajes.JPQL.PasajeJPQLBusca;
 import com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQLRelatorio;
 import com.alvaro.empresas.passagens.enums.MetodoPagamentoEnum;
 import com.alvaro.empresas.passagens.helpers.DateAuxiliarFunctions;
-import com.alvaro.empresas.passagens.helpers.PDFTymeleaf;
+import com.alvaro.empresas.passagens.helpers.thymeleaf.PDFThymeleaf;
 import com.alvaro.empresas.passagens.helpers.services.EmailService;
 import com.alvaro.empresas.passagens.helpers.thymeleaf.CiudadTHModel;
 import com.alvaro.empresas.passagens.helpers.thymeleaf.MetodoTHModel;
@@ -14,6 +14,7 @@ import com.alvaro.empresas.passagens.paradas.services.LugarService;
 import com.alvaro.empresas.passagens.repositories.PasajeRepository;
 import com.alvaro.empresas.passagens.services.EmpresaService;
 import com.alvaro.empresas.passagens.services.validacao.TiempoViajeService;
+import com.itextpdf.kernel.geom.PageSize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -29,19 +30,19 @@ public class RelatorioService {
     private final PasajeRepository pasajeRepository;
     private final EmailService emailService;
     private final DateAuxiliarFunctions dateAuxiliarFunctions;
-    private final PDFTymeleaf pdfTymeleaf;
+    private final PDFThymeleaf pdfThymeleaf;
     private final LugarService lugarService;
     private final TiempoViajeService tiempoViajeService;
 
     @Autowired
-    public RelatorioService(EmpresaService empresaService, PasajeRepository pasajeRepository, EmailService emailService, LugarService lugarService, TiempoViajeService tiempoViajeService, PDFTymeleaf pdfTymeleaf) {
+    public RelatorioService(EmpresaService empresaService, PasajeRepository pasajeRepository, EmailService emailService, LugarService lugarService, TiempoViajeService tiempoViajeService, PDFThymeleaf pdfThymeleaf) {
         this.empresaService = empresaService;
         this.pasajeRepository = pasajeRepository;
         this.emailService = emailService;
         this.dateAuxiliarFunctions = new DateAuxiliarFunctions();
         this.lugarService = lugarService;
         this.tiempoViajeService = tiempoViajeService;
-        this.pdfTymeleaf = pdfTymeleaf;
+        this.pdfThymeleaf = pdfThymeleaf;
     }
 
     @Value("${api.viaje.max-time-viaje-day}")
@@ -154,6 +155,6 @@ public class RelatorioService {
         context.setVariable("valorArrecadadoWeb", relatorio.getValorArrecadadoWeb());
         context.setVariable("valorArrecadadoNoWeb", relatorio.getValorArrecadadoNoWeb());
         context.setVariable("valorTotal", relatorio.getValorArrecadadoNoWeb() + relatorio.getValorArrecadadoWeb());
-        return pdfTymeleaf.generatePDFByTemplate("/empresa/relatorio", context);
+        return pdfThymeleaf.generatePDFByTemplate("/empresa/relatorio", context, PageSize.A4);
     }
 }

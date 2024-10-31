@@ -71,7 +71,7 @@ public class PasajesPDF {
         addRowBold(contentStream, "Empresa: " + empresaName, standardFontSize + 1);
         addRowBold(contentStream, "Datos del Viaje", standardFontSize + 1);
 
-        var dataHora = FormatarDataHora.getDataHoraToString(salida.getDataHora());
+        var dataHora = DateAuxiliarFunctions.getDataHoraToString(salida.getDataHora());
         contentStream.showText("Fecha y Hora: " + dataHora.data() + " - " + dataHora.hora());
         contentStream.newLine();
         contentStream.showText("Carril: " + salida.getPlataforma());
@@ -116,7 +116,7 @@ public class PasajesPDF {
                 lines.add(line.toString());
                 line = new StringBuilder();
             }
-            if (line.length() > 0) line.append(" ");
+            if (!line.isEmpty()) line.append(" ");
             line.append(word);
         }
         lines.add(line.toString());

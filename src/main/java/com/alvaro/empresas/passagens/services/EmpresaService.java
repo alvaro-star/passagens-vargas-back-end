@@ -45,9 +45,10 @@ public class EmpresaService {
     }
 
     public Page<EmpresaResponseDto> findAll(Pageable pageable) {
-        return empresaRepository.findAll(pageable).map(model ->
-                new EmpresaResponseDto(model, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO)
-        );
+        return empresaRepository.findAll(pageable)
+                .map(model ->
+                        new EmpresaResponseDto(model, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO)
+                );
     }
 
     @Transactional

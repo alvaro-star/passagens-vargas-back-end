@@ -19,8 +19,8 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -51,13 +51,13 @@ public class ViajeEmpresaResource {
         this.empresaService = empresaService;
     }
 
-
-    @GetMapping("/from/{idEmpresa}/{type}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
-    public ResponseEntity<Page<ViajeDTOListBusquedaEmpresa>> getAllFromEmpresa(@PathVariable(value = "idEmpresa") UUID id,
-                                                                               @PageableDefault(sort = "dataHoraSalida", direction = Sort.Direction.DESC) Pageable pageable,
-                                                                               @PathVariable(value = "type") String type) {
-        return ResponseEntity.ok(viajeEmpresaService.findAllEmpresa(id, pageable, type));
+    @GetMapping("/{id}/pdf")
+    public ResponseEntity<Object> getPdfFromViaje(@PathVariable("id") UUID idViaje) {
+        byte[] viajeRelatorio = viajeEmpresaService.getPdfFromViaje(idViaje);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=viaje.pdf");
+        headers.add(HttpHeaders.CONTENT_TYPE, "application/pdf");
+        return new ResponseEntity<>(viajeRelatorio, headers, HttpStatus.OK);
     }
 
     @PostMapping("/from/empresa")
@@ -128,8 +128,7 @@ public class ViajeEmpresaResource {
         int response = viajeEmpresaService.saveOneCopy(dto, viaje);
         if (response == -1)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Mensaje("El autobus esta ocupado en esa fecha con otro viaje"));
-        else
-            return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PutMapping("/{id}")

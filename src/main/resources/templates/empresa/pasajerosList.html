@@ -38,9 +38,9 @@
         <td th:text="${pasaje.nsilla}"></td>
         <td th:text="${pasaje.carnet}"></td>
         <td th:text="${pasaje.nombre}"></td>
-        <td th:text="${pasaje.nascimento}" style="text-align: center;"></td>
-        <td th:text="${pasaje.salida}"></td>
-        <td th:text="${pasaje.destino}"></td>
+        <td th:text="${pasaje.nascimiento}" style="text-align: center;"></td>
+        <td th:text="${pasaje.origen.ciudad} - ${pasaje.origen.abreviacion}"></td>
+        <td th:text="${pasaje.destino.ciudad} - ${pasaje.destino.abreviacion}"></td>
     </tr>
     </tbody>
 </table>

@@ -24,8 +24,6 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-//@Table(name = "tb_parada", indexes = @Index(name = "idx_dataHora", columnList = "data_hora"))
-//indexes = { @Index(name = "idx_composto", columnList = "chave_estrangeira, chave_unica")
 public class AutobusModel {
     @Id
     @Column(name = "idtb_autobus")

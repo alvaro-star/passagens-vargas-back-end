@@ -20,5 +20,4 @@ public class FacturaEmpresaService {
         var model = fERepository.findById(id);
         return model.orElseThrow(() -> new ObjectNotFoundException(id, FacturaEmpresaModel.class.getName()));
     }
-
 }
