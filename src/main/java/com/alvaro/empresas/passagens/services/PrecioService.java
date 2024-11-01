@@ -54,7 +54,7 @@ public class PrecioService {
             if (piso.getNPiso().equals(model.getNPiso()))
                 pisoElegido = piso;
 
-        PisoDTOResponse pisoDto = new PisoDTOResponse(pisoElegido, model.getViaje().getAutobus().getId());
+        PisoDTOResponse pisoDto = new PisoDTOResponse(pisoElegido);
         List<Integer> ocupados = pasajeRepository.getPasajesVendidosAndNoRembolso(model.getId());
         return new PrecioDTOResponseViaje(model, pisoDto, ocupados);
     }

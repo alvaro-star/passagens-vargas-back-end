@@ -15,8 +15,3 @@ import java.util.List;
 public interface LugarRepository extends JpaRepository<LugarModel, Integer> {
     List<LugarModel> findByCiudadId(Integer idCiudad);
 }
-/*
-@Query(value = "select * from tb_lugar where fk_idtb_ciudad = :idCiudad", nativeQuery = true)
-    List<LugarModel> findLugaresByCiudadId23(@Param(value = "idCiudad") Integer idCiudad);
-* */
-

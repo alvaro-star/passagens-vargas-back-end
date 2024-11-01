@@ -36,4 +36,7 @@ public class PisoDTOUpdate {
 
     private List<Integer> posicoesIndisponiveis = new ArrayList<Integer>();
 
+    public int getNSillas() {
+        return nColunas * nLinhas;
+    }
 }

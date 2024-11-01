@@ -4,7 +4,6 @@ import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTO;
 import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTOUpdate;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.models.ViajeModel;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,6 +14,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "tb_autobus", indexes = {
@@ -45,8 +45,10 @@ public class AutobusModel {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_empresa")
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private EmpresaModel empresa;
+
+    @Column(name = "fk_idtb_empresa", insertable = false, updatable = false)
+    private UUID empresaId;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "autobus")
     private List<PisoModel> pisos = new ArrayList<>();
@@ -57,9 +59,14 @@ public class AutobusModel {
     public AutobusModel(String placa, Boolean enable, EmpresaModel empresa) {
         this.placa = placa;
         this.empresa = empresa;
+        this.empresaId = empresa.getId();
         this.enable = enable;
     }
 
+    public void setEmpresa(EmpresaModel empresa) {
+        this.empresa = empresa;
+        this.empresaId = empresa.getId();
+    }
 
     public AutobusModel(AutobusDTO dto) {
         placa = dto.placa();

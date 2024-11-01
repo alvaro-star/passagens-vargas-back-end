@@ -1,14 +1,13 @@
 package com.alvaro.empresas.passagens.autobuses.resources;
 
 import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTO;
-import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTOList;
 import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTOResponse;
 import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTOUpdate;
 import com.alvaro.empresas.passagens.autobuses.repositories.AutobusRepository;
 import com.alvaro.empresas.passagens.autobuses.services.AutobusService;
 import com.alvaro.empresas.passagens.autobuses.services.validacao.ValidarPiso;
-import com.alvaro.empresas.passagens.dtos.Mensaje;
-import com.alvaro.empresas.passagens.helpers.beans.MyUserService;
+import com.alvaro.empresas.passagens.helpers.Mensaje;
+import com.alvaro.empresas.passagens.helpers.beans.MyUserComponent;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.services.EmpresaService;
 import com.alvaro.empresas.passagens.services.validacao.ValidationErrorsWithList;
@@ -31,44 +30,29 @@ import java.util.UUID;
 @RequestMapping("/autobuses")
 @SecurityRequirement(name = "bearer-key")
 public class AutobusResource {
-    private final AutobusService autobusService;
-    private final MyUserService myUserService;
-    private final EmpresaService empresaService;
-    private final AutobusRepository autobusRepository;
-
     @Autowired
-    public AutobusResource(
-            AutobusService autobusService,
-            MyUserService myUserService,
-            EmpresaService empresaService,
-            AutobusRepository autobusRepository
-    ) {
-        this.autobusService = autobusService;
-        this.myUserService = myUserService;
-        this.empresaService = empresaService;
-        this.autobusRepository = autobusRepository;
-    }
+    private AutobusService autobusService;
+    @Autowired
+    private MyUserComponent myUserComponent;
+    @Autowired
+    private EmpresaService empresaService;
+    @Autowired
+    private AutobusRepository autobusRepository;
 
     private Mensaje validarUsuario(EmpresaModel empresa) {
-        var user = myUserService.getUser();
-        if (user.getIdEmpresa() == null)
-            return new Mensaje("Usted no esta relacionado a una empresa");
-        if (empresa.getBloqued() || !empresa.getEnabled())
-            return new Mensaje("La empresa esta bloqueada");
-        if (!user.isMyEmpresa(empresa.getId()))
-            return new Mensaje("Usted no esta relacionado a esta empresa");
+        var user = myUserComponent.getUser();
+        if (user.getIdEmpresa() == null) return new Mensaje("Usted no esta relacionado a una empresa");
+        if (empresa.getBloqued() || !empresa.getEnabled()) return new Mensaje("La empresa esta bloqueada");
+        if (!user.isMyEmpresa(empresa.getId())) return new Mensaje("Usted no esta relacionado a esta empresa");
         return new Mensaje("");
     }
 
     @GetMapping("/from/{idEmpresa}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
-    public ResponseEntity<Page<AutobusDTOList>> getAutobusesFromEmpresa(@PathVariable(value = "idEmpresa") UUID id,
-                                                                        @PageableDefault(size = 10, sort = {"createdAt"}, direction = Sort.Direction.DESC) Pageable pageable) {
-        var user = myUserService.getUser();
-        if (!(user.hasRole("ROLE_ADMIN") || user.isMyEmpresa(id))) {
-            Page<AutobusDTOList> emptyPage = Page.empty(pageable);
-            return ResponseEntity.ok().body(emptyPage);
-        }
+    public ResponseEntity<Page<AutobusDTOResponse>> getAutobusesFromEmpresa(@PathVariable(value = "idEmpresa") UUID id, @PageableDefault(size = 10, sort = {"createdAt"}, direction = Sort.Direction.DESC) Pageable pageable) {
+        var user = myUserComponent.getUser();
+        if (!(user.hasRole("ROLE_ADMIN") || user.isMyEmpresa(id)))
+            return ResponseEntity.ok().body(Page.empty(pageable));
         return ResponseEntity.ok().body(autobusService.findAllFromEmpresa(id, pageable));
     }
 
@@ -84,11 +68,9 @@ public class AutobusResource {
         if (!validacao.getErrors().isEmpty() || !validacao.getErrorsList().isEmpty())
             return ResponseEntity.unprocessableEntity().body(validacao);
         var empresa = empresaService.findById(dto.idEmpresa());
-        Mensaje mensaje = this.validarUsuario(empresa);
-        if (mensaje.conteudo().isEmpty())
-            return ResponseEntity.status(HttpStatus.CREATED).body(autobusService.salvar(dto, empresa));
-        else
-            return ResponseEntity.badRequest().body(mensaje);
+        Mensaje validationResponse = this.validarUsuario(empresa);
+        if (!validationResponse.conteudo().isEmpty()) return ResponseEntity.badRequest().body(validationResponse);
+        return ResponseEntity.status(HttpStatus.CREATED).body(autobusService.salvar(dto, empresa));
     }
 
     //Solo el administrador
@@ -102,10 +84,8 @@ public class AutobusResource {
 
         var autobus = autobusService.findById(id);
         Mensaje mensaje = this.validarUsuario(autobus.getEmpresa());
-        if (mensaje.conteudo().isEmpty())
-            return ResponseEntity.ok().body(autobusService.update(dto, autobus));
-        else
-            return ResponseEntity.badRequest().body(mensaje);
+        if (!mensaje.conteudo().isEmpty()) return ResponseEntity.badRequest().body(mensaje);
+        return ResponseEntity.ok().body(autobusService.update(dto, autobus));
     }
 
     @DeleteMapping("/{id}")
@@ -113,13 +93,11 @@ public class AutobusResource {
     public ResponseEntity<Object> delete(@PathVariable(value = "id") Integer id) {
         var model = autobusService.findById(id);
         Mensaje mensaje = this.validarUsuario(model.getEmpresa());
-        if (mensaje.conteudo().isEmpty()) {
-            String resposta = autobusService.delete(model);
-            if (resposta.isBlank())
-                return ResponseEntity.noContent().build();
-            else
-                return ResponseEntity.badRequest().body(new Mensaje(resposta));
-        } else
-            return ResponseEntity.badRequest().body(mensaje);
+        if (!mensaje.conteudo().isEmpty()) return ResponseEntity.badRequest().body(mensaje);
+
+        String resposta = autobusService.delete(model);
+        if (resposta.isBlank()) return ResponseEntity.noContent().build();
+        else return ResponseEntity.badRequest().body(new Mensaje(resposta));
+
     }
 }

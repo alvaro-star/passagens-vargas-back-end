@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.dtos.pasajes;
 
-import com.alvaro.empresas.passagens.enums.MetodoPagamentoEnum;
+import com.alvaro.empresas.passagens.enums.TipoPagamentoEnum;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.Valid;
@@ -26,6 +26,6 @@ public record PasajesDTOVenta(
         @Size(min = 1)
         List<PasajeDTO> pasajes,
         @Enumerated(EnumType.STRING)
-        MetodoPagamentoEnum metodo
+        TipoPagamentoEnum metodo
 ) {
 }

@@ -4,7 +4,7 @@ import com.alvaro.empresas.passagens.configurations.exceptions.FieldMessage;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
 import com.alvaro.empresas.passagens.dtos.FacturaPasajeDTO;
 import com.alvaro.empresas.passagens.dtos.pasajes.ContactoDTO;
-import com.alvaro.empresas.passagens.enums.MetodoPagamentoEnum;
+import com.alvaro.empresas.passagens.enums.TipoPagamentoEnum;
 import com.alvaro.empresas.passagens.helpers.PasajesPDF;
 import com.alvaro.empresas.passagens.models.ContactoModel;
 import com.alvaro.empresas.passagens.models.PasajeModel;
@@ -40,34 +40,31 @@ public class FacturaPasajeService {
     @Autowired
     private ViajeRepository viajeRepository;
 
-    public FacturaPasajeModel save(ContactoDTO contactoDTO, BigDecimal precioTotal, ViajeModel viaje, MetodoPagamentoEnum metodo, boolean guardarContacto) {
+    public FacturaPasajeModel save(ContactoDTO contactoDTO, BigDecimal precioTotal, ViajeModel viaje, TipoPagamentoEnum metodo, boolean guardarContacto) {
         boolean estaPagado;
-
         LocalDateTime fechaPago = null;
-
         BigDecimal tasa = new BigDecimal("0.1");//Cuanto será cobrad por el servicio
-
         BigDecimal tasaServicio = new BigDecimal("0.00");
-
-        if (metodo == MetodoPagamentoEnum.QR) {
-            tasaServicio = precioTotal.multiply(tasa);
-            estaPagado = false;
-        } else if (metodo == MetodoPagamentoEnum.EFECTIVO) {
-            estaPagado = true;
-            fechaPago = LocalDateTime.now();
-        } else
-            throw new ValidationException(new FieldMessage("metodo", "Metodo de Pago invalido"));
+        switch (metodo) {
+            case QR -> {
+                tasaServicio = precioTotal.multiply(tasa);
+                estaPagado = false;
+            }
+            case EFECTIVO -> {
+                estaPagado = true;
+                fechaPago = LocalDateTime.now();
+            }
+            default -> throw new ValidationException(new FieldMessage("metodo", "Metodo de Pago invalido"));
+        }
 
         ContactoModel contactoModel = null;
         if (guardarContacto)
             contactoModel = new ContactoModel(contactoDTO.nombre(), contactoDTO.email(), contactoDTO.telefono());
-
         var pago = new FacturaPasajeModel(precioTotal, BigDecimal.valueOf(0), tasaServicio, estaPagado, metodo, viaje, fechaPago, contactoModel);
-
         return facturaPasajeRepository.save(pago);
     }
 
-    public FacturaPasajeModel saveEmpresa(BigDecimal precioTotal, ViajeModel viaje, MetodoPagamentoEnum metodo, boolean estaPago) {
+    public FacturaPasajeModel saveEmpresa(BigDecimal precioTotal, ViajeModel viaje, TipoPagamentoEnum metodo, boolean estaPago) {
         LocalDateTime fechaPago = LocalDateTime.now();
         BigDecimal tasaServicio = new BigDecimal("0.00");
         var pago = new FacturaPasajeModel(precioTotal, BigDecimal.valueOf(0), tasaServicio, estaPago, metodo, viaje, fechaPago, null);

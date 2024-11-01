@@ -17,7 +17,16 @@ public record PasajeDTOEmpresaResponse(
         ParadaDTOComplete salida,
         ParadaDTOComplete destino
 ) {
-    public PasajeDTOEmpresaResponse(PasajeModel model, ParadaDTOComplete salida, ParadaDTOComplete destino) {
-        this(model.getId(), model.getCarnet(), model.getNombre(), model.getNascimento(), model.getFacturaRembolsoId() != null, model.getEstaPagado(), model.getNSilla(), salida, destino);
+    public PasajeDTOEmpresaResponse(PasajeModel model) {
+        this(
+                model.getId(),
+                model.getCarnet(),
+                model.getNombre(),
+                model.getNascimento(),
+                model.getFacturaRembolsoId() != null,
+                model.getEstaPagado(),
+                model.getNSilla(),
+                new ParadaDTOComplete(model.getSalida()),
+                new ParadaDTOComplete(model.getDestino()));
     }
 }

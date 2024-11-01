@@ -64,3 +64,59 @@
             throw new ValidationException("id", "El viaje ya se encuentra registrado"));
         }
  */
+
+
+    public int saveCopyDay(ViajeDTOFormCopy dto, AutobusModel autobus) {
+        LocalDateTime dataViajeOriginal;
+        LocalDateTime startDaySerch = dto.dataNovo().atTime(0, 0, 0, 0);
+        LocalDateTime endDaySearch = startDaySerch.plusDays(1).minusSeconds(1);
+
+        Sort sort = Sort.by("dataHoraSalida").ascending();
+        Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, sort);
+        Page<ViajeDTOJPQL> viajes = viajeRepository.findByEmpresaIdAndAutobusId(autobus.getEmpresa().getId(), autobus.getId(), startDaySerch, endDaySearch, pageable);
+
+        if (viajes.getContent().isEmpty()) return 1;
+
+        long diffDias;
+
+        dataViajeOriginal = viajes.getContent().get(0).salida().getDataHora();
+        LocalDateTime firsHourViaje = viajes.getContent().get(0).salida().getDataHora();
+        LocalDateTime lastHourViaje = viajes.getContent().get(viajes.getContent().size() - 1).salida().getDataHora();
+
+        diffDias = ChronoUnit.DAYS.between(firsHourViaje.toLocalDate(), lastHourViaje.toLocalDate());
+        diffDias = (diffDias < 0) ? -diffDias : diffDias;
+
+        firsHourViaje = dto.dataNovo().atTime(firsHourViaje.getHour(), firsHourViaje.getMinute(), firsHourViaje.getSecond(), firsHourViaje.getNano());
+        lastHourViaje = dto.dataNovo().atTime(lastHourViaje.getHour(), lastHourViaje.getMinute(), lastHourViaje.getSecond(), lastHourViaje.getNano());
+
+
+        if (diffDias > 0) lastHourViaje = lastHourViaje.plusDays(diffDias);
+
+        boolean existe = tiempoViajeService.existsViajesActiveFromAutobus(autobus, firsHourViaje, lastHourViaje);
+        if (existe) return -1;
+
+        List<ViajeModel> viajeModelsSave = new LinkedList<>();
+        List<ParadaModel> paradaModelSave = new LinkedList<>();
+
+        ViajeModel viajeAuxiliar;
+
+        diffDias = ChronoUnit.DAYS.between(dataViajeOriginal.toLocalDate(), firsHourViaje.toLocalDate());
+        diffDias = (diffDias < 0) ? -diffDias : diffDias;
+
+
+        for (ViajeDTOJPQL viajeDTOJPQL : viajes.getContent()) {
+            viajeAuxiliar = viajeDTOJPQL.viaje();
+            viajeAuxiliar.setCodigo(null);
+            viajeAuxiliar.setDataHoraSalida(viajeAuxiliar.getDataHoraSalida().plusDays(diffDias));
+            for (ParadaModel aux : viajeAuxiliar.getParadas()) {
+                aux.setId(null);
+                aux.setViaje(viajeAuxiliar);
+                aux.setDataHora(aux.getDataHora().plusDays(diffDias));
+                paradaModelSave.add(aux);
+            }
+            viajeModelsSave.add(viajeAuxiliar);
+        }
+        viajeRepository.saveAll(viajeModelsSave);
+        paradaRepository.saveAll(paradaModelSave);
+        return 1;
+    }

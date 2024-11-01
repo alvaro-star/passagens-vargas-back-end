@@ -1,9 +1,9 @@
 package com.alvaro.empresas.passagens.security.resource;
 
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
-import com.alvaro.empresas.passagens.dtos.Mensaje;
+import com.alvaro.empresas.passagens.helpers.Mensaje;
 import com.alvaro.empresas.passagens.enums.EnumTypeSolicitudOperation;
-import com.alvaro.empresas.passagens.helpers.beans.MyUserService;
+import com.alvaro.empresas.passagens.helpers.beans.MyUserComponent;
 import com.alvaro.empresas.passagens.helpers.services.EmailService;
 import com.alvaro.empresas.passagens.security.dtos.*;
 import com.alvaro.empresas.passagens.security.dtos.password.PasswordForm;
@@ -42,7 +42,7 @@ public class AuthResource {
     private final EmailService emailService;
     private final CodigoRepository codigoRepository;
     private final BCryptPasswordEncoder passwordEncoder;
-    private final MyUserService myUserService;
+    private final MyUserComponent myUserComponent;
     @Autowired
     private UsuarioService usuarioService;
 
@@ -52,12 +52,12 @@ public class AuthResource {
                         UsuarioSolicitudRepository usuarioSolicitudRepository,
                         EmailService emailService,
                         CodigoRepository codigoRepository,
-                        MyUserService myUserService,
+                        MyUserComponent myUserComponent,
                         BCryptPasswordEncoder passwordEncoder
     ) {
         this.usuarioRepository = usuarioRepository;
         this.roleService = roleService;
-        this.myUserService = myUserService;
+        this.myUserComponent = myUserComponent;
         this.usuarioSolicitudRepository = usuarioSolicitudRepository;
         this.emailService = emailService;
         this.codigoRepository = codigoRepository;
@@ -180,7 +180,7 @@ public class AuthResource {
 
     @PostMapping("/update")
     public ResponseEntity<Object> updateProfile(@RequestBody @Valid UsuarioDTOUpdate solicitud) {
-        var usuarioModel = myUserService.getUserModel();
+        var usuarioModel = myUserComponent.getUserModel();
         Boolean emailOcuped = false;
         if (solicitud.email() != null && !solicitud.email().isBlank() && !solicitud.email().equals(usuarioModel.getLogin()))
             emailOcuped = usuarioRepository.existsByLogin(solicitud.email());
@@ -202,7 +202,7 @@ public class AuthResource {
 
     @PutMapping("/validar_update")
     public ResponseEntity<Object> vaidateUpdate(@RequestBody @Valid UsuarioDTOUpdateValidation form) {
-        var userLogado = myUserService.getUserModel();
+        var userLogado = myUserComponent.getUserModel();
         var usuarioSolicitud = usuarioSolicitudRepository.findById(form.codigo());
         if (usuarioSolicitud.isEmpty())
             throw new ValidationException("codigo", "El codigo de verificacion es invalido");

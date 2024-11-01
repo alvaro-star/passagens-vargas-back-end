@@ -2,9 +2,6 @@ package com.alvaro.empresas.passagens.autobuses.dtos.pisos;
 
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public record PisoDTOResponse(
         Integer id,
         Integer nLinhas,
@@ -15,9 +12,9 @@ public record PisoDTOResponse(
         Integer nSillas,
         Integer primeraSilla,
         Integer idAutobus,
-        String posicoesBloqueadas
+        int[] posicoesBloqueadas
 ) {
-    public PisoDTOResponse(PisoModel model, Integer idAutobus) {
+    public PisoDTOResponse(PisoModel model) {
         this(
                 model.getId(),
                 model.getNLinhas(),
@@ -27,8 +24,8 @@ public record PisoDTOResponse(
                 model.getInicioContagem().toString(),
                 model.getNSillas(),
                 model.getPrimeraSilla(),
-                idAutobus,
-                model.getPosicionesBloqueadas()
+                model.getAutobusId(),
+                model.getPosicionesBloqueadasIntegerList()
         );
     }
 }

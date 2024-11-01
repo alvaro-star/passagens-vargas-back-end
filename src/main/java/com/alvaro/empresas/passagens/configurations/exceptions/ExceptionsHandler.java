@@ -82,7 +82,7 @@ public class ExceptionsHandler {
         BadRequestError err = new BadRequestError(
                 System.currentTimeMillis(),
                 HttpStatus.UNPROCESSABLE_ENTITY.value(),
-                "Erro de Validacao",
+                "Um erro de validacao",
                 e.getMessage(),
                 request.getRequestURI());
         err.setConteudo(e.getMensaje().conteudo());

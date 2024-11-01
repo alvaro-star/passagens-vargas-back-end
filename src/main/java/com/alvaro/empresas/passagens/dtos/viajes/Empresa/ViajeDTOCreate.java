@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-public record ViajeDTOForm(
+public record ViajeDTOCreate(
         UUID codigo,
         @NotNull
         Integer idAutobus,

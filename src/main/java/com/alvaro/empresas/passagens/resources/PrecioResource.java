@@ -1,10 +1,10 @@
 package com.alvaro.empresas.passagens.resources;
 
-import com.alvaro.empresas.passagens.dtos.Mensaje;
+import com.alvaro.empresas.passagens.helpers.Mensaje;
 import com.alvaro.empresas.passagens.dtos.precios.PrecioDTO;
 import com.alvaro.empresas.passagens.dtos.precios.PrecioDTOResponseViaje;
 import com.alvaro.empresas.passagens.dtos.precios.PrecioDTOUpdate;
-import com.alvaro.empresas.passagens.helpers.beans.MyUserService;
+import com.alvaro.empresas.passagens.helpers.beans.MyUserComponent;
 import com.alvaro.empresas.passagens.services.PrecioService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -21,12 +21,12 @@ import java.util.UUID;
 public class PrecioResource {
 
     private final PrecioService precioService;
-    private final MyUserService myUserService;
+    private final MyUserComponent myUserComponent;
 
     @Autowired
-    public PrecioResource(PrecioService precioService, MyUserService myUserService) {
+    public PrecioResource(PrecioService precioService, MyUserComponent myUserComponent) {
         this.precioService = precioService;
-        this.myUserService = myUserService;
+        this.myUserComponent = myUserComponent;
     }
 
     @GetMapping("/{id}")
@@ -43,7 +43,7 @@ public class PrecioResource {
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
     public ResponseEntity<Object> update(@PathVariable(value = "id") UUID id, @RequestBody @Valid PrecioDTOUpdate dto) {
         var precio = precioService.findById(id);
-        var usuario = myUserService.getUser();
+        var usuario = myUserComponent.getUser();
         if (!usuario.isMyEmpresa(precio.getEmpresa().getId()))
             return ResponseEntity.badRequest().body(new Mensaje("Usted no esta relacionado con esta empresa"));
         if (precio.getEmpresa().getBloqued() || !precio.getEmpresa().getEnabled())

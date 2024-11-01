@@ -1,7 +1,7 @@
 package com.alvaro.empresas.passagens.autobuses.services.validacao;
 
 import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTO;
-import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTO;
+import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTOCreate;
 import com.alvaro.empresas.passagens.autobuses.enums.EnumPosicao;
 import com.alvaro.empresas.passagens.autobuses.repositories.AutobusRepository;
 import com.alvaro.empresas.passagens.configurations.exceptions.FieldMessage;
@@ -28,9 +28,8 @@ public class ValidarPiso {
                 "Erro de Validacao",
                 "Erro durante a validacao",
                 "/autobuses");
-        for (FieldError erro : bindingResult.getFieldErrors()) {
+        for (FieldError erro : bindingResult.getFieldErrors())
             err.addError(erro.getField(), erro.getDefaultMessage());
-        }
 
         if (!bindingResult.hasFieldErrors("placa"))
             if (autobusRepository.existsByPlaca(dto.placa()))
@@ -46,7 +45,7 @@ public class ValidarPiso {
         return err;
     }
 
-    private static FieldMessageItemList validarPisoDTO(int indice, PisoDTO dto) {
+    private static FieldMessageItemList validarPisoDTO(int indice, PisoDTOCreate dto) {
         String message;
         FieldMessageItemList itemList = new FieldMessageItemList();
         itemList.setIndex(indice);

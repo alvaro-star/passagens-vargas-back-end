@@ -20,13 +20,6 @@ public interface ViajeRepository extends JpaRepository<ViajeModel, UUID> {
 
     @Query("SELECT v FROM ViajeModel v WHERE v.empresa.id = :empresaId AND v.dataHoraSalida >= :dataHoraSalida")
     Page<ViajeModel> findViajesFuturos(UUID empresaId, LocalDateTime dataHoraSalida, Pageable pageable);
-    /*
-    @Query("SELECT v FROM ViajeModel v WHERE v.empresa.id = :empresaId AND v.dataHoraSalida >= :dataHoraSalida")
-    Page<ViajeModel> findViajesFuturos(UUID empresaId, LocalDateTime dataHoraSalida, Pageable pageable);
-    * */
-
-    @Query("SELECT v FROM ViajeModel v WHERE v.empresa.id = :empresaId AND v.dataHoraSalida < :dataHoraSalida")
-    Page<ViajeModel> findViajesPassados(UUID empresaId, LocalDateTime dataHoraSalida, Pageable pageable);
 
     @Query("SELECT new com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQL(v, s, d) " +
             "FROM ViajeModel v, ParadaModel s, ParadaModel d " +
@@ -47,12 +40,6 @@ public interface ViajeRepository extends JpaRepository<ViajeModel, UUID> {
 
     Optional<ViajeModel> findFirst1ByAutobusId(Integer idAutobus);
 
-    /*Query("SELECT v from ViejModel v, ParadaModel d " +
-            "WHERE v.empresa.id = :empresaId " +
-            "AND v.dataHoraSalida BETWEEN :inicioAlterado AND :fim " +
-            "AND v.autobus.id = :autobusId " +
-            "AND d.viaje.codigo = v.codigo AND d.tipo = 'DESTINO' AND v.dataHora >= :inicio")*/
-    //Usado e ideal para verificar a existencia de um viaje de un autobus dentro de un intervalo
     @Query(value = "SELECT v.* FROM tb_viaje v, tb_parada d " +
             "WHERE v.fk_idtb_empresa = :empresaId " +
             "AND v.data_hora_salida BETWEEN :inicioAlterado AND :fim " +

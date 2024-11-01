@@ -14,7 +14,7 @@ public record ViajeDTOResponse(
         List<ParadaDTOComplete> paradas,
         List<PrecioDTO> precios
 ) {
-    public ViajeDTOResponse(ViajeModel model, Integer idAutobus, List<ParadaDTOComplete> paradas, List<PrecioDTO> precios) {
-        this(model.getCodigo(), idAutobus, model.isCancelado(), paradas, precios);
+    public ViajeDTOResponse(ViajeModel model, List<ParadaDTOComplete> paradas, List<PrecioDTO> precios) {
+        this(model.getCodigo(), model.getAutobusId(), model.isCancelado(), paradas, precios);
     }
 }

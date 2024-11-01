@@ -1,7 +1,6 @@
 package com.alvaro.empresas.passagens.models;
 
 import com.alvaro.empresas.passagens.pagos.models.FacturaPasajeModel;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,7 +24,6 @@ public class ContactoModel {
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_factura_pasaje")
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private FacturaPasajeModel facturaPasaje;
 
     public ContactoModel(String nombre, String email, Integer numero) {

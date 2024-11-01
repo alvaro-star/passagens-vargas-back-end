@@ -19,27 +19,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Service
 public class ParadaService {
-    private final TiempoViajeService tiempoViajeService;
-    private final ParadaRepository paradaRepository;
-    private final LugarService lugarService;
-    private final ViajeRepository viajeRepository;
-
     @Autowired
-    public ParadaService(
-            TiempoViajeService tiempoViajeService,
-            ParadaRepository paradaRepository,
-            LugarService lugarService,
-            ViajeRepository viajeRepository
-    ) {
-        this.tiempoViajeService = tiempoViajeService;
-        this.paradaRepository = paradaRepository;
-        this.lugarService = lugarService;
-        this.viajeRepository = viajeRepository;
-    }
+    private TiempoViajeService tiempoViajeService;
+    @Autowired
+    private ParadaRepository paradaRepository;
+    @Autowired
+    private LugarService lugarService;
+    @Autowired
+    private ViajeRepository viajeRepository;
 
     public ParadaModel findById(Integer id) {
         var model = paradaRepository.findById(id);
@@ -48,17 +38,12 @@ public class ParadaService {
 
     public ParadaDTOComplete getOne(Integer id) {
         var model = this.findById(id);
-        UUID idViaje = model.getViaje().getCodigo();
-        return new ParadaDTOComplete(model, idViaje);
+        return new ParadaDTOComplete(model);
     }
 
     public Page<ParadaDTO> getAll(Pageable pageable) {
         Page<ParadaModel> models = paradaRepository.findAll(pageable);
-        return models.map(model -> {
-            int idLugar = model.getLugar().getId();
-            UUID idViaje = model.getViaje().getCodigo();
-            return new ParadaDTO(model, idLugar, idViaje);
-        });
+        return models.map(ParadaDTO::new);
     }
 
     @Transactional
@@ -67,19 +52,18 @@ public class ParadaService {
         if (!lugar.getEnable())
             throw new ValidationException("idLugar", "El lugar no esta disponible");
         //Validacao de Usuario
-
         var dataParadaAjustada = dtoSended.dataHora().withSecond(0).withNano(0);
         for (ParadaModel parada : viaje.getParadas()) {
             if (parada.getTipo().equals(EnumParada.SALIDA) && parada.getDataHora().isBefore(LocalDateTime.now()))
                 throw new ValidationException("dataHora", "No se puede agregar una parada a un viaje que ya inicio");
             if (parada.getDataHora().isEqual(dataParadaAjustada))
-                throw new ValidationException("dataHora", "Ya hay una parada registrada en esta fecha");
+                throw new ValidationException("dataHora", "Ya hay una parada registrada en esta esta hora");
             if (parada.getLugar().getId().equals(dtoSended.idLugar()))
                 throw new ValidationException("idLugar", "Ya hay una parada registrada que passara por este lugar");
         }
 
         if (!viaje.dataHoraValido(dataParadaAjustada))
-            throw new ValidationException("dataHora", "El horario debe estar dentro del intervalo dela salida y del destino");
+            throw new ValidationException("dataHora", "El horario no es valido");
 
         var model = new ParadaModel(dtoSended, EnumParada.CAMINO);
         model.setLugar(lugar);
@@ -87,8 +71,8 @@ public class ParadaService {
         model.setViaje(viaje);
         model.setEmpresa(viaje.getEmpresa());
 
-        var modelSave = paradaRepository.save(model);
-        return new ParadaDTOComplete(modelSave, viaje.getCodigo());
+        paradaRepository.save(model);
+        return new ParadaDTOComplete(model);
     }
 
     @Transactional
@@ -99,7 +83,7 @@ public class ParadaService {
                 throw new ValidationException("dataHora", "No se puede editar una parada de un viaje que ya inicio");
             if (parada.getDataHora().isEqual(dataParadaAjustada) && !parada.getId().equals(model.getId()))
                 throw new ValidationException("dataHora", "Ya hay una parada registrada en esta fecha");
-            if (parada.getLugar().getId() == dtoSended.idLugar() && !parada.getId().equals(model.getId()))
+            if (parada.getLugar().getId().equals(dtoSended.idLugar()) && !parada.getId().equals(model.getId()))
                 throw new ValidationException("idLugar", "Ya hay una parada registrada que passara por este lugar");
         }
 
@@ -140,20 +124,17 @@ public class ParadaService {
         if (!valido)
             throw new ValidationException("dataHora", "El autobus esta ocupado en esta hora");
 
-        var modelUpdated = paradaRepository.save(model);
-        UUID idViaje = modelUpdated.getViaje().getCodigo();
-
-        return new ParadaDTOComplete(modelUpdated, idViaje);
+        paradaRepository.save(model);
+        return new ParadaDTOComplete(model);
     }
 
     private boolean validarHorarioParadaExterno(ParadaModel modelEscolhido, LocalDateTime novoDataHoraAjustada) {
         var existe = true;
         var valido = false;
-        System.out.println(modelEscolhido.getViaje().toString());
+
         if (modelEscolhido.getTipo().equals(EnumParada.SALIDA)) {
             existe = tiempoViajeService.existsViajesActiveFromAutobus(
-                    modelEscolhido.getViaje().getAutobus().getEmpresa().getId(),
-                    modelEscolhido.getViaje().getAutobus().getId(),
+                    modelEscolhido.getViaje().getAutobus(),
                     novoDataHoraAjustada,
                     modelEscolhido.getViaje().getDestino().getDataHora(),
                     modelEscolhido.getViaje().getCodigo()
@@ -162,8 +143,7 @@ public class ParadaService {
                     validarTempoMaximoViaje(novoDataHoraAjustada, modelEscolhido.getViaje().getDestino().getDataHora());
         } else if (modelEscolhido.getTipo().equals(EnumParada.DESTINO)) {
             existe = tiempoViajeService.existsViajesActiveFromAutobus(
-                    modelEscolhido.getViaje().getAutobus().getEmpresa().getId(),
-                    modelEscolhido.getViaje().getAutobus().getId(),
+                    modelEscolhido.getViaje().getAutobus(),
                     modelEscolhido.getViaje().getSalida().getDataHora(),
                     novoDataHoraAjustada,
                     modelEscolhido.getViaje().getCodigo()

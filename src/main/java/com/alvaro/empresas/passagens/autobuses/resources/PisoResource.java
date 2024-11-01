@@ -3,8 +3,8 @@ package com.alvaro.empresas.passagens.autobuses.resources;
 import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTOResponse;
 import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTOUpdate;
 import com.alvaro.empresas.passagens.autobuses.services.PisoService;
-import com.alvaro.empresas.passagens.dtos.Mensaje;
-import com.alvaro.empresas.passagens.helpers.beans.MyUserService;
+import com.alvaro.empresas.passagens.helpers.Mensaje;
+import com.alvaro.empresas.passagens.helpers.beans.MyUserComponent;
 import com.alvaro.empresas.passagens.services.EmpresaService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -21,17 +21,17 @@ import java.util.UUID;
 public class PisoResource {
     private final PisoService pisoService;
     private final EmpresaService empresaService;
-    private final MyUserService myUserService;
+    private final MyUserComponent myUserComponent;
 
     @Autowired
-    public PisoResource(PisoService pisoService, EmpresaService empresaService, MyUserService myUserService) {
+    public PisoResource(PisoService pisoService, EmpresaService empresaService, MyUserComponent myUserComponent) {
         this.pisoService = pisoService;
         this.empresaService = empresaService;
-        this.myUserService = myUserService;
+        this.myUserComponent = myUserComponent;
     }
 
     private Mensaje validarUsuario(UUID idEmpresa) {
-        var user = myUserService.getUser();
+        var user = myUserComponent.getUser();
         if (user.getIdEmpresa() == null)
             return new Mensaje("Usted no esta relacionado a una empresa");
         var empresa = empresaService.findById(user.getIdEmpresa());
@@ -56,14 +56,10 @@ public class PisoResource {
         if (!piso.getAutobus().isEnable())
             return ResponseEntity.badRequest().body(new Mensaje("El autobus esta deshabilitado"));
 
-        if (mensaje.conteudo().isEmpty()) {
-            var updated = pisoService.update(dto, piso);
-            if (updated == null)
-                return ResponseEntity.unprocessableEntity().body(new Mensaje("La flota ya tiene viajes almacenados"));
-            return ResponseEntity.ok().body(updated);
-        } else
+        if (!mensaje.conteudo().isEmpty())
             return ResponseEntity.badRequest().body(mensaje);
 
-
+        var updated = pisoService.update(dto, piso);
+        return ResponseEntity.ok().body(updated);
     }
 }

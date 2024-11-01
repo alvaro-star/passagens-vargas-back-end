@@ -1,8 +1,7 @@
 package com.alvaro.empresas.passagens.services;
 
 import com.alvaro.empresas.passagens.dtos.FuncionarioDTO;
-import com.alvaro.empresas.passagens.dtos.Mensaje;
-import com.alvaro.empresas.passagens.helpers.services.EmailService;
+import com.alvaro.empresas.passagens.helpers.Mensaje;
 import com.alvaro.empresas.passagens.security.dtos.RegisterDtoFuncionario;
 import com.alvaro.empresas.passagens.security.models.RoleList;
 import com.alvaro.empresas.passagens.security.models.RoleModel;

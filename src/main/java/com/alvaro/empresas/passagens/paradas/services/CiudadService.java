@@ -4,7 +4,6 @@ import com.alvaro.empresas.passagens.paradas.dtos.CiudadDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.CiudadDtoUpdate;
 import com.alvaro.empresas.passagens.paradas.models.CiudadModel;
 import com.alvaro.empresas.passagens.paradas.repositories.CiudadRepository;
-import com.alvaro.empresas.passagens.paradas.repositories.LugarRepository;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -20,12 +19,12 @@ public class CiudadService {
 
     public Page<CiudadDTO> findAll(Pageable pageable) {
         Page<CiudadModel> models = ciudadRepository.findAll(pageable);
-        return models.map(model -> new CiudadDTO(model, model.getDepartamento().getId()));
+        return models.map(CiudadDTO::new);
     }
 
     public Page<CiudadDTO> findByNombreContaining(String nombre, Pageable pageable) {
         Page<CiudadModel> models = ciudadRepository.findByNombreContaining(nombre, pageable);
-        return models.map(model -> new CiudadDTO(model, model.getDepartamento().getId()));
+        return models.map(CiudadDTO::new);
     }
 
     public CiudadModel findById(Integer id) {
@@ -33,23 +32,22 @@ public class CiudadService {
     }
 
     public CiudadDTO getOne(Integer id) {
-        var model = ciudadRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException(id, CiudadModel.class.getName()));
-        return new CiudadDTO(model, model.getDepartamento().getId());
+        var model = findById(id);
+        return new CiudadDTO(model);
     }
 
     public CiudadDTO save(CiudadDTO dto) {
         var departamento = departamentoService.findById(dto.idDepartamento());
-        CiudadModel model = new CiudadModel(dto);
-        model.setDepartamento(departamento);
-        var saved = ciudadRepository.save(model);
-        return new CiudadDTO(saved, departamento.getId());
+        CiudadModel model = new CiudadModel(dto, departamento);
+        ciudadRepository.save(model);
+        return new CiudadDTO(model);
     }
 
     public CiudadDTO update(CiudadDtoUpdate dto, Integer id) {
         CiudadModel model = this.findById(id);
         model.updateValues(dto);
-        var updated = ciudadRepository.save(model);
-        return new CiudadDTO(updated, updated.getDepartamento().getId());
+        ciudadRepository.save(model);
+        return new CiudadDTO(model);
     }
 
     public void delete(CiudadModel model) {

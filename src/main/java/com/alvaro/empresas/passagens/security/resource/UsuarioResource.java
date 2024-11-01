@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.security.resource;
 
-import com.alvaro.empresas.passagens.helpers.beans.MyUserService;
+import com.alvaro.empresas.passagens.helpers.beans.MyUserComponent;
 import com.alvaro.empresas.passagens.security.dtos.UsuarioDto;
 import com.alvaro.empresas.passagens.security.dtos.UsuarioEmpresaDto;
 import com.alvaro.empresas.passagens.security.models.RoleList;
@@ -17,17 +17,17 @@ import org.springframework.web.bind.annotation.RestController;
 @SecurityRequirement(name = "bearer-key")
 public class UsuarioResource {
     private final UsuarioRepository usuarioRepository;
-    private final MyUserService myUserService;
+    private final MyUserComponent myUserComponent;
 
     @Autowired
-    public UsuarioResource(UsuarioRepository usuarioRepository, MyUserService myUserService) {
+    public UsuarioResource(UsuarioRepository usuarioRepository, MyUserComponent myUserComponent) {
         this.usuarioRepository = usuarioRepository;
-        this.myUserService = myUserService;
+        this.myUserComponent = myUserComponent;
     }
 
     @GetMapping("/mydata")
     public ResponseEntity<Object> getProfile() {
-        var usuario = myUserService.getUser();
+        var usuario = myUserComponent.getUser();
         boolean isEmpresa = usuario.hasRole(RoleList.ROLE_EMPRESA_FUNCIONARIO.toString()) || usuario.hasRole(RoleList.ROLE_EMPRESA_ADMIN.toString());
         if (isEmpresa)
             return ResponseEntity.ok(new UsuarioEmpresaDto(usuario.getLogin(), usuario.getNombre(), usuario.getTelefono(), usuario.getIdEmpresa(), usuario.getRoles()));

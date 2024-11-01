@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.paradas.resources;
 
-import com.alvaro.empresas.passagens.dtos.Mensaje;
+import com.alvaro.empresas.passagens.helpers.Mensaje;
 import com.alvaro.empresas.passagens.paradas.dtos.CiudadDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.CiudadDtoUpdate;
 import com.alvaro.empresas.passagens.paradas.dtos.LugarDTO;
@@ -43,9 +43,7 @@ public class CiudadResource {
     public ResponseEntity<List<LugarDTO>> getLugaresFromCiudad(@PathVariable(value = "id") Integer id) {
         var ciudadModel = ciudadService.findById(id);
         List<LugarDTO> lugares = new ArrayList<>();
-        ciudadModel.getLugares().forEach(lugarModel -> {
-            lugares.add(new LugarDTO(lugarModel, ciudadModel.getId()));
-        });
+        ciudadModel.getLugares().forEach(lugarModel -> lugares.add(new LugarDTO(lugarModel)));
         return ResponseEntity.ok().body(lugares);
     }
 
@@ -72,7 +70,7 @@ public class CiudadResource {
         //Causas de posible lentitud, la ciudad posee muchos lugares
         var model = ciudadService.findById(id);
         if (!model.getLugares().isEmpty())
-            return ResponseEntity.badRequest().body(new Mensaje("La ciudad posee lugarees registrados"));
+            return ResponseEntity.badRequest().body(new Mensaje("La ciudad posee lugares registrados"));
         ciudadService.delete(model);
         return ResponseEntity.noContent().build();
     }

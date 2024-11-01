@@ -17,13 +17,13 @@ public record ParadaDTOComplete(
         String departamento,
         String abreviacion
 ) {
-    public ParadaDTOComplete(ParadaModel model, UUID idViaje) {
+    public ParadaDTOComplete(ParadaModel model) {
         this(model.getId(),
                 model.getDataHora(),
                 model.getPlataforma(),
                 model.getTipo().toString(),
-                idViaje,
-                model.getLugar().getId(),
+                model.getViajeCodigo(),
+                model.getLugarId(),
                 model.getLugar().getNombre(),
                 model.getLugar().getCiudad().getNombre(),
                 model.getLugar().getCiudad().getDepartamento().getNombre(),

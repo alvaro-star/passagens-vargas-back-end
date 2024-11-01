@@ -29,18 +29,14 @@ import java.util.UUID;
 
 @Service
 public class ViajeService {
-    private final ViajeRepository viajeRepository;
-    private final ParadaRepository paradaRepository;
-    private final LugarRepository lugarRepository;
-    private final PrecioRepository precioRepository;
-
     @Autowired
-    public ViajeService(ViajeRepository viajeRepository, ParadaRepository paradaRepository, LugarRepository lugarRepository, PrecioRepository precioRepository) {
-        this.viajeRepository = viajeRepository;
-        this.paradaRepository = paradaRepository;
-        this.lugarRepository = lugarRepository;
-        this.precioRepository = precioRepository;
-    }
+    private ViajeRepository viajeRepository;
+    @Autowired
+    private ParadaRepository paradaRepository;
+    @Autowired
+    private LugarRepository lugarRepository;
+    @Autowired
+    private PrecioRepository precioRepository;
 
     public ViajeModel findById(UUID id) {
         var model = viajeRepository.findById(id);
@@ -49,17 +45,16 @@ public class ViajeService {
 
     public ViajeDTOResponse getOne(UUID id) {
         var model = this.findById(id);
-        Integer idAutobus = model.getAutobus().getId();
         List<ParadaDTOComplete> paradasDTOs = new ArrayList<>();
 
         for (ParadaModel paradaModel : model.getParadas())
-            paradasDTOs.add(new ParadaDTOComplete(paradaModel, model.getCodigo()));
+            paradasDTOs.add(new ParadaDTOComplete(paradaModel));
 
         List<PrecioDTO> precios = new ArrayList<>();
         for (PrecioModel precioModel : model.getPrecios())
             precios.add(new PrecioDTO(precioModel, model.getCodigo()));
 
-        return new ViajeDTOResponse(model, idAutobus, paradasDTOs, precios);
+        return new ViajeDTOResponse(model, paradasDTOs, precios);
     }
 
     //Inconcluso
@@ -92,10 +87,10 @@ public class ViajeService {
         List<PrecioModel> preciosModels;
         for (LugarModel lugarSalida : lugaresSalida) {
             for (LugarModel lugarDestino : lugaresDestino) {
-                List<ViajeBuscaDTOJPQL> salidasDia = paradaRepository.cargarSalidasDelDia(lugarSalida.getId(), lugarDestino.getId(), startDay, endDay);
+                List<ViajeBuscaDTOJPQL> salidasDia = paradaRepository.loadViajesDay(lugarSalida.getId(), lugarDestino.getId(), startDay, endDay);
                 for (ViajeBuscaDTOJPQL viajeJPQL : salidasDia) {
-                    salidaDTO = new ParadaDTOComplete(viajeJPQL.getSalida(), viajeJPQL.getIdViaje());
-                    destinoDTO = new ParadaDTOComplete(viajeJPQL.getDestino(), viajeJPQL.getIdViaje());
+                    salidaDTO = new ParadaDTOComplete(viajeJPQL.getSalida());
+                    destinoDTO = new ParadaDTOComplete(viajeJPQL.getDestino());
                     if (!destinoDTO.dataHora().isAfter(salidaDTO.dataHora())) continue;
                     preciosModels = precioRepository.findByViajeCodigo(viajeJPQL.getIdViaje());
                     preciosDTOs = new ArrayList<>();
@@ -110,7 +105,6 @@ public class ViajeService {
         }
         return viajesSelecionados;
     }
-
 
 
 }

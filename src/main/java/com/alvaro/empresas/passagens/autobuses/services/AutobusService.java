@@ -1,7 +1,6 @@
 package com.alvaro.empresas.passagens.autobuses.services;
 
 import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTO;
-import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTOList;
 import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTOResponse;
 import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTOUpdate;
 import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTOResponse;
@@ -20,7 +19,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,52 +26,37 @@ import java.util.UUID;
 
 @Service
 public class AutobusService {
-    private final AutobusRepository autobusRepository;
-    private final EmpresaService empresaService;
-    private final PisoService pisoService;
-    private final ViajeRepository viajeRepository;
-
     @Autowired
-    public AutobusService(
-            AutobusRepository autobusRepository,
-            EmpresaService empresaService,
-            PisoService pisoService,
-            ViajeRepository viajeRepository
-    ) {
-        this.autobusRepository = autobusRepository;
-        this.empresaService = empresaService;
-        this.pisoService = pisoService;
-        this.viajeRepository = viajeRepository;
-    }
+    private AutobusRepository autobusRepository;
+    @Autowired
+    private EmpresaService empresaService;
+    @Autowired
+    private PisoService pisoService;
+    @Autowired
+    private ViajeRepository viajeRepository;
 
     public AutobusModel findById(Integer id) {
         var model = autobusRepository.findById(id);
         return model.orElseThrow(() -> new ObjectNotFoundException(id, AutobusModel.class.getName()));
     }
 
-    public Page<AutobusDTOList> findAll(Pageable pageable) {
+    public Page<AutobusDTOResponse> findAll(Pageable pageable) {
         Page<AutobusModel> models = autobusRepository.findAll(pageable);
-        return models.map(model ->
-                new AutobusDTOList(model, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, model.getEmpresa().getId())
-        );
+        return models.map(AutobusDTOResponse::new);
     }
 
-    public Page<AutobusDTOList> findAllFromEmpresa(UUID idEmpresa, Pageable pageable) {
+    public Page<AutobusDTOResponse> findAllFromEmpresa(UUID idEmpresa, Pageable pageable) {
         var empresa = empresaService.findById(idEmpresa);
         Page<AutobusModel> autobuses = autobusRepository.findByEmpresaId(empresa.getId(), pageable);
-        return autobuses.map((autobus) -> new AutobusDTOList(autobus,
-                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
-                empresa.getId())
-        );
+        return autobuses.map(AutobusDTOResponse::new);
     }
 
     public AutobusDTOResponse getOne(Integer id) {
         var model = findById(id);
         List<PisoDTOResponse> pisosDto = new ArrayList<>();
         for (PisoModel piso : model.getPisos())
-            pisosDto.add(new PisoDTOResponse(piso, model.getId()));
-
-        return new AutobusDTOResponse(model, model.getEmpresa().getId(), pisosDto);
+            pisosDto.add(new PisoDTOResponse(piso));
+        return new AutobusDTOResponse(model, pisosDto);
     }
 
 
@@ -81,29 +64,28 @@ public class AutobusService {
     public AutobusDTOResponse salvar(AutobusDTO dto, EmpresaModel empresa) {
         var model = new AutobusModel(dto);
         model.setEmpresa(empresa);
-        var save = autobusRepository.save(model);
+        autobusRepository.save(model);
 
         List<PisoDTOResponse> pisosGuardados = new ArrayList<>();
-        pisosGuardados.add(pisoService.salvar(dto.pisos().get(0), save, 1, 1));
+        pisosGuardados.add(pisoService.salvar(dto.pisos().get(0), model, 1, 1));
         if (dto.pisos().size() == 2) {
             var primeraSilla = pisosGuardados.get(0).nSillas() + 1;
-            pisosGuardados.add(pisoService.salvar(dto.pisos().get(1), save, 2, primeraSilla));
+            pisosGuardados.add(pisoService.salvar(dto.pisos().get(1), model, 2, primeraSilla));
         }
 
-        return new AutobusDTOResponse(save, save.getEmpresa().getId(), pisosGuardados);
+        return new AutobusDTOResponse(model, pisosGuardados);
     }
 
-    public AutobusDTOList update(AutobusDTOUpdate dto, AutobusModel model) {
+    public AutobusDTOResponse update(AutobusDTOUpdate dto, AutobusModel model) {
         model.updateValues(dto);
-        var update = autobusRepository.save(model);
-        return new AutobusDTOList(update,
-                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
-                update.getEmpresa().getId());
+        autobusRepository.save(model);
+        return new AutobusDTOResponse(model);
     }
 
     @Transactional
     public String delete(AutobusModel model) {
         var now = LocalDateTime.now();
+
         Pageable pageable = PageRequest.of(0, 1);
         Page<ViajeModel> viajesFuturos = viajeRepository.findViajesFuturos(model.getEmpresa().getId(), now, pageable);
 

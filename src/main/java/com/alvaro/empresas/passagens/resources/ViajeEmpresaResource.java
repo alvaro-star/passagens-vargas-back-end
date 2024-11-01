@@ -1,16 +1,16 @@
 package com.alvaro.empresas.passagens.resources;
 
 import com.alvaro.empresas.passagens.autobuses.services.AutobusService;
-import com.alvaro.empresas.passagens.dtos.Mensaje;
 import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacaoEmpresa;
 import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacaoFromAutobus;
 import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacaoFromEmpresa;
+import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOCreate;
 import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOEmpresaResponse;
-import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOForm;
 import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOFormCopy;
 import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOListBusquedaEmpresa;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOUpdate;
-import com.alvaro.empresas.passagens.helpers.beans.MyUserService;
+import com.alvaro.empresas.passagens.helpers.Mensaje;
+import com.alvaro.empresas.passagens.helpers.beans.MyUserComponent;
 import com.alvaro.empresas.passagens.security.models.RoleList;
 import com.alvaro.empresas.passagens.services.EmpresaService;
 import com.alvaro.empresas.passagens.services.ViajeEmpresaService;
@@ -33,23 +33,14 @@ import java.util.UUID;
 @RequestMapping("/empresa/viajes")
 @SecurityRequirement(name = "bearer-key")
 public class ViajeEmpresaResource {
-    private final ViajeEmpresaService viajeEmpresaService;
-    private final EmpresaService empresaService;
-    private final MyUserService myUserService;
-    private final AutobusService autobusService;
-
     @Autowired
-    public ViajeEmpresaResource(
-            ViajeEmpresaService viajeEmpresaService,
-            MyUserService myUserService,
-            AutobusService autobusService,
-            EmpresaService empresaService
-    ) {
-        this.viajeEmpresaService = viajeEmpresaService;
-        this.myUserService = myUserService;
-        this.autobusService = autobusService;
-        this.empresaService = empresaService;
-    }
+    private ViajeEmpresaService viajeEmpresaService;
+    @Autowired
+    private EmpresaService empresaService;
+    @Autowired
+    private MyUserComponent myUserComponent;
+    @Autowired
+    private AutobusService autobusService;
 
     @GetMapping("/{id}/pdf")
     public ResponseEntity<Object> getPdfFromViaje(@PathVariable("id") UUID idViaje) {
@@ -65,7 +56,7 @@ public class ViajeEmpresaResource {
     public ResponseEntity<Page<ViajeDTOListBusquedaEmpresa>> getAllFromEmpresaBetweenMonth(@RequestBody @Valid ViajeDTOSolicitacaoFromEmpresa solicitacao,
                                                                                            @PageableDefault(sort = "dataHoraSalida") Pageable pageable) {
         var empresa = empresaService.findById(solicitacao.idEmpresa());
-        var usuarioLogado = myUserService.getUser();
+        var usuarioLogado = myUserComponent.getUser();
         if (usuarioLogado.hasRole(RoleList.ROLE_ADMIN.toString()) || usuarioLogado.isMyEmpresa(empresa.getId()))
             return ResponseEntity.ok(viajeEmpresaService.findAllFromEmpresaBetweenDates(empresa, solicitacao, pageable));
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -76,7 +67,7 @@ public class ViajeEmpresaResource {
     public ResponseEntity<Page<ViajeDTOListBusquedaEmpresa>> getAllFromAutobus(@RequestBody @Valid ViajeDTOSolicitacaoFromAutobus solicitacao,
                                                                                @PageableDefault(sort = "dataHoraSalida") Pageable pageable) {
         var autobusModel = autobusService.findById(solicitacao.idAutobus());
-        var usuarioLogado = myUserService.getUser();
+        var usuarioLogado = myUserComponent.getUser();
         if (usuarioLogado.hasRole(RoleList.ROLE_ADMIN.toString()) || usuarioLogado.isMyEmpresa(autobusModel.getEmpresa().getId()))
             return ResponseEntity.ok(viajeEmpresaService.findAllFromAutobus(autobusModel, solicitacao, pageable));
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -86,7 +77,7 @@ public class ViajeEmpresaResource {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
     public ResponseEntity<List<ViajeDTOListBusquedaEmpresa>> getViajeFromDia(@PathVariable(value = "idEmpresa") UUID idEmpresa,
                                                                              @RequestBody @Valid ViajeDTOSolicitacaoEmpresa dto) {
-        var user = myUserService.getUser();
+        var user = myUserComponent.getUser();
         if (user.hasRole(RoleList.ROLE_ADMIN.toString()) || user.isMyEmpresa(idEmpresa)) {
             if (dto.idCiudadDestino() == null || dto.idCiudadDestino() == 0)
                 return ResponseEntity.ok(viajeEmpresaService.getViajesFromSalida(idEmpresa, dto));
@@ -98,9 +89,9 @@ public class ViajeEmpresaResource {
 
     @PostMapping("/create")
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
-    public ResponseEntity<Object> save(@Valid @RequestBody ViajeDTOForm dto) {
+    public ResponseEntity<Object> save(@Valid @RequestBody ViajeDTOCreate dto) {
         var autobus = autobusService.findById(dto.idAutobus());
-        var user = myUserService.getUser();
+        var user = myUserComponent.getUser();
         if (!autobus.isEnable())
             return ResponseEntity.badRequest().body(new Mensaje("El autobus esta inhabilitado"));
         if (autobus.getEmpresa().getBloqued() || !autobus.getEmpresa().getEnabled())
@@ -118,7 +109,7 @@ public class ViajeEmpresaResource {
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
     public ResponseEntity<Object> saveViajesCopyFromDay(@RequestBody @Valid ViajeDTOFormCopy dto) {
         var viaje = viajeEmpresaService.findById(dto.idViaje());
-        var user = myUserService.getUser();
+        var user = myUserComponent.getUser();
         if (!viaje.getAutobus().isEnable())
             return ResponseEntity.badRequest().body(new Mensaje("El autobus esta inhabilitado"));
         if (viaje.getEmpresa().getBloqued() || !viaje.getEmpresa().getEnabled())
@@ -135,7 +126,7 @@ public class ViajeEmpresaResource {
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
     public ResponseEntity<Object> update(@PathVariable(value = "id") UUID id, @RequestBody @Valid ViajeDTOUpdate dto) {
         var viajeModel = viajeEmpresaService.findById(id);
-        var user = myUserService.getUser();
+        var user = myUserComponent.getUser();
 
         if (viajeModel.getEmpresa().getBloqued() || !viajeModel.getEmpresa().getEnabled())
             return ResponseEntity.badRequest().body(new Mensaje("La empresa esta inhabilitada"));
@@ -153,7 +144,7 @@ public class ViajeEmpresaResource {
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
     public ResponseEntity<Object> delete(@PathVariable(value = "id") UUID id) {
         var model = viajeEmpresaService.findById(id);
-        var user = myUserService.getUser();
+        var user = myUserComponent.getUser();
         if (!user.isMyEmpresa(model.getEmpresa().getId()))
             return ResponseEntity.badRequest().body(new Mensaje("El viaje no pertenece a esta empresa"));
         if (model.getEmpresa().getBloqued() || !model.getEmpresa().getEnabled())

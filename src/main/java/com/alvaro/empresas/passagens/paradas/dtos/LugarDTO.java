@@ -11,7 +11,7 @@ public record LugarDTO(
         @NotNull
         Integer idCiudad) {
 
-    public LugarDTO(LugarModel model, Integer idCiudad) {
-        this(model.getId(), model.getNombre(), idCiudad);
+    public LugarDTO(LugarModel model) {
+        this(model.getId(), model.getNombre(), model.getCiudadId());
     }
 }

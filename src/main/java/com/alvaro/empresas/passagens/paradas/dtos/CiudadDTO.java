@@ -14,10 +14,7 @@ public record CiudadDTO(
 
 
     public CiudadDTO(CiudadModel model) {
-        this(model.getId(), model.getNombre(), null);
+        this(model.getId(), model.getNombre(), model.getDepartamentoId());
     }
 
-    public CiudadDTO(CiudadModel model, Integer idDepartamento) {
-        this(model.getId(), model.getNombre(), idDepartamento);
-    }
 }

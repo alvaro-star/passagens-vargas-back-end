@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.paradas.resources;
 
-import com.alvaro.empresas.passagens.dtos.Mensaje;
+import com.alvaro.empresas.passagens.helpers.Mensaje;
 import com.alvaro.empresas.passagens.paradas.dtos.CiudadDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.DepartamentoDTO;
 import com.alvaro.empresas.passagens.paradas.models.DepartamentoModel;
@@ -34,11 +34,8 @@ public class DepartamentoResource {
     @GetMapping("/{id}")
     public ResponseEntity<DepartamentoDTO> getOne(@PathVariable(value = "id") Integer id) {
         DepartamentoModel model = departamentoService.findById(id);
-
         List<CiudadDTO> ciudades = new ArrayList<>();
-        model.getCiudades().forEach(ciudadModel -> {
-            ciudades.add(new CiudadDTO(ciudadModel, model.getId()));
-        });
+        model.getCiudades().forEach(ciudadModel -> ciudades.add(new CiudadDTO(ciudadModel)));
         return ResponseEntity.ok().body(new DepartamentoDTO(model, ciudades));
     }
 

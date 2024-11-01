@@ -3,7 +3,6 @@ package com.alvaro.empresas.passagens.autobuses.dtos.pisos;
 import com.alvaro.empresas.passagens.autobuses.enums.EnumPosicao;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -17,7 +16,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class PisoDTO {
+public class PisoDTOCreate {
     @NotNull
     @Min(value = 1)
     private Integer nLinhas;
@@ -35,4 +34,7 @@ public class PisoDTO {
 
     private List<Integer> posicionesBloqueadas = new ArrayList<>();
 
+    public int getNSillas() {
+        return nColunas * nLinhas;
+    }
 }

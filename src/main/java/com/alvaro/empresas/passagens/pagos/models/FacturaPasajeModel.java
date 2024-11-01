@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.pagos.models;
 
-import com.alvaro.empresas.passagens.enums.MetodoPagamentoEnum;
+import com.alvaro.empresas.passagens.enums.TipoPagamentoEnum;
 import com.alvaro.empresas.passagens.models.ContactoModel;
 import com.alvaro.empresas.passagens.models.PasajeModel;
 import com.alvaro.empresas.passagens.models.ViajeModel;
@@ -30,7 +30,7 @@ public class FacturaPasajeModel extends FacturaModel {
     private Boolean estaPagado;
     @Column(nullable = false, name = "metodo_pago")
     @Enumerated(EnumType.STRING)
-    private MetodoPagamentoEnum metodoPago;
+    private TipoPagamentoEnum metodoPago;
     private LocalDateTime fechaPago;
 
     @OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "facturaPasaje")
@@ -49,7 +49,7 @@ public class FacturaPasajeModel extends FacturaModel {
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "facturaPasaje")
     private List<PasajeModel> pasajes;
 
-    public FacturaPasajeModel(BigDecimal valorTotal, BigDecimal descuento, BigDecimal tasaServicio, Boolean estaPagado, MetodoPagamentoEnum metodoPago, ViajeModel viajeModel, LocalDateTime fechaPago, ContactoModel contacto) {
+    public FacturaPasajeModel(BigDecimal valorTotal, BigDecimal descuento, BigDecimal tasaServicio, Boolean estaPagado, TipoPagamentoEnum metodoPago, ViajeModel viajeModel, LocalDateTime fechaPago, ContactoModel contacto) {
         super(valorTotal);
         this.descuento = descuento;
         this.tasaServicio = tasaServicio;

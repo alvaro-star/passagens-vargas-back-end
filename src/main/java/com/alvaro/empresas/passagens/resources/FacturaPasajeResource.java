@@ -2,7 +2,7 @@ package com.alvaro.empresas.passagens.resources;
 
 
 import com.alvaro.empresas.passagens.dtos.FacturaPasajeDTO;
-import com.alvaro.empresas.passagens.dtos.Mensaje;
+import com.alvaro.empresas.passagens.helpers.Mensaje;
 import com.alvaro.empresas.passagens.services.FacturaPasajeService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,9 +39,8 @@ public class FacturaPasajeResource {
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public ResponseEntity<Object> pagarQR(@PathVariable(value = "id") UUID id) {
-        if (facturaPasajeService.pagarQr(id)) {
+        if (facturaPasajeService.pagarQr(id))
             return ResponseEntity.ok(new Mensaje("El pago fue hecho con exito"));
-        }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Mensaje("Falla ala hora del pago"));
     }
 

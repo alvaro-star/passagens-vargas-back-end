@@ -27,7 +27,6 @@ public class PassagensApplication {
     private RelatorioService relatorioService;
     @Autowired
     private PasajeService pasajeService;
-
     @Autowired
     private PDFThymeleaf pdfThymeleaf;
 

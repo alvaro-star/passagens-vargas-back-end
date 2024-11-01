@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.configurations.exceptions.InternalException;
 
-import com.alvaro.empresas.passagens.dtos.Mensaje;
+import com.alvaro.empresas.passagens.helpers.Mensaje;
 import lombok.Getter;
 
 @Getter

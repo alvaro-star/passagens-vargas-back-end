@@ -1,7 +1,10 @@
 package com.alvaro.empresas.passagens.helpers.thymeleaf;
 
+import com.alvaro.empresas.passagens.helpers.DateAuxiliarFunctions;
 import com.alvaro.empresas.passagens.models.PasajeModel;
 import org.thymeleaf.context.Context;
+
+import java.time.LocalDateTime;
 
 public record PasajeTHModel(
         String empresa,

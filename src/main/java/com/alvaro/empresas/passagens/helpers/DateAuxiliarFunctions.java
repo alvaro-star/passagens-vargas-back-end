@@ -14,7 +14,7 @@ public class DateAuxiliarFunctions {
     @Value("${spring.jackson.time-zone}")
     private String timeZone;
 
-    public LocalDateTime getDateWithFirstDayOfMonth(Date date) {
+    public LocalDateTime getFirstDayOfMonthDate(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         calendar.set(Calendar.DAY_OF_MONTH, 1);
@@ -27,7 +27,7 @@ public class DateAuxiliarFunctions {
         return calendar.getTime().toInstant().atZone(zoneId).toLocalDateTime();
     }
 
-    public LocalDateTime getDateWithLastDayOfMonth(Date date) {
+    public LocalDateTime getLastDayOfMonthDate(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));

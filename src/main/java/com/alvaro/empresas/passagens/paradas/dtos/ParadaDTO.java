@@ -22,7 +22,7 @@ public record ParadaDTO(
         UUID idViaje
 ) {
 
-    public ParadaDTO(ParadaModel model, Integer idLugar, UUID idViaje) {
-        this(model.getId(), model.getPlataforma(), model.getDataHora(), idLugar, idViaje);
+    public ParadaDTO(ParadaModel model) {
+        this(model.getId(), model.getPlataforma(), model.getDataHora(), model.getLugarId(), model.getEmpresaId());
     }
 }

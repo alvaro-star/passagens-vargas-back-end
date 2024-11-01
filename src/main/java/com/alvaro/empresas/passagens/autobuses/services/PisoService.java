@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.autobuses.services;
 
-import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTO;
+import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTOCreate;
 import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTOResponse;
 import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTOUpdate;
 import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
@@ -15,6 +15,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -31,18 +33,17 @@ public class PisoService {
 
     public PisoDTOResponse getOne(Integer id) {
         var model = this.findById(id);
-        Integer idAutobus = model.getAutobus().getId();
-        return new PisoDTOResponse(model, idAutobus);
+        return new PisoDTOResponse(model);
     }
 
     public Page<PisoDTOResponse> findAll(Pageable pageable) {
         Page<PisoModel> pisos = pisoRepository.findAll(pageable);
-        return pisos.map(piso -> new PisoDTOResponse(piso, piso.getAutobus().getId()));
+        return pisos.map(PisoDTOResponse::new);
     }
 
     @Transactional
-    public PisoDTOResponse salvar(PisoDTO dto, AutobusModel autobusModel, Integer nPiso, Integer nPrimeraSilla) {
-        int nSillas = dto.getNLinhas() * dto.getNColunas();
+    public PisoDTOResponse salvar(PisoDTOCreate dto, AutobusModel autobusModel, Integer nPiso, Integer nPrimeraSilla) {
+        int nSillas = dto.getNSillas();
         for (Integer posicion : dto.getPosicionesBloqueadas()) {
             if (posicion > nSillas)
                 throw new ValidationException("Las posiciones indisponibles son invalidas");
@@ -52,34 +53,29 @@ public class PisoService {
         pisoModel.setAutobus(autobusModel);
         var saved = pisoRepository.save(pisoModel);
 
-        return new PisoDTOResponse(saved, autobusModel.getId());
+        return new PisoDTOResponse(saved);
     }
 
     @Transactional
     public PisoDTOResponse update(PisoDTOUpdate dto, PisoModel model) {
+
         var viaje = viajeRepository.findFirst1ByAutobusId(model.getAutobus().getId());
-        if (!viaje.isEmpty())
-            return null;
-
-        int produto = dto.getNLinhas() * dto.getNColunas();
-        for (Integer posicion : dto.getPosicoesIndisponiveis()) {
-            if (posicion > produto)
-                return null;
-        }
-
+        int nSillas = dto.getNSillas();
+        if (viaje.isPresent())
+            throw new ValidationException("El autobus ya tiene un viaje registrado");
+        for (Integer posicion : dto.getPosicoesIndisponiveis())
+            if (posicion > nSillas)
+                throw new ValidationException("Una posicion informada es invalida");
+        List<PisoModel> pisos = new ArrayList<>();
         model.updateValues(dto);
-
-        if (model.getAutobus().getPisos().size() == 2) {
-            int indiceSegundoPiso = (model.getAutobus().getPisos().get(0).getNPiso() == 2) ? 0 : 1;
-            if (model.getNPiso() == 1) {
-                var segundoPisoModel = model.getAutobus().getPisos().get(indiceSegundoPiso);
-                segundoPisoModel.setPrimeraSilla(model.getNSillas() + 1);
-                pisoRepository.save(segundoPisoModel);
-            }
+        pisos.add(model);
+        if (model.getAutobus().getPisos().size() == 2 && model.getNPiso() == 1) {
+            var segundoPisoModel = model.getAutobus().getPisoByNumero(2);
+            segundoPisoModel.setPrimeraSilla(model.getNSillas() + 1);
+            pisos.add(segundoPisoModel);
         }
 
-
-        var modelUpdate = pisoRepository.save(model);
-        return new PisoDTOResponse(modelUpdate, modelUpdate.getAutobus().getId());
+        pisoRepository.saveAll(pisos);
+        return new PisoDTOResponse(model);
     }
 }

@@ -1,9 +1,8 @@
 package com.alvaro.empresas.passagens.autobuses.models;
 
-import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTO;
+import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTOCreate;
 import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTOUpdate;
 import com.alvaro.empresas.passagens.autobuses.enums.EnumPosicao;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -41,12 +40,13 @@ public class PisoModel {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_autobus")
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private AutobusModel autobus;
+    @Column(name = "fk_idtb_autobus", insertable = false, updatable = false)
+    private Integer autobusId;
 
     private String posicionesBloqueadas = "";
 
-    public PisoModel(PisoDTO dto, Integer nPiso, Integer primeraSilla) {
+    public PisoModel(PisoDTOCreate dto, Integer nPiso, Integer primeraSilla) {
         nSillas = dto.getNColunas() * dto.getNLinhas() - dto.getPosicionesBloqueadas().size();
         nLinhas = dto.getNLinhas();
         nColunas = dto.getNColunas();
@@ -54,11 +54,19 @@ public class PisoModel {
         inicioContagem = dto.getInicioContagem();
         this.nPiso = nPiso;
         this.primeraSilla = primeraSilla;
-        String palavra = "";
+        StringBuilder str = new StringBuilder();
         for (Integer posicionBloqueada : dto.getPosicionesBloqueadas())
-            palavra = palavra.concat(posicionBloqueada + ",");
-        System.out.println(palavra);
-        this.posicionesBloqueadas = palavra;
+            str.append(posicionBloqueada).append(",");
+        this.posicionesBloqueadas = str.toString();
+    }
+
+    public int[] getPosicionesBloqueadasIntegerList() {
+        String[] posiciones = this.posicionesBloqueadas.split(",");
+        int[] posicionesConvert = new int[posiciones.length - 1];
+        for (int i = 0; i < posiciones.length - 1; i++) {
+            posicionesConvert[i] = Integer.getInteger(posiciones[i]);
+        }
+        return posicionesConvert;
     }
 
     public PisoModel(Integer nLinhas, Integer nColunas, EnumPosicao distribuicaoFileira, Integer nPiso, EnumPosicao inicioContagem, Integer nSillas, Integer primeraSilla, AutobusModel autobus) {

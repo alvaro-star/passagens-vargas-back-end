@@ -4,26 +4,21 @@ import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import com.alvaro.empresas.passagens.configurations.exceptions.FieldMessage;
 import com.alvaro.empresas.passagens.configurations.exceptions.InternalException.BadRequestException;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
-import com.alvaro.empresas.passagens.dtos.Mensaje;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajeDTO;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajeDTOEmpresaResponse;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTO;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTOVenta;
-import com.alvaro.empresas.passagens.enums.MetodoPagamentoEnum;
-import com.alvaro.empresas.passagens.helpers.DateAuxiliarFunctions;
-import com.alvaro.empresas.passagens.helpers.thymeleaf.PDFThymeleaf;
-import com.alvaro.empresas.passagens.helpers.thymeleaf.ParadaTHModel;
-import com.alvaro.empresas.passagens.helpers.thymeleaf.PasajeTHModel;
+import com.alvaro.empresas.passagens.enums.TipoPagamentoEnum;
+import com.alvaro.empresas.passagens.helpers.Mensaje;
+import com.alvaro.empresas.passagens.helpers.PasajesPDF;
 import com.alvaro.empresas.passagens.models.PasajeModel;
 import com.alvaro.empresas.passagens.models.PrecioModel;
 import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.pagos.models.FacturaPasajeModel;
 import com.alvaro.empresas.passagens.pagos.models.FacturaRembolsoModel;
-import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.alvaro.empresas.passagens.repositories.PasajeRepository;
 import com.alvaro.empresas.passagens.repositories.ViajeRepository;
-import com.itextpdf.kernel.geom.PageSize;
 import org.hibernate.ObjectNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,8 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.thymeleaf.context.Context;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -43,28 +38,16 @@ import java.util.UUID;
 public class PasajeService {
     @Value("${api.viaje.min-time-before-buy-pasaje-min}")
     private Integer minTimeBeforeBuyPasaje;
-    private final PasajeRepository pasajeRepository;
-    private final PrecioService precioService;
-    private final FacturaPasajeService facturaPasajeService;
-    private final ViajeRepository viajeRepository;
-    private final PDFThymeleaf pdfThymeleaf;
+    @Autowired
+    private PasajeRepository pasajeRepository;
+    @Autowired
+    private PrecioService precioService;
+    @Autowired
+    private FacturaPasajeService facturaPasajeService;
+    @Autowired
+    private ViajeRepository viajeRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(PasajeService.class);
-
-    @Autowired
-    public PasajeService(
-            PasajeRepository pasajeRepository,
-            PrecioService precioService,
-            FacturaPasajeService facturaPasajeService,
-            ViajeRepository viajeRepository,
-            PDFThymeleaf pdfThymeleaf
-    ) {
-        this.pasajeRepository = pasajeRepository;
-        this.precioService = precioService;
-        this.facturaPasajeService = facturaPasajeService;
-        this.viajeRepository = viajeRepository;
-        this.pdfThymeleaf = pdfThymeleaf;
-    }
 
     public PasajeModel findById(UUID id) {
         var model = pasajeRepository.findById(id);
@@ -73,60 +56,35 @@ public class PasajeService {
 
     public byte[] getOnePasajeDownload(UUID idPasaje) {
         var pasajeModel = findById(idPasaje);
-        var horaSalida = DateAuxiliarFunctions.getDataHoraToString(pasajeModel.getSalida().getDataHora());
-        PasajeTHModel thymeleafModel = new PasajeTHModel(pasajeModel.getPrecio().getEmpresa().getNombre(), pasajeModel, horaSalida.data() + horaSalida.hora(), pasajeModel.getMetodoPago().toString());
-        //PageSize pageSize = new PageSize(5.08f * 72 / 2.54f, 21.0f * 72 / 2.54f);
-        System.out.println("Chaguei aqui");
-        try {
-            byte[] pdf = pdfThymeleaf.generatePDFByTemplate("/pasaje", thymeleafModel.toContextThymeleaf(), PageSize.A7);
-            return pdf;
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-        return new byte[0];
-/*System.out.println("Inicio do conext");
-            Context context = new Context();
-            context.setVariable("empresa", pasajeModel.getPrecio().getEmpresa().getNombre());
-            context.setVariable("fechaHora", horaSalida.data() + horaSalida.hora());
-            context.setVariable("piso", pasajeModel.getPrecio().getNPiso());
-            context.setVariable("nsilla", pasajeModel.getNSilla());
-            context.setVariable("carril", pasajeModel.getSalida().getPlataforma());
-            context.setVariable("nombre", pasajeModel.getNombre());
-            context.setVariable("carnet", pasajeModel.getCarnet());
-            context.setVariable("nascimiento", pasajeModel.getNascimento().toString());
-            context.setVariable("origen", new ParadaTHModel(pasajeModel.getSalida()));
-            context.setVariable("destino", new ParadaTHModel(pasajeModel.getDestino()));
-            context.setVariable("precio", pasajeModel.getPrecioPagado().toString());
-            context.setVariable("metodoPago", pasajeModel.getMetodoPago().toString());
-            context.setVariable("descuento", 0f);
-            System.out.println("Inicio da conversao");*/
-
-        /*PasajesPDF pasajePDF = new PasajesPDF();
+        PasajesPDF pasajePDF = new PasajesPDF();
         byte[] emptyByteArray = new byte[0];
         try {
-            pasajePDF.addPasaje(pasajeModel, pasajeModel.getPrecio().getEmpresa().getNombre(), pasajeModel.getSalida(), pasajeModel.getDestino(), pasajeModel.getFacturaPasaje().getMetodoPago());
+            ParadaModel salida = pasajeModel.getSalida();
+            ParadaModel destino = pasajeModel.getDestino();
+            pasajePDF.addPasaje(pasajeModel, pasajeModel.getPrecio().getEmpresa().getNombre(), salida, destino, pasajeModel.getFacturaPasaje().getMetodoPago());
             emptyByteArray = pasajePDF.closeAndGetBytes();
             return emptyByteArray;
         } catch (IOException exception) {
-            throw new ValidationException("pasaje", "Hubo un error ala hra de crear el boleto");
-        }*/
+            throw new ValidationException("pasaje", "Hubo un error ala hora de crear el pasaje");
+        }
     }
 
     //Exclusivo para el servicio online
     @Transactional
-    public FacturaPasajeModel save(PasajesDTO dto, MetodoPagamentoEnum metodo, boolean guardarContacto, boolean compradoWeb) {
+    public FacturaPasajeModel save(PasajesDTO dto, TipoPagamentoEnum metodo, boolean guardarContacto, boolean compradoWeb) {
         var precio = precioService.findById(dto.idPrecio());
         var viaje = precio.getViaje();
         ParadaModel salida;
         ParadaModel destino;
 
-        List<Integer> ocupados = pasajeRepository.getPasajesVendidosAndNoRembolso(precio.getId());
-        validarSilla(viaje, precio, dto.pasajes(), ocupados);
+        PisoModel pisoEscolhido = viaje.getAutobus().getPisoByNumero(precio.getNPiso());
+        validarSillas(pisoEscolhido, precio, dto.pasajes());
+
         salida = viaje.getParadaByLugarId(dto.idLugarSalida());
         if (salida == null)
             throw new ValidationException(new FieldMessage("idLugarSalida", "La salida no hace parte del trayecto"));
         else if (salida.getDataHora().isBefore(LocalDateTime.now().minusMinutes(minTimeBeforeBuyPasaje)))
-            throw new ValidationException(new FieldMessage("idLugarSalida", "El autobus ya inicio el viaje"));
+            throw new BadRequestException("El autobus ya inicio el viaje");
         destino = viaje.getParadaByLugarId(dto.idLugarDestino());
         if (destino == null)
             throw new ValidationException(new FieldMessage("idLugarDestino", "El destino no hace parte del trayecto"));
@@ -137,7 +95,7 @@ public class PasajeService {
         BigDecimal valorArrecadadoWeb = viaje.getValorArrecadadoWeb() != null ? viaje.getValorArrecadadoWeb() : BigDecimal.ZERO;
         viaje.setValorArrecadadoWeb(valorArrecadadoWeb.add(pago.getValorTotal()));
         viajeRepository.save(viaje);
-        if (!metodo.equals(MetodoPagamentoEnum.QR))
+        if (!metodo.equals(TipoPagamentoEnum.QR))
             throw new ValidationException(new FieldMessage("metodo", "Metodo de Pago invalido"));
 
         PasajeModel pasajeModel;
@@ -154,7 +112,7 @@ public class PasajeService {
 
 
     @Transactional
-    public UUID saveEmpresa(PasajesDTOVenta dto, MetodoPagamentoEnum metodo, ViajeModel viaje, boolean guardarContacto) {
+    public UUID saveEmpresa(PasajesDTOVenta dto, TipoPagamentoEnum metodo, ViajeModel viaje) {
         ParadaModel salida;
         ParadaModel destino;
 
@@ -181,27 +139,25 @@ public class PasajeService {
         PrecioModel precio2 = viaje.getPrecioByNPiso(2);
 
         BigDecimal valorTotal = BigDecimal.ZERO;
-        if (piso2 == null) {
-            if (!sillasPiso2.isEmpty()) throw new ValidationException("pasajes", "Hay un numero dela silla invalida");
-            validarSillasEmpresa(piso1, precio1, sillasPiso1);
-            valorTotal = precio1.getPrecio().multiply(BigDecimal.valueOf(sillasPiso1.size()));
-        } else {
-            if (!sillasPiso1.isEmpty()) {
-                validarSillasEmpresa(piso1, precio1, sillasPiso1);
-                valorTotal = valorTotal.add(precio1.getPrecio().multiply(BigDecimal.valueOf(sillasPiso1.size())));
-            }
-            if (!sillasPiso2.isEmpty()) {
-                validarSillasEmpresa(piso2, precio2, sillasPiso2);
-                valorTotal = valorTotal.add(precio2.getPrecio().multiply(BigDecimal.valueOf(sillasPiso2.size())));
-            }
+        if (piso2 == null && !sillasPiso2.isEmpty())
+            throw new ValidationException("pasajes", "Hay un numero dela silla invalida");
+
+        if (!sillasPiso1.isEmpty()) {
+            validarSillas(piso1, precio1, sillasPiso1);
+            valorTotal = valorTotal.add(precio1.getPrecio().multiply(BigDecimal.valueOf(sillasPiso1.size())));
+        }
+
+        if (!sillasPiso2.isEmpty()) {
+            validarSillas(piso2, precio2, sillasPiso2);
+            valorTotal = valorTotal.add(precio2.getPrecio().multiply(BigDecimal.valueOf(sillasPiso2.size())));
         }
 
         if (valorTotal.compareTo(BigDecimal.ZERO) == 0)
             throw new ValidationException("pasajes", "La suma delos pasajes es zero");
 
         boolean enEfectivo = false;
-
         boolean estaPago = true;
+
         FacturaPasajeModel pago = facturaPasajeService.saveEmpresa(valorTotal, viaje, metodo, estaPago);
 
         BigDecimal valorArrecadadoNoWeb = viaje.getValorArrecadadoNoWeb() != null ? viaje.getValorArrecadadoNoWeb() : BigDecimal.ZERO;
@@ -247,11 +203,7 @@ public class PasajeService {
 
 
     public List<PasajeDTOEmpresaResponse> getPasajesFromPrecio(UUID idPrecio) {
-        return pasajeRepository.findByPrecioIdAndEstaPagado(idPrecio, true).stream().map(model -> {
-            ParadaDTOComplete salida = new ParadaDTOComplete(model.getSalida(), null);
-            ParadaDTOComplete destino = new ParadaDTOComplete(model.getDestino(), null);
-            return new PasajeDTOEmpresaResponse(model, salida, destino);
-        }).toList();
+        return pasajeRepository.findByPrecioIdAndEstaPagado(idPrecio, true).stream().map(PasajeDTOEmpresaResponse::new).toList();
     }
 
     //Validadores
@@ -263,7 +215,7 @@ public class PasajeService {
         precio.setNSillasDisponibles(nSillasDisponibles);
     }
 
-    public void validarSillasEmpresa(PisoModel piso, PrecioModel precio, List<PasajeDTO> sillasSolicitadas) {
+    public void validarSillas(PisoModel piso, PrecioModel precio, List<PasajeDTO> sillasSolicitadas) {
         int numeroMinimo = piso.getPrimeraSilla();
         int numeroMaximo = piso.getNSillas() + piso.getPrimeraSilla() - 1;
 
@@ -282,25 +234,6 @@ public class PasajeService {
         }
     }
 
-    public void validarSilla(ViajeModel viaje, PrecioModel precio, List<PasajeDTO> pasajesDTO, List<Integer> ocupados) {
-        PisoModel piso = viaje.getAutobus().getPisoByNumero(precio.getNPiso());
-        if (piso == null) throw new ValidationException(new FieldMessage("piso", "El piso informado no existe"));
-
-        int numeroMinimo = piso.getPrimeraSilla();
-        int numeroMaximo = piso.getNSillas() + piso.getPrimeraSilla() - 1;
-        if (precio.getNSillasDisponibles() < pasajesDTO.size())
-            throw new ValidationException(new FieldMessage("pasajes", "No hay tantas sillas disponibles"));
-
-        for (PasajeDTO pasajeDTO : pasajesDTO) {
-            for (Integer ocupado : ocupados)
-                if (ocupado.equals(pasajeDTO.nSilla()))//Erro
-                    throw new ValidationException("El viaje ya posse un pasaje registrado");
-
-            if (pasajeDTO.nSilla() > numeroMaximo || pasajeDTO.nSilla() < numeroMinimo)
-                throw new ValidationException(new FieldMessage("nSilla", "El numero de Silla informado es invalido"));
-        }
-    }
-
     public Mensaje delete(UUID idPasaje) {
         var pasajeModel = findById(idPasaje);
 
@@ -313,9 +246,9 @@ public class PasajeService {
         boolean resultado;
         if (pasajeModel.getEnEfectivo()) {
             resultado = viaje.substractValueEfectivo(pasajeModel.getPrecioPagado());
-        } else if (!pasajeModel.getCompradoWeb()) resultado = viaje.substractValueNoWeb(pasajeModel.getPrecioPagado());
+        } else if (!pasajeModel.getCompradoWeb())
+            resultado = viaje.substractValueNoWeb(pasajeModel.getPrecioPagado());
         else {
-            // Para este caso se necessita la API
             logger.warn("Se necessita una API para esta operacion");
             return new Mensaje("El pasaje fue comprado en la web, no esta disponible");
         }

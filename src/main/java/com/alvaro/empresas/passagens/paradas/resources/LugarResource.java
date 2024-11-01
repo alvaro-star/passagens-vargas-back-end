@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.paradas.resources;
 
-import com.alvaro.empresas.passagens.dtos.Mensaje;
+import com.alvaro.empresas.passagens.helpers.Mensaje;
 import com.alvaro.empresas.passagens.paradas.dtos.LugarDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.LugarDtoUpdate;
 import com.alvaro.empresas.passagens.paradas.services.CiudadService;
@@ -33,8 +33,7 @@ public class LugarResource {
     @GetMapping("/{id}")
     public ResponseEntity<LugarDTO> getOne(@PathVariable(value = "id") Integer id) {
         var model = lugarService.findById(id);
-        int idCiudad = model.getCiudad().getId();
-        return ResponseEntity.ok().body(new LugarDTO(model, idCiudad));
+        return ResponseEntity.ok().body(new LugarDTO(model));
     }
 
     @PostMapping
@@ -42,16 +41,14 @@ public class LugarResource {
     public ResponseEntity<LugarDTO> save(@RequestBody @Valid LugarDTO dto) {
         var ciudad = ciudadService.findById(dto.idCiudad());
         var model = lugarService.save(dto, ciudad);
-        int idCiudad = model.getCiudad().getId();
-        return ResponseEntity.status(HttpStatus.CREATED).body(new LugarDTO(model, idCiudad));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new LugarDTO(model));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public ResponseEntity<LugarDTO> update(@PathVariable(value = "id") Integer id, @RequestBody @Valid LugarDtoUpdate dto) {
         var model = lugarService.update(dto, id);
-        int idCiudad = model.getCiudad().getId();
-        return ResponseEntity.ok().body(new LugarDTO(model, idCiudad));
+        return ResponseEntity.ok().body(new LugarDTO(model));
     }
 
     @DeleteMapping("/{id}")
@@ -61,5 +58,4 @@ public class LugarResource {
         lugarService.delete(model);
         return ResponseEntity.noContent().build();
     }
-
 }

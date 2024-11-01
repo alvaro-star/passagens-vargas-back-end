@@ -6,19 +6,15 @@ import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Service
-public class MyUserService {
-
-    private final UsuarioRepository usuarioRepository;
+@Component
+public class MyUserComponent {
 
     @Autowired
-    public MyUserService(UsuarioRepository usuarioRepository) {
-        this.usuarioRepository = usuarioRepository;
-    }
+    private UsuarioRepository usuarioRepository;
 
     public UsuarioBean getUser() {
         var usuario = SecurityContextHolder.getContext().getAuthentication();

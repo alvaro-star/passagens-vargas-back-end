@@ -4,7 +4,6 @@ import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.enums.EnumParada;
 import com.alvaro.empresas.passagens.pagos.models.FacturaPasajeModel;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import lombok.Getter;
@@ -63,13 +62,15 @@ public class ViajeModel {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_autobus")
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private AutobusModel autobus;
+    @Column(name = "fk_idtb_autobus", updatable = false, insertable = false)
+    private Integer autobusId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_empresa")
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private EmpresaModel empresa;
+    @Column(name = "fk_idtb_empresa", insertable = false, updatable = false)
+    private UUID empresaId;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "viaje")
     private List<ParadaModel> paradas = new ArrayList<>();
@@ -82,15 +83,17 @@ public class ViajeModel {
 
     public ViajeModel(AutobusModel autobus, EmpresaModel empresa, BigDecimal valorArrecadadoEfectivo, BigDecimal valorArrecadadoNoWeb, BigDecimal valorArrecadadoWeb, boolean isCobrado, LocalDateTime dataHoraSalida) {
         this.autobus = autobus;
+        this.autobusId = autobus.getId();
         this.valorArrecadadoEfectivo = valorArrecadadoEfectivo;
         this.valorArrecadadoNoWeb = valorArrecadadoNoWeb;
         this.valorArrecadadoWeb = valorArrecadadoWeb;
         this.isCobrado = isCobrado;
         this.empresa = empresa;
+        this.empresaId = empresa.getId();
         this.dataHoraSalida = dataHoraSalida;
     }
 
-    public ViajeModel(LocalDateTime dataHoraSalida, AutobusModel autobus, EmpresaModel empresa) {
+    public ViajeModel(AutobusModel autobus, EmpresaModel empresa, LocalDateTime dataHoraSalida) {
         valorArrecadadoEfectivo = BigDecimal.ZERO;
         valorArrecadadoNoWeb = BigDecimal.ZERO;
         valorArrecadadoWeb = BigDecimal.ZERO;
@@ -98,7 +101,9 @@ public class ViajeModel {
         isCancelado = false;
         this.dataHoraSalida = dataHoraSalida;
         this.autobus = autobus;
+        this.autobusId = autobus.getId();
         this.empresa = empresa;
+        this.empresaId = empresa.getId();
         this.paradas = new ArrayList<>();
     }
 
@@ -125,7 +130,7 @@ public class ViajeModel {
 
     public ParadaModel getParadaByLugarId(Integer idLugar) {
         for (ParadaModel parada : this.getParadas()) {
-            if (parada.getLugar().getId() == idLugar)
+            if (parada.getLugar().getId().equals(idLugar))
                 return parada;
         }
         return null;

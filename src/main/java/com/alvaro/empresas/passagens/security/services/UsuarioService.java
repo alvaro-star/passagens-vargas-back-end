@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.security.services;
 
-import com.alvaro.empresas.passagens.helpers.beans.MyUserService;
+import com.alvaro.empresas.passagens.helpers.beans.MyUserComponent;
 import com.alvaro.empresas.passagens.helpers.services.EmailService;
 import com.alvaro.empresas.passagens.security.dtos.LoginDto;
 import com.alvaro.empresas.passagens.security.dtos.LoginResponseDto;
@@ -31,7 +31,7 @@ public class UsuarioService {
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
     @Autowired
-    private MyUserService myUserService;
+    private MyUserComponent myUserComponent;
     @Autowired
     private UsuarioRepository usuarioRepository;
 

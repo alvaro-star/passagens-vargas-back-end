@@ -5,7 +5,7 @@ import com.alvaro.empresas.passagens.models.EmpresaModel;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-public record EmpresaResponseDto(
+public record EmpresaDTOResponse(
         UUID id,
         String nombre,
         String logo,
@@ -15,7 +15,11 @@ public record EmpresaResponseDto(
         BigDecimal valorViajesNoWeb,
         BigDecimal valorViajesWeb
 ) {
-    public EmpresaResponseDto(EmpresaModel model, BigDecimal valorViajesEfectivo, BigDecimal valorViajesNoWeb, BigDecimal valorViajesWeb) {
+    public EmpresaDTOResponse(EmpresaModel model, BigDecimal valorViajesEfectivo, BigDecimal valorViajesNoWeb, BigDecimal valorViajesWeb) {
         this(model.getId(), model.getNombre(), model.getLogo(), model.getBloqued(), model.getEnabled(), valorViajesEfectivo, valorViajesNoWeb, valorViajesWeb);
+    }
+
+    public EmpresaDTOResponse(EmpresaModel model) {
+        this(model.getId(), model.getNombre(), model.getLogo(), model.getBloqued(), model.getEnabled(), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
     }
 }

@@ -6,7 +6,7 @@ import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import com.alvaro.empresas.passagens.autobuses.repositories.AutobusRepository;
 import com.alvaro.empresas.passagens.autobuses.repositories.PisoRepository;
 import com.alvaro.empresas.passagens.enums.EnumParada;
-import com.alvaro.empresas.passagens.enums.MetodoPagamentoEnum;
+import com.alvaro.empresas.passagens.enums.TipoPagamentoEnum;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.models.PasajeModel;
 import com.alvaro.empresas.passagens.models.PrecioModel;
@@ -101,7 +101,7 @@ public class DataLoader {
                 var viaje = viajeRepository.save(new ViajeModel(autobus, autobus.getEmpresa(), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, false, dataInicio));
 
                 List<ParadaModel> paradas = new ArrayList<>();
-                //Registra as paradas
+
                 var parada = new ParadaModel(dataInicio, 10, EnumParada.SALIDA, lugares.get(0), viaje, viaje.getEmpresa());
                 dataInicio = dataInicio.plusHours(2);
                 paradas.add(parada);
@@ -121,7 +121,7 @@ public class DataLoader {
                 for (PisoModel piso : pisos) {
                     var precio = precioRepository.save(new PrecioModel(precioBruto, piso.getNPiso(), piso.getNSillas(), viaje, viaje.getEmpresa()));
                     precioBruto = precioBruto.subtract(BigDecimal.valueOf(20));
-                    var facturaPasaje = new FacturaPasajeModel(precioBruto, BigDecimal.ZERO, BigDecimal.ZERO, true, MetodoPagamentoEnum.EFECTIVO, precio.getViaje(), LocalDateTime.now(), null);
+                    var facturaPasaje = new FacturaPasajeModel(precioBruto, BigDecimal.ZERO, BigDecimal.ZERO, true, TipoPagamentoEnum.EFECTIVO, precio.getViaje(), LocalDateTime.now(), null);
                     facturaPasajeRepository.save(facturaPasaje);
                     var pasaje = new PasajeModel(23, false, precioBruto, true, true, "Alvaro Vargas Alvarez", "3308731", new Date(2000, 1, 1), paradas.get(0), paradas.get(2), precio, facturaPasaje);
                     pasajeRepository.save(pasaje);

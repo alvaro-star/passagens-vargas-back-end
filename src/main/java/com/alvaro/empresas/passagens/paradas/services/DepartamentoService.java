@@ -16,14 +16,15 @@ public class DepartamentoService {
     @Autowired
     private DepartamentoRepository departamentoRepository;
 
-    public Page<DepartamentoDTO> findAll(Pageable pageable) {
-        Page<DepartamentoModel> models = departamentoRepository.findAll(pageable);
-        return models.map(DepartamentoDTO::new);
-    }
 
     public DepartamentoModel findById(Integer id) {
         Optional<DepartamentoModel> model = departamentoRepository.findById(id);
         return model.orElseThrow(() -> new ObjectNotFoundException(id, DepartamentoModel.class.getName()));
+    }
+
+    public Page<DepartamentoDTO> findAll(Pageable pageable) {
+        Page<DepartamentoModel> models = departamentoRepository.findAll(pageable);
+        return models.map(DepartamentoDTO::new);
     }
 
     public DepartamentoModel save(DepartamentoDTO dto) {

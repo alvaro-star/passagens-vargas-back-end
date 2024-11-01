@@ -1,7 +1,7 @@
 package com.alvaro.empresas.passagens.models;
 
 import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
-import com.alvaro.empresas.passagens.dtos.EmpresaDto;
+import com.alvaro.empresas.passagens.dtos.EmpresaDTO;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -35,6 +35,12 @@ public class EmpresaModel {
     @Column(nullable = false)
     private Boolean bloqued;
 
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "empresa")
+    private List<AutobusModel> autobuses = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "empresa")
+    private List<ViajeModel> viajes = new ArrayList<>();
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -43,14 +49,7 @@ public class EmpresaModel {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "empresa")
-    private List<AutobusModel> autobuses = new ArrayList<>();
-
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "empresa")
-    private List<ViajeModel> viajes = new ArrayList<>();
-
-    //Funcionarios
-    public EmpresaModel(EmpresaDto dto) {
+    public EmpresaModel(EmpresaDTO dto) {
         nombre = dto.nombre();
         logo = dto.logo();
         numeroCuenta = dto.numeroCuenta();

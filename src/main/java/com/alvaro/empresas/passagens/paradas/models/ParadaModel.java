@@ -5,13 +5,13 @@ import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOUpdate;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "tb_parada", indexes = {
@@ -38,20 +38,21 @@ public class ParadaModel {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_lugar")
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private LugarModel lugar;
     @Column(name = "fk_idtb_lugar", updatable = false, insertable = false)
     private Integer lugarId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_viaje")
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private ViajeModel viaje;
+    @Column(name = "fk_idtb_viaje", insertable = false, updatable = false)
+    private UUID viajeCodigo;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_empresa")
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private EmpresaModel empresa;
+    @Column(name = "fk_idtb_empresa", insertable = false, updatable = false)
+    private UUID empresaId;
 
     public ParadaModel(ParadaDTO dto, EnumParada tipo) {
         dataHora = dto.dataHora();
@@ -66,7 +67,25 @@ public class ParadaModel {
         this.lugar = lugar;
         this.lugarId = lugar.getId();
         this.viaje = viaje;
+        this.viajeCodigo = viaje.getCodigo();
         this.empresa = empresa;
+        this.empresaId = empresa.getId();
+    }
+
+    public void setLugar(LugarModel lugar) {
+        this.lugar = lugar;
+        this.lugarId = lugar.getId();
+
+    }
+
+    public void setViaje(ViajeModel viaje) {
+        this.viaje = viaje;
+        this.viajeCodigo = viaje.getCodigo();
+    }
+
+    public void setEmpresa(EmpresaModel empresa) {
+        this.empresa = empresa;
+        this.empresaId = empresa.getId();
     }
 
     public void updateValues(ParadaDTOUpdate dtoUpdate) {

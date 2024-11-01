@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.models;
 
-import com.alvaro.empresas.passagens.enums.MetodoPagamentoEnum;
+import com.alvaro.empresas.passagens.enums.TipoPagamentoEnum;
 import com.alvaro.empresas.passagens.pagos.models.FacturaPasajeModel;
 import com.alvaro.empresas.passagens.pagos.models.FacturaRembolsoModel;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
@@ -49,7 +49,7 @@ public class PasajeModel {
     private Boolean enEfectivo;
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private MetodoPagamentoEnum metodoPago;
+    private TipoPagamentoEnum metodoPago;
 
     @Column(nullable = false, length = 9)
     private String carnet;

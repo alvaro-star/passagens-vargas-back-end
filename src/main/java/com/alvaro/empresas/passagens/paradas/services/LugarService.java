@@ -19,7 +19,6 @@ import java.util.Set;
 public class LugarService {
     @Autowired
     private LugarRepository lugarRepository;
-
     @Autowired
     private ParadaRepository paradaRepository;
 
@@ -28,18 +27,17 @@ public class LugarService {
         return model.orElseThrow(() -> new ObjectNotFoundException(id, LugarModel.class.getName()));
     }
 
-    public List<LugarModel> findAllById(Set<Integer> ids){
+    public List<LugarModel> findAllById(Set<Integer> ids) {
         return lugarRepository.findAllById(ids);
     }
 
     public Page<LugarDTO> findAll(Pageable pageable) {
         Page<LugarModel> models = lugarRepository.findAll(pageable);
-        return models.map(model -> new LugarDTO(model, model.getCiudad().getId()));
+        return models.map(LugarDTO::new);
     }
 
     public LugarModel save(LugarDTO dto, CiudadModel ciudad) {
-        var model = new LugarModel(dto);
-        model.setCiudad(ciudad);
+        var model = new LugarModel(dto, ciudad);
         return lugarRepository.save(model);
     }
 
@@ -54,8 +52,7 @@ public class LugarService {
         if (parada.isPresent()) {
             model.setEnable(false);
             lugarRepository.save(model);
-        } else {
+        } else
             lugarRepository.delete(model);
-        }
     }
 }

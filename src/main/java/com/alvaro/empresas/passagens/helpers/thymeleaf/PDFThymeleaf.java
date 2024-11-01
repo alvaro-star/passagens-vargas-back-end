@@ -25,7 +25,6 @@ public class PDFThymeleaf {
 
         PdfDocument pdfDocument = new PdfDocument(writer);
         pdfDocument.setDefaultPageSize(pageSize);
-
         ConverterProperties converterProperties = new ConverterProperties();
         HtmlConverter.convertToPdf(html, pdfDocument, converterProperties);
         pdfDocument.close();

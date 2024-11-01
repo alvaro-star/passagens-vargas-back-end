@@ -2,7 +2,6 @@ package com.alvaro.empresas.passagens.paradas.models;
 
 import com.alvaro.empresas.passagens.paradas.dtos.CiudadDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.CiudadDtoUpdate;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -27,14 +26,23 @@ public class CiudadModel {
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "fk_idtb_departamento")
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private DepartamentoModel departamento;
+
+    @Column(name = "fk_idtb_departamento", insertable = false, updatable = false)
+    private Integer departamentoId;
 
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "ciudad")
     private List<LugarModel> lugares = new ArrayList<>();
 
-    public CiudadModel(CiudadDTO dto) {
+    public CiudadModel(CiudadDTO dto, DepartamentoModel departamento) {
         nombre = dto.nombre().toUpperCase();
+        this.departamento = departamento;
+        this.departamentoId = departamento.getId();
+    }
+
+    public void setDepartamento(DepartamentoModel departamento) {
+        this.departamento = departamento;
+        this.departamentoId = departamento.getId();
     }
 
     public void updateValues(CiudadDtoUpdate dto) {
