@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.paradas.models;
 
-import com.alvaro.empresas.passagens.enums.EnumParada;
+import com.alvaro.empresas.passagens.enums.TypeParada;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTO;
@@ -34,7 +34,7 @@ public class ParadaModel {
     @Column(nullable = false)
     private int plataforma;
     @Enumerated(EnumType.STRING)
-    private EnumParada tipo;
+    private TypeParada tipo;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_lugar")
@@ -54,13 +54,13 @@ public class ParadaModel {
     @Column(name = "fk_idtb_empresa", insertable = false, updatable = false)
     private UUID empresaId;
 
-    public ParadaModel(ParadaDTO dto, EnumParada tipo) {
+    public ParadaModel(ParadaDTO dto, TypeParada tipo) {
         dataHora = dto.dataHora();
         this.tipo = tipo;
         plataforma = dto.plataforma();
     }
 
-    public ParadaModel(LocalDateTime dataHora, int plataforma, EnumParada tipo, LugarModel lugar, ViajeModel viaje, EmpresaModel empresa) {
+    public ParadaModel(LocalDateTime dataHora, int plataforma, TypeParada tipo, LugarModel lugar, ViajeModel viaje, EmpresaModel empresa) {
         this.dataHora = dataHora;
         this.plataforma = plataforma;
         this.tipo = tipo;

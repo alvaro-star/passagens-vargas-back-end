@@ -15,9 +15,4 @@ public class ValidationException extends RuntimeException {
         super(mensaje);
         this.campo = new FieldMessage(campo, mensaje);
     }
-
-    public ValidationException(FieldMessage campo) {
-        super(campo.getMessage());
-        this.campo = campo;
-    }
 }

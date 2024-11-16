@@ -10,7 +10,6 @@ import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.math.BigDecimal;
@@ -21,19 +20,29 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 @DataJpaTest
 class ParadaRepositoryTest {
     private final ParadaRepository paradaRepository;
 
     private final EntityManager em;
-    @Autowired
+
     public ParadaRepositoryTest(ParadaRepository paradaRepository, EntityManager em) {
         this.paradaRepository = paradaRepository;
         this.em = em;
     }
-/*
+
+    @Test
+    void loadViajesDay() {
+    }
+
+    @Test
+    void loadViajesDayByEmpresaOnlySalida() {
+    }
+
+    @Test
+    void loadViajesDayByEmpresaId() {
+    }
+
     @Test
     @DisplayName("Dado tres registros de parada, deveriam ser mostradas os codigos de tres trayectos que posseen una parada de un lugar em um dia determinado")
     void cargarSalidasDelDiaCenario1() {
@@ -59,7 +68,7 @@ class ParadaRepositoryTest {
 
         LocalDateTime startDay = dataAtual.plusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
         LocalDateTime endDay = startDay.withHour(23).withMinute(59).withSecond(59).withNano(999999999);
-        List<ParadaModel> paradasDia = paradaRepository.cargarSalidasDelDia(lugares.get(1).getId(), startDay, endDay);
+        List<ParadaModel> paradasDia = paradaRepository.load(lugares.get(1).getId(), startDay, endDay);
         assertThat(paradasDia.size()).isEqualTo(3);
 
         paradasDia = paradaRepository.cargarSalidasDelDia(lugares.get(7).getId(), startDay, endDay);
@@ -68,19 +77,19 @@ class ParadaRepositoryTest {
 
 
     private EmpresaModel cadastrarEmpresa(String nombre) {
-        var empresa = new EmpresaModel(nombre, "logo", "numerocuenta");
+        var empresa = new EmpresaModel(nombre, "logo", "numerocuenta", true, false);
         em.persist(empresa);
         return empresa;
     }
 
     private AutobusModel cadastrarAutobus(String placa, EmpresaModel empresaModel) {
-        var autobus = new AutobusModel(placa, empresaModel);
+        var autobus = new AutobusModel(placa, true, empresaModel);
         em.persist(autobus);
         return autobus;
     }
 
     private ViajeModel cadastrarViaje(AutobusModel autobusModel) {
-        var viaje = new ViajeModel(autobusModel, autobusModel.getEmpresa(), BigDecimal.valueOf(0), BigDecimal.valueOf(0), false);
+        var viaje = new ViajeModel(autobusModel, autobusModel.getEmpresa(), BigDecimal.ZERO, BigDecimal.ZERO, false);
         em.persist(viaje);
         return viaje;
     }
@@ -104,5 +113,5 @@ class ParadaRepositoryTest {
         var parada = new ParadaModel(data, 10, lugar, viaje);
         em.persist(parada);
         return parada;
-    }*/
+    }
 }

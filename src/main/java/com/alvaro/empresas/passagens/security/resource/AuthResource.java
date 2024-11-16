@@ -2,7 +2,7 @@ package com.alvaro.empresas.passagens.security.resource;
 
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
 import com.alvaro.empresas.passagens.helpers.Mensaje;
-import com.alvaro.empresas.passagens.enums.EnumTypeSolicitudOperation;
+import com.alvaro.empresas.passagens.enums.TypeSolicitudOperation;
 import com.alvaro.empresas.passagens.helpers.beans.MyUserComponent;
 import com.alvaro.empresas.passagens.helpers.services.EmailService;
 import com.alvaro.empresas.passagens.security.dtos.*;
@@ -92,7 +92,7 @@ public class AuthResource {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Mensaje("Ya hay un usuario registrado"));
 
         LocalDateTime startDay = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(1);
-        var solicitudes = usuarioSolicitudRepository.findByEmailAfterTime(registerDto.login(), startDay, EnumTypeSolicitudOperation.CREATE);
+        var solicitudes = usuarioSolicitudRepository.findByEmailAfterTime(registerDto.login(), startDay, TypeSolicitudOperation.CREATE);
 
         if (solicitudes.size() > 5)
             return ResponseEntity.badRequest().body(new Mensaje("Ya hubo bastantes intentos con este email por hoy"));
@@ -104,7 +104,7 @@ public class AuthResource {
         if (logado)
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Mensaje("Hay un usuario que inicio session"));
         String encriptedPassword = this.passwordEncoder.encode(registerDto.contrasena());
-        UsuarioSolicitudModel newUser = new UsuarioSolicitudModel(registerDto.login(), registerDto.nombre(), registerDto.telefono(), encriptedPassword, EnumTypeSolicitudOperation.CREATE);
+        UsuarioSolicitudModel newUser = new UsuarioSolicitudModel(registerDto.login(), registerDto.nombre(), registerDto.telefono(), encriptedPassword, TypeSolicitudOperation.CREATE);
         usuarioSolicitudRepository.save(newUser);
         boolean valorLogico;
 
@@ -117,7 +117,7 @@ public class AuthResource {
     public ResponseEntity<Mensaje> verificarRegistro(@RequestBody ValidadorDTO validadorDTO) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime halfHourAgo = now.minus(Duration.ofMinutes(30));
-        var solicitudes = usuarioSolicitudRepository.findByEmailAfterTime(validadorDTO.email(), halfHourAgo, EnumTypeSolicitudOperation.CREATE);
+        var solicitudes = usuarioSolicitudRepository.findByEmailAfterTime(validadorDTO.email(), halfHourAgo, TypeSolicitudOperation.CREATE);
         var usuario = usuarioRepository.findByEmail(validadorDTO.email());
         if (usuario.isPresent()) return ResponseEntity.badRequest().body(new Mensaje("El usuario ya esta registrado"));
         if (solicitudes.isEmpty()) {
@@ -187,13 +187,13 @@ public class AuthResource {
 
         if (emailOcuped) return ResponseEntity.badRequest().body(new Mensaje("El email esta indisponible"));
         LocalDateTime thrityMinutesBefore = LocalDateTime.now().minusMinutes(60);
-        var solicitudes = usuarioSolicitudRepository.findByEmailAfterTime(solicitud.email(), thrityMinutesBefore, EnumTypeSolicitudOperation.UPDATE);
+        var solicitudes = usuarioSolicitudRepository.findByEmailAfterTime(solicitud.email(), thrityMinutesBefore, TypeSolicitudOperation.UPDATE);
         if (solicitudes.size() >= 5)
             return ResponseEntity.badRequest().body(new Mensaje("Fueron intentadas muchas solicitaciones"));
 
         if (!passwordEncoder.matches(solicitud.contrasena(), usuarioModel.getPassword()))
             return ResponseEntity.badRequest().body(new Mensaje("La contrasena es invalida"));
-        var usuarioSolicitud = new UsuarioSolicitudModel(solicitud, usuarioModel, usuarioModel.getPassword(), EnumTypeSolicitudOperation.UPDATE);
+        var usuarioSolicitud = new UsuarioSolicitudModel(solicitud, usuarioModel, usuarioModel.getPassword(), TypeSolicitudOperation.UPDATE);
 
         usuarioSolicitudRepository.save(usuarioSolicitud);
         emailService.mandarEmail(usuarioModel.getLogin(), "Cambio de datos del perfil", "Este es tu codigo de verificacion para editar tud datos: \n" + usuarioSolicitud.getId().toString() + "\nNo lo compartas con nadie");

@@ -1,5 +1,5 @@
 package com.alvaro.empresas.passagens.enums;
 
-public enum EnumParada {
+public enum TypeParada {
     SALIDA, CAMINO, DESTINO;
 }

@@ -1,7 +1,7 @@
-package com.alvaro.empresas.passagens.services;
+package com.alvaro.empresas.passagens.pagos.services;
 
 import com.alvaro.empresas.passagens.pagos.models.FacturaEmpresaModel;
-import com.alvaro.empresas.passagens.repositories.FacturaEmpresaRepository;
+import com.alvaro.empresas.passagens.pagos.repositories.FacturaEmpresaRepository;
 import com.alvaro.empresas.passagens.repositories.PasajeRepository;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;

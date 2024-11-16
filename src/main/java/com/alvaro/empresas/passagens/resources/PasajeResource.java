@@ -4,7 +4,6 @@ import com.alvaro.empresas.passagens.dtos.pasajes.CodigoPago;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajeDTOEmpresaResponse;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTO;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTOVenta;
-import com.alvaro.empresas.passagens.enums.TipoPagamentoEnum;
 import com.alvaro.empresas.passagens.helpers.Mensaje;
 import com.alvaro.empresas.passagens.helpers.beans.MyUserComponent;
 import com.alvaro.empresas.passagens.services.PasajeService;
@@ -40,13 +39,13 @@ public class PasajeResource {
     private PrecioService precioService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<PasajeDTOEmpresaResponse> getOne(@PathVariable(value = "id") UUID id) {
+    public ResponseEntity<PasajeDTOEmpresaResponse> getOne(@PathVariable UUID id) {
         var model = pasajeService.findById(id);
         return ResponseEntity.ok(new PasajeDTOEmpresaResponse(model));
     }
 
     @GetMapping("/{id}/download")
-    public ResponseEntity<byte[]> getFilePasaje(@PathVariable(value = "id") UUID id) {
+    public ResponseEntity<byte[]> getFilePasaje(@PathVariable UUID id) {
         byte[] pasajePdf = pasajeService.getOnePasajeDownload(id);
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=pasaje.pdf");
@@ -56,7 +55,7 @@ public class PasajeResource {
 
     @GetMapping("/from/{idPrecio}")
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_FUNCIONARIO', 'ROLE_EMPRESA_ADMIN', 'ROLE_ADMIN')")
-    public ResponseEntity<List<PasajeDTOEmpresaResponse>> getPasajerosFromPrecio(@PathVariable(value = "idPrecio") UUID idPrecio) {
+    public ResponseEntity<List<PasajeDTOEmpresaResponse>> getPasajerosFromPrecio(@PathVariable UUID idPrecio) {
         var usuario = myUserComponent.getUser();
         var precio = precioService.findById(idPrecio);
         if (usuario.hasRole("ROLE_ADMIN") || usuario.isMyEmpresa(precio.getEmpresa().getId()))
@@ -65,12 +64,12 @@ public class PasajeResource {
     }
 
 
-    public ResponseEntity<Object> save(@Valid @RequestBody PasajesDTO dto, BindingResult bindingResult) {//Venta de pasajes al publico
+    public ResponseEntity<Object> save(@RequestBody @Valid PasajesDTO dto, BindingResult bindingResult) {//Venta de pasajes al publico
         ValidationErrorsWithList validacao;
         validacao = ValidarCompraPasajes.validarPasajesDTO(bindingResult, dto, "/pasajes");
         if (!validacao.getErrorsList().isEmpty() || !validacao.getErrors().isEmpty())
             return ResponseEntity.unprocessableEntity().body(validacao);
-        return ResponseEntity.status(HttpStatus.CREATED).body(pasajeService.save(dto, TipoPagamentoEnum.QR, true, true));
+        return ResponseEntity.status(HttpStatus.CREATED).body(pasajeService.saveCliente(dto));
     }
 
     @PostMapping("/vender")
@@ -89,14 +88,14 @@ public class PasajeResource {
         if (!validacao.getErrorsList().isEmpty() || !validacao.getErrors().isEmpty())
             return ResponseEntity.unprocessableEntity().body(validacao);
 
-        var idPago = pasajeService.saveEmpresa(dto, dto.metodo(), viaje);
+        var idPago = pasajeService.saveEmpresa(dto, viaje);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(new CodigoPago(idPago));
     }
 
-    @DeleteMapping("/{id}")//Habiliado solo para el rembolso fijo
+    @DeleteMapping("{id}")//Habiliado solo para el rembolso fijo
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_FUNCIONARIO', 'ROLE_EMPRESA_ADMIN')")
-    public ResponseEntity<Mensaje> rembolso(@PathVariable(name = "id") UUID idPasaje) {
+    public ResponseEntity<Mensaje> rembolso(@PathVariable UUID idPasaje) {
         var mensaje = pasajeService.delete(idPasaje);
         if (mensaje == null) return ResponseEntity.noContent().build();
         else return ResponseEntity.badRequest().body(mensaje);

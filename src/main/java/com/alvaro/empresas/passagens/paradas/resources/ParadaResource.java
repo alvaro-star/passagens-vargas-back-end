@@ -1,7 +1,7 @@
 package com.alvaro.empresas.passagens.paradas.resources;
 
 import com.alvaro.empresas.passagens.helpers.Mensaje;
-import com.alvaro.empresas.passagens.enums.EnumParada;
+import com.alvaro.empresas.passagens.enums.TypeParada;
 import com.alvaro.empresas.passagens.helpers.beans.MyUserComponent;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
@@ -106,13 +106,13 @@ public class ParadaResource {
             return ResponseEntity.badRequest().body(new Mensaje("El autobus esta inhabilitado"));
         int indice = -1;
 
-        if (!model.getTipo().equals(EnumParada.CAMINO))
+        if (!model.getTipo().equals(TypeParada.CAMINO))
             return ResponseEntity.badRequest().body(new Mensaje("No se puede eliminar la salida o el destino"));
 
         ParadaModel aux;
         for (int i = 0; i < model.getViaje().getParadas().size(); i++) {
             aux = model.getViaje().getParadas().get(i);
-            if (aux.getTipo().equals(EnumParada.DESTINO) && aux.getDataHora().isBefore(LocalDateTime.now()))
+            if (aux.getTipo().equals(TypeParada.DESTINO) && aux.getDataHora().isBefore(LocalDateTime.now()))
                 return ResponseEntity.badRequest().body(new Mensaje("No se puede eliminar una parada de un viaje del pasado"));
             if (aux.getId().equals(model.getId()))
                 indice = i;

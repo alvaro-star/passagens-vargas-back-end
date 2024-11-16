@@ -1,10 +1,10 @@
 package com.alvaro.empresas.passagens.models;
 
-import com.alvaro.empresas.passagens.enums.TipoPagamentoEnum;
+import com.alvaro.empresas.passagens.dtos.pasajes.PasajeDTO;
+import com.alvaro.empresas.passagens.enums.TipoPagamento;
 import com.alvaro.empresas.passagens.pagos.models.FacturaPasajeModel;
 import com.alvaro.empresas.passagens.pagos.models.FacturaRembolsoModel;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -49,7 +49,7 @@ public class PasajeModel {
     private Boolean enEfectivo;
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private TipoPagamentoEnum metodoPago;
+    private TipoPagamento metodoPago;
 
     @Column(nullable = false, length = 9)
     private String carnet;
@@ -60,23 +60,45 @@ public class PasajeModel {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_id_salida")
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private ParadaModel salida;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "fk_id_destino")
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private ParadaModel destino;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "fk_idtb_precio")
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private PrecioModel precio;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_factura_pasaje")
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private FacturaPasajeModel facturaPasaje;
+    @Column(name = "fk_idtb_factura_pasaje", updatable = false, insertable = false)
+    private UUID facturaPasajeId;
+
+    public PasajeModel(PasajeDTO pasajeDTO, Boolean compradoWeb, BigDecimal precioPagado, Boolean estaPagado, Boolean enEfectivo, ParadaModel salida, ParadaModel destino, PrecioModel precio, FacturaPasajeModel facturaPasaje) {
+        this.nSilla = pasajeDTO.nSilla();
+        this.carnet = pasajeDTO.carnet();
+        this.nombre = pasajeDTO.nombre();
+        this.nascimento = pasajeDTO.nascimento();
+
+        this.precioPagado = precioPagado;
+        this.compradoWeb = compradoWeb;
+        this.estaPagado = estaPagado;
+        this.facturaRembolso = null;
+        this.facturaRembolsoId = null;
+        this.enEfectivo = enEfectivo;
+
+        this.facturaPasaje = facturaPasaje;
+        if (facturaPasaje != null) {
+            this.metodoPago = facturaPasaje.getMetodoPago();
+            this.facturaPasajeId = facturaPasaje.getId();
+        }
+
+        this.salida = salida;
+        this.destino = destino;
+        this.precio = precio;
+    }
 
     public PasajeModel(Integer nSilla, Boolean compradoWeb, BigDecimal precioPagado, Boolean estaPagado, Boolean enEfectivo, String nombre, String carnet, Date nascimento, ParadaModel salida, ParadaModel destino, PrecioModel precio, FacturaPasajeModel facturaPasaje) {
         this.nSilla = nSilla;

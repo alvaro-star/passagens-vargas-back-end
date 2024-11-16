@@ -1,9 +1,9 @@
-package com.alvaro.empresas.passagens.resources;
+package com.alvaro.empresas.passagens.pagos.resources;
 
 
 import com.alvaro.empresas.passagens.dtos.FacturaPasajeDTO;
 import com.alvaro.empresas.passagens.helpers.Mensaje;
-import com.alvaro.empresas.passagens.services.FacturaPasajeService;
+import com.alvaro.empresas.passagens.pagos.services.FacturaPasajeService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

@@ -1,5 +1,5 @@
 package com.alvaro.empresas.passagens.enums;
 
-public enum EnumTypeSolicitudOperation {
+public enum TypeSolicitudOperation {
     UPDATE, CREATE
 }

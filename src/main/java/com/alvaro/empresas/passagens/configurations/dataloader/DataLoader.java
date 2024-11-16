@@ -5,13 +5,14 @@ import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import com.alvaro.empresas.passagens.autobuses.repositories.AutobusRepository;
 import com.alvaro.empresas.passagens.autobuses.repositories.PisoRepository;
-import com.alvaro.empresas.passagens.enums.EnumParada;
-import com.alvaro.empresas.passagens.enums.TipoPagamentoEnum;
+import com.alvaro.empresas.passagens.enums.TypeParada;
+import com.alvaro.empresas.passagens.enums.TipoPagamento;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.models.PasajeModel;
 import com.alvaro.empresas.passagens.models.PrecioModel;
 import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.pagos.models.FacturaPasajeModel;
+import com.alvaro.empresas.passagens.pagos.repositories.FacturaPasajeRepository;
 import com.alvaro.empresas.passagens.paradas.models.CiudadModel;
 import com.alvaro.empresas.passagens.paradas.models.DepartamentoModel;
 import com.alvaro.empresas.passagens.paradas.models.LugarModel;
@@ -70,7 +71,7 @@ public class DataLoader {
 
     @Bean
     public String loadData() {
-        List<EmpresaModel> empresas = this.loadUsersAndEmpresas();
+        List<EmpresaModel> empresas = loadEmpresas();
         loadUsers(empresas);
         List<LugarModel> lugares = loadLugares();
         List<AutobusModel> autobuses = loadAutobuses(empresas);
@@ -102,16 +103,16 @@ public class DataLoader {
 
                 List<ParadaModel> paradas = new ArrayList<>();
 
-                var parada = new ParadaModel(dataInicio, 10, EnumParada.SALIDA, lugares.get(0), viaje, viaje.getEmpresa());
+                var parada = new ParadaModel(dataInicio, 10, TypeParada.SALIDA, lugares.get(0), viaje, viaje.getEmpresa());
                 dataInicio = dataInicio.plusHours(2);
                 paradas.add(parada);
                 for (int i = 1; i < 4; i++) {
                     dataInicio = dataInicio.plusHours(2);
-                    parada = new ParadaModel(dataInicio, 10, EnumParada.CAMINO, lugares.get(i), viaje, viaje.getEmpresa());
+                    parada = new ParadaModel(dataInicio, 10, TypeParada.CAMINO, lugares.get(i), viaje, viaje.getEmpresa());
                     paradas.add(parada);
                 }
                 dataInicio = dataInicio.plusHours(2);
-                parada = new ParadaModel(dataInicio, 20, EnumParada.DESTINO, lugares.get(5), viaje, viaje.getEmpresa());
+                parada = new ParadaModel(dataInicio, 20, TypeParada.DESTINO, lugares.get(5), viaje, viaje.getEmpresa());
                 paradas.add(parada);
 
 
@@ -121,9 +122,10 @@ public class DataLoader {
                 for (PisoModel piso : pisos) {
                     var precio = precioRepository.save(new PrecioModel(precioBruto, piso.getNPiso(), piso.getNSillas(), viaje, viaje.getEmpresa()));
                     precioBruto = precioBruto.subtract(BigDecimal.valueOf(20));
-                    var facturaPasaje = new FacturaPasajeModel(precioBruto, BigDecimal.ZERO, BigDecimal.ZERO, true, TipoPagamentoEnum.EFECTIVO, precio.getViaje(), LocalDateTime.now(), null);
+                    var facturaPasaje = new FacturaPasajeModel(precioBruto, BigDecimal.ZERO, BigDecimal.ZERO, true, TipoPagamento.EFECTIVO, precio.getViaje(), LocalDateTime.now(), null);
                     facturaPasajeRepository.save(facturaPasaje);
-                    var pasaje = new PasajeModel(23, false, precioBruto, true, true, "Alvaro Vargas Alvarez", "3308731", new Date(2000, 1, 1), paradas.get(0), paradas.get(2), precio, facturaPasaje);
+
+                    var pasaje = new PasajeModel(piso.getPrimeraSilla() + 3, false, precioBruto, true, true, "Alvaro Vargas Alvarez", "3308731", new Date(2000, 1, 1), paradas.get(0), paradas.get(2), precio, facturaPasaje);
                     pasajeRepository.save(pasaje);
                 }
             }
@@ -149,10 +151,13 @@ public class DataLoader {
         for (ENUM_EMPRESAS value : ENUM_EMPRESAS.values()) {
             nickNameAdmin = value.toString().toLowerCase() + "admin";
             nickNameFuncionario = value.toString().toLowerCase() + "funcionario";
-            var usuarioEmpresaAdmin = new UsuarioModel(nickNameAdmin + "@gmail.com", "Hero Nakamura", "(33) - 33333-3333", passwordEncoder.encode(nickNameAdmin), empresas.get(ENUM_EMPRESAS.MARZO.ordinal()).getId());
+
+            var usuarioEmpresaAdmin = new UsuarioModel(nickNameAdmin + "@gmail.com", "Hero Nakamura", "(33) - 33333-3333", passwordEncoder.encode(nickNameAdmin), empresas.get(value.ordinal()).getId());
             usuarioEmpresaAdmin.setRoles(new HashSet<RoleModel>(Arrays.asList(empresaAdmin, empresaFuncionario, cliente)));
+
             users.add(usuarioEmpresaAdmin);
-            var usuarioFuncionario = new UsuarioModel(nickNameFuncionario + "@gmail.com", "Rick Sanchez", "(11) - 11111-1111", passwordEncoder.encode(nickNameFuncionario), empresas.get(ENUM_EMPRESAS.MARZO.ordinal()).getId());
+
+            var usuarioFuncionario = new UsuarioModel(nickNameFuncionario + "@gmail.com", "Rick Sanchez", "(11) - 11111-1111", passwordEncoder.encode(nickNameFuncionario), empresas.get(value.ordinal()).getId());
             usuarioFuncionario.setRoles(new HashSet<RoleModel>(Arrays.asList(empresaFuncionario, cliente)));
             users.add(usuarioFuncionario);
             if (value.ordinal() == 2) break;
@@ -160,7 +165,7 @@ public class DataLoader {
         usuarioRepository.saveAll(users);
     }
 
-    private List<EmpresaModel> loadUsersAndEmpresas() {
+    private List<EmpresaModel> loadEmpresas() {
         List<EmpresaModel> empresas = new ArrayList<>();
         for (ENUM_EMPRESAS value : ENUM_EMPRESAS.values()) {
             var empresa = new EmpresaModel(value.toString(), "https://github.com/alvaro-star.png", "202345", true, false);

@@ -1,5 +1,6 @@
 package com.alvaro.empresas.passagens.helpers.beans;
 
+import com.alvaro.empresas.passagens.security.models.RoleList;
 import com.alvaro.empresas.passagens.security.models.UsuarioModel;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,6 +23,10 @@ public class UsuarioBean {
         this.telefono = usuarioModel.getTelefono();
         this.idEmpresa = usuarioModel.getIdEmpresa();
         this.roles = roles;
+    }
+
+    public boolean isAdminOrOwnerEmpresa(UUID idEmpresa) {
+        return hasRole(RoleList.ROLE_ADMIN.toString()) || isMyEmpresa(idEmpresa);
     }
 
     public boolean isMyEmpresa(UUID idEmpresa) {

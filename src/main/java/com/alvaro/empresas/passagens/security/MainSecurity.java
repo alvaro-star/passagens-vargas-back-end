@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -50,11 +49,7 @@ public class MainSecurity {
                     .headers(h -> h.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
         else if (isProfileActive("prod"))
             http.authorizeHttpRequests(RoutesConfiguration::loadProdRoutes);
-        else http.authorizeHttpRequests(authorize -> authorize
-                    .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
-                    .anyRequest().authenticated()
-            );
+        else http.authorizeHttpRequests(RoutesConfiguration::loadDefaultRoutes);
         return http.addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

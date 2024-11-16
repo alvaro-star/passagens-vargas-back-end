@@ -2,8 +2,8 @@ package com.alvaro.empresas.passagens.pagos;
 
 import com.alvaro.empresas.passagens.models.PasajeModel;
 import com.alvaro.empresas.passagens.pagos.models.FacturaPasajeModel;
-import com.alvaro.empresas.passagens.repositories.FacturaEmpresaRepository;
-import com.alvaro.empresas.passagens.repositories.FacturaPasajeRepository;
+import com.alvaro.empresas.passagens.pagos.repositories.FacturaEmpresaRepository;
+import com.alvaro.empresas.passagens.pagos.repositories.FacturaPasajeRepository;
 
 
 public class PagoService {

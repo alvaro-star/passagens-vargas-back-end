@@ -2,7 +2,7 @@ package com.alvaro.empresas.passagens.services.relatorios;
 
 import com.alvaro.empresas.passagens.dtos.viajes.JPQL.PasajeJPQLBusca;
 import com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQLRelatorio;
-import com.alvaro.empresas.passagens.enums.TipoPagamentoEnum;
+import com.alvaro.empresas.passagens.enums.TipoPagamento;
 import com.alvaro.empresas.passagens.helpers.DateAuxiliarFunctions;
 import com.alvaro.empresas.passagens.helpers.services.EmailService;
 import com.alvaro.empresas.passagens.helpers.thymeleaf.CiudadTHModel;
@@ -61,7 +61,7 @@ public class RelatorioService {
         RelatorioModel relatorio = new RelatorioModel(empresa);
 
         HashMap<String, HashMetodoPagamentoValor> pagamentosWeb = new HashMap<>(), pagamentosNoWeb = new HashMap<>();
-        for (TipoPagamentoEnum metodo : TipoPagamentoEnum.values()) {
+        for (TipoPagamento metodo : TipoPagamento.values()) {
             pagamentosWeb.put(metodo.toString(), new HashMetodoPagamentoValor(metodo.toString(), 0.0));
             pagamentosNoWeb.put(metodo.toString(), new HashMetodoPagamentoValor(metodo.toString(), 0.0));
         }
@@ -96,7 +96,7 @@ public class RelatorioService {
         for (LugarModel destino : destinos)
             destinosTHModels.add(new CiudadTHModel(destino.getCiudad().getNombre(), destinosIdNPasajes.get(destino.getId())));
 
-        for (TipoPagamentoEnum value : TipoPagamentoEnum.values()) {
+        for (TipoPagamento value : TipoPagamento.values()) {
             metodos.add(new MetodoTHModel(value.toString(), relatorio.getDineroPorMetodoWeb().get(value.toString()).valor, relatorio.getDineroPorMetodoNoWeb().get(value.toString()).valor));
         }
 

@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.helpers;
 
-import com.alvaro.empresas.passagens.enums.TipoPagamentoEnum;
+import com.alvaro.empresas.passagens.enums.TipoPagamento;
 import com.alvaro.empresas.passagens.models.PasajeModel;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -27,7 +27,7 @@ public class PasajesPDF {
 
     public PasajesPDF() {
         document = new PDDocument();
-        rectangle = new PDRectangle(5.08f * 72 / 2.54f, 21.0f * 72 / 2.54f); // 12 cm largura e altura padrão A4
+        rectangle = new PDRectangle(5.08f * 72 / 2.54f, 15.0f * 72 / 2.54f); // 12 cm largura e altura padrão A4
         float margin = (0.5f * 72) / 2.54f; // 1 cm de margem em cada lado
         width = rectangle.getWidth() - 2 * margin;
         startX = rectangle.getLowerLeftX() + margin;
@@ -58,7 +58,7 @@ public class PasajesPDF {
         showLongTextAndNewLine(contentStream, "Lugar: " + parada.getLugar().getNombre());
     }
 
-    public void addPasaje(PasajeModel model, String empresaName, ParadaModel salida, ParadaModel destino, TipoPagamentoEnum metodo) throws IOException {
+    public void addPasaje(PasajeModel model, String empresaName, ParadaModel salida, ParadaModel destino, TipoPagamento metodo) throws IOException {
         PDPage page = new PDPage(rectangle);
         document.addPage(page);
 

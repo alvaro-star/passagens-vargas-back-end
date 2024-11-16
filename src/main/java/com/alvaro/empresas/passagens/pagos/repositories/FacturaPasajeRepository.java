@@ -1,4 +1,4 @@
-package com.alvaro.empresas.passagens.repositories;
+package com.alvaro.empresas.passagens.pagos.repositories;
 
 import com.alvaro.empresas.passagens.pagos.models.FacturaPasajeModel;
 import org.springframework.data.domain.Page;

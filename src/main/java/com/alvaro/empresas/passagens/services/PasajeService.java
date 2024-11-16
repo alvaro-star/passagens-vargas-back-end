@@ -1,14 +1,13 @@
 package com.alvaro.empresas.passagens.services;
 
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
-import com.alvaro.empresas.passagens.configurations.exceptions.FieldMessage;
 import com.alvaro.empresas.passagens.configurations.exceptions.InternalException.BadRequestException;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajeDTO;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajeDTOEmpresaResponse;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTO;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTOVenta;
-import com.alvaro.empresas.passagens.enums.TipoPagamentoEnum;
+import com.alvaro.empresas.passagens.enums.TipoPagamento;
 import com.alvaro.empresas.passagens.helpers.Mensaje;
 import com.alvaro.empresas.passagens.helpers.PasajesPDF;
 import com.alvaro.empresas.passagens.models.PasajeModel;
@@ -16,6 +15,7 @@ import com.alvaro.empresas.passagens.models.PrecioModel;
 import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.pagos.models.FacturaPasajeModel;
 import com.alvaro.empresas.passagens.pagos.models.FacturaRembolsoModel;
+import com.alvaro.empresas.passagens.pagos.services.FacturaPasajeService;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.alvaro.empresas.passagens.repositories.PasajeRepository;
 import com.alvaro.empresas.passagens.repositories.ViajeRepository;
@@ -69,40 +69,42 @@ public class PasajeService {
         }
     }
 
+    private void validarViaje(ViajeModel viaje, Integer idLugarSalida, Integer idLugarDestino) {
+        var salida = viaje.getParadaByLugarId(idLugarSalida);
+        var destino = viaje.getParadaByLugarId(idLugarDestino);
+        if (salida == null)
+            throw new ValidationException("idLugarSalida", "La salida no hace parte del trayecto");
+        else if (salida.getDataHora().isBefore(LocalDateTime.now().minusMinutes(minTimeBeforeBuyPasaje)))
+            throw new BadRequestException("El autobus ya inicio el viaje");
+        if (destino == null) throw new ValidationException("idLugarDestino", "El destino no hace parte del trayecto");
+    }
+
     //Exclusivo para el servicio online
     @Transactional
-    public FacturaPasajeModel save(PasajesDTO dto, TipoPagamentoEnum metodo, boolean guardarContacto, boolean compradoWeb) {
+    public FacturaPasajeModel saveCliente(PasajesDTO dto) {
         var precio = precioService.findById(dto.idPrecio());
         var viaje = precio.getViaje();
-        ParadaModel salida;
-        ParadaModel destino;
+
+        validarViaje(viaje, dto.idLugarSalida(), dto.idLugarDestino());
+
+        ParadaModel salida = viaje.getParadaByLugarId(dto.idLugarSalida());
+        ParadaModel destino = viaje.getParadaByLugarId(dto.idLugarDestino());
 
         PisoModel pisoEscolhido = viaje.getAutobus().getPisoByNumero(precio.getNPiso());
         validarSillas(pisoEscolhido, precio, dto.pasajes());
 
-        salida = viaje.getParadaByLugarId(dto.idLugarSalida());
-        if (salida == null)
-            throw new ValidationException(new FieldMessage("idLugarSalida", "La salida no hace parte del trayecto"));
-        else if (salida.getDataHora().isBefore(LocalDateTime.now().minusMinutes(minTimeBeforeBuyPasaje)))
-            throw new BadRequestException("El autobus ya inicio el viaje");
-        destino = viaje.getParadaByLugarId(dto.idLugarDestino());
-        if (destino == null)
-            throw new ValidationException(new FieldMessage("idLugarDestino", "El destino no hace parte del trayecto"));
-
         BigDecimal valorTotal = precio.getPrecio().multiply(BigDecimal.valueOf(dto.pasajes().size()));
-        FacturaPasajeModel pago = facturaPasajeService.save(dto.contacto(), valorTotal, null, metodo, guardarContacto);
+        FacturaPasajeModel pago = facturaPasajeService.saveCliente(dto.contacto(), valorTotal, null, TipoPagamento.QR);
 
-        BigDecimal valorArrecadadoWeb = viaje.getValorArrecadadoWeb() != null ? viaje.getValorArrecadadoWeb() : BigDecimal.ZERO;
-        viaje.setValorArrecadadoWeb(valorArrecadadoWeb.add(pago.getValorTotal()));
+        viaje.addValorArrecadadoWeb(pago.getValorTotal());
+
         viajeRepository.save(viaje);
-        if (!metodo.equals(TipoPagamentoEnum.QR))
-            throw new ValidationException(new FieldMessage("metodo", "Metodo de Pago invalido"));
 
         PasajeModel pasajeModel;
         List<PasajeModel> pasajesList = new ArrayList<>();
 
         for (PasajeDTO pasajeDTO : dto.pasajes()) {
-            pasajeModel = new PasajeModel(pasajeDTO.nSilla(), compradoWeb, precio.getPrecio(), false, false, pasajeDTO.nombre(), pasajeDTO.carnet(), pasajeDTO.nascimento(), salida, destino, precio, pago);
+            pasajeModel = new PasajeModel(pasajeDTO, true, precio.getPrecio(), false, false, salida, destino, precio, pago);
             pasajesList.add(pasajeModel);
         }
 
@@ -112,18 +114,14 @@ public class PasajeService {
 
 
     @Transactional
-    public UUID saveEmpresa(PasajesDTOVenta dto, TipoPagamentoEnum metodo, ViajeModel viaje) {
+    public UUID saveEmpresa(PasajesDTOVenta dto, ViajeModel viaje) {
         ParadaModel salida;
         ParadaModel destino;
 
+        validarViaje(viaje, dto.idLugarSalida(), dto.idLugarDestino());
+
         salida = viaje.getParadaByLugarId(dto.idLugarSalida());
-        if (salida == null)
-            throw new ValidationException(new FieldMessage("idLugarSalida", "La salida no hace parte del trayecto"));
-        else if (salida.getDataHora().isBefore(LocalDateTime.now()))
-            throw new BadRequestException("El autobus ya inicio el viaje");
         destino = viaje.getParadaByLugarId(dto.idLugarDestino());
-        if (destino == null)
-            throw new ValidationException(new FieldMessage("idLugarDestino", "El destino no hace parte del trayecto"));
 
         List<PasajeDTO> sillasPiso1 = new ArrayList<>(), sillasPiso2 = new ArrayList<>();
 
@@ -158,19 +156,12 @@ public class PasajeService {
         boolean enEfectivo = false;
         boolean estaPago = true;
 
-        FacturaPasajeModel pago = facturaPasajeService.saveEmpresa(valorTotal, viaje, metodo, estaPago);
+        FacturaPasajeModel pago = facturaPasajeService.saveEmpresa(valorTotal, viaje, dto.metodo(), estaPago);
 
-        BigDecimal valorArrecadadoNoWeb = viaje.getValorArrecadadoNoWeb() != null ? viaje.getValorArrecadadoNoWeb() : BigDecimal.ZERO;
-        BigDecimal valorTotalPago = pago.getValorTotal() != null ? pago.getValorTotal() : BigDecimal.ZERO;
-        viaje.setValorArrecadadoNoWeb(valorArrecadadoNoWeb.add(valorTotalPago));
-
-
-        switch (metodo) {
-            case EFECTIVO -> {
-                enEfectivo = true;
-                BigDecimal valorArrecadadoEfectivo = viaje.getValorArrecadadoEfectivo() != null ? viaje.getValorArrecadadoEfectivo() : BigDecimal.ZERO;
-                viaje.setValorArrecadadoEfectivo(valorArrecadadoEfectivo.add(valorTotalPago));
-            }
+        viaje.addValorArrecadadoNoWeb(pago.getValorTotal());
+        if (dto.metodo().equals(TipoPagamento.EFECTIVO)) {
+            enEfectivo = true;
+            viaje.addValorArrecadadoEfectivo(pago.getValorTotal());
         }
 
         if (!sillasPiso1.isEmpty()) {
@@ -180,27 +171,25 @@ public class PasajeService {
 
         if (precio2 != null && !sillasPiso2.isEmpty()) {
             actualizarNSillasDisponibles(precio2, sillasPiso2);
-            precioService.updateFromService(precio1);
+            precioService.updateFromService(precio2);
         }
 
         viajeRepository.save(viaje);//Actualizar los valores arrecadados
 
-        PasajeModel pasaje;
-        List<PasajeModel> pasajesModels = new ArrayList<>();
+        List<PasajeModel> pasajes = new ArrayList<>();
         for (PasajeDTO pasajeDTO : sillasPiso1) {
-            pasaje = new PasajeModel(pasajeDTO.nSilla(), false, precio1.getPrecio(), estaPago, enEfectivo, pasajeDTO.nombre(), pasajeDTO.carnet(), pasajeDTO.nascimento(), salida, destino, precio1, pago);
-            pasajesModels.add(pasaje);
+            var pasaje = new PasajeModel(pasajeDTO, false, precio1.getPrecio(), estaPago, enEfectivo, salida, destino, precio1, pago);
+            pasajes.add(pasaje);
         }
 
         if (precio2 != null) for (PasajeDTO pasajeDTO : sillasPiso2) {
-            pasaje = new PasajeModel(pasajeDTO.nSilla(), false, precio1.getPrecio(), estaPago, enEfectivo, pasajeDTO.nombre(), pasajeDTO.carnet(), pasajeDTO.nascimento(), salida, destino, precio2, pago);
-            pasajesModels.add(pasaje);
+            var pasaje = new PasajeModel(pasajeDTO, false, precio2.getPrecio(), estaPago, enEfectivo, salida, destino, precio2, pago);
+            pasajes.add(pasaje);
         }
 
-        pasajeRepository.saveAll(pasajesModels);
+        pasajeRepository.saveAll(pasajes);
         return pago.getId();
     }
-
 
     public List<PasajeDTOEmpresaResponse> getPasajesFromPrecio(UUID idPrecio) {
         return pasajeRepository.findByPrecioIdAndEstaPagado(idPrecio, true).stream().map(PasajeDTOEmpresaResponse::new).toList();
@@ -210,14 +199,14 @@ public class PasajeService {
     public void actualizarNSillasDisponibles(PrecioModel precio, List<PasajeDTO> sillasPiso) {
         int nSillasDisponibles = precio.getNSillasDisponibles() - sillasPiso.size();
         if (nSillasDisponibles < 0)
-            throw new ValidationException(new FieldMessage("pasajes", "No hay sillas disponibles"));
+            throw new ValidationException("pasajes", "No hay sillas disponibles");
         if (nSillasDisponibles == 0) precio.setLleno(true);
         precio.setNSillasDisponibles(nSillasDisponibles);
     }
 
     public void validarSillas(PisoModel piso, PrecioModel precio, List<PasajeDTO> sillasSolicitadas) {
         int numeroMinimo = piso.getPrimeraSilla();
-        int numeroMaximo = piso.getNSillas() + piso.getPrimeraSilla() - 1;
+        int numeroMaximo = piso.getUltimaSilla();
 
         List<Integer> ocupados = pasajeRepository.getPasajesVendidosAndNoRembolso(precio.getId());
 
@@ -226,11 +215,11 @@ public class PasajeService {
 
         for (PasajeDTO sillasSolicitada : sillasSolicitadas) {
             for (Integer ocupado : ocupados)
-                if (ocupado.equals(sillasSolicitada.nSilla()))//Erro
+                if (ocupado.equals(sillasSolicitada.nSilla()))
                     throw new ValidationException("El viaje ya posse un pasaje registrado");
 
             if (sillasSolicitada.nSilla() > numeroMaximo || sillasSolicitada.nSilla() < numeroMinimo)
-                throw new ValidationException(new FieldMessage("nSilla", "El numero de Silla informado es invalido"));
+                throw new ValidationException("nSilla", "El numero de Silla informado es invalido");
         }
     }
 
@@ -241,13 +230,13 @@ public class PasajeService {
             logger.error("Se intento reembolsar un pasaje no pagado");
             return new Mensaje("El pasaje no fue pagado");
         }
+
         if (pasajeModel.getFacturaRembolsoId() != null) return new Mensaje("El pasaje ya fue rembolsado");
         var viaje = pasajeModel.getPrecio().getViaje();
         boolean resultado;
         if (pasajeModel.getEnEfectivo()) {
             resultado = viaje.substractValueEfectivo(pasajeModel.getPrecioPagado());
-        } else if (!pasajeModel.getCompradoWeb())
-            resultado = viaje.substractValueNoWeb(pasajeModel.getPrecioPagado());
+        } else if (!pasajeModel.getCompradoWeb()) resultado = viaje.substractValueNoWeb(pasajeModel.getPrecioPagado());
         else {
             logger.warn("Se necessita una API para esta operacion");
             return new Mensaje("El pasaje fue comprado en la web, no esta disponible");

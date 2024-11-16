@@ -21,9 +21,7 @@ public class MyUserComponent {
         List<String> roles = usuario.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
 
         var usuarioModel = usuarioRepository.findByEmail(usuario.getName());
-        return new UsuarioBean(usuarioModel.orElseThrow(
-                () -> new ObjectNotFoundException(0, UsuarioModel.class.getName())
-        ), roles);
+        return new UsuarioBean(usuarioModel.orElseThrow(() -> new ObjectNotFoundException(0, UsuarioModel.class.getName())), roles);
     }
 
     public UsuarioModel getUserModel() {

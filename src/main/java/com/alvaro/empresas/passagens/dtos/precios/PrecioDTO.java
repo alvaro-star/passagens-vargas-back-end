@@ -29,6 +29,6 @@ public record PrecioDTO(
     }
 
     public PrecioDTO(PrecioModel model) {
-        this(model.getId(), model.getPrecio(), model.getNPiso(), model.getLleno(), model.getNSillasDisponibles(), null);
+        this(model.getId(), model.getPrecio(), model.getNPiso(), model.getLleno(), model.getNSillasDisponibles(), model.getViajeCodigo());
     }
 }

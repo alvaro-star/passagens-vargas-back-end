@@ -1,4 +1,4 @@
-package com.alvaro.empresas.passagens.resources;
+package com.alvaro.empresas.passagens.pagos.resources;
 
 import com.alvaro.empresas.passagens.services.relatorios.RelatorioService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;

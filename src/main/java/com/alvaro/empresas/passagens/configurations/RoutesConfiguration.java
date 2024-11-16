@@ -33,4 +33,11 @@ public class RoutesConfiguration {
         loadCommonRoutes(routesConfigurations);
         routesConfigurations.anyRequest().authenticated();
     }
+
+    public static void loadDefaultRoutes(AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry routesConfigurations) {
+        routesConfigurations
+                .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
+                .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                .anyRequest().authenticated();
+    }
 }

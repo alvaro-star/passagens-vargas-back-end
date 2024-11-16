@@ -3,7 +3,6 @@ package com.alvaro.empresas.passagens.autobuses.resources;
 import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTO;
 import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTOResponse;
 import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTOUpdate;
-import com.alvaro.empresas.passagens.autobuses.repositories.AutobusRepository;
 import com.alvaro.empresas.passagens.autobuses.services.AutobusService;
 import com.alvaro.empresas.passagens.autobuses.services.validacao.ValidarPiso;
 import com.alvaro.empresas.passagens.helpers.Mensaje;
@@ -33,15 +32,15 @@ public class AutobusResource {
     @Autowired
     private AutobusService autobusService;
     @Autowired
+    private ValidarPiso validarPiso;
+    @Autowired
     private MyUserComponent myUserComponent;
     @Autowired
     private EmpresaService empresaService;
-    @Autowired
-    private AutobusRepository autobusRepository;
 
     private Mensaje validarUsuario(EmpresaModel empresa) {
         var user = myUserComponent.getUser();
-        if (user.getIdEmpresa() == null) return new Mensaje("Usted no esta relacionado a una empresa");
+        // if (user.getIdEmpresa() == null) return new Mensaje("Usted no esta relacionado a una empresa");
         if (empresa.getBloqued() || !empresa.getEnabled()) return new Mensaje("La empresa esta bloqueada");
         if (!user.isMyEmpresa(empresa.getId())) return new Mensaje("Usted no esta relacionado a esta empresa");
         return new Mensaje("");
@@ -49,11 +48,10 @@ public class AutobusResource {
 
     @GetMapping("/from/{idEmpresa}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
-    public ResponseEntity<Page<AutobusDTOResponse>> getAutobusesFromEmpresa(@PathVariable(value = "idEmpresa") UUID id, @PageableDefault(size = 10, sort = {"createdAt"}, direction = Sort.Direction.DESC) Pageable pageable) {
+    public ResponseEntity<Page<AutobusDTOResponse>> getAutobusesFromEmpresa(@PathVariable UUID idEmpresa, @PageableDefault(size = 10, sort = {"createdAt"}, direction = Sort.Direction.DESC) Pageable pageable) {
         var user = myUserComponent.getUser();
-        if (!(user.hasRole("ROLE_ADMIN") || user.isMyEmpresa(id)))
-            return ResponseEntity.ok().body(Page.empty(pageable));
-        return ResponseEntity.ok().body(autobusService.findAllFromEmpresa(id, pageable));
+        if (!user.isAdminOrOwnerEmpresa(idEmpresa)) return ResponseEntity.ok().body(Page.empty(pageable));
+        return ResponseEntity.ok().body(autobusService.findAllFromEmpresa(idEmpresa, pageable));
     }
 
     @GetMapping("/{id}")
@@ -64,7 +62,7 @@ public class AutobusResource {
     @PostMapping
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN')")
     public ResponseEntity<Object> save(@RequestBody @Valid AutobusDTO dto, BindingResult bindingResult) {
-        ValidationErrorsWithList validacao = ValidarPiso.validarAutobusDTO(bindingResult, dto, autobusRepository);
+        ValidationErrorsWithList validacao = validarPiso.validarAutobusDTO(bindingResult, dto);
         if (!validacao.getErrors().isEmpty() || !validacao.getErrorsList().isEmpty())
             return ResponseEntity.unprocessableEntity().body(validacao);
         var empresa = empresaService.findById(dto.idEmpresa());
@@ -78,7 +76,7 @@ public class AutobusResource {
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN')")
     public ResponseEntity<Object> update(@PathVariable(value = "id") Integer id, @Valid @RequestBody AutobusDTOUpdate dto, BindingResult bindingResult) {
         var transform = new AutobusDTO(dto.placa());
-        ValidationErrorsWithList validacao = ValidarPiso.validarAutobusDTO(bindingResult, transform, autobusRepository);
+        ValidationErrorsWithList validacao = validarPiso.validarAutobusDTO(bindingResult, transform);
         if (!validacao.getErrors().isEmpty() || !validacao.getErrorsList().isEmpty())
             return ResponseEntity.unprocessableEntity().body(validacao);
 

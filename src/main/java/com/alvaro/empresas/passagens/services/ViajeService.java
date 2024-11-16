@@ -45,14 +45,14 @@ public class ViajeService {
 
     public ViajeDTOResponse getOne(UUID id) {
         var model = this.findById(id);
-        List<ParadaDTOComplete> paradasDTOs = new ArrayList<>();
 
+        List<ParadaDTOComplete> paradasDTOs = new ArrayList<>();
         for (ParadaModel paradaModel : model.getParadas())
             paradasDTOs.add(new ParadaDTOComplete(paradaModel));
 
         List<PrecioDTO> precios = new ArrayList<>();
         for (PrecioModel precioModel : model.getPrecios())
-            precios.add(new PrecioDTO(precioModel, model.getCodigo()));
+            precios.add(new PrecioDTO(precioModel));
 
         return new ViajeDTOResponse(model, paradasDTOs, precios);
     }
@@ -105,23 +105,4 @@ public class ViajeService {
         }
         return viajesSelecionados;
     }
-
-
 }
-       /*
-        for (LugarModel lugarSalida : lugaresSalida) {
-            List<ParadaModel> salidasDia = paradaRepository.cargarSalidasDelDia(lugarSalida.getId(), startDay, endDay);
-
-            if (!salidasDia.isEmpty()) {
-                for (ParadaModel salidaFor : salidasDia) {
-                    ViajeModel viaje = salidaFor.getViaje();
-
-                    for (LugarModel lugarDestino : lugaresDestino) {
-                        List<ParadaModel> nVezesTrayectoPassaDestino = paradaRepository.findByViajeCodigoAndLugarId(viaje.getCodigo(), lugarDestino.getId());
-                        if (nVezesTrayectoPassaDestino.size() != 1) continue;
-
-                    }
-                }
-            }
-        }
-*/

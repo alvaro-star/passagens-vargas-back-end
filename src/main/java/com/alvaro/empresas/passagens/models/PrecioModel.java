@@ -2,7 +2,6 @@ package com.alvaro.empresas.passagens.models;
 
 import com.alvaro.empresas.passagens.dtos.precios.PrecioDTO;
 import com.alvaro.empresas.passagens.dtos.precios.PrecioDTOUpdate;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import lombok.Getter;
@@ -40,20 +39,30 @@ public class PrecioModel {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_viaje")
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private ViajeModel viaje;
     @Column(name = "fk_idtb_viaje", updatable = false, insertable = false)
     private UUID viajeCodigo;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_empresa")
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private EmpresaModel empresa;
     @Column(name = "fk_idtb_empresa", updatable = false, insertable = false)
     private UUID empresaId;
 
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "precio")
     private List<PasajeModel> pasajes = new ArrayList<>();
+
+    public void setViaje(ViajeModel viaje) {
+        this.viaje = viaje;
+        if (viaje != null)
+            viajeCodigo = viaje.getCodigo();
+    }
+
+    public void setEmpresa(EmpresaModel empresa) {
+        this.empresa = empresa;
+        if (empresa != null)
+            empresaId = empresa.getId();
+    }
 
     public PrecioModel(PrecioDTO dto) {
         precio = dto.precio();

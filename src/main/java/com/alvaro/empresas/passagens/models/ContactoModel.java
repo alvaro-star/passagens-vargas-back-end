@@ -1,5 +1,6 @@
 package com.alvaro.empresas.passagens.models;
 
+import com.alvaro.empresas.passagens.dtos.pasajes.ContactoDTO;
 import com.alvaro.empresas.passagens.pagos.models.FacturaPasajeModel;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -25,6 +26,12 @@ public class ContactoModel {
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_factura_pasaje")
     private FacturaPasajeModel facturaPasaje;
+
+    public ContactoModel(ContactoDTO contactoDTO) {
+        this.nombre = contactoDTO.nombre();
+        this.email = contactoDTO.email();
+        this.numero = contactoDTO.telefono();
+    }
 
     public ContactoModel(String nombre, String email, Integer numero) {
         this.nombre = nombre;

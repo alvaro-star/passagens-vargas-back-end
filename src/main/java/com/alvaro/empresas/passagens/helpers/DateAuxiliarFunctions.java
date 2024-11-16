@@ -4,6 +4,7 @@ import com.alvaro.empresas.passagens.helpers.dtos.DataHoraFormatada;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Calendar;
@@ -57,5 +58,9 @@ public class DateAuxiliarFunctions {
                 .append(String.format("%02d", dataHora.getMinute()));
 
         return new DataHoraFormatada(dataBuilder.toString(), horaBuilder.toString());
+    }
+
+    public static LocalDateTime copyLocalTimeInLocalDate(LocalDate localDate, LocalDateTime dateTime) {
+        return localDate.atTime(dateTime.getHour(), dateTime.getMinute(), dateTime.getSecond(), dateTime.getNano());
     }
 }

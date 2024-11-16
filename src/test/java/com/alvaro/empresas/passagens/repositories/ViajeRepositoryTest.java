@@ -1,11 +1,10 @@
 package com.alvaro.empresas.passagens.repositories;
 
 import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
-import com.alvaro.empresas.passagens.enums.EnumParada;
+import com.alvaro.empresas.passagens.enums.TypeParada;
+import com.alvaro.empresas.passagens.helpers.DadosPersist;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.models.ViajeModel;
-import com.alvaro.empresas.passagens.paradas.models.CiudadModel;
-import com.alvaro.empresas.passagens.paradas.models.DepartamentoModel;
 import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import jakarta.persistence.EntityManager;
@@ -20,7 +19,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,53 +27,45 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("test")
 class ViajeRepositoryTest {
     @Autowired
+    private DadosPersist dadosPersist;
+    @Autowired
     private ViajeRepository viajeRepository;
     @Autowired
     private EntityManager em;
     @Value("${api.viaje.max-time-viaje-day}")
     private Integer tempoMaxViajeDias;
 
-    @Test
-    @DisplayName("Este teste verifica se o metodo pode retornar dois viajes que esten en el mismo intervalo de tiempo")
-    void getFromTrayectoCenario1() {
-        var empresa = cadastrarEmpresa("23 de Abril");
-        var autobus = cadastrarAutobus("2345L", empresa);
-        var dataInicioViaje = LocalDateTime.now().with(TemporalAdjusters.next(DayOfWeek.MONDAY)).withHour(15);
-        var viaje1 = cadastrarViaje(dataInicioViaje, autobus, empresa);
-        var viaje2 = cadastrarViaje(dataInicioViaje, autobus, empresa);
-        var lugares = cadastrarLugares();
+    private final String[] lugaresName = new String[]{"Santa Cruz", "La Paz", "Cochabamba", "Oruro", "Potosí", "Tarija", "Chuquisaca", "Pando", "Beni"}
 
-        List<ParadaModel> paradas1 = new ArrayList<>();
-        List<ParadaModel> paradas2 = new ArrayList<>();
-        //Hay nueve lugares registrados
-        int finalLista;
-        int contador = 0;
-        paradas1.add(cadastrarParada(dataInicioViaje.plusHours(contador), lugares.get(0), EnumParada.SALIDA, viaje1, empresa));
-        paradas2.add(cadastrarParada(dataInicioViaje.plusHours(contador), lugares.get(0), EnumParada.SALIDA, viaje2, empresa));
-        contador++;
-        for (int i = 1; i < lugares.size() - 1; i++) {
-            paradas1.add(cadastrarParada(dataInicioViaje.plusHours(contador), lugares.get(i), EnumParada.CAMINO, viaje1, empresa));
-            paradas2.add(cadastrarParada(dataInicioViaje.plusHours(contador), lugares.get(i), EnumParada.CAMINO, viaje2, empresa));
-            contador++;
-        }
-        paradas1.add(cadastrarParada(dataInicioViaje.plusHours(contador), lugares.get(lugares.size() - 1), EnumParada.DESTINO, viaje1, empresa));
-        paradas2.add(cadastrarParada(dataInicioViaje.plusHours(contador), lugares.get(lugares.size() - 1), EnumParada.DESTINO, viaje2, empresa));
-        contador++;
+    @Test
+    @DisplayName("Dado 3 viajes registrados, verifica se o metodo foi capaz de detectar dos viajes de un autobus")
+    void findViajeFromAutobusInIntervalo1() {
+        String[] empresasName = new String[]{"23 de Marzo", "15 de Abril"};
+        var empresasModels = dadosPersist.loadEmpresas(empresasName);
+
+        var autobusMarzo = dadosPersist.cadastrarAutobus("2023", empresasModels.get(empresasName[0]));
+        var autobusAbril = dadosPersist.cadastrarAutobus("2023", empresasModels.get(empresasName[1]));
+        var lugares = dadosPersist.loadLugares(lugaresName);
+
+        var startViaje = LocalDateTime.now().with(TemporalAdjusters.next(DayOfWeek.MONDAY)).withHour(15);
+        var viaje1 = cadastrarViaje(startViaje, autobusAbril, lugares);
+        var viaje2 = cadastrarViaje(startViaje, autobusAbril, lugares);
+        var viaje3 = cadastrarViaje(startViaje, autobusMarzo, lugares);
 
         List<ViajeModel> viaje = viajeRepository.findViajeFromAutobusInIntervalo(
-                empresa.getId(), autobus.getId(), dataInicioViaje,
-                dataInicioViaje.minusDays(tempoMaxViajeDias), dataInicioViaje.plusHours(contador - 1));
+                empresasModels.get(empresasName[1]).getId(), autobusAbril.getId(), startViaje,
+                startViaje.minusDays(tempoMaxViajeDias), viaje1.getSalida().getDataHora().minusDays(2));
         assertThat(viaje.isEmpty()).isEqualTo(false);
         assertThat(viaje.size()).isEqualTo(2);
     }
-    /*
+
     @DisplayName("Deveria mostrar un viaje que contenga un intervalo de tiempo")
-    *Sabendo que un trayecto tiene un viaje, mas muchas paradas, si quiero realizar un viaje que pase por dos
-    paradas mas no por la primera ni por la ultima necessáriamente, el viaje deveria contener el itervalo de un trayecto dado*
-    void getFromTrayectoCenario1() {
+    /*Sabendo que un trayecto tiene un viaje, mas muchas paradas, si quiero realizar un viaje que pase por dos
+    paradas mas no por la primera ni por la ultima necessáriamente, el viaje deveria contener el itervalo de un trayecto dado*/
+    void getFromTrayectoCenario2() {
         var empresa = cadastrarEmpresa("23 de Abril");
         var autobus = cadastrarAutobus("2345L", empresa);
-        var trayecto1 = cadastrarTrayecto(autobus);
+        var trayecto1 = cadastrarViaje(autobus);
         var trayecto2 = cadastrarTrayecto(autobus);
         var lugares = cadastrarLugares();
         var dataAtual = LocalDateTime.now().with(TemporalAdjusters.next(DayOfWeek.MONDAY)).withHour(8);
@@ -154,7 +144,7 @@ class ViajeRepositoryTest {
         assertThat(viajesEncontrados.size()).isEqualTo(0);
         viajesEncontrados = viajeRepository.getFromTrayecto(trayecto1.getCodigo(), manha7.plusHours(2), paradas1.get(size - 1).getDataHora().plusHours(3));
         assertThat(viajesEncontrados.size()).isEqualTo(0);
-    }*/
+    }
 
     private EmpresaModel cadastrarEmpresa(String nombre) {
         var empresa = new EmpresaModel(nombre, "logo", "numerocuenta", true, false);
@@ -168,30 +158,22 @@ class ViajeRepositoryTest {
         return autobus;
     }
 
-    private ViajeModel cadastrarViaje(LocalDateTime dataHoraSalida, AutobusModel autobusModel, EmpresaModel empresaModel) {
-        var viaje = new ViajeModel(dataHoraSalida, autobusModel, empresaModel);
+
+    private ViajeModel cadastrarViaje(LocalDateTime dataHoraSalida, AutobusModel autobusModel, List<LugarModel> lugares) {
+        var viaje = new ViajeModel(autobusModel, autobusModel.getEmpresa(), dataHoraSalida);
         em.persist(viaje);
+
+        List<ParadaModel> paradas = new ArrayList<>();
+        int contador = 0;
+        paradas.add(new ParadaModel(dataHoraSalida.plusDays(contador), 10, TypeParada.SALIDA, lugares.get(0), viaje, viaje.getEmpresa()));
+        contador++;
+        for (int i = 1; i < lugares.size() - 1; i++, contador++)
+            paradas.add(new ParadaModel(dataHoraSalida.plusSeconds(contador), 10, TypeParada.CAMINO, lugares.get(i), viaje, viaje.getEmpresa()));
+
+        paradas.add(new ParadaModel(dataHoraSalida.plusDays(contador), 10, TypeParada.DESTINO, lugares.get(paradas.size() - 1), viaje, viaje.getEmpresa()));
+        for (ParadaModel parada : paradas)
+            em.persist(parada);
+
         return viaje;
-    }
-
-    private List<LugarModel> cadastrarLugares() {
-        List<String> nombresDepartamentos = Arrays.asList("Santa Cruz", "La Paz", "Cochabamba", "Oruro", "Potosí", "Tarija", "Chuquisaca", "Pando", "Beni");
-        List<LugarModel> lugares = new ArrayList<>();
-        for (String nombreDepartamento : nombresDepartamentos) {
-            var depModel = new DepartamentoModel(nombreDepartamento, "SC");
-            em.persist(depModel);
-            var ciudad = new CiudadModel(nombreDepartamento, depModel);
-            em.persist(ciudad);
-            var lugar = new LugarModel("Terminal " + nombreDepartamento, ciudad);
-            em.persist(lugar);
-            lugares.add(lugar);
-        }
-        return lugares;
-    }
-
-    private ParadaModel cadastrarParada(LocalDateTime data, LugarModel lugar, EnumParada tipo, ViajeModel viaje, EmpresaModel empresaModel) {
-        var parada = new ParadaModel(data, 10, tipo, lugar, viaje, empresaModel);
-        em.persist(parada);
-        return parada;
     }
 }

@@ -2,7 +2,6 @@ package com.alvaro.empresas.passagens.services;
 
 import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
-import com.alvaro.empresas.passagens.configurations.exceptions.FieldMessage;
 import com.alvaro.empresas.passagens.configurations.exceptions.InternalException.BadRequestException;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
 import com.alvaro.empresas.passagens.dtos.precios.PrecioDTO;
@@ -15,7 +14,7 @@ import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOFormCopy;
 import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOListBusquedaEmpresa;
 import com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQL;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOUpdate;
-import com.alvaro.empresas.passagens.enums.EnumParada;
+import com.alvaro.empresas.passagens.enums.TypeParada;
 import com.alvaro.empresas.passagens.helpers.DateAuxiliarFunctions;
 import com.alvaro.empresas.passagens.helpers.thymeleaf.PDFThymeleaf;
 import com.alvaro.empresas.passagens.helpers.thymeleaf.PasajeItemListTHModel;
@@ -49,6 +48,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import static com.alvaro.empresas.passagens.helpers.DateAuxiliarFunctions.copyLocalTimeInLocalDate;
 
 
 @Service
@@ -85,25 +86,20 @@ public class ViajeEmpresaService {
         return models.map(model -> {
             if (model.salida() == null || model.destino() == null)
                 throw new BadRequestException("Hay un viaje que no posse ninguna parada");
-            ParadaDTOComplete salidaDTO = new ParadaDTOComplete(model.salida());
-            ParadaDTOComplete destinoDTO = new ParadaDTOComplete(model.destino());
-            return new ViajeDTOListBusquedaEmpresa(model.viaje(), "", salidaDTO, destinoDTO, new ArrayList<>());
+            return new ViajeDTOListBusquedaEmpresa(model.viaje());
         });
     }
 
     public Page<ViajeDTOListBusquedaEmpresa> findAllFromAutobus(AutobusModel autobusModel, ViajeDTOSolicitacaoFromAutobus solicitacao, Pageable pageable) {
-        Page<ViajeDTOJPQL> models;
         LocalDateTime dataInicio = helperDate.getFirstDayOfMonthDate(solicitacao.dataAnalise());
         LocalDateTime dataFim = helperDate.getLastDayOfMonthDate(solicitacao.dataAnalise());
 
-        models = viajeRepository.findByEmpresaIdAndAutobusId(autobusModel.getEmpresa().getId(), autobusModel.getId(), dataInicio, dataFim, pageable);
+        Page<ViajeDTOJPQL> models = viajeRepository.findByEmpresaIdAndAutobusId(autobusModel.getEmpresa().getId(), autobusModel.getId(), dataInicio, dataFim, pageable);
 
         return models.map(model -> {
             if (model.salida() == null || model.destino() == null)
                 throw new ValidationException("lista", "Hay un viaje que no posse ninguna parada");
-            ParadaDTOComplete salidaDTO = new ParadaDTOComplete(model.salida());
-            ParadaDTOComplete destinoDTO = new ParadaDTOComplete(model.destino());
-            return new ViajeDTOListBusquedaEmpresa(model.viaje(), "", salidaDTO, destinoDTO, new ArrayList<>());
+            return new ViajeDTOListBusquedaEmpresa(model.viaje());
         });
     }
 
@@ -212,16 +208,15 @@ public class ViajeEmpresaService {
             throw new ValidationException("destino.dataHora", "Existe un viaje del autobus que ocurre en este intervalo");
 
         var model = new ViajeModel(autobus, autobus.getEmpresa(), dataHoraSalidaAjustada);
-        var saved = viajeRepository.save(model);
+        viajeRepository.save(model);
 
-        var salida = new ParadaModel(dataHoraSalidaAjustada, dto.salida().plataforma(), EnumParada.SALIDA, lugarSalida.get(), saved, saved.getEmpresa());
-        var destino = new ParadaModel(dataHoraDestinoAjustada, dto.destino().plataforma(), EnumParada.DESTINO, lugarDestino.get(), saved, saved.getEmpresa());
+        var salida = new ParadaModel(dataHoraSalidaAjustada, dto.salida().plataforma(), TypeParada.SALIDA, lugarSalida.get(), model, model.getEmpresa());
+        var destino = new ParadaModel(dataHoraDestinoAjustada, dto.destino().plataforma(), TypeParada.DESTINO, lugarDestino.get(), model, model.getEmpresa());
 
         //Tratando los precios del viaje
-        List<PisoModel> pisos = autobus.getPisos();
-
         List<PrecioModel> precios = new ArrayList<>();
         List<BigDecimal> preciodDto = List.of(dto.precioPiso1(), dto.precioPiso2());
+
         PisoModel aux;
         for (int i = 1; i <= autobus.getPisos().size(); i++) {
             aux = autobus.getPisoByNumero(i);
@@ -231,14 +226,15 @@ public class ViajeEmpresaService {
         }
 
         //Guardando los precios
-        List<PrecioDTO> preciosSalvos = precioService.saveAll(precios, saved);
-        List<ParadaDTOComplete> paradas = new ArrayList<>();
-        var salidaSaved = paradaRepository.save(salida);
-        paradas.add(new ParadaDTOComplete(salidaSaved));
-        var destinoSaved = paradaRepository.save(destino);
-        paradas.add(new ParadaDTOComplete(destinoSaved));
+        List<PrecioDTO> preciosSalvos = precioService.saveAll(precios, model);
 
-        return new ViajeDTOEmpresaResponse(saved, paradas, preciosSalvos);
+        List<ParadaDTOComplete> paradas = new ArrayList<>();
+        paradaRepository.save(salida);
+        paradas.add(new ParadaDTOComplete(salida));
+        paradaRepository.save(destino);
+        paradas.add(new ParadaDTOComplete(destino));
+
+        return new ViajeDTOEmpresaResponse(model, paradas, preciosSalvos);
     }
 
     @Transactional
@@ -254,10 +250,8 @@ public class ViajeEmpresaService {
 
         diffDias = ChronoUnit.DAYS.between(firsHourViaje.toLocalDate(), lastHourViaje.toLocalDate());
 
-        firsHourViaje = dto.dataNovo().atTime(firsHourViaje.getHour(), firsHourViaje.getMinute(), firsHourViaje.getSecond(), firsHourViaje.getNano());
-
-        lastHourViaje = dto.dataNovo().atTime(lastHourViaje.getHour(), lastHourViaje.getMinute(), lastHourViaje.getSecond(), lastHourViaje.getNano());
-
+        firsHourViaje = copyLocalTimeInLocalDate(dto.dataNovo(), firsHourViaje);
+        lastHourViaje = copyLocalTimeInLocalDate(dto.dataNovo(), lastHourViaje);
 
         diffDias = (diffDias < 0) ? -diffDias : diffDias;
         if (diffDias > 0) lastHourViaje = lastHourViaje.plusDays(diffDias);
@@ -296,19 +290,19 @@ public class ViajeEmpresaService {
 
         int size = model.getAutobus().getPisos().size();
         if (size != autobus.getPisos().size())
-            throw new ValidationException(new FieldMessage("idAutobus", "El autobus no es compatible"));
+            throw new ValidationException("idAutobus", "El autobus no es compatible");
 
         PisoModel pisoModel, pisoAutobus;
         for (int i = 1; i <= model.getAutobus().getPisos().size(); i++) {
             pisoModel = model.getAutobus().getPisoByNumero(i);
             pisoAutobus = autobus.getPisoByNumero(i);
             if (!pisoModel.getNSillas().equals(pisoAutobus.getNSillas()))
-                throw new ValidationException(new FieldMessage("idAutobus", "El autobus no es compatible"));
+                throw new ValidationException("idAutobus", "El autobus no es compatible");
         }
 
         model.setAutobus(autobus);
-        var update = viajeRepository.save(model);
-        return new ViajeDTOUpdate(update.getCodigo(), autobus.getId());
+        viajeRepository.save(model);
+        return new ViajeDTOUpdate(model);
     }
 
 

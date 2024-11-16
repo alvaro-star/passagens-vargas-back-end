@@ -69,6 +69,10 @@ public class PisoModel {
         return posicionesConvert;
     }
 
+    public Integer getUltimaSilla() {
+        return nSillas + primeraSilla - 1;
+    }
+
     public PisoModel(Integer nLinhas, Integer nColunas, EnumPosicao distribuicaoFileira, Integer nPiso, EnumPosicao inicioContagem, Integer nSillas, Integer primeraSilla, AutobusModel autobus) {
         this.nLinhas = nLinhas;
         this.nColunas = nColunas;

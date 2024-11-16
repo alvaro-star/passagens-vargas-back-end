@@ -8,7 +8,9 @@ import com.alvaro.empresas.passagens.configurations.exceptions.FieldMessage;
 import com.alvaro.empresas.passagens.services.validacao.FieldMessageItemList;
 import com.alvaro.empresas.passagens.services.validacao.FieldMessageList;
 import com.alvaro.empresas.passagens.services.validacao.ValidationErrorsWithList;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
@@ -17,8 +19,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@Component
 public class ValidarPiso {
-    public static ValidationErrorsWithList validarAutobusDTO(BindingResult bindingResult, AutobusDTO dto, AutobusRepository autobusRepository) {
+    @Autowired
+    private AutobusRepository autobusRepository;
+
+    public ValidationErrorsWithList validarAutobusDTO(BindingResult bindingResult, AutobusDTO dto) {
         int i;
         FieldMessageItemList itemList;
         List<FieldMessageItemList> itensErrados = new ArrayList<>();

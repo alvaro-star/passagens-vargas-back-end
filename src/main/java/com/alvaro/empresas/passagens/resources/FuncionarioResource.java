@@ -4,7 +4,6 @@ import com.alvaro.empresas.passagens.dtos.FuncionarioDTO;
 import com.alvaro.empresas.passagens.helpers.Mensaje;
 import com.alvaro.empresas.passagens.helpers.beans.MyUserComponent;
 import com.alvaro.empresas.passagens.security.dtos.RegisterDtoFuncionario;
-import com.alvaro.empresas.passagens.security.models.RoleList;
 import com.alvaro.empresas.passagens.services.EmpresaService;
 import com.alvaro.empresas.passagens.services.FuncionarioService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -23,28 +22,20 @@ import java.util.UUID;
 @SecurityRequirement(name = "bearer-key")
 //EMPRESA_ADMIN - EMPRESA_ADMIN
 public class FuncionarioResource {
-    private final MyUserComponent myUserComponent;
-    private final FuncionarioService funcionarioService;
-    private final EmpresaService empresaService;
-
     @Autowired
-    public FuncionarioResource(
-            MyUserComponent myUserComponent,
-            FuncionarioService funcionarioService,
-            EmpresaService empresaService
-    ) {
-        this.myUserComponent = myUserComponent;
-        this.funcionarioService = funcionarioService;
-        this.empresaService = empresaService;
-    }
+    private MyUserComponent myUserComponent;
+    @Autowired
+    private FuncionarioService funcionarioService;
+    @Autowired
+    private EmpresaService empresaService;
 
     @GetMapping("/{idEmpresa}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN')")
-    public ResponseEntity<Page<FuncionarioDTO>> getAll(@PathVariable(value = "idEmpresa") UUID idEmpresa, Pageable pageable) {
+    public ResponseEntity<Page<FuncionarioDTO>> getAll(@PathVariable UUID idEmpresa, Pageable pageable) {
         var user = myUserComponent.getUser();
-        if (user.hasRole(RoleList.ROLE_ADMIN.toString()) || user.isMyEmpresa(idEmpresa))
-            return ResponseEntity.ok(funcionarioService.findAllFromEmpresa(idEmpresa, pageable));
-        return ResponseEntity.badRequest().build();
+        if (!user.isAdminOrOwnerEmpresa(idEmpresa))
+            return ResponseEntity.badRequest().build();
+        return ResponseEntity.ok(funcionarioService.findAllFromEmpresa(idEmpresa, pageable));
     }
 
     @PostMapping("/{idEmpresa}")
@@ -57,9 +48,9 @@ public class FuncionarioResource {
         if (empresa.getBloqued() || !empresa.getEnabled())
             return ResponseEntity.badRequest().body(new Mensaje("La empresa esta bloqueada"));
         Mensaje mensaje = funcionarioService.save(registerDto, idEmpresa);
-        if (!mensaje.conteudo().equals(""))
+        if (!mensaje.conteudo().isEmpty())
             return ResponseEntity.badRequest().body(mensaje);
-        return ResponseEntity.ok(new Mensaje("criado"));
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{idEmpresa}/{email}")

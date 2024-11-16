@@ -23,31 +23,18 @@ public class FuncionarioService {
     @Autowired
     private RoleService roleService;
 
-    public String determinarRole(UsuarioModel model) {
-        var isAdmin = model.hasRole(RoleList.ROLE_EMPRESA_ADMIN.toString());
-        if (isAdmin)
-            return RoleList.ROLE_EMPRESA_ADMIN.toString();
-        var isFuncionario = model.hasRole(RoleList.ROLE_EMPRESA_FUNCIONARIO.toString());
-        if (isFuncionario)
-            return RoleList.ROLE_EMPRESA_FUNCIONARIO.toString();
-        return RoleList.ROLE_CLIENTE.toString();
-    }
-
     public Page<FuncionarioDTO> findAllFromEmpresa(UUID idEmpresa, Pageable pageable) {
-        return usuarioRepository.findByIdEmpresa(idEmpresa, pageable)
-                .map(usuario -> new FuncionarioDTO(usuario.getLogin(), usuario.getNombre(), usuario.getTelefono(), determinarRole(usuario)));
+        Page<UsuarioModel> models = usuarioRepository.findByIdEmpresa(idEmpresa, pageable);
+        return models.map(FuncionarioDTO::new);
     }
 
     @Transactional
-    // El usuario debera crear-se una cuenta por si solo, el sistema solo le dara el cargo
     public Mensaje save(RegisterDtoFuncionario registerDto, UUID idEmpresa) {
         var usuario = usuarioRepository.findByEmail(registerDto.email());
 
         if (usuario.isEmpty())
             return new Mensaje("El usuario no esta registrado en el sistema");
-
         usuario.get().setIdEmpresa(idEmpresa);
-
         if (usuario.get().hasRole(RoleList.ROLE_EMPRESA_FUNCIONARIO.toString()))
             return new Mensaje("El funcionario ya esta relacionado con una empresa");
 
@@ -56,6 +43,7 @@ public class FuncionarioService {
         adicionou = usuario.get().addRole(roleEmpresaFuncionario);
         if (!adicionou || roleEmpresaFuncionario == null)
             return new Mensaje("No se pudo elevar el cargo");
+
         usuarioRepository.save(usuario.get());
         return new Mensaje("");
     }
@@ -63,10 +51,12 @@ public class FuncionarioService {
     @Transactional
     public Mensaje delete(String email) {
         var usuario = usuarioRepository.findByEmail(email);
-        if (email.equals(""))
+
+        if (email.isEmpty())
             return new Mensaje("El email no puede ser nulo");
-        if (!usuario.isPresent())
+        if (usuario.isEmpty())
             return new Mensaje("El usuario no esta registrado en el sistema");
+
         RoleModel roleEmpresaFuncionario = roleService.getByRoleName(RoleList.ROLE_EMPRESA_FUNCIONARIO);
 
         usuario.get().setIdEmpresa(null);

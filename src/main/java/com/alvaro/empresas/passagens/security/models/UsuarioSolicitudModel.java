@@ -1,9 +1,8 @@
 package com.alvaro.empresas.passagens.security.models;
 
-import com.alvaro.empresas.passagens.enums.EnumTypeSolicitudOperation;
+import com.alvaro.empresas.passagens.enums.TypeSolicitudOperation;
 import com.alvaro.empresas.passagens.security.dtos.UsuarioDTOUpdate;
 import jakarta.persistence.*;
-import jakarta.validation.Valid;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,7 +10,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 @Getter
@@ -36,7 +34,7 @@ public class UsuarioSolicitudModel {
     private String contrasena;
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private EnumTypeSolicitudOperation tipo;
+    private TypeSolicitudOperation tipo;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -46,7 +44,7 @@ public class UsuarioSolicitudModel {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    public UsuarioSolicitudModel(String email, String nombre, String telefono, String contrasena, EnumTypeSolicitudOperation tipo) {
+    public UsuarioSolicitudModel(String email, String nombre, String telefono, String contrasena, TypeSolicitudOperation tipo) {
         this.email = email;
         this.nombre = nombre;
         this.telefono = telefono;
@@ -54,7 +52,7 @@ public class UsuarioSolicitudModel {
         this.tipo = tipo;
     }
 
-    public UsuarioSolicitudModel(UsuarioDTOUpdate solicitud, UsuarioModel usuario, String passwordEncripted, EnumTypeSolicitudOperation tipo) {
+    public UsuarioSolicitudModel(UsuarioDTOUpdate solicitud, UsuarioModel usuario, String passwordEncripted, TypeSolicitudOperation tipo) {
         this.email = usuario.getLogin();
         if (solicitud.email() == null || solicitud.email().isBlank()) this.newEmail = usuario.getLogin();
         else this.newEmail = solicitud.email();

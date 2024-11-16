@@ -29,20 +29,20 @@ public class PrecioService {
         return model.orElseThrow(() -> new ObjectNotFoundException(id, PrecioModel.class.getName()));
     }
 
-    public List<PrecioDTO> saveAll(List<PrecioModel> dtoModels, ViajeModel viaje) {
-        List<PrecioDTO> salvos = new ArrayList<>();
-        for (PrecioModel precioModel : dtoModels) {
-            precioModel.setViaje(viaje);
-            precioModel.setEmpresa(viaje.getEmpresa());
-            var save = precioRepository.save(precioModel);
-            salvos.add(new PrecioDTO(save, viaje.getCodigo()));
+    public List<PrecioDTO> saveAll(List<PrecioModel> newModels, ViajeModel viaje) {
+        for (PrecioModel newModel : newModels) {
+            newModel.setViaje(viaje);
+            newModel.setEmpresa(viaje.getEmpresa());
         }
+        precioRepository.saveAll(newModels);
+        List<PrecioDTO> salvos = new ArrayList<>();
+        newModels.forEach(model -> salvos.add(new PrecioDTO(model)));
         return salvos;
     }
 
     public PrecioDTO getOne(UUID id) {
         var model = findById(id);
-        return new PrecioDTO(model, model.getViajeCodigo());
+        return new PrecioDTO(model);
     }
 
     public PrecioDTOResponseViaje vender(UUID id) {
@@ -51,8 +51,7 @@ public class PrecioService {
         var pisoElegido = new PisoModel();
 
         for (PisoModel piso : pisos)
-            if (piso.getNPiso().equals(model.getNPiso()))
-                pisoElegido = piso;
+            if (piso.getNPiso().equals(model.getNPiso())) pisoElegido = piso;
 
         PisoDTOResponse pisoDto = new PisoDTOResponse(pisoElegido);
         List<Integer> ocupados = pasajeRepository.getPasajesVendidosAndNoRembolso(model.getId());
@@ -61,8 +60,8 @@ public class PrecioService {
 
     public PrecioDTO update(PrecioDTOUpdate dto, PrecioModel model) {
         model.updateValues(dto);
-        var update = precioRepository.save(model);
-        return new PrecioDTO(update, model.getViajeCodigo());
+        precioRepository.save(model);
+        return new PrecioDTO(model);
     }
 
     public void updateFromService(PrecioModel precioModel) {

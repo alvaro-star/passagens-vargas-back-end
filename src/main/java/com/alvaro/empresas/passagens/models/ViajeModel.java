@@ -1,7 +1,7 @@
 package com.alvaro.empresas.passagens.models;
 
 import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
-import com.alvaro.empresas.passagens.enums.EnumParada;
+import com.alvaro.empresas.passagens.enums.TypeParada;
 import com.alvaro.empresas.passagens.pagos.models.FacturaPasajeModel;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import jakarta.persistence.*;
@@ -72,6 +72,18 @@ public class ViajeModel {
     @Column(name = "fk_idtb_empresa", insertable = false, updatable = false)
     private UUID empresaId;
 
+    public void setAutobus(AutobusModel autobus) {
+        this.autobus = autobus;
+        if (autobus != null)
+            autobusId = autobus.getId();
+    }
+
+    public void setEmpresa(EmpresaModel empresa) {
+        this.empresa = empresa;
+        if (empresa != null)
+            empresaId = empresa.getId();
+    }
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "viaje")
     private List<ParadaModel> paradas = new ArrayList<>();
 
@@ -107,6 +119,24 @@ public class ViajeModel {
         this.paradas = new ArrayList<>();
     }
 
+    public BigDecimal addValorArrecadadoWeb(BigDecimal valor) {
+        if (valorArrecadadoWeb == null) valorArrecadadoWeb = valor;
+        else valorArrecadadoWeb = valorArrecadadoWeb.add(valor);
+        return valorArrecadadoWeb;
+    }
+
+    public BigDecimal addValorArrecadadoNoWeb(BigDecimal valor) {
+        if (valorArrecadadoNoWeb == null) valorArrecadadoNoWeb = valor;
+        else valorArrecadadoNoWeb = valorArrecadadoNoWeb.add(valor);
+        return valorArrecadadoNoWeb;
+    }
+
+    public BigDecimal addValorArrecadadoEfectivo(BigDecimal valor) {
+        if (valorArrecadadoEfectivo == null) valorArrecadadoEfectivo = valor;
+        else valorArrecadadoEfectivo = valorArrecadadoEfectivo.add(valor);
+        return valorArrecadadoEfectivo;
+    }
+
     public boolean substractValueEfectivo(BigDecimal valor) {
         int comparacao = valorArrecadadoEfectivo.compareTo(valor);
         if (comparacao < 0) return false;
@@ -138,14 +168,14 @@ public class ViajeModel {
 
     public ParadaModel getSalida() {
         for (ParadaModel parada : this.paradas)
-            if (parada.getTipo().equals(EnumParada.SALIDA))
+            if (parada.getTipo().equals(TypeParada.SALIDA))
                 return parada;
         return null;
     }
 
     public ParadaModel getDestino() {
         for (ParadaModel parada : this.paradas)
-            if (parada.getTipo().equals(EnumParada.DESTINO))
+            if (parada.getTipo().equals(TypeParada.DESTINO))
                 return parada;
         return null;
     }

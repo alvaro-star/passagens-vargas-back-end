@@ -92,12 +92,11 @@ public class AutobusService {
         var viaje = viajeRepository.findFirst1ByAutobusId(model.getId());
         if (viaje.isEmpty())
             autobusRepository.delete(model);
-        else {
-            if (viajesFuturos.getTotalElements() == 0) {
-                model.setEnable(false);
-                autobusRepository.save(model);
-            } else return "El atobus tiene un viaje programado en el futuro";
-        }
+        else if (viajesFuturos.getTotalElements() == 0) {
+            model.setEnable(false);
+            autobusRepository.save(model);
+        } else return "El atobus tiene un viaje programado en el futuro";
+
         return "";
     }
 }
