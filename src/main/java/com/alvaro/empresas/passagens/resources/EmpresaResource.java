@@ -29,30 +29,26 @@ public class EmpresaResource {
     @PostMapping("/admin")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Mensaje> registerEmpresaAdmin(@RequestBody @Valid RegisterDtoEmpresaAdmin empresaAdmin) {
-        Mensaje mensaje;
-        mensaje = empresaService.saveAdmin(empresaAdmin);
-        if (mensaje.conteudo().isEmpty()) return ResponseEntity.ok(new Mensaje("Criado con exito"));
-        return ResponseEntity.badRequest().body(mensaje);
+        empresaService.saveAdmin(empresaAdmin);
+        return ResponseEntity.ok(new Mensaje("El cargo le fue dado"));
     }
 
     @DeleteMapping("/admin/{email}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Mensaje> removerEmpresario(@PathVariable(value = "email") String email) {
-        Mensaje mensaje;
-        mensaje = empresaService.removerAdmin(email);
-        if (mensaje.conteudo().isEmpty()) return ResponseEntity.noContent().build();
-        return ResponseEntity.badRequest().body(mensaje);
+        empresaService.removerAdmin(email);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Page<EmpresaDTOResponse>> getAll(@PageableDefault(size = 10) Pageable pageable) {
-        return ResponseEntity.status(HttpStatus.OK).body(empresaService.findAll(pageable));
+        return ResponseEntity.ok(empresaService.findAll(pageable));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<EmpresaDTOResponse> getOne(@PathVariable(value = "id") UUID id) {
-        return ResponseEntity.status(HttpStatus.OK).body(empresaService.getOne(id));
+    public ResponseEntity<EmpresaDTOResponse> getOne(@PathVariable UUID id) {
+        return ResponseEntity.ok(empresaService.getOne(id));
     }
 
     @PostMapping
@@ -63,22 +59,21 @@ public class EmpresaResource {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<EmpresaDTOResponse> update(@PathVariable(value = "id") UUID id, @RequestBody @Valid EmpresaDTO dto) {
-        return ResponseEntity.status(HttpStatus.OK).body(empresaService.update(dto, id));
+    public ResponseEntity<EmpresaDTOResponse> update(@PathVariable UUID id, @RequestBody @Valid EmpresaDTO dto) {
+        return ResponseEntity.ok(empresaService.update(dto, id));
     }
 
     @GetMapping("/{id}/bloquedCount")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<Object> disabled(@PathVariable(value = "id") UUID id) {
-        var mensaje = empresaService.bloquedCount(id);
-        if (!mensaje.conteudo().isEmpty()) return ResponseEntity.badRequest().body(mensaje);
+    public ResponseEntity<Object> disabled(@PathVariable UUID id) {
+        empresaService.bloquedCount(id);
         return ResponseEntity.noContent().build();
     }
 
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<Object> delete(@PathVariable(value = "id") UUID id) {
+    public ResponseEntity<Object> delete(@PathVariable UUID id) {
         empresaService.delete(id);
         return ResponseEntity.noContent().build();
     }

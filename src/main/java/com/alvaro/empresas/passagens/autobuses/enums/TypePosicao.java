@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.autobuses.enums;
 
-public enum EnumPosicao {
+public enum TypePosicao {
     IZQUIERDA, DERECHA;
 }
 

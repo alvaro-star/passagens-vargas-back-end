@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.configurations.dataloader;
 
-import com.alvaro.empresas.passagens.autobuses.enums.EnumPosicao;
+import com.alvaro.empresas.passagens.autobuses.enums.TypePosicao;
 import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import com.alvaro.empresas.passagens.autobuses.repositories.AutobusRepository;
@@ -85,9 +85,9 @@ public class DataLoader {
         int nColunas = 3;
         for (AutobusModel autobus : autobuses) {
             List<PisoModel> pisos = new ArrayList<>();
-            pisos.add(new PisoModel(nLinhas, nColunas, EnumPosicao.IZQUIERDA, 1, EnumPosicao.DERECHA, nLinhas * nColunas, 1, autobus));
+            pisos.add(new PisoModel(nLinhas, nColunas, TypePosicao.IZQUIERDA, 1, TypePosicao.DERECHA, nLinhas * nColunas, 1, autobus));
             if (indice % 2 == 0) {
-                pisos.add(new PisoModel(nLinhas, nColunas, EnumPosicao.IZQUIERDA, 2, EnumPosicao.DERECHA, nLinhas * nColunas, nLinhas * nColunas + 1, autobus));
+                pisos.add(new PisoModel(nLinhas, nColunas, TypePosicao.IZQUIERDA, 2, TypePosicao.DERECHA, nLinhas * nColunas, nLinhas * nColunas + 1, autobus));
             }
             pisoRepository.saveAll(pisos);
 

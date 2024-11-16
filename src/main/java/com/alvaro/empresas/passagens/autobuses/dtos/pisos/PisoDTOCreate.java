@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.autobuses.dtos.pisos;
 
-import com.alvaro.empresas.passagens.autobuses.enums.EnumPosicao;
+import com.alvaro.empresas.passagens.autobuses.enums.TypePosicao;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Max;
@@ -27,10 +27,10 @@ public class PisoDTOCreate {
 
     @NotNull
     @Enumerated(EnumType.STRING)
-    private EnumPosicao distribuicaoFileira;
+    private TypePosicao distribuicaoFileira;
     @NotNull
     @Enumerated(EnumType.STRING)
-    private EnumPosicao inicioContagem;
+    private TypePosicao inicioContagem;
 
     private List<Integer> posicionesBloqueadas = new ArrayList<>();
 

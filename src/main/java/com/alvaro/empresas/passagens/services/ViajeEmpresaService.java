@@ -2,7 +2,8 @@ package com.alvaro.empresas.passagens.services;
 
 import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
-import com.alvaro.empresas.passagens.configurations.exceptions.InternalException.BadRequestException;
+import com.alvaro.empresas.passagens.autobuses.services.AutobusService;
+import com.alvaro.empresas.passagens.configurations.exceptions.InternalException.GeneralException;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
 import com.alvaro.empresas.passagens.dtos.precios.PrecioDTO;
 import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacaoEmpresa;
@@ -18,7 +19,8 @@ import com.alvaro.empresas.passagens.enums.TypeParada;
 import com.alvaro.empresas.passagens.helpers.DateAuxiliarFunctions;
 import com.alvaro.empresas.passagens.helpers.thymeleaf.PDFThymeleaf;
 import com.alvaro.empresas.passagens.helpers.thymeleaf.PasajeItemListTHModel;
-import com.alvaro.empresas.passagens.models.EmpresaModel;
+import com.alvaro.empresas.passagens.helpers.validators.AutobusEnabled;
+import com.alvaro.empresas.passagens.helpers.validators.EmpresaEnabled;
 import com.alvaro.empresas.passagens.models.PasajeModel;
 import com.alvaro.empresas.passagens.models.PrecioModel;
 import com.alvaro.empresas.passagens.models.ViajeModel;
@@ -37,6 +39,7 @@ import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.context.Context;
@@ -57,6 +60,8 @@ public class ViajeEmpresaService {
     @Autowired
     private TiempoViajeService tiempoViajeService;
     @Autowired
+    private EmpresaService emrEmpresaService;
+    @Autowired
     private ViajeRepository viajeRepository;
     @Autowired
     private ParadaRepository paradaRepository;
@@ -70,22 +75,29 @@ public class ViajeEmpresaService {
     private PrecioRepository precioRepository;
     @Autowired
     private PDFThymeleaf pdfThymeleaf;
+    @Autowired
+    private EmpresaEnabled empresaEnabled;
+    @Autowired
+    private AutobusEnabled autobusEnabled;
+    @Autowired
+    private AutobusService autobusService;
 
     public ViajeModel findById(UUID id) {
         var model = viajeRepository.findById(id);
         return model.orElseThrow(() -> new ObjectNotFoundException(id, ViajeModel.class.getName()));
     }
 
-    public Page<ViajeDTOListBusquedaEmpresa> findAllFromEmpresaBetweenDates(EmpresaModel empresa, ViajeDTOSolicitacaoFromEmpresa solicitacao, Pageable pageable) {
+    public Page<ViajeDTOListBusquedaEmpresa> findAllFromEmpresaBetweenDates(ViajeDTOSolicitacaoFromEmpresa solicitacao, Pageable pageable) {
+        var empresa = emrEmpresaService.findById(solicitacao.idEmpresa());
         Page<ViajeDTOJPQL> models;
         LocalDateTime dataInicio = helperDate.getFirstDayOfMonthDate(solicitacao.dataAnalise());
         LocalDateTime dataFim = helperDate.getLastDayOfMonthDate(solicitacao.dataAnalise());
 
-        models = viajeRepository.findByEmpresaIdInInterval(empresa.getId(), dataInicio, dataFim, pageable);
+        models = viajeRepository.findByEmpresaIdAndStartInInterval(empresa.getId(), dataInicio, dataFim, pageable);
 
         return models.map(model -> {
             if (model.salida() == null || model.destino() == null)
-                throw new BadRequestException("Hay un viaje que no posse ninguna parada");
+                throw new GeneralException("Hay un viaje que no posse ninguna parada");
             return new ViajeDTOListBusquedaEmpresa(model.viaje());
         });
     }
@@ -189,6 +201,9 @@ public class ViajeEmpresaService {
 
     @Transactional
     public ViajeDTOEmpresaResponse save(ViajeDTOCreate dto, AutobusModel autobus) {
+        autobusEnabled.validAutobusEnabled(dto.idAutobus());
+        empresaEnabled.validEmpresaEnabled(autobus.getEmpresaId());
+
         var lugarSalida = lugarRepository.findById(dto.salida().idLugar());
         if (lugarSalida.isEmpty()) throw new ValidationException("salida.idLugar", "El lugarSalida no fue allado");
 
@@ -238,7 +253,9 @@ public class ViajeEmpresaService {
     }
 
     @Transactional
-    public int saveOneCopy(ViajeDTOFormCopy dto, ViajeModel viaje) {
+    public void saveOneCopy(ViajeDTOFormCopy dto, ViajeModel viaje) {
+        autobusEnabled.validAutobusEnabled(viaje.getAutobusId());
+        empresaEnabled.validEmpresaEnabled(viaje.getEmpresaId());
         long diffDias;
         LocalDateTime dataViajeOriginal = viaje.getDataHoraSalida();
 
@@ -257,7 +274,9 @@ public class ViajeEmpresaService {
         if (diffDias > 0) lastHourViaje = lastHourViaje.plusDays(diffDias);
         boolean existe = tiempoViajeService.existsViajesActiveFromAutobus(viaje.getAutobus(), firsHourViaje, lastHourViaje);
 
-        if (existe) return -1;
+
+        if (existe)
+            throw new GeneralException(HttpStatus.CONFLICT, "El autobus esta ocupado en esa fecha con otro viaje");
 
         diffDias = ChronoUnit.DAYS.between(dataViajeOriginal.toLocalDate(), firsHourViaje.toLocalDate());
         diffDias = (diffDias < 0) ? -diffDias : diffDias;
@@ -281,10 +300,17 @@ public class ViajeEmpresaService {
         viajeRepository.save(viajeNew);
         paradaRepository.saveAll(paradaModelSave);
         precioRepository.saveAll(preciosModelSave);
-        return 1;
     }
 
-    public ViajeDTOUpdate update(ViajeModel model, AutobusModel autobus) {//Validacao para que a mudanca seja feita
+    public ViajeDTOUpdate update(ViajeDTOUpdate dto) {//Validacao para que a mudanca seja feita
+        var model = findById(dto.codigo());
+        empresaEnabled.validEmpresaEnabled(model.getEmpresaId());
+
+        var autobus = autobusService.findById(dto.idAutobus());
+        if (!autobus.getEmpresaId().equals(model.getEmpresaId()))
+            throw new GeneralException(HttpStatus.CONFLICT, "Este autobus le pertenece a otra empresa");
+        autobusEnabled.validAutobusEnabled(dto.idAutobus());
+
         boolean viajeInIntervalo = tiempoViajeService.existsViajesActiveFromAutobus(autobus, model.getSalida().getDataHora(), model.getDestino().getDataHora());
         if (viajeInIntervalo) throw new ValidationException("idAutobus", "El autobus esta ocupado con otro viaje");
 
@@ -308,6 +334,9 @@ public class ViajeEmpresaService {
 
     @Transactional
     public void delete(ViajeModel model) {
+        empresaEnabled.validEmpresaEnabled(model.getEmpresaId());
+        if (this.hasPasajes(model.getPrecios()))
+            throw new GeneralException("El viaje ya posse un pasaje registrado");
         precioRepository.deleteAll(model.getPrecios());
         paradaRepository.deleteAll(model.getParadas());
         viajeRepository.delete(model);

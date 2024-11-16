@@ -2,12 +2,14 @@ package com.alvaro.empresas.passagens.services.validacao;
 
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationError;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
 @Getter
+@Setter
 public class ValidationErrorsWithList extends ValidationError {
     private List<FieldMessageList> errorsList = new ArrayList<>();
 

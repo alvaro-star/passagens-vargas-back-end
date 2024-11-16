@@ -6,6 +6,7 @@ import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTO;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTOVenta;
 import com.alvaro.empresas.passagens.helpers.Mensaje;
 import com.alvaro.empresas.passagens.helpers.beans.MyUserComponent;
+import com.alvaro.empresas.passagens.helpers.validators.EmpresaEnabled;
 import com.alvaro.empresas.passagens.services.PasajeService;
 import com.alvaro.empresas.passagens.services.PrecioService;
 import com.alvaro.empresas.passagens.services.ViajeService;
@@ -21,7 +22,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,6 +37,8 @@ public class PasajeResource {
     private ViajeService viajeService;
     @Autowired
     private PrecioService precioService;
+    @Autowired
+    private EmpresaEnabled empresaEnabled;
 
     @GetMapping("/{id}")
     public ResponseEntity<PasajeDTOEmpresaResponse> getOne(@PathVariable UUID id) {
@@ -58,9 +60,8 @@ public class PasajeResource {
     public ResponseEntity<List<PasajeDTOEmpresaResponse>> getPasajerosFromPrecio(@PathVariable UUID idPrecio) {
         var usuario = myUserComponent.getUser();
         var precio = precioService.findById(idPrecio);
-        if (usuario.hasRole("ROLE_ADMIN") || usuario.isMyEmpresa(precio.getEmpresa().getId()))
-            return ResponseEntity.ok(pasajeService.getPasajesFromPrecio(idPrecio));
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ArrayList<>());
+        usuario.validIfIsAdminOrOwnerEmpresa(precio.getEmpresaId());
+        return ResponseEntity.ok(pasajeService.getPasajesFromPrecio(idPrecio));
     }
 
 
@@ -79,25 +80,21 @@ public class PasajeResource {
         var usuario = myUserComponent.getUser();
         var viaje = viajeService.findById(dto.idViaje());
 
-        if (!usuario.isMyEmpresa(viaje.getEmpresa().getId()))
-            return ResponseEntity.badRequest().body(new Mensaje("No se puede vender el pasaje de otra empresa"));
-        if (viaje.getEmpresa().getBloqued() || !viaje.getEmpresa().getEnabled())
-            return ResponseEntity.badRequest().body(new Mensaje("La empresa esta bloqueada"));
+        usuario.validIfIsMyEmpresa(viaje.getEmpresaId());
+        empresaEnabled.validEmpresaEnabled(viaje.getEmpresaId());
 
         validacao = ValidarCompraPasajes.validarPasajesDTOVenta(bindingResult, dto, "/pasajes/vender");
         if (!validacao.getErrorsList().isEmpty() || !validacao.getErrors().isEmpty())
             return ResponseEntity.unprocessableEntity().body(validacao);
 
         var idPago = pasajeService.saveEmpresa(dto, viaje);
-
         return ResponseEntity.status(HttpStatus.CREATED).body(new CodigoPago(idPago));
     }
 
     @DeleteMapping("{id}")//Habiliado solo para el rembolso fijo
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_FUNCIONARIO', 'ROLE_EMPRESA_ADMIN')")
     public ResponseEntity<Mensaje> rembolso(@PathVariable UUID idPasaje) {
-        var mensaje = pasajeService.delete(idPasaje);
-        if (mensaje == null) return ResponseEntity.noContent().build();
-        else return ResponseEntity.badRequest().body(mensaje);
+        pasajeService.delete(idPasaje);
+        return ResponseEntity.noContent().build();
     }
 }

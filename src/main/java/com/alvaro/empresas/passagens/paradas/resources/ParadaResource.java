@@ -1,8 +1,9 @@
 package com.alvaro.empresas.passagens.paradas.resources;
 
-import com.alvaro.empresas.passagens.helpers.Mensaje;
 import com.alvaro.empresas.passagens.enums.TypeParada;
+import com.alvaro.empresas.passagens.helpers.Mensaje;
 import com.alvaro.empresas.passagens.helpers.beans.MyUserComponent;
+import com.alvaro.empresas.passagens.helpers.validators.EmpresaEnabled;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOUpdate;
@@ -27,20 +28,14 @@ import java.time.LocalDateTime;
 @RequestMapping("/paradas")
 @SecurityRequirement(name = "bearer-key")
 public class ParadaResource {
-    private final ParadaService paradaService;
-    private final MyUserComponent myUserComponent;
-    private final ViajeEmpresaService viajeEmpresaService;
-
     @Autowired
-    public ParadaResource(
-            ParadaService paradaService,
-            MyUserComponent myUserComponent,
-            ViajeEmpresaService viajeEmpresaService
-    ) {
-        this.paradaService = paradaService;
-        this.myUserComponent = myUserComponent;
-        this.viajeEmpresaService = viajeEmpresaService;
-    }
+    private ParadaService paradaService;
+    @Autowired
+    private MyUserComponent myUserComponent;
+    @Autowired
+    private ViajeEmpresaService viajeEmpresaService;
+    @Autowired
+    private EmpresaEnabled empresaEnabled;
 
 
     @GetMapping
@@ -58,16 +53,9 @@ public class ParadaResource {
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
     public ResponseEntity<Object> save(@RequestBody @Valid ParadaDTO dto) {
         var viajeModel = this.viajeEmpresaService.findById(dto.idViaje());
-        var userLogin = myUserComponent.getUser();
+        var user = myUserComponent.getUser();
+        user.validIfIsMyEmpresa(viajeModel.getEmpresaId());
 
-        if (!userLogin.isMyEmpresa(viajeModel.getEmpresa().getId())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Mensaje("El usuario no esta relacionado con este Viaje"));
-        }
-        var empresa = viajeModel.getEmpresa();
-        if (empresa.getBloqued() || !empresa.getEnabled())
-            return ResponseEntity.badRequest().body(new Mensaje("La empresa esta bloqueada"));
-        if (!viajeModel.getAutobus().isEnable())
-            return ResponseEntity.badRequest().body(new Mensaje("El autobus esta inhabilitado"));
         if (viajeEmpresaService.hasPasajes(viajeModel.getPrecios()))
             return ResponseEntity.badRequest().body(new Mensaje("El viaje ya posee un pasaje registrado"));
         return ResponseEntity.status(HttpStatus.CREATED).body(paradaService.save(dto, viajeModel));
@@ -79,13 +67,8 @@ public class ParadaResource {
     public ResponseEntity<Object> update(@Valid @RequestBody ParadaDTOUpdate dto, @PathVariable Integer id) {
         var paradaModel = paradaService.findById(id);
         var userLogin = myUserComponent.getUser();
-        if (!userLogin.isMyEmpresa(paradaModel.getEmpresa().getId()))
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Mensaje("El usuario no esta relacionado con esta Parada"));
-        var empresa = paradaModel.getEmpresa();
-        if (empresa.getBloqued() || !empresa.getEnabled())
-            return ResponseEntity.badRequest().body(new Mensaje("La empresa esta bloqueada"));
-        if (!paradaModel.getViaje().getAutobus().isEnable())
-            return ResponseEntity.badRequest().body(new Mensaje("El autobus esta inhabilitado"));
+        userLogin.validIfIsMyEmpresa(paradaModel.getEmpresaId());
+
         if (viajeEmpresaService.hasPasajes(paradaModel.getViaje().getPrecios()))
             return ResponseEntity.badRequest().body(new Mensaje("El viaje ya posee un pasaje registrado"));
         return ResponseEntity.ok(paradaService.update(dto, paradaModel));
@@ -96,12 +79,12 @@ public class ParadaResource {
     public ResponseEntity<Mensaje> delete(@PathVariable Integer id) {
         var model = paradaService.findById(id);
         var userLogin = myUserComponent.getUser();
+
         if (!userLogin.hasRole(RoleList.ROLE_ADMIN.toString())) {
-            if (!userLogin.isMyEmpresa(model.getEmpresa().getId()))
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Mensaje("El usuario no esta relacionado con esta Parada"));
-            if (model.getEmpresa().getBloqued() || !model.getEmpresa().getEnabled())
-                return ResponseEntity.badRequest().body(new Mensaje("La empresa esta bloqueada"));
+            userLogin.validIfIsMyEmpresa(model.getEmpresaId());
+            empresaEnabled.validEmpresaEnabled(model.getEmpresaId());
         }
+
         if (!model.getViaje().getAutobus().isEnable())
             return ResponseEntity.badRequest().body(new Mensaje("El autobus esta inhabilitado"));
         int indice = -1;

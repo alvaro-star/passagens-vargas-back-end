@@ -6,6 +6,8 @@ import com.alvaro.empresas.passagens.paradas.models.CiudadModel;
 import com.alvaro.empresas.passagens.paradas.models.DepartamentoModel;
 import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import jakarta.persistence.EntityManager;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -18,6 +20,19 @@ public class DadosPersist {
 
     public DadosPersist(EntityManager manager) {
         this.em = manager;
+    }
+
+
+    public Pageable makePageable() {
+        return PageRequest.of(0, 10);
+    }
+
+    public Pageable makePageable(int pageNumber) {
+        return PageRequest.of(pageNumber, 10);
+    }
+
+    public Pageable makePageable(int pageNumber, int pageSize) {
+        return PageRequest.of(pageNumber, pageSize);
     }
 
     public EmpresaModel cadastrarEmpresa(String nombre) {

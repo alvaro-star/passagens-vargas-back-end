@@ -2,6 +2,8 @@ package com.alvaro.empresas.passagens.paradas.services;
 
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
 import com.alvaro.empresas.passagens.enums.TypeParada;
+import com.alvaro.empresas.passagens.helpers.validators.AutobusEnabled;
+import com.alvaro.empresas.passagens.helpers.validators.EmpresaEnabled;
 import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
@@ -22,6 +24,10 @@ import java.time.LocalDateTime;
 
 @Service
 public class ParadaService {
+    @Autowired
+    private EmpresaEnabled empresaEnabled;
+    @Autowired
+    private AutobusEnabled autobusEnabled;
     @Autowired
     private TiempoViajeService tiempoViajeService;
     @Autowired
@@ -48,6 +54,8 @@ public class ParadaService {
 
     @Transactional
     public ParadaDTOComplete save(ParadaDTO dtoSended, ViajeModel viaje) {
+        empresaEnabled.validEmpresaEnabled(viaje.getEmpresaId());
+        autobusEnabled.validAutobusEnabled(viaje.getAutobusId());
         LugarModel lugar = lugarService.findById(dtoSended.idLugar());
         if (!lugar.getEnable())
             throw new ValidationException("idLugar", "El lugar no esta disponible");
@@ -77,6 +85,9 @@ public class ParadaService {
 
     @Transactional
     public ParadaDTOComplete update(ParadaDTOUpdate dtoSended, ParadaModel model) {
+        empresaEnabled.validEmpresaEnabled(model.getEmpresaId());
+        autobusEnabled.validAutobusEnabled(model.getViaje().getAutobusId());
+
         var dataParadaAjustada = dtoSended.dataHora().withSecond(0).withNano(0);
         for (ParadaModel parada : model.getViaje().getParadas()) {
             if (parada.getTipo().equals(TypeParada.SALIDA) && parada.getDataHora().isBefore(LocalDateTime.now()))

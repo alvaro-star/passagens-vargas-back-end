@@ -1,7 +1,8 @@
 package com.alvaro.empresas.passagens.configurations.exceptions;
 
-import com.alvaro.empresas.passagens.configurations.exceptions.InternalException.BadRequestError;
-import com.alvaro.empresas.passagens.configurations.exceptions.InternalException.BadRequestException;
+import com.alvaro.empresas.passagens.configurations.exceptions.InternalException.GeneralException;
+import com.alvaro.empresas.passagens.configurations.exceptions.InternalException.ValidationWithErrorListExceptions;
+import com.alvaro.empresas.passagens.services.validacao.ValidationErrorsWithList;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -21,11 +22,23 @@ public class ExceptionsHandler {
         StandardError error = new StandardError(
                 System.currentTimeMillis(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "Não Encontrado",
+                "Error interno",
                 ex.getMessage(),
                 request.getRequestURI()
         );
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    }
+
+    @ExceptionHandler(GeneralException.class)
+    public ResponseEntity<StandardError> generalException(GeneralException ex, HttpServletRequest request) {
+        StandardError error = new StandardError(
+                System.currentTimeMillis(),
+                ex.getStatus().value(),
+                "Não Encontrado",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(ex.getStatus()).body(error);
     }
 
     @ExceptionHandler(ObjectNotFoundException.class)
@@ -48,9 +61,21 @@ public class ExceptionsHandler {
                 "Erro de Validacao",
                 e.getMessage(),
                 request.getRequestURI());
-        for (FieldError erro : e.getBindingResult().getFieldErrors()) {
+        for (FieldError erro : e.getBindingResult().getFieldErrors())
             err.addError(erro.getField(), erro.getDefaultMessage());
-        }
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(err);
+    }
+
+    @ExceptionHandler(ValidationWithErrorListExceptions.class)
+    public ResponseEntity<ValidationErrorsWithList> validationWithErrorListExceptions(ValidationWithErrorListExceptions ex, String path) {
+        ValidationErrorsWithList err = new ValidationErrorsWithList(
+                System.currentTimeMillis(),
+                HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                "Erro de Validacao",
+                "Erro durante a validacao",
+                "/autobuses");
+        err.setErrorsList(ex.getErrorsList());
+        err.setErrors(ex.getErrors());
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(err);
     }
 
@@ -75,18 +100,6 @@ public class ExceptionsHandler {
                 request.getRequestURI());
         err.getErrors().add(e.getCampo());
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(err);
-    }
-
-    @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<Object> badRequestException(BadRequestException e, HttpServletRequest request) {
-        BadRequestError err = new BadRequestError(
-                System.currentTimeMillis(),
-                HttpStatus.UNPROCESSABLE_ENTITY.value(),
-                "Um erro de validacao",
-                e.getMessage(),
-                request.getRequestURI());
-        err.setConteudo(e.getMensaje().conteudo());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err);
     }
 
     @ExceptionHandler(InvalidDataAccessApiUsageException.class)

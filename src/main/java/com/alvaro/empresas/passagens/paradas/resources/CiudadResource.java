@@ -5,7 +5,6 @@ import com.alvaro.empresas.passagens.paradas.dtos.CiudadDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.CiudadDtoUpdate;
 import com.alvaro.empresas.passagens.paradas.dtos.LugarDTO;
 import com.alvaro.empresas.passagens.paradas.services.CiudadService;
-import com.alvaro.empresas.passagens.paradas.services.DepartamentoService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +25,6 @@ import java.util.List;
 public class CiudadResource {
     @Autowired
     private CiudadService ciudadService;
-    @Autowired
-    private DepartamentoService departamentoService;
 
     @GetMapping
     public ResponseEntity<Page<CiudadDTO>> getAll(@PageableDefault(size = 20) Pageable pageable) {
@@ -35,12 +32,12 @@ public class CiudadResource {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CiudadDTO> getOne(@PathVariable(value = "id") Integer id) {
+    public ResponseEntity<CiudadDTO> getOne(@PathVariable Integer id) {
         return ResponseEntity.ok().body(ciudadService.getOne(id));
     }
 
     @GetMapping("/{id}/lugares")
-    public ResponseEntity<List<LugarDTO>> getLugaresFromCiudad(@PathVariable(value = "id") Integer id) {
+    public ResponseEntity<List<LugarDTO>> getLugaresFromCiudad(@PathVariable Integer id) {
         var ciudadModel = ciudadService.findById(id);
         List<LugarDTO> lugares = new ArrayList<>();
         ciudadModel.getLugares().forEach(lugarModel -> lugares.add(new LugarDTO(lugarModel)));
@@ -60,13 +57,13 @@ public class CiudadResource {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    public ResponseEntity<CiudadDTO> update(@Valid @RequestBody CiudadDtoUpdate dto, @PathVariable(value = "id") Integer id) {
+    public ResponseEntity<CiudadDTO> update(@Valid @RequestBody CiudadDtoUpdate dto, @PathVariable Integer id) {
         return ResponseEntity.ok().body(ciudadService.update(dto, id));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    public ResponseEntity<Object> delete(@PathVariable(value = "id") Integer id) {
+    public ResponseEntity<Object> delete(@PathVariable Integer id) {
         //Causas de posible lentitud, la ciudad posee muchos lugares
         var model = ciudadService.findById(id);
         if (!model.getLugares().isEmpty())

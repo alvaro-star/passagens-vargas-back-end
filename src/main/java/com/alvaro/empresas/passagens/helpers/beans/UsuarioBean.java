@@ -1,9 +1,11 @@
 package com.alvaro.empresas.passagens.helpers.beans;
 
+import com.alvaro.empresas.passagens.configurations.exceptions.InternalException.GeneralException;
 import com.alvaro.empresas.passagens.security.models.RoleList;
 import com.alvaro.empresas.passagens.security.models.UsuarioModel;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 import java.util.UUID;
@@ -25,12 +27,25 @@ public class UsuarioBean {
         this.roles = roles;
     }
 
+
+    public void validIfIsAdminOrOwnerEmpresa(UUID idEmpresa) {
+        if (!isAdminOrOwnerEmpresa(idEmpresa))
+            throw new GeneralException(HttpStatus.FORBIDDEN, "No esta autorizado a realizar esta accion");
+    }
+
     public boolean isAdminOrOwnerEmpresa(UUID idEmpresa) {
         return hasRole(RoleList.ROLE_ADMIN.toString()) || isMyEmpresa(idEmpresa);
     }
 
     public boolean isMyEmpresa(UUID idEmpresa) {
         return this.idEmpresa != null && this.idEmpresa.equals(idEmpresa);
+    }
+
+    public void validIfIsMyEmpresa(UUID idEmpresa) {
+        if (idEmpresa == null)
+            throw new GeneralException("El usuario no esta relacionado con ninguna empresa");
+        if (this.idEmpresa.equals(idEmpresa))
+            throw new GeneralException("El usuario no esta relacionado con esta empresa");
     }
 
     public boolean hasRole(String role) {

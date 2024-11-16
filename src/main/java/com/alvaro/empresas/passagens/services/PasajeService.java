@@ -1,14 +1,13 @@
 package com.alvaro.empresas.passagens.services;
 
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
-import com.alvaro.empresas.passagens.configurations.exceptions.InternalException.BadRequestException;
+import com.alvaro.empresas.passagens.configurations.exceptions.InternalException.GeneralException;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajeDTO;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajeDTOEmpresaResponse;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTO;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTOVenta;
 import com.alvaro.empresas.passagens.enums.TipoPagamento;
-import com.alvaro.empresas.passagens.helpers.Mensaje;
 import com.alvaro.empresas.passagens.helpers.PasajesPDF;
 import com.alvaro.empresas.passagens.models.PasajeModel;
 import com.alvaro.empresas.passagens.models.PrecioModel;
@@ -75,7 +74,7 @@ public class PasajeService {
         if (salida == null)
             throw new ValidationException("idLugarSalida", "La salida no hace parte del trayecto");
         else if (salida.getDataHora().isBefore(LocalDateTime.now().minusMinutes(minTimeBeforeBuyPasaje)))
-            throw new BadRequestException("El autobus ya inicio el viaje");
+            throw new GeneralException("El autobus ya inicio el viaje");
         if (destino == null) throw new ValidationException("idLugarDestino", "El destino no hace parte del trayecto");
     }
 
@@ -223,15 +222,15 @@ public class PasajeService {
         }
     }
 
-    public Mensaje delete(UUID idPasaje) {
+    public void delete(UUID idPasaje) {
         var pasajeModel = findById(idPasaje);
 
         if (!pasajeModel.getFacturaPasaje().getEstaPagado()) {
             logger.error("Se intento reembolsar un pasaje no pagado");
-            return new Mensaje("El pasaje no fue pagado");
+            throw new GeneralException("El pasaje no fue pagado");
         }
 
-        if (pasajeModel.getFacturaRembolsoId() != null) return new Mensaje("El pasaje ya fue rembolsado");
+        if (pasajeModel.getFacturaRembolsoId() != null) throw new GeneralException("El pasaje ya fue rembolsado");
         var viaje = pasajeModel.getPrecio().getViaje();
         boolean resultado;
         if (pasajeModel.getEnEfectivo()) {
@@ -239,16 +238,15 @@ public class PasajeService {
         } else if (!pasajeModel.getCompradoWeb()) resultado = viaje.substractValueNoWeb(pasajeModel.getPrecioPagado());
         else {
             logger.warn("Se necessita una API para esta operacion");
-            return new Mensaje("El pasaje fue comprado en la web, no esta disponible");
+            throw new GeneralException("El pasaje fue comprado en la web, no esta disponible");
         }
         if (!resultado) {
             logger.warn("Se intento retirar un valor que no se debia del valor arrecadado");
-            return new Mensaje("El valor arrecadado es menor que el de pasajes");
+            throw new GeneralException("El valor arrecadado es menor que el de pasajes");
         }
 
         var facturaRembolsada = new FacturaRembolsoModel(pasajeModel.getPrecioPagado(), pasajeModel.getFacturaPasaje(), pasajeModel);
         pasajeModel.setFacturaRembolso(facturaRembolsada);
         pasajeRepository.save(pasajeModel);
-        return null;
     }
 }

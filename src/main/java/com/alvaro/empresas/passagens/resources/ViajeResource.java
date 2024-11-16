@@ -21,7 +21,7 @@ public class ViajeResource {
     private ViajeService viajeService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<ViajeDTOResponse> getOne(@PathVariable(value = "id") UUID id) {
+    public ResponseEntity<ViajeDTOResponse> getOne(@PathVariable UUID id) {
         return ResponseEntity.ok(viajeService.getOne(id));
     }
 

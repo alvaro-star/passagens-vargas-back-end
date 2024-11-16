@@ -7,7 +7,9 @@ import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTOResponse;
 import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import com.alvaro.empresas.passagens.autobuses.repositories.AutobusRepository;
-import com.alvaro.empresas.passagens.models.EmpresaModel;
+import com.alvaro.empresas.passagens.autobuses.services.validacao.ValidarPiso;
+import com.alvaro.empresas.passagens.configurations.exceptions.InternalException.GeneralException;
+import com.alvaro.empresas.passagens.helpers.validators.EmpresaEnabled;
 import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.repositories.ViajeRepository;
 import com.alvaro.empresas.passagens.services.EmpresaService;
@@ -16,8 +18,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.BindingResult;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -30,10 +34,15 @@ public class AutobusService {
     private AutobusRepository autobusRepository;
     @Autowired
     private EmpresaService empresaService;
+
+    @Autowired
+    private EmpresaEnabled empresaEnabled;
     @Autowired
     private PisoService pisoService;
     @Autowired
     private ViajeRepository viajeRepository;
+    @Autowired
+    private ValidarPiso validarPiso;
 
     public AutobusModel findById(Integer id) {
         var model = autobusRepository.findById(id);
@@ -61,8 +70,13 @@ public class AutobusService {
 
 
     @Transactional
-    public AutobusDTOResponse salvar(AutobusDTO dto, EmpresaModel empresa) {
+    public AutobusDTOResponse salvar(AutobusDTO dto, BindingResult bindingResult) {
+        empresaEnabled.validEmpresaEnabled(dto.idEmpresa());
+        validarPiso.validarAutobusDTO(bindingResult, dto);
+
+        var empresa = empresaService.findById(dto.idEmpresa());
         var model = new AutobusModel(dto);
+
         model.setEmpresa(empresa);
         autobusRepository.save(model);
 
@@ -76,14 +90,18 @@ public class AutobusService {
         return new AutobusDTOResponse(model, pisosGuardados);
     }
 
-    public AutobusDTOResponse update(AutobusDTOUpdate dto, AutobusModel model) {
+    public AutobusDTOResponse update(AutobusDTOUpdate dto, AutobusModel model, BindingResult bindingResult) {
+        empresaEnabled.validEmpresaEnabled(model.getEmpresaId());
+        var transform = new AutobusDTO(dto.placa());
+        validarPiso.validarAutobusDTO(bindingResult, transform);
         model.updateValues(dto);
         autobusRepository.save(model);
         return new AutobusDTOResponse(model);
     }
 
     @Transactional
-    public String delete(AutobusModel model) {
+    public void delete(AutobusModel model) {
+        empresaEnabled.validEmpresaEnabled(model.getEmpresaId());
         var now = LocalDateTime.now();
 
         Pageable pageable = PageRequest.of(0, 1);
@@ -95,8 +113,7 @@ public class AutobusService {
         else if (viajesFuturos.getTotalElements() == 0) {
             model.setEnable(false);
             autobusRepository.save(model);
-        } else return "El atobus tiene un viaje programado en el futuro";
-
-        return "";
+        } else
+            throw new GeneralException(HttpStatus.BAD_REQUEST, "El atobus tiene un viaje programado en el futuro");
     }
 }

@@ -1,9 +1,9 @@
 package com.alvaro.empresas.passagens.services;
 
-import com.alvaro.empresas.passagens.configurations.exceptions.InternalException.BadRequestException;
+import com.alvaro.empresas.passagens.configurations.exceptions.InternalException.GeneralException;
 import com.alvaro.empresas.passagens.dtos.EmpresaDTO;
 import com.alvaro.empresas.passagens.dtos.EmpresaDTOResponse;
-import com.alvaro.empresas.passagens.helpers.Mensaje;
+import com.alvaro.empresas.passagens.helpers.validators.EmpresaEnabled;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.repositories.EmpresaRepository;
 import com.alvaro.empresas.passagens.security.dtos.RegisterDtoEmpresaAdmin;
@@ -11,6 +11,7 @@ import com.alvaro.empresas.passagens.security.models.RoleList;
 import com.alvaro.empresas.passagens.security.models.RoleModel;
 import com.alvaro.empresas.passagens.security.repositories.UsuarioRepository;
 import com.alvaro.empresas.passagens.security.services.RoleService;
+import jakarta.validation.constraints.NotBlank;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,10 +28,11 @@ public class EmpresaService {
     @Autowired
     private EmpresaRepository empresaRepository;
     @Autowired
+    private EmpresaEnabled empresaEnabled;
+    @Autowired
     private UsuarioRepository usuarioRepository;
     @Autowired
     private RoleService roleService;
-
 
     public EmpresaModel findById(UUID id) {
         Optional<EmpresaModel> model = empresaRepository.findById(id);
@@ -56,32 +58,32 @@ public class EmpresaService {
         return new EmpresaDTOResponse(modelSaved);
     }
 
-    public Mensaje saveAdmin(RegisterDtoEmpresaAdmin empresaAdmin) {
+    public void saveAdmin(RegisterDtoEmpresaAdmin empresaAdmin) {
         var usuario = usuarioRepository.findByEmail(empresaAdmin.email());
+        if (usuario.isEmpty())
+            throw new GeneralException("El usuario no esta registrado en el sistema");
 
-        if (usuario.isEmpty()) return new Mensaje("El usuario no esta registrado en el sistema");
         var empresa = empresaRepository.existsById(empresaAdmin.idEmpresa());
-        if (!empresa) return new Mensaje("La empresa no existe");
+        if (!empresa) throw new GeneralException("La empresa no existe");
         if (usuario.get().hasRole(RoleList.ROLE_EMPRESA_ADMIN.toString()))
-            return new Mensaje("El usuario ya es un administrador");
+            throw new GeneralException("El usuario ya es un administrador");
 
         List<RoleModel> rolesModels = roleService.findAll();
         Set<RoleModel> roles = new HashSet<>(rolesModels);
 
         if (usuario.get().hasRole(RoleList.ROLE_EMPRESA_FUNCIONARIO.toString()) && !usuario.get().getIdEmpresa().equals(empresaAdmin.idEmpresa()))
-            throw new BadRequestException("El usuario esta relacionado con otra empresa");
+            throw new GeneralException("El usuario esta relacionado con otra empresa");
 
         usuario.get().setRoles(roles);
         usuario.get().setIdEmpresa(empresaAdmin.idEmpresa());
 
         usuarioRepository.save(usuario.get());
-        return new Mensaje("");
     }
 
-    public Mensaje removerAdmin(String email) {
+    public void removerAdmin(@NotBlank String email) {
         var usuario = usuarioRepository.findByEmail(email);
-        if (email.isEmpty()) return new Mensaje("El email no puede ser nulo");
-        if (!usuario.isPresent()) return new Mensaje("El usuario no esta registrado en el sistema");
+
+        if (usuario.isEmpty()) throw new GeneralException("El usuario no esta registrado en el sistema");
 
         Set<RoleModel> roles = new HashSet<>();
         var roleCliente = roleService.getByRoleName(RoleList.ROLE_CLIENTE);
@@ -89,7 +91,6 @@ public class EmpresaService {
         usuario.get().setRoles(roles);
         usuario.get().setIdEmpresa(null);
         usuarioRepository.save(usuario.get());
-        return new Mensaje("");
     }
 
     public EmpresaDTOResponse update(EmpresaDTO dto, UUID id) {
@@ -99,13 +100,11 @@ public class EmpresaService {
         return new EmpresaDTOResponse(model, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
     }
 
-    public Mensaje bloquedCount(UUID id) {
+    public void bloquedCount(UUID id) {
         var model = this.findById(id);
-        if (!model.getEnabled())
-            return new Mensaje("La empresa esta deshabilitada");
+        empresaEnabled.validEmpresaEnabled(id);
         model.setBloqued(!model.getBloqued());
         empresaRepository.save(model);
-        return new Mensaje("");
     }
 
     @Transactional

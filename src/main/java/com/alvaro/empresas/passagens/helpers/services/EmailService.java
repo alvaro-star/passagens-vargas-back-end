@@ -9,17 +9,19 @@ import org.springframework.stereotype.Service;
 @Service
 public class EmailService {
     @Value("${spring.mail.username}")
-    private String enviador;
+    private String sender;
+    public final String messageEmailNotSended = "El mensaje no pudo ser enviado";
+
     @Autowired
     private JavaMailSender mailSender;
 
     public boolean mandarEmail(String destino, String assunto, String mensaje) {
-        if (!destino.equals(enviador)) {
+        if (!destino.equals(sender)) {
             var message = new SimpleMailMessage();
             message.setTo(destino);
             message.setSubject(assunto);
             message.setText(mensaje);
-            message.setFrom(enviador);
+            message.setFrom(sender);
             mailSender.send(message);
             return true;
         }

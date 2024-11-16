@@ -1,10 +1,10 @@
 package com.alvaro.empresas.passagens.resources;
 
-import com.alvaro.empresas.passagens.helpers.Mensaje;
 import com.alvaro.empresas.passagens.dtos.precios.PrecioDTO;
 import com.alvaro.empresas.passagens.dtos.precios.PrecioDTOResponseViaje;
 import com.alvaro.empresas.passagens.dtos.precios.PrecioDTOUpdate;
 import com.alvaro.empresas.passagens.helpers.beans.MyUserComponent;
+import com.alvaro.empresas.passagens.helpers.validators.EmpresaEnabled;
 import com.alvaro.empresas.passagens.services.PrecioService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -20,14 +20,12 @@ import java.util.UUID;
 @SecurityRequirement(name = "bearer-key")
 public class PrecioResource {
 
-    private final PrecioService precioService;
-    private final MyUserComponent myUserComponent;
-
     @Autowired
-    public PrecioResource(PrecioService precioService, MyUserComponent myUserComponent) {
-        this.precioService = precioService;
-        this.myUserComponent = myUserComponent;
-    }
+    private PrecioService precioService;
+    @Autowired
+    private MyUserComponent myUserComponent;
+    @Autowired
+    private EmpresaEnabled empresaEnabled;
 
     @GetMapping("/{id}")
     public ResponseEntity<PrecioDTO> getOne(@PathVariable(value = "id") UUID id) {
@@ -44,10 +42,9 @@ public class PrecioResource {
     public ResponseEntity<Object> update(@PathVariable(value = "id") UUID id, @RequestBody @Valid PrecioDTOUpdate dto) {
         var precio = precioService.findById(id);
         var usuario = myUserComponent.getUser();
-        if (!usuario.isMyEmpresa(precio.getEmpresa().getId()))
-            return ResponseEntity.badRequest().body(new Mensaje("Usted no esta relacionado con esta empresa"));
-        if (precio.getEmpresa().getBloqued() || !precio.getEmpresa().getEnabled())
-            return ResponseEntity.badRequest().body(new Mensaje("La empresa esta inhabilitada"));
+        usuario.validIfIsMyEmpresa(precio.getEmpresaId());
+        empresaEnabled.validEmpresaEnabled(precio.getEmpresaId());
+
         return ResponseEntity.ok(precioService.update(dto, precio));
     }
 }

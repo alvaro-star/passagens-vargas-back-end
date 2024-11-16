@@ -2,7 +2,7 @@ package com.alvaro.empresas.passagens.autobuses.models;
 
 import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTOCreate;
 import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTOUpdate;
-import com.alvaro.empresas.passagens.autobuses.enums.EnumPosicao;
+import com.alvaro.empresas.passagens.autobuses.enums.TypePosicao;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,13 +26,13 @@ public class PisoModel {
     private Integer nColunas;
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private EnumPosicao distribuicaoFileira;
+    private TypePosicao distribuicaoFileira;
     @Column(nullable = false)
     private Integer nPiso;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private EnumPosicao inicioContagem;
+    private TypePosicao inicioContagem;
     @Column(nullable = false)
     private Integer nSillas;
     @Column(nullable = false)
@@ -73,7 +73,7 @@ public class PisoModel {
         return nSillas + primeraSilla - 1;
     }
 
-    public PisoModel(Integer nLinhas, Integer nColunas, EnumPosicao distribuicaoFileira, Integer nPiso, EnumPosicao inicioContagem, Integer nSillas, Integer primeraSilla, AutobusModel autobus) {
+    public PisoModel(Integer nLinhas, Integer nColunas, TypePosicao distribuicaoFileira, Integer nPiso, TypePosicao inicioContagem, Integer nSillas, Integer primeraSilla, AutobusModel autobus) {
         this.nLinhas = nLinhas;
         this.nColunas = nColunas;
         this.distribuicaoFileira = distribuicaoFileira;

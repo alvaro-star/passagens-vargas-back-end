@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.autobuses.enums;
 
-public enum EnumTipoBus {
+public enum TypePiso {
     LEITO, TRADICIONAL;
 }
 

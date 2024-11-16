@@ -12,14 +12,13 @@ import java.util.List;
 
 @Component
 public class MyUserComponent {
-
     @Autowired
     private UsuarioRepository usuarioRepository;
+
 
     public UsuarioBean getUser() {
         var usuario = SecurityContextHolder.getContext().getAuthentication();
         List<String> roles = usuario.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
-
         var usuarioModel = usuarioRepository.findByEmail(usuario.getName());
         return new UsuarioBean(usuarioModel.orElseThrow(() -> new ObjectNotFoundException(0, UsuarioModel.class.getName())), roles);
     }

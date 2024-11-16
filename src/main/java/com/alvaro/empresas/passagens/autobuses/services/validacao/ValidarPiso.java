@@ -2,17 +2,15 @@ package com.alvaro.empresas.passagens.autobuses.services.validacao;
 
 import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTO;
 import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTOCreate;
-import com.alvaro.empresas.passagens.autobuses.enums.EnumPosicao;
+import com.alvaro.empresas.passagens.autobuses.enums.TypePosicao;
 import com.alvaro.empresas.passagens.autobuses.repositories.AutobusRepository;
 import com.alvaro.empresas.passagens.configurations.exceptions.FieldMessage;
+import com.alvaro.empresas.passagens.configurations.exceptions.InternalException.ValidationWithErrorListExceptions;
 import com.alvaro.empresas.passagens.services.validacao.FieldMessageItemList;
 import com.alvaro.empresas.passagens.services.validacao.FieldMessageList;
-import com.alvaro.empresas.passagens.services.validacao.ValidationErrorsWithList;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -24,31 +22,26 @@ public class ValidarPiso {
     @Autowired
     private AutobusRepository autobusRepository;
 
-    public ValidationErrorsWithList validarAutobusDTO(BindingResult bindingResult, AutobusDTO dto) {
+    public void validarAutobusDTO(BindingResult bindingResult, AutobusDTO dto) {
         int i;
         FieldMessageItemList itemList;
+        List<FieldMessageList> errorsList = new ArrayList<>();
         List<FieldMessageItemList> itensErrados = new ArrayList<>();
-        ValidationErrorsWithList err = new ValidationErrorsWithList(
-                System.currentTimeMillis(),
-                HttpStatus.UNPROCESSABLE_ENTITY.value(),
-                "Erro de Validacao",
-                "Erro durante a validacao",
-                "/autobuses");
-        for (FieldError erro : bindingResult.getFieldErrors())
-            err.addError(erro.getField(), erro.getDefaultMessage());
+        List<FieldMessage> errors = new ArrayList<>();
+        bindingResult.getFieldErrors().forEach(error -> errors.add(new FieldMessage(error)));
 
         if (!bindingResult.hasFieldErrors("placa"))
             if (autobusRepository.existsByPlaca(dto.placa()))
-                err.addError("placa", "La placa ya esta registrada");
+                errors.add(new FieldMessage("placa", "La placa ya esta registrada"));
 
         for (i = 0; i < dto.pisos().size(); i++) {
             itemList = validarPisoDTO(i, dto.pisos().get(i));
-            if (itemList != null)
-                itensErrados.add(itemList);
+            if (itemList != null) itensErrados.add(itemList);
         }
         if (!itensErrados.isEmpty())
-            err.addErrorList(new FieldMessageList("pisos", itensErrados));
-        return err;
+            errorsList.add(new FieldMessageList("pisos", itensErrados));
+        if (!errorsList.isEmpty() || !errors.isEmpty())
+            throw new ValidationWithErrorListExceptions("Erro de validacao", errors, errorsList);
     }
 
     private static FieldMessageItemList validarPisoDTO(int indice, PisoDTOCreate dto) {
@@ -93,7 +86,7 @@ public class ValidarPiso {
         return "";
     }
 
-    private static String validarDistribuicaoFileira(EnumPosicao distribuicaoFileira) {
+    private static String validarDistribuicaoFileira(TypePosicao distribuicaoFileira) {
         if (distribuicaoFileira == null)
             return "No puede ser un valor nulo";
         return "";
