@@ -30,7 +30,7 @@ public class FacturaPasajeResource {
 
 
     @GetMapping("/{idViaje}/from/viaje")
-    public ResponseEntity<Page<FacturaPasajeDTO>> findAll(@PathVariable(value = "idViaje") UUID idViaje,
+    public ResponseEntity<Page<FacturaPasajeDTO>> findAll(@PathVariable UUID idViaje,
                                                           @PageableDefault(sort = "created_at", direction = Sort.Direction.DESC) Pageable pageable) {
         if (idViaje != null)
             return ResponseEntity.ok(facturaPasajeService.findAllFromViaje(idViaje, pageable));
@@ -38,7 +38,7 @@ public class FacturaPasajeResource {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    public ResponseEntity<Object> pagarQR(@PathVariable(value = "id") UUID id) {
+    public ResponseEntity<Object> pagarQR(@PathVariable UUID id) {
         if (facturaPasajeService.pagarQr(id))
             return ResponseEntity.ok(new Mensaje("El pago fue hecho con exito"));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Mensaje("Falla ala hora del pago"));

@@ -6,8 +6,8 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 public class GeneralException extends RuntimeException {
-    private HttpStatus status;
-    private Mensaje mensaje;
+    private final HttpStatus status;
+    private final Mensaje mensaje;
 
     public GeneralException(HttpStatus status, String message) {
         super(message);

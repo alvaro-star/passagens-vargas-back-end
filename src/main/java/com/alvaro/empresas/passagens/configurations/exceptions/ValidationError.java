@@ -18,10 +18,6 @@ public class ValidationError extends StandardError {
         super(timestamp, status, error, message, path);
     }
 
-    public List<FieldMessage> getErrors() {
-        return errors;
-    }
-
     public void addError(String fieldName, String mensagem) {
         errors.add(new FieldMessage(fieldName, mensagem));
     }

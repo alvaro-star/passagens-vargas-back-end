@@ -42,9 +42,7 @@ public class UsuarioBean {
     }
 
     public void validIfIsMyEmpresa(UUID idEmpresa) {
-        if (idEmpresa == null)
-            throw new GeneralException("El usuario no esta relacionado con ninguna empresa");
-        if (this.idEmpresa.equals(idEmpresa))
+        if (!isMyEmpresa(idEmpresa))
             throw new GeneralException("El usuario no esta relacionado con esta empresa");
     }
 

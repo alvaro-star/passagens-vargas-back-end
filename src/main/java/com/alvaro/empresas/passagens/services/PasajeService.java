@@ -190,6 +190,34 @@ public class PasajeService {
         return pago.getId();
     }
 
+    /*public List<List<Integer>> dividirListas(PasajesDTOVenta dto, ViajeModel viaje) {
+        LinkedList<Integer> pilha = new LinkedList<>();
+        dto.pasajes().forEach(pasaje -> pilha.add(pasaje.nSilla()));
+        int nPisos = viaje.getAutobus().getPisos().size();
+        List<PisoModel> pisos = new ArrayList<>();
+
+        List<List<Integer>> sillasOfPiso = new ArrayList<>();
+
+        for (int i = 1; i <= nPisos; i++) {
+            pisos.add(viaje.getAutobus().getPisoByNumero(i));
+            sillasOfPiso.add(new ArrayList<>());
+        }
+
+        boolean hasInsert;
+        while (!pilha.isEmpty()) {
+            int nSilla = pilha.removeFirst();
+            hasInsert = false;
+            for (int i = 0; i < nPisos; i++) {
+                if (pisos.get(i).hasNSilla(nSilla)) {
+                    sillasOfPiso.get(0).add(nSilla);
+                    hasInsert = true;
+                }
+            }
+            if (!hasInsert) throw new ValidationException("pasajes", "Una delas sillas es invalido");
+        }
+        return sillasOfPiso;
+    }*/
+
     public List<PasajeDTOEmpresaResponse> getPasajesFromPrecio(UUID idPrecio) {
         return pasajeRepository.findByPrecioIdAndEstaPagado(idPrecio, true).stream().map(PasajeDTOEmpresaResponse::new).toList();
     }

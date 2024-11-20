@@ -69,6 +69,10 @@ public class PisoModel {
         return posicionesConvert;
     }
 
+    public boolean hasNSilla(Integer nSilla) {
+        return nSilla >= primeraSilla && nSilla <= getUltimaSilla();
+    }
+
     public Integer getUltimaSilla() {
         return nSillas + primeraSilla - 1;
     }

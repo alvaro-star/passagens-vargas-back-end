@@ -1,6 +1,7 @@
 package com.alvaro.empresas.passagens.security;
 
-import com.alvaro.empresas.passagens.configurations.RoutesConfiguration;
+import com.alvaro.empresas.passagens.security.configurations.CorsCustomConfiguration;
+import com.alvaro.empresas.passagens.security.configurations.RoutesConfiguration;
 import com.alvaro.empresas.passagens.security.jwt.SecurityFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -16,9 +17,6 @@ import org.springframework.security.config.annotation.web.configurers.HeadersCon
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
@@ -26,10 +24,13 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class MainSecurity {
 
     @Autowired
-    SecurityFilter securityFilter;
-
+    private SecurityFilter securityFilter;
     @Autowired
     private Environment env;
+    @Autowired
+    private RoutesConfiguration routesConfiguration;
+    @Autowired
+    private CorsCustomConfiguration corsCustomConfiguration;
 
     private boolean isProfileActive(String name) {
         for (String activeProfile : env.getActiveProfiles())
@@ -42,14 +43,15 @@ public class MainSecurity {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         var http = httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(cors -> cors.configurationSource(corsConfigurationSourceMy()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         if (isProfileActive("h2") || isProfileActive("mysql"))
-            http.authorizeHttpRequests(RoutesConfiguration::loadDevRoutes)
+            http.authorizeHttpRequests(routesConfiguration::loadDevRoutes)
+                    .cors(corsCustomConfiguration::loadDevCors)
                     .headers(h -> h.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
         else if (isProfileActive("prod"))
-            http.authorizeHttpRequests(RoutesConfiguration::loadProdRoutes);
-        else http.authorizeHttpRequests(RoutesConfiguration::loadDefaultRoutes);
+            http.cors(corsCustomConfiguration::loadProdCors)
+                    .authorizeHttpRequests(routesConfiguration::loadProdRoutes);
+        else http.authorizeHttpRequests(routesConfiguration::loadDefaultRoutes);
         return http.addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
@@ -57,16 +59,5 @@ public class MainSecurity {
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
-    }
-
-    @Bean
-    public CorsConfigurationSource corsConfigurationSourceMy() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOrigin("*");
-        configuration.addAllowedMethod("*");
-        configuration.addAllowedHeader("*");
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
     }
 }

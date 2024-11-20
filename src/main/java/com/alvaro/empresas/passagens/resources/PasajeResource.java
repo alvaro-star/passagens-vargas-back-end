@@ -64,7 +64,6 @@ public class PasajeResource {
         return ResponseEntity.ok(pasajeService.getPasajesFromPrecio(idPrecio));
     }
 
-
     public ResponseEntity<Object> save(@RequestBody @Valid PasajesDTO dto, BindingResult bindingResult) {//Venta de pasajes al publico
         ValidationErrorsWithList validacao;
         validacao = ValidarCompraPasajes.validarPasajesDTO(bindingResult, dto, "/pasajes");

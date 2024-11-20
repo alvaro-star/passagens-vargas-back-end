@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
 
@@ -75,6 +76,11 @@ public class PasajeModel {
     private FacturaPasajeModel facturaPasaje;
     @Column(name = "fk_idtb_factura_pasaje", updatable = false, insertable = false)
     private UUID facturaPasajeId;
+
+    public String getNacimentoString() {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        return sdf.format(nascimento);
+    }
 
     public PasajeModel(PasajeDTO pasajeDTO, Boolean compradoWeb, BigDecimal precioPagado, Boolean estaPagado, Boolean enEfectivo, ParadaModel salida, ParadaModel destino, PrecioModel precio, FacturaPasajeModel facturaPasaje) {
         this.nSilla = pasajeDTO.nSilla();

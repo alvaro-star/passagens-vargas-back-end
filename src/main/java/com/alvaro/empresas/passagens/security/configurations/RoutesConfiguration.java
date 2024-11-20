@@ -1,11 +1,13 @@
-package com.alvaro.empresas.passagens.configurations;
+package com.alvaro.empresas.passagens.security.configurations;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
+import org.springframework.stereotype.Component;
 
+@Component
 public class RoutesConfiguration {
-    private static void loadCommonRoutes(AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry routesConfigurations) {
+    private void loadCommonRoutes(AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry routesConfigurations) {
         routesConfigurations
                 .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/auth/refresh").permitAll()
@@ -19,7 +21,7 @@ public class RoutesConfiguration {
                 .requestMatchers(HttpMethod.GET, "/ciudades/{nombre}/like").permitAll();
     }
 
-    public static void loadDevRoutes(AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry routesConfigurations) {
+    public void loadDevRoutes(AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry routesConfigurations) {
         loadCommonRoutes(routesConfigurations);
         routesConfigurations.requestMatchers(HttpMethod.GET, "/facturas/{idEmpresa}").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
@@ -29,12 +31,12 @@ public class RoutesConfiguration {
                 .anyRequest().authenticated();
     }
 
-    public static void loadProdRoutes(AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry routesConfigurations) {
+    public void loadProdRoutes(AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry routesConfigurations) {
         loadCommonRoutes(routesConfigurations);
         routesConfigurations.anyRequest().authenticated();
     }
 
-    public static void loadDefaultRoutes(AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry routesConfigurations) {
+    public void loadDefaultRoutes(AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry routesConfigurations) {
         routesConfigurations
                 .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
                 .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()

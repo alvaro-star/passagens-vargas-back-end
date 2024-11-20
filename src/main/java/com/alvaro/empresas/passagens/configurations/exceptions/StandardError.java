@@ -7,13 +7,14 @@ import java.io.Serializable;
 
 @Getter
 @Setter
-public class StandardError implements Serializable{
+public class StandardError implements Serializable {
 
     private static final long serialVersionUIDLONG = 1L;
     private Long timestamp;
     private Integer status;
     private String error;
     private String message;
+    private String conteudo;
     private String path;
 
 
@@ -22,6 +23,7 @@ public class StandardError implements Serializable{
         this.status = status;
         this.error = error;
         this.message = message;
+        this.conteudo = message;
         this.path = path;
     }
 }
