@@ -23,14 +23,12 @@ public class AuthResource {
 
     @PostMapping("/login")
     public ResponseEntity<Object> login(@RequestBody @Valid LoginDto loginDto) {
-        var loginDtoResponse = authService.login(loginDto);
-        return ResponseEntity.ok(loginDtoResponse);
+        return ResponseEntity.ok(authService.login(loginDto));
     }
 
     @PostMapping("/refresh")
     public ResponseEntity<Object> refresh(@RequestBody Map<String, String> request) {
-        var loginDtoResponse = authService.refresh(request.get("refreshToken"));
-        return ResponseEntity.ok(loginDtoResponse);
+        return ResponseEntity.ok(authService.refresh(request.get("refreshToken")));
     }
 
     //Es necessario crear una rutina para el registro de pasajes, una en el que se envien email con el codigo de verificacion

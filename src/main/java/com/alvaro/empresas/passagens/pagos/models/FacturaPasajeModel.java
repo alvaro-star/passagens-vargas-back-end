@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.pagos.models;
 
-import com.alvaro.empresas.passagens.enums.TipoPagamento;
+import com.alvaro.empresas.passagens.enums.TipoPago;
 import com.alvaro.empresas.passagens.models.ContactoModel;
 import com.alvaro.empresas.passagens.models.PasajeModel;
 import com.alvaro.empresas.passagens.models.ViajeModel;
@@ -20,7 +20,7 @@ import java.util.List;
 @NoArgsConstructor
 @Table(name = "tb_factura_pasaje", indexes = @Index(name = "idxtb_viaje_fk_idtb_viaje_created_at", columnList = "fk_idtb_viaje, created_at"))
 @DiscriminatorValue("PASAJE")
-public class FacturaPasajeModel extends FacturaModel {
+public class FacturaPasajeModel extends FacturaAbstractModel {
     @Column(nullable = false)
     private BigDecimal descuento;
     @Column(nullable = false)
@@ -29,7 +29,7 @@ public class FacturaPasajeModel extends FacturaModel {
     private Boolean estaPagado;
     @Column(nullable = false, name = "metodo_pago")
     @Enumerated(EnumType.STRING)
-    private TipoPagamento metodoPago;
+    private TipoPago metodoPago;
     private LocalDateTime fechaPago;
 
     @OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "facturaPasaje")
@@ -46,7 +46,7 @@ public class FacturaPasajeModel extends FacturaModel {
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "facturaPasaje")
     private List<PasajeModel> pasajes;
 
-    public FacturaPasajeModel(BigDecimal valorTotal, BigDecimal descuento, BigDecimal tasaServicio, Boolean estaPagado, TipoPagamento metodoPago, ViajeModel viajeModel, LocalDateTime fechaPago, ContactoModel contacto) {
+    public FacturaPasajeModel(BigDecimal valorTotal, BigDecimal descuento, BigDecimal tasaServicio, Boolean estaPagado, TipoPago metodoPago, ViajeModel viajeModel, LocalDateTime fechaPago, ContactoModel contacto) {
         super(valorTotal);
         this.descuento = descuento;
         this.tasaServicio = tasaServicio;

@@ -2,13 +2,14 @@ package com.alvaro.empresas.passagens.services.relatorios;
 
 import com.alvaro.empresas.passagens.dtos.viajes.JPQL.PasajeJPQLBusca;
 import com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQLRelatorio;
-import com.alvaro.empresas.passagens.enums.TipoPagamento;
+import com.alvaro.empresas.passagens.enums.TipoPago;
 import com.alvaro.empresas.passagens.helpers.DateAuxiliarFunctions;
 import com.alvaro.empresas.passagens.helpers.services.EmailService;
 import com.alvaro.empresas.passagens.helpers.thymeleaf.CiudadTHModel;
 import com.alvaro.empresas.passagens.helpers.thymeleaf.MetodoTHModel;
 import com.alvaro.empresas.passagens.helpers.thymeleaf.PDFThymeleaf;
 import com.alvaro.empresas.passagens.models.PrecioModel;
+import com.alvaro.empresas.passagens.pagos.dtos.RelatorioSolicitudDTO;
 import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import com.alvaro.empresas.passagens.paradas.services.LugarService;
 import com.alvaro.empresas.passagens.repositories.PasajeRepository;
@@ -18,11 +19,13 @@ import com.itextpdf.kernel.geom.PageSize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.Model;
 import org.thymeleaf.context.Context;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
 
 @Service
 public class RelatorioService {
@@ -50,10 +53,10 @@ public class RelatorioService {
 
     // Categorizar las ciudades por el numero de pasajeros que van a ella y no por os autobuses
     // Ordenar las lisdas de ciudades con base en el numero de pasajes vendidos
-    public byte[] makeRelatorioMensual(UUID idEmpresa, Date dateAnalize, Model model) {
-        var empresa = empresaService.findById(idEmpresa);
-        LocalDateTime inicio = dateAuxiliarFunctions.getFirstDayOfMonthDate(dateAnalize);
-        LocalDateTime fim = dateAuxiliarFunctions.getLastDayOfMonthDate(dateAnalize);
+    public byte[] makeRelatorioMensual(RelatorioSolicitudDTO solicitudDTO) {
+        var empresa = empresaService.findById(solicitudDTO.idEmpresa());
+        LocalDateTime inicio = dateAuxiliarFunctions.getFirstDayOfMonthDate(solicitudDTO.data());
+        LocalDateTime fim = dateAuxiliarFunctions.getLastDayOfMonthDate(solicitudDTO.data());
         List<ViajeDTOJPQLRelatorio> viajes = tiempoViajeService.findViajesFromEmpresa(empresa, inicio, fim);
 
         HashMap<Integer, Integer> salidasIdNPasajes = new HashMap<>(), destinosIdNPasajes = new HashMap<>();
@@ -61,7 +64,7 @@ public class RelatorioService {
         RelatorioModel relatorio = new RelatorioModel(empresa);
 
         HashMap<String, HashMetodoPagamentoValor> pagamentosWeb = new HashMap<>(), pagamentosNoWeb = new HashMap<>();
-        for (TipoPagamento metodo : TipoPagamento.values()) {
+        for (TipoPago metodo : TipoPago.values()) {
             pagamentosWeb.put(metodo.toString(), new HashMetodoPagamentoValor(metodo.toString(), 0.0));
             pagamentosNoWeb.put(metodo.toString(), new HashMetodoPagamentoValor(metodo.toString(), 0.0));
         }
@@ -96,7 +99,7 @@ public class RelatorioService {
         for (LugarModel destino : destinos)
             destinosTHModels.add(new CiudadTHModel(destino.getCiudad().getNombre(), destinosIdNPasajes.get(destino.getId())));
 
-        for (TipoPagamento value : TipoPagamento.values()) {
+        for (TipoPago value : TipoPago.values()) {
             metodos.add(new MetodoTHModel(value.toString(), relatorio.getDineroPorMetodoWeb().get(value.toString()).valor, relatorio.getDineroPorMetodoNoWeb().get(value.toString()).valor));
         }
 

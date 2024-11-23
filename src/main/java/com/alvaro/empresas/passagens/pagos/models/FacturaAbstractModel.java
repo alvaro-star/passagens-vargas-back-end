@@ -17,7 +17,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @DiscriminatorColumn(name = "tipo", discriminatorType = DiscriminatorType.STRING)
-public abstract class FacturaModel {
+public abstract class FacturaAbstractModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -28,14 +28,14 @@ public abstract class FacturaModel {
     private BigDecimal valorTotal;
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
+    @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    public FacturaModel(BigDecimal valorTotal) {
+    public FacturaAbstractModel(BigDecimal valorTotal) {
         this.valorTotal = valorTotal;
     }
 }

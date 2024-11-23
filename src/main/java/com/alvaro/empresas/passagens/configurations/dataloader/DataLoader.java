@@ -6,7 +6,7 @@ import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import com.alvaro.empresas.passagens.autobuses.repositories.AutobusRepository;
 import com.alvaro.empresas.passagens.autobuses.repositories.PisoRepository;
 import com.alvaro.empresas.passagens.enums.TypeParada;
-import com.alvaro.empresas.passagens.enums.TipoPagamento;
+import com.alvaro.empresas.passagens.enums.TipoPago;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.models.PasajeModel;
 import com.alvaro.empresas.passagens.models.PrecioModel;
@@ -122,7 +122,7 @@ public class DataLoader {
                 for (PisoModel piso : pisos) {
                     var precio = precioRepository.save(new PrecioModel(precioBruto, piso.getNPiso(), piso.getNSillas(), viaje, viaje.getEmpresa()));
                     precioBruto = precioBruto.subtract(BigDecimal.valueOf(20));
-                    var facturaPasaje = new FacturaPasajeModel(precioBruto, BigDecimal.ZERO, BigDecimal.ZERO, true, TipoPagamento.EFECTIVO, precio.getViaje(), LocalDateTime.now(), null);
+                    var facturaPasaje = new FacturaPasajeModel(precioBruto, BigDecimal.ZERO, BigDecimal.ZERO, true, TipoPago.EFECTIVO, precio.getViaje(), LocalDateTime.now(), null);
                     facturaPasajeRepository.save(facturaPasaje);
 
                     var pasaje = new PasajeModel(piso.getPrimeraSilla() + 3, false, precioBruto, true, true, "Alvaro Vargas Alvarez", "3308731", new Date(2000, 1, 1), paradas.get(0), paradas.get(2), precio, facturaPasaje);

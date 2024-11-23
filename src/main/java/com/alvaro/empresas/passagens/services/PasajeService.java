@@ -7,7 +7,7 @@ import com.alvaro.empresas.passagens.dtos.pasajes.PasajeDTO;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajeDTOEmpresaResponse;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTO;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTOVenta;
-import com.alvaro.empresas.passagens.enums.TipoPagamento;
+import com.alvaro.empresas.passagens.enums.TipoPago;
 import com.alvaro.empresas.passagens.helpers.PasajesPDF;
 import com.alvaro.empresas.passagens.models.PasajeModel;
 import com.alvaro.empresas.passagens.models.PrecioModel;
@@ -93,7 +93,7 @@ public class PasajeService {
         validarSillas(pisoEscolhido, precio, dto.pasajes());
 
         BigDecimal valorTotal = precio.getPrecio().multiply(BigDecimal.valueOf(dto.pasajes().size()));
-        FacturaPasajeModel pago = facturaPasajeService.saveCliente(dto.contacto(), valorTotal, null, TipoPagamento.QR);
+        FacturaPasajeModel pago = facturaPasajeService.saveCliente(dto.contacto(), valorTotal, null, TipoPago.QR);
 
         viaje.addValorArrecadadoWeb(pago.getValorTotal());
 
@@ -158,7 +158,7 @@ public class PasajeService {
         FacturaPasajeModel pago = facturaPasajeService.saveEmpresa(valorTotal, viaje, dto.metodo(), estaPago);
 
         viaje.addValorArrecadadoNoWeb(pago.getValorTotal());
-        if (dto.metodo().equals(TipoPagamento.EFECTIVO)) {
+        if (dto.metodo().equals(TipoPago.EFECTIVO)) {
             enEfectivo = true;
             viaje.addValorArrecadadoEfectivo(pago.getValorTotal());
         }

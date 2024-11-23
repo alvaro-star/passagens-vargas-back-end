@@ -1,5 +1,5 @@
 package com.alvaro.empresas.passagens.enums;
 
-public enum TipoPagamento {
+public enum TipoPago {
     QR, EFECTIVO, DEBITO, CREDITO;
 }

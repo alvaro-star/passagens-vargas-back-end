@@ -3,7 +3,7 @@ package com.alvaro.empresas.passagens.pagos.services;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
 import com.alvaro.empresas.passagens.dtos.FacturaPasajeDTO;
 import com.alvaro.empresas.passagens.dtos.pasajes.ContactoDTO;
-import com.alvaro.empresas.passagens.enums.TipoPagamento;
+import com.alvaro.empresas.passagens.enums.TipoPago;
 import com.alvaro.empresas.passagens.helpers.PasajesPDF;
 import com.alvaro.empresas.passagens.models.ContactoModel;
 import com.alvaro.empresas.passagens.models.PasajeModel;
@@ -40,11 +40,11 @@ public class FacturaPasajeService {
     @Autowired
     private ViajeRepository viajeRepository;
 
-    public FacturaPasajeModel saveCliente(ContactoDTO contactoDTO, BigDecimal precioTotal, ViajeModel viaje, TipoPagamento metodo) {
+    public FacturaPasajeModel saveCliente(ContactoDTO contactoDTO, BigDecimal precioTotal, ViajeModel viaje, TipoPago metodo) {
         BigDecimal tasa = new BigDecimal("0.1");//Cuanto será cobrad por el servicio
         BigDecimal tasaServicio = precioTotal.multiply(tasa);
 
-        if (!metodo.equals(TipoPagamento.QR))
+        if (!metodo.equals(TipoPago.QR))
             throw new ValidationException("metodo", "Metodo de Pago invalido");
 
         var contactoModel = new ContactoModel(contactoDTO);
@@ -52,7 +52,7 @@ public class FacturaPasajeService {
         return facturaPasajeRepository.save(pago);
     }
 
-    public FacturaPasajeModel saveEmpresa(BigDecimal precioTotal, ViajeModel viaje, TipoPagamento metodo, boolean estaPago) {
+    public FacturaPasajeModel saveEmpresa(BigDecimal precioTotal, ViajeModel viaje, TipoPago metodo, boolean estaPago) {
         LocalDateTime fechaPago = LocalDateTime.now();
         BigDecimal tasaServicio = BigDecimal.ZERO;
         var pago = new FacturaPasajeModel(precioTotal, BigDecimal.valueOf(0), tasaServicio, estaPago, metodo, viaje, fechaPago, null);

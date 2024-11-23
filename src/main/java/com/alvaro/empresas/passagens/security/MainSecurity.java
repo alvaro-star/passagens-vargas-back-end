@@ -2,6 +2,7 @@ package com.alvaro.empresas.passagens.security;
 
 import com.alvaro.empresas.passagens.security.configurations.CorsCustomConfiguration;
 import com.alvaro.empresas.passagens.security.configurations.RoutesConfiguration;
+import com.alvaro.empresas.passagens.security.configurations.exceptions.ExceptionsHandlerCustomConfiguration;
 import com.alvaro.empresas.passagens.security.jwt.SecurityFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -31,6 +32,8 @@ public class MainSecurity {
     private RoutesConfiguration routesConfiguration;
     @Autowired
     private CorsCustomConfiguration corsCustomConfiguration;
+    @Autowired
+    private ExceptionsHandlerCustomConfiguration exceptionsHandlerConfiguration;
 
     private boolean isProfileActive(String name) {
         for (String activeProfile : env.getActiveProfiles())
@@ -52,7 +55,9 @@ public class MainSecurity {
             http.cors(corsCustomConfiguration::loadProdCors)
                     .authorizeHttpRequests(routesConfiguration::loadProdRoutes);
         else http.authorizeHttpRequests(routesConfiguration::loadDefaultRoutes);
-        return http.addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
+
+        return http.exceptionHandling(exceptionsHandlerConfiguration::loadConfiguration)
+                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

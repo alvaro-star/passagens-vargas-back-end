@@ -34,7 +34,6 @@ public class AutobusService {
     private AutobusRepository autobusRepository;
     @Autowired
     private EmpresaService empresaService;
-
     @Autowired
     private EmpresaEnabled empresaEnabled;
     @Autowired

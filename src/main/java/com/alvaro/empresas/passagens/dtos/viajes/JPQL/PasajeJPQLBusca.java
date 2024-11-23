@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.dtos.viajes.JPQL;
 
-import com.alvaro.empresas.passagens.enums.TipoPagamento;
+import com.alvaro.empresas.passagens.enums.TipoPago;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -12,7 +12,7 @@ public record PasajeJPQLBusca(
         Boolean compradoWeb,
         UUID facturaRembolsoId,
         Boolean enEfectivo,
-        TipoPagamento metodoPago,
+        TipoPago metodoPago,
         BigDecimal precioPagado
 ) {
 }

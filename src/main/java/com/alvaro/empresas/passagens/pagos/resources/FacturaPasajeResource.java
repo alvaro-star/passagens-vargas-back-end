@@ -28,7 +28,6 @@ public class FacturaPasajeResource {
     @Autowired
     private FacturaPasajeService facturaPasajeService;
 
-
     @GetMapping("/{idViaje}/from/viaje")
     public ResponseEntity<Page<FacturaPasajeDTO>> findAll(@PathVariable UUID idViaje,
                                                           @PageableDefault(sort = "created_at", direction = Sort.Direction.DESC) Pageable pageable) {
@@ -45,7 +44,7 @@ public class FacturaPasajeResource {
     }
 
     @GetMapping("/{id}/download")
-    public ResponseEntity<byte[]> getFactura(@PathVariable(value = "id") UUID id) {
+    public ResponseEntity<byte[]> getFactura(@PathVariable UUID id) {
         byte[] pasajesPDF = facturaPasajeService.downloadFactura(id);
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=pasajes.pdf");

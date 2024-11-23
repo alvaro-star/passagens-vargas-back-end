@@ -1,7 +1,6 @@
 package com.alvaro.empresas.passagens.pagos.models;
 
 import com.alvaro.empresas.passagens.models.EmpresaModel;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,10 +17,10 @@ import java.time.LocalDateTime;
         columnList = "fk_idtb_empresa, inicio_conteo"))
 @DiscriminatorValue("EMPRESA")
 @NoArgsConstructor
-public class FacturaEmpresaModel extends FacturaModel {
+public class FacturaEmpresaModel extends FacturaAbstractModel {
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_empresa")
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private EmpresaModel empresa;
     @Column(nullable = false)
     private LocalDateTime inicioConteo;

@@ -58,7 +58,6 @@ public class PisoService {
         var pisoModel = new PisoModel(dto, nPiso, nPrimeraSilla);
         pisoModel.setAutobus(autobusModel);
         var saved = pisoRepository.save(pisoModel);
-
         return new PisoDTOResponse(saved);
     }
 

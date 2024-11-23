@@ -2,7 +2,6 @@ package com.alvaro.empresas.passagens.pagos.models;
 
 
 import com.alvaro.empresas.passagens.models.PasajeModel;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,11 +15,11 @@ import java.math.BigDecimal;
 @Getter
 @NoArgsConstructor
 @DiscriminatorValue("REMBOLSO")
-public class FacturaRembolsoModel extends FacturaModel {
+public class FacturaRembolsoModel extends FacturaAbstractModel {
     @ManyToOne
     @JoinColumn(name = "fk_idtb_factura_pasaje")
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private FacturaPasajeModel facturaPasaje;
+
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "facturaRembolso")
     private PasajeModel pasaje;
 

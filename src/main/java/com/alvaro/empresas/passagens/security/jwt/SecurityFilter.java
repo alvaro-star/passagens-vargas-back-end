@@ -2,7 +2,6 @@ package com.alvaro.empresas.passagens.security.jwt;
 
 import com.alvaro.empresas.passagens.security.repositories.UsuarioRepository;
 import com.alvaro.empresas.passagens.security.services.TokenService;
-import com.auth0.jwt.exceptions.JWTVerificationException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,26 +20,22 @@ import java.io.IOException;
 public class SecurityFilter extends OncePerRequestFilter {
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(SecurityFilter.class);
     @Autowired
-    TokenService tokenService;
+    private TokenService tokenService;
     @Autowired
-    UsuarioRepository usuarioRepository;
+    private UsuarioRepository usuarioRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
             var token = this.getToken(request);
-            var subject = tokenService.validateToken(token);
-            UserDetails user = usuarioRepository.findByLogin(subject);
-            if (user != null) {
-                var authenticate = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-                SecurityContextHolder.getContext().setAuthentication(authenticate);
+            if (!isNullOrBlank(token)) {
+                var subject = tokenService.validateToken(token);
+                if (!isNullOrBlank(subject)) {
+                    UserDetails user = usuarioRepository.findByLogin(subject);
+                    var authenticate = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+                    SecurityContextHolder.getContext().setAuthentication(authenticate);
+                }
             }
-        } catch (JWTVerificationException e) {
-            logger.error(e.getMessage());
-            //response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            //response.setContentType("application/json");
-            //response.getWriter().write("{\"conteudo\": \"Inicie Sesion nuevamente\"}");
-            //return; -> finaliza sem continuar
         } catch (Exception e) {
             logger.error(e.getMessage());
         }
@@ -49,8 +44,12 @@ public class SecurityFilter extends OncePerRequestFilter {
 
     private String getToken(HttpServletRequest request) {
         var authheader = request.getHeader("Authorization");
-        if (authheader != null && authheader.startsWith("Bearer"))
+        if (authheader != null && authheader.startsWith("Bearer "))
             return authheader.replace("Bearer ", "");
         return null;
+    }
+
+    private boolean isNullOrBlank(String value) {
+        return value == null || value.isBlank();
     }
 }

@@ -1,5 +1,6 @@
 package com.alvaro.empresas.passagens.security.configurations;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.CorsConfigurer;
@@ -9,23 +10,23 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Component
 public class CorsCustomConfiguration {
+    @Value("${spring.server.front-end.base_url}")
+    private String urlFrontBase;
 
-    public CorsConfigurer<HttpSecurity> loadDevCors(CorsConfigurer<HttpSecurity> cors) {
+    public void loadDevCors(CorsConfigurer<HttpSecurity> cors) {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.addAllowedOrigin("*");
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        //Aplica a configuracao a todos os endpoints
         source.registerCorsConfiguration("/**", configuration);
         cors.configurationSource(source);
-        return cors;
     }
 
-    public CorsConfigurer<HttpSecurity> loadProdCors(CorsConfigurer<HttpSecurity> cors) {
+    public void loadProdCors(CorsConfigurer<HttpSecurity> cors) {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOrigin("http://localhost:5173");
+        configuration.addAllowedOrigin(urlFrontBase);
         configuration.addAllowedMethod(HttpMethod.GET);
         configuration.addAllowedMethod(HttpMethod.POST);
         configuration.addAllowedMethod(HttpMethod.PUT);
@@ -36,6 +37,5 @@ public class CorsCustomConfiguration {
         source.registerCorsConfiguration("/**", configuration);
 
         cors.configurationSource(source);
-        return cors;
     }
 }
