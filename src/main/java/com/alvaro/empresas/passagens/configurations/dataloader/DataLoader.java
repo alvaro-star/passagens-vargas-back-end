@@ -5,8 +5,8 @@ import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import com.alvaro.empresas.passagens.autobuses.repositories.AutobusRepository;
 import com.alvaro.empresas.passagens.autobuses.repositories.PisoRepository;
-import com.alvaro.empresas.passagens.enums.TypeParada;
 import com.alvaro.empresas.passagens.enums.TipoPago;
+import com.alvaro.empresas.passagens.enums.TypeParada;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.models.PasajeModel;
 import com.alvaro.empresas.passagens.models.PrecioModel;
@@ -21,7 +21,10 @@ import com.alvaro.empresas.passagens.paradas.repositories.CiudadRepository;
 import com.alvaro.empresas.passagens.paradas.repositories.DepartamentoRepository;
 import com.alvaro.empresas.passagens.paradas.repositories.LugarRepository;
 import com.alvaro.empresas.passagens.paradas.repositories.ParadaRepository;
-import com.alvaro.empresas.passagens.repositories.*;
+import com.alvaro.empresas.passagens.repositories.EmpresaRepository;
+import com.alvaro.empresas.passagens.repositories.PasajeRepository;
+import com.alvaro.empresas.passagens.repositories.PrecioRepository;
+import com.alvaro.empresas.passagens.repositories.ViajeRepository;
 import com.alvaro.empresas.passagens.security.models.RoleList;
 import com.alvaro.empresas.passagens.security.models.RoleModel;
 import com.alvaro.empresas.passagens.security.models.UsuarioModel;
@@ -103,16 +106,16 @@ public class DataLoader {
 
                 List<ParadaModel> paradas = new ArrayList<>();
 
-                var parada = new ParadaModel(dataInicio, 10, TypeParada.SALIDA, lugares.get(0), viaje, viaje.getEmpresa());
+                var parada = new ParadaModel(dataInicio, 10, TypeParada.SALIDA, lugares.get(0), viaje);
                 dataInicio = dataInicio.plusHours(2);
                 paradas.add(parada);
                 for (int i = 1; i < 4; i++) {
                     dataInicio = dataInicio.plusHours(2);
-                    parada = new ParadaModel(dataInicio, 10, TypeParada.CAMINO, lugares.get(i), viaje, viaje.getEmpresa());
+                    parada = new ParadaModel(dataInicio, 10, TypeParada.CAMINO, lugares.get(i), viaje);
                     paradas.add(parada);
                 }
                 dataInicio = dataInicio.plusHours(2);
-                parada = new ParadaModel(dataInicio, 20, TypeParada.DESTINO, lugares.get(5), viaje, viaje.getEmpresa());
+                parada = new ParadaModel(dataInicio, 20, TypeParada.DESTINO, lugares.get(5), viaje);
                 paradas.add(parada);
 
 
@@ -120,7 +123,7 @@ public class DataLoader {
                 BigDecimal precioBruto = BigDecimal.valueOf(200);
                 BigDecimal valorTotal;
                 for (PisoModel piso : pisos) {
-                    var precio = precioRepository.save(new PrecioModel(precioBruto, piso.getNPiso(), piso.getNSillas(), viaje, viaje.getEmpresa()));
+                    var precio = precioRepository.save(new PrecioModel(precioBruto, piso.getNPiso(), piso.getNSillas(), viaje));
                     precioBruto = precioBruto.subtract(BigDecimal.valueOf(20));
                     var facturaPasaje = new FacturaPasajeModel(precioBruto, BigDecimal.ZERO, BigDecimal.ZERO, true, TipoPago.EFECTIVO, precio.getViaje(), LocalDateTime.now(), null);
                     facturaPasajeRepository.save(facturaPasaje);

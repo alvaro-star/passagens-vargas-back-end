@@ -3,10 +3,13 @@ package com.alvaro.empresas.passagens.repositories;
 import com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQL;
 import com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQLRelatorio;
 import com.alvaro.empresas.passagens.models.ViajeModel;
+import com.alvaro.empresas.passagens.paradas.dtos.JPQL.ViajeBuscaDTOJPQL;
+import com.alvaro.empresas.passagens.paradas.dtos.JPQL.ViajeEmpresaDTOJPQ;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -56,6 +59,44 @@ public interface ViajeRepository extends JpaRepository<ViajeModel, UUID> {
             "AND s.viaje.codigo = v.codigo AND s.tipo = 'SALIDA' " +
             "AND d.viaje.codigo = v.codigo AND d.tipo = 'DESTINO' AND d.dataHora >= :dataInicio")
     List<ViajeDTOJPQLRelatorio> findByEmpresaIdMakedInInterval(UUID empresaId, LocalDateTime dataInicio, LocalDateTime dataInicioAlterado, LocalDateTime dataFim);
+
+
+    @Query("SELECT new com.alvaro.empresas.passagens.paradas.dtos.JPQL.ViajeBuscaDTOJPQL(s.viaje.codigo, s.viaje.empresa.logo, s, d) " +
+            "FROM ParadaModel s, ParadaModel d " +
+            "WHERE s.lugar.id = :id_lugar_salida " +
+            "AND s.dataHora BETWEEN :data_start AND :data_end " +
+            "AND s.tipo != 'DESTINO' " +
+            "AND s.viaje.codigo = d.viaje.codigo " +
+            "AND d.lugar.id = :id_lugar_destino " +
+            "AND d.tipo != 'SALIDA'")
+    List<ViajeBuscaDTOJPQL> loadViajesDay(
+            @Param("id_lugar_salida") Integer idLugarSalida,
+            @Param("id_lugar_destino") Integer idLugarDestino,
+            @Param("data_start") LocalDateTime dataStart,
+            @Param("data_end") LocalDateTime dataEnd);
+
+    @Query("SELECT new com.alvaro.empresas.passagens.paradas.dtos.JPQL.ViajeEmpresaDTOJPQ(v, s, d) " +
+            "FROM ParadaModel s, ParadaModel d, ViajeModel v " +
+            "WHERE s.empresa.id = :id_empresa AND s.lugar.id = :id_lugar " +
+            "AND s.dataHora BETWEEN :data_start AND :data_end AND s.tipo != 'DESTINO' " +
+            "AND s.viaje.codigo = d.viaje.codigo AND d.tipo = 'DESTINO' " +
+            "AND v.codigo = s.viaje.codigo")
+    List<ViajeEmpresaDTOJPQ> loadViajesDayByEmpresaOnlySalida(@Param("id_empresa") UUID idEmpresa,
+                                                              @Param("id_lugar") Integer idLugar,
+                                                              @Param("data_start") LocalDateTime dataStart,
+                                                              @Param("data_end") LocalDateTime dataEnd);
+
+    @Query("SELECT new com.alvaro.empresas.passagens.paradas.dtos.JPQL.ViajeEmpresaDTOJPQ(v, s, d) " +
+            "FROM ParadaModel s, ParadaModel d, ViajeModel v " +
+            "WHERE s.empresa.id = :id_empresa AND s.lugar.id = :id_lugar_salida " +
+            "AND s.dataHora BETWEEN :data_start AND :data_end AND s.tipo != 'DESTINO' " +
+            "AND s.viaje.codigo = d.viaje.codigo AND d.lugar.id = :id_lugar_destino AND d.tipo != 'SALIDA' " +
+            "AND v.codigo = s.viaje.codigo")
+    List<ViajeEmpresaDTOJPQ> loadViajesDayByEmpresaId(@Param("id_empresa") UUID idEmpresa,
+                                                      @Param("id_lugar_salida") Integer idLugarSalida,
+                                                      @Param("id_lugar_destino") Integer idLugarDestino,
+                                                      @Param("data_start") LocalDateTime dataStart,
+                                                      @Param("data_end") LocalDateTime dataEnd);
 }
 
 /* No usage

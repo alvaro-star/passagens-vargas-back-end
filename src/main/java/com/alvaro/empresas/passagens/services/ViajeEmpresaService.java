@@ -139,7 +139,7 @@ public class ViajeEmpresaService {
 
         for (LugarModel lugarSalida : lugaresSalida) {
             for (LugarModel lugarDestino : lugaresDestino) {
-                List<ViajeEmpresaDTOJPQ> salidasDia = paradaRepository.loadViajesDayByEmpresaId(idEmpresa, lugarSalida.getId(), lugarDestino.getId(), startDay, endDay);
+                List<ViajeEmpresaDTOJPQ> salidasDia = viajeRepository.loadViajesDayByEmpresaId(idEmpresa, lugarSalida.getId(), lugarDestino.getId(), startDay, endDay);
                 for (ViajeEmpresaDTOJPQ ViajeEmpresaDTOJPQ : salidasDia) {
                     salidaDTO = new ParadaDTOComplete(ViajeEmpresaDTOJPQ.getSalida());
                     destinoDTO = new ParadaDTOComplete(ViajeEmpresaDTOJPQ.getDestino());
@@ -170,7 +170,7 @@ public class ViajeEmpresaService {
         List<PrecioDTO> precios;
 
         for (LugarModel lugarSalida : lugaresSalida) {
-            List<ViajeEmpresaDTOJPQ> salidasDia = paradaRepository.loadViajesDayByEmpresaOnlySalida(idEmpresa, lugarSalida.getId(), startDay, endDay);
+            List<ViajeEmpresaDTOJPQ> salidasDia = viajeRepository.loadViajesDayByEmpresaOnlySalida(idEmpresa, lugarSalida.getId(), startDay, endDay);
             for (ViajeEmpresaDTOJPQ ViajeEmpresaDTOJPQ : salidasDia) {
                 salidaDTO = new ParadaDTOComplete(ViajeEmpresaDTOJPQ.getSalida());
                 destinoDTO = new ParadaDTOComplete(ViajeEmpresaDTOJPQ.getDestino());
@@ -204,29 +204,26 @@ public class ViajeEmpresaService {
         autobusEnabled.validAutobusEnabled(dto.idAutobus());
         empresaEnabled.validEmpresaEnabled(autobus.getEmpresaId());
 
-        var lugarSalida = lugarRepository.findById(dto.salida().idLugar());
-        if (lugarSalida.isEmpty()) throw new ValidationException("salida.idLugar", "El lugarSalida no fue allado");
+        var lugarSalida = lugarRepository.findById(dto.idLugarSalida());
+        if (lugarSalida.isEmpty()) throw new ValidationException("idLugarSalida", "El lugarSalida no fue allado");
 
-        var lugarDestino = lugarRepository.findById(dto.destino().idLugar());
-        if (lugarDestino.isEmpty()) throw new ValidationException("destino.idLugar", "El lugarDestino no fue allado");
+        var lugarDestino = lugarRepository.findById(dto.idLugarDestino());
+        if (lugarDestino.isEmpty()) throw new ValidationException("idLugarDestino", "El lugarDestino no fue allado");
 
-        LocalDateTime dataHoraSalidaAjustada = dto.salida().dataHora().withSecond(0).withNano(0);
-        LocalDateTime dataHoraDestinoAjustada = dto.destino().dataHora().withSecond(0).withNano(0);
+        LocalDateTime dataHoraSalidaAjustada = dto.fechaSalida().withSecond(0).withNano(0);
+        LocalDateTime dataHoraDestino = dataHoraSalidaAjustada.plusHours(dto.horasViaje());
 
-        if (!dataHoraDestinoAjustada.isAfter(dataHoraSalidaAjustada))
-            throw new ValidationException("salida", "La salida posee un horario superior al del destino");
-        if (!tiempoViajeService.validarTempoMaximoViaje(dataHoraSalidaAjustada, dataHoraDestinoAjustada))
+        if (!tiempoViajeService.validarTempoMaximoViaje(dataHoraSalidaAjustada, dataHoraDestino))
             throw new ValidationException("destino.dataHora", "Un viaje puede durar maximo 3 dias");
 
-        boolean viajeInIntervalo = tiempoViajeService.existsViajesActiveFromAutobus(autobus, dataHoraSalidaAjustada, dataHoraDestinoAjustada);
+        boolean viajeInIntervalo = tiempoViajeService.existsViajesActiveFromAutobus(autobus, dataHoraSalidaAjustada, dataHoraDestino);
         if (viajeInIntervalo)
             throw new ValidationException("destino.dataHora", "Existe un viaje del autobus que ocurre en este intervalo");
 
-        var model = new ViajeModel(autobus, autobus.getEmpresa(), dataHoraSalidaAjustada);
-        viajeRepository.save(model);
+        var model = new ViajeModel(autobus, dataHoraSalidaAjustada);
 
-        var salida = new ParadaModel(dataHoraSalidaAjustada, dto.salida().plataforma(), TypeParada.SALIDA, lugarSalida.get(), model, model.getEmpresa());
-        var destino = new ParadaModel(dataHoraDestinoAjustada, dto.destino().plataforma(), TypeParada.DESTINO, lugarDestino.get(), model, model.getEmpresa());
+        var salida = new ParadaModel(dataHoraSalidaAjustada, dto.plataforma(), TypeParada.SALIDA, lugarSalida.get(), model);
+        var destino = new ParadaModel(dataHoraDestino, 0, TypeParada.DESTINO, lugarDestino.get(), model);
 
         //Tratando los precios del viaje
         List<PrecioModel> precios = new ArrayList<>();
@@ -243,63 +240,57 @@ public class ViajeEmpresaService {
         //Guardando los precios
         List<PrecioDTO> preciosSalvos = precioService.saveAll(precios, model);
 
-        List<ParadaDTOComplete> paradas = new ArrayList<>();
-        paradaRepository.save(salida);
-        paradas.add(new ParadaDTOComplete(salida));
-        paradaRepository.save(destino);
-        paradas.add(new ParadaDTOComplete(destino));
+        model.addParada(salida);
+        model.addParada(destino);
+        viajeRepository.save(model);
 
+        List<ParadaDTOComplete> paradas = new ArrayList<>();
+        paradas.add(new ParadaDTOComplete(salida));
+        paradas.add(new ParadaDTOComplete(destino));
         return new ViajeDTOEmpresaResponse(model, paradas, preciosSalvos);
     }
 
     @Transactional
-    public void saveOneCopy(ViajeDTOFormCopy dto, ViajeModel viaje) {
+    // Verificar si se quiere replicar un viaje futuro en un viaje menos futuro
+    public ViajeModel saveOneCopy(ViajeDTOFormCopy dto, ViajeModel viaje) {
         autobusEnabled.validAutobusEnabled(viaje.getAutobusId());
         empresaEnabled.validEmpresaEnabled(viaje.getEmpresaId());
-        long diffDias;
-        LocalDateTime dataViajeOriginal = viaje.getDataHoraSalida();
 
         if (dto.dataNovo().isEqual(viaje.getDataHoraSalida().toLocalDate()))
-            throw new ValidationException("dataNovo", "La nueva fecha es identico al del viaje");
+            throw new ValidationException("dataNova", "La nueva fecha es identico al del viaje");
 
         LocalDateTime firsHourViaje = viaje.getSalida().getDataHora();
         LocalDateTime lastHourViaje = viaje.getDestino().getDataHora();
-
-        diffDias = ChronoUnit.DAYS.between(firsHourViaje.toLocalDate(), lastHourViaje.toLocalDate());
+        var durationViajeSeconds = ChronoUnit.SECONDS.between(firsHourViaje, lastHourViaje);
 
         firsHourViaje = copyLocalTimeInLocalDate(dto.dataNovo(), firsHourViaje);
-        lastHourViaje = copyLocalTimeInLocalDate(dto.dataNovo(), lastHourViaje);
+        lastHourViaje = firsHourViaje.plusSeconds(durationViajeSeconds);
 
-        diffDias = (diffDias < 0) ? -diffDias : diffDias;
-        if (diffDias > 0) lastHourViaje = lastHourViaje.plusDays(diffDias);
         boolean existe = tiempoViajeService.existsViajesActiveFromAutobus(viaje.getAutobus(), firsHourViaje, lastHourViaje);
-
 
         if (existe)
             throw new GeneralException(HttpStatus.CONFLICT, "El autobus esta ocupado en esa fecha con otro viaje");
 
-        diffDias = ChronoUnit.DAYS.between(dataViajeOriginal.toLocalDate(), firsHourViaje.toLocalDate());
-        diffDias = (diffDias < 0) ? -diffDias : diffDias;
+        viaje.getAutobus().setEmpresa(viaje.getEmpresa());
+        var viajeNew = new ViajeModel(viaje.getAutobus(), firsHourViaje);
 
-        List<ParadaModel> paradaModelSave = new ArrayList<>();
-        List<PrecioModel> preciosModelSave = new ArrayList<>();
-        var viajeNew = new ViajeModel(viaje.getAutobus(), viaje.getEmpresa(), viaje.getDataHoraSalida().plusDays(diffDias));
-
+        var horaPartida = firsHourViaje;
+        long diffSecondBetweenParadas;
+        var dataHoraInicioViajeOld = viaje.getSalida().getDataHora();
         ParadaModel auxParada;
         for (ParadaModel aux : viaje.getParadas()) {
-            auxParada = new ParadaModel(aux.getDataHora().plusDays(diffDias), aux.getPlataforma(), aux.getTipo(), aux.getLugar(), viajeNew, viajeNew.getEmpresa());
-            paradaModelSave.add(auxParada);
+            diffSecondBetweenParadas = ChronoUnit.SECONDS.between(dataHoraInicioViajeOld, aux.getDataHora());
+            auxParada = new ParadaModel(horaPartida.plusSeconds(diffSecondBetweenParadas), aux.getPlataforma(), aux.getTipo(), aux.getLugar(), viajeNew);
+            viajeNew.addParada(auxParada);
         }
 
         PrecioModel precioAux;
         for (PrecioModel precio : viaje.getPrecios()) {
-            precioAux = new PrecioModel(precio.getPrecio(), precio.getNPiso(), viaje.getAutobus().getPisoByNumero(precio.getNPiso()).getNSillas(), viajeNew, viajeNew.getEmpresa());
-            preciosModelSave.add(precioAux);
+            precioAux = new PrecioModel(precio.getPrecio(), precio.getNPiso(), viaje.getAutobus().getPisoByNumero(precio.getNPiso()).getNSillas(), viajeNew);
+            viajeNew.addPrecio(precioAux);
         }
 
-        viajeRepository.save(viajeNew);
-        paradaRepository.saveAll(paradaModelSave);
-        precioRepository.saveAll(preciosModelSave);
+        return viajeRepository.save(viajeNew);
     }
 
     public ViajeDTOUpdate update(ViajeDTOUpdate dto) {//Validacao para que a mudanca seja feita

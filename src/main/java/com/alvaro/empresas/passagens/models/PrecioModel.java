@@ -75,14 +75,14 @@ public class PrecioModel {
         this.nSillasDisponibles = nSillasDisponibles;
     }
 
-    public PrecioModel(BigDecimal precio, Integer nPiso, Integer nSillasDisponibles, ViajeModel viaje, EmpresaModel empresa) {
+    public PrecioModel(BigDecimal precio, Integer nPiso, Integer nSillasDisponibles, ViajeModel viaje) {
         this.precio = precio;
         this.nPiso = nPiso;
         this.nSillasDisponibles = nSillasDisponibles;
         this.viajeCodigo = viaje.getCodigo();
         this.viaje = viaje;
-        this.empresaId = empresa.getId();
-        this.empresa = empresa;
+        this.empresaId = viaje.getEmpresaId();
+        this.empresa = viaje.getEmpresa();
     }
 
     public void updateValues(PrecioDTOUpdate dto) {

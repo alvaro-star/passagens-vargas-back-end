@@ -45,20 +45,20 @@ public class MainSecurity {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         var http = httpSecurity
-                .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-        if (isProfileActive("h2") || isProfileActive("mysql"))
-            http.authorizeHttpRequests(routesConfiguration::loadDevRoutes)
-                    .cors(corsCustomConfiguration::loadDevCors)
-                    .headers(h -> h.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
-        else if (isProfileActive("prod"))
-            http.cors(corsCustomConfiguration::loadProdCors)
-                    .authorizeHttpRequests(routesConfiguration::loadProdRoutes);
-        else http.authorizeHttpRequests(routesConfiguration::loadDefaultRoutes);
+        if (isProfileActive("h2") || isProfileActive("mysql")) {
+            http.authorizeHttpRequests(routesConfiguration::loadDevRoutes);
+            http.csrf(AbstractHttpConfigurer::disable);
+            http.cors(corsCustomConfiguration::loadDevCors);
+            http.headers(h -> h.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
+        } else if (isProfileActive("prod")) {
+            http.cors(corsCustomConfiguration::loadProdCors);
+            http.authorizeHttpRequests(routesConfiguration::loadProdRoutes);
+        } else http.authorizeHttpRequests(routesConfiguration::loadDefaultRoutes);
+        http.exceptionHandling(exceptionsHandlerConfiguration::loadConfiguration);
+        http.addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return http.exceptionHandling(exceptionsHandlerConfiguration::loadConfiguration)
-                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
-                .build();
+        return http.build();
     }
 
     @Bean

@@ -6,9 +6,9 @@ import com.alvaro.empresas.passagens.models.ViajeModel;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOUpdate;
 import jakarta.persistence.*;
-import lombok.Getter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -19,9 +19,9 @@ import java.util.UUID;
         @Index(name = "idxtb_parada_fk_idtb_empresa_fk_idtb_lugar_dataHora", columnList = "fk_idtb_empresa, fk_idtb_lugar, data_hora"),
         @Index(name = "idxtb_parada_fk_idtb_viaje", columnList = "fk_idtb_viaje")
 })
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
+@EqualsAndHashCode(of = "id")
 public class ParadaModel {
     @Id
     @Column(name = "idtb_parada", nullable = false)
@@ -60,7 +60,7 @@ public class ParadaModel {
         plataforma = dto.plataforma();
     }
 
-    public ParadaModel(LocalDateTime dataHora, int plataforma, TypeParada tipo, LugarModel lugar, ViajeModel viaje, EmpresaModel empresa) {
+    public ParadaModel(LocalDateTime dataHora, int plataforma, TypeParada tipo, LugarModel lugar, ViajeModel viaje) {
         this.dataHora = dataHora;
         this.plataforma = plataforma;
         this.tipo = tipo;
@@ -68,8 +68,8 @@ public class ParadaModel {
         this.lugarId = lugar.getId();
         this.viaje = viaje;
         this.viajeCodigo = viaje.getCodigo();
-        this.empresa = empresa;
-        this.empresaId = empresa.getId();
+        this.empresa = viaje.getEmpresa();
+        this.empresaId = viaje.getEmpresaId();
     }
 
     public void setLugar(LugarModel lugar) {

@@ -6,6 +6,7 @@ import com.alvaro.empresas.passagens.paradas.models.CiudadModel;
 import com.alvaro.empresas.passagens.paradas.models.DepartamentoModel;
 import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import jakarta.persistence.EntityManager;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -14,14 +15,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-@Service
+
 public class DadosPersist {
-    private final EntityManager em;
+    private EntityManager em;
 
-    public DadosPersist(EntityManager manager) {
-        this.em = manager;
+    public DadosPersist(EntityManager em) {
+        this.em = em;
     }
-
 
     public Pageable makePageable() {
         return PageRequest.of(0, 10);

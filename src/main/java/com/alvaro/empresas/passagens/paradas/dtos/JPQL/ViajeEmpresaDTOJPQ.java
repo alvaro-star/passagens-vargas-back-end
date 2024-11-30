@@ -6,8 +6,8 @@ import lombok.Getter;
 
 @Getter
 public class ViajeEmpresaDTOJPQ {
-    private ViajeModel viaje;
-    private ParadaModel salida, destino;
+    private final ViajeModel viaje;
+    private final ParadaModel salida, destino;
 
     public ViajeEmpresaDTOJPQ(ViajeModel viaje, ParadaModel salida, ParadaModel destino) {
         this.viaje = viaje;

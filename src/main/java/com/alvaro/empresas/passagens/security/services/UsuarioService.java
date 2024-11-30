@@ -9,11 +9,9 @@ import com.alvaro.empresas.passagens.security.dtos.UsuarioDTOUpdate;
 import com.alvaro.empresas.passagens.security.dtos.UsuarioDTOUpdateValidation;
 import com.alvaro.empresas.passagens.security.models.UsuarioModel;
 import com.alvaro.empresas.passagens.security.models.UsuarioSolicitudModel;
-import com.alvaro.empresas.passagens.security.repositories.CodigoRepository;
 import com.alvaro.empresas.passagens.security.repositories.UsuarioRepository;
 import com.alvaro.empresas.passagens.security.repositories.UsuarioSolicitudRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,17 +20,9 @@ import java.time.LocalDateTime;
 @Service
 public class UsuarioService {
     @Autowired
-    private RoleService roleService;
-    @Autowired
-    private AuthenticationManager authenticationManager;
-    @Autowired
-    private TokenService tokenService;
-    @Autowired
     private UsuarioSolicitudRepository usuarioSolicitudRepository;
     @Autowired
     private EmailService emailService;
-    @Autowired
-    private CodigoRepository codigoRepository;
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
     @Autowired

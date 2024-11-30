@@ -13,7 +13,6 @@ import com.alvaro.empresas.passagens.paradas.models.CiudadModel;
 import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.alvaro.empresas.passagens.paradas.repositories.LugarRepository;
-import com.alvaro.empresas.passagens.paradas.repositories.ParadaRepository;
 import com.alvaro.empresas.passagens.repositories.PrecioRepository;
 import com.alvaro.empresas.passagens.repositories.ViajeRepository;
 import org.hibernate.ObjectNotFoundException;
@@ -31,8 +30,6 @@ import java.util.UUID;
 public class ViajeService {
     @Autowired
     private ViajeRepository viajeRepository;
-    @Autowired
-    private ParadaRepository paradaRepository;
     @Autowired
     private LugarRepository lugarRepository;
     @Autowired
@@ -87,7 +84,7 @@ public class ViajeService {
         List<PrecioModel> preciosModels;
         for (LugarModel lugarSalida : lugaresSalida) {
             for (LugarModel lugarDestino : lugaresDestino) {
-                List<ViajeBuscaDTOJPQL> salidasDia = paradaRepository.loadViajesDay(lugarSalida.getId(), lugarDestino.getId(), startDay, endDay);
+                List<ViajeBuscaDTOJPQL> salidasDia = viajeRepository.loadViajesDay(lugarSalida.getId(), lugarDestino.getId(), startDay, endDay);
                 for (ViajeBuscaDTOJPQL viajeJPQL : salidasDia) {
                     salidaDTO = new ParadaDTOComplete(viajeJPQL.getSalida());
                     destinoDTO = new ParadaDTOComplete(viajeJPQL.getDestino());

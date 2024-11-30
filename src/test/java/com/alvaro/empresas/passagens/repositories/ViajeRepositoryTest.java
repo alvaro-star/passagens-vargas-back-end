@@ -1,10 +1,10 @@
 package com.alvaro.empresas.passagens.repositories;
 
 import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
-import com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQL;
 import com.alvaro.empresas.passagens.enums.TypeParada;
 import com.alvaro.empresas.passagens.helpers.DadosPersist;
 import com.alvaro.empresas.passagens.models.ViajeModel;
+import com.alvaro.empresas.passagens.paradas.dtos.JPQL.ViajeEmpresaDTOJPQ;
 import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import jakarta.persistence.EntityManager;
@@ -13,13 +13,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.data.domain.Page;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,12 +25,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
 @ActiveProfiles("test")
 class ViajeRepositoryTest {
-    @Autowired
     private DadosPersist dadosPersist;
-    @Autowired
     private ViajeRepository viajeRepository;
-    @Autowired
     private EntityManager em;
+
+    @Autowired
+    public ViajeRepositoryTest(EntityManager em, ViajeRepository viajeRepository) {
+        this.em = em;
+        this.viajeRepository = viajeRepository;
+        this.dadosPersist = new DadosPersist(em);
+    }
+
     @Value("${api.viaje.max-time-viaje-day}")
     private Integer tempoMaxViajeDias;
 
@@ -50,16 +53,21 @@ class ViajeRepositoryTest {
 
         var startViaje = LocalDateTime.now().with(TemporalAdjusters.next(DayOfWeek.MONDAY)).withHour(15);
         var viaje1 = cadastrarViaje(startViaje, autobusAbril, lugares);
-        var viaje2 = cadastrarViaje(startViaje, autobusAbril, lugares);
-        var viaje3 = cadastrarViaje(startViaje, autobusMarzo, lugares);
+        cadastrarViaje(startViaje, autobusAbril, lugares);
+        cadastrarViaje(startViaje, autobusMarzo, lugares);
 
         List<ViajeModel> viaje = viajeRepository.findViajeFromAutobusInIntervalo(
-                empresasModels.get(empresasName[1]).getId(), autobusAbril.getId(), startViaje,
-                startViaje.minusDays(tempoMaxViajeDias), viaje1.getSalida().getDataHora().minusDays(2));
+                empresasModels.get(empresasName[1]).getId(),
+                autobusAbril.getId(),
+                startViaje,
+                startViaje.minusDays(tempoMaxViajeDias),
+                viaje1.getDestino().getDataHora()
+        );
         assertThat(viaje.isEmpty()).isEqualTo(false);
         assertThat(viaje.size()).isEqualTo(2);
     }
 
+    @Test
     @DisplayName("Deveria mostrar un viaje que contenga un intervalo de tiempo")
     /*Sabendo que un trayecto tiene un viaje, mas muchas paradas, si quiero realizar un viaje que pase por dos
     paradas mas no por la primera ni por la ultima necessáriamente, el metodo me debe retornar este viaje*/
@@ -74,28 +82,32 @@ class ViajeRepositoryTest {
         var startViaje = LocalDateTime.now().with(TemporalAdjusters.next(DayOfWeek.MONDAY)).withHour(15);
 
         var viaje1 = cadastrarViaje(startViaje, autobusAbril, lugares);
-        var viaje2 = cadastrarViaje(startViaje, autobusMarzo, lugares);
-        var viaje3 = cadastrarViaje(startViaje, autobusMarzo, lugares);
+        cadastrarViaje(startViaje, autobusMarzo, lugares);
+        cadastrarViaje(startViaje, autobusMarzo, lugares);
 
-        Page<ViajeDTOJPQL> viajesEncontrados = viajeRepository.findByEmpresaIdAndStartInInterval(autobusAbril.getEmpresaId(), startViaje, startViaje.plusHours(3), dadosPersist.makePageable());
-        assertThat(viajesEncontrados.getContent().size()).isEqualTo(1);
-        assertThat(viajesEncontrados.getContent().get(0)).isEqualTo(viaje1);
+        int idLugarSalida = lugares.get(1).getId();
+        int idLugarDestino = lugares.get(2).getId();
+        List<ViajeEmpresaDTOJPQ> viajesEncontrados = viajeRepository.loadViajesDayByEmpresaId(
+                autobusAbril.getEmpresaId(),
+                idLugarSalida,
+                idLugarDestino,
+                startViaje,
+                startViaje.plusHours(3));
+        assertThat(viajesEncontrados.size()).isEqualTo(1);
+        assertThat(viajesEncontrados.get(0).getViaje()).isEqualTo(viaje1);
     }
 
     private ViajeModel cadastrarViaje(LocalDateTime dataHoraSalida, AutobusModel autobusModel, List<LugarModel> lugares) {
-        var viaje = new ViajeModel(autobusModel, autobusModel.getEmpresa(), dataHoraSalida);
-        em.persist(viaje);
-        List<ParadaModel> paradas = new ArrayList<>();
+        var viaje = new ViajeModel(autobusModel, dataHoraSalida);
+
         int contador = 0;
-        paradas.add(new ParadaModel(dataHoraSalida.plusDays(contador), 10, TypeParada.SALIDA, lugares.get(0), viaje, viaje.getEmpresa()));
+        viaje.addParada(new ParadaModel(dataHoraSalida.plusDays(contador), 10, TypeParada.SALIDA, lugares.get(0), viaje));
         contador++;
         for (int i = 1; i < lugares.size() - 1; i++, contador++)
-            paradas.add(new ParadaModel(dataHoraSalida.plusSeconds(contador), 10, TypeParada.CAMINO, lugares.get(i), viaje, viaje.getEmpresa()));
+            viaje.addParada(new ParadaModel(dataHoraSalida.plusSeconds(contador), 10, TypeParada.CAMINO, lugares.get(i), viaje));
+        viaje.addParada(new ParadaModel(dataHoraSalida.plusDays(contador), 10, TypeParada.DESTINO, lugares.get(lugares.size() - 1), viaje));
 
-        paradas.add(new ParadaModel(dataHoraSalida.plusDays(contador), 10, TypeParada.DESTINO, lugares.get(paradas.size() - 1), viaje, viaje.getEmpresa()));
-        for (ParadaModel parada : paradas)
-            em.persist(parada);
-
+        em.persist(viaje);
         return viaje;
     }
     /*

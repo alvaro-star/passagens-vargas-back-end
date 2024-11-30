@@ -6,6 +6,7 @@ import com.alvaro.empresas.passagens.pagos.models.FacturaPasajeModel;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,6 +27,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
+@EqualsAndHashCode(of = "codigo")
 public class ViajeModel {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -93,6 +95,16 @@ public class ViajeModel {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "viaje")
     private List<PrecioModel> precios = new ArrayList<>();
 
+    public void addParada(ParadaModel parada) {
+        parada.setViaje(this);
+        this.paradas.add(parada);
+    }
+
+    public void addPrecio(PrecioModel precio) {
+        precio.setViaje(this);
+        this.precios.add(precio);
+    }
+
     public ViajeModel(AutobusModel autobus, EmpresaModel empresa, BigDecimal valorArrecadadoEfectivo, BigDecimal valorArrecadadoNoWeb, BigDecimal valorArrecadadoWeb, boolean isCobrado, LocalDateTime dataHoraSalida) {
         this.autobus = autobus;
         this.autobusId = autobus.getId();
@@ -105,7 +117,7 @@ public class ViajeModel {
         this.dataHoraSalida = dataHoraSalida;
     }
 
-    public ViajeModel(AutobusModel autobus, EmpresaModel empresa, LocalDateTime dataHoraSalida) {
+    public ViajeModel(AutobusModel autobus, LocalDateTime dataHoraSalida) {
         valorArrecadadoEfectivo = BigDecimal.ZERO;
         valorArrecadadoNoWeb = BigDecimal.ZERO;
         valorArrecadadoWeb = BigDecimal.ZERO;
@@ -114,8 +126,8 @@ public class ViajeModel {
         this.dataHoraSalida = dataHoraSalida;
         this.autobus = autobus;
         this.autobusId = autobus.getId();
-        this.empresa = empresa;
-        this.empresaId = empresa.getId();
+        this.empresa = autobus.getEmpresa();
+        this.empresaId = autobus.getEmpresaId();
         this.paradas = new ArrayList<>();
     }
 

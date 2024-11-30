@@ -1,21 +1,32 @@
 package com.alvaro.empresas.passagens.dtos.viajes.Empresa;
 
-import com.alvaro.empresas.passagens.paradas.dtos.ParadaViajeFormDTO;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record ViajeDTOCreate(
         UUID codigo,
         @NotNull
         Integer idAutobus,
-        @NotNull @Valid
-        ParadaViajeFormDTO salida,
-        @NotNull @Valid
-        ParadaViajeFormDTO destino,
+
+        @NotNull
+        @Positive
+        Integer plataforma,
+        @NotNull
+        @Future
+        LocalDateTime fechaSalida,
+        @NotNull
+        Integer idLugarSalida,
+        @Positive
+        int horasViaje,
+        @NotNull
+        Integer idLugarDestino,
+
         @NotNull
         @DecimalMin(value = "10.0")
         BigDecimal precioPiso1,
