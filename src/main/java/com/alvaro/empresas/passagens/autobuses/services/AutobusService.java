@@ -104,7 +104,7 @@ public class AutobusService {
         var now = LocalDateTime.now();
 
         Pageable pageable = PageRequest.of(0, 1);
-        Page<ViajeModel> viajesFuturos = viajeRepository.findViajesFuturos(model.getEmpresa().getId(), now, pageable);
+        Page<ViajeModel> viajesFuturos = viajeRepository.findAfterDate(model.getEmpresa().getId(), now, pageable);
 
         var viaje = viajeRepository.findFirst1ByAutobusId(model.getId());
         if (viaje.isEmpty())

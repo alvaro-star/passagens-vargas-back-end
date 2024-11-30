@@ -71,11 +71,11 @@ public class EmpresaService {
         List<RoleModel> rolesModels = roleService.findAll();
         Set<RoleModel> roles = new HashSet<>(rolesModels);
 
-        if (usuario.get().hasRole(RoleList.ROLE_EMPRESA_FUNCIONARIO.toString()) && !usuario.get().getIdEmpresa().equals(empresaAdmin.idEmpresa()))
+        if (usuario.get().hasRole(RoleList.ROLE_EMPRESA_FUNCIONARIO.toString()) && !usuario.get().getEmpresaId().equals(empresaAdmin.idEmpresa()))
             throw new GeneralException("El usuario esta relacionado con otra empresa");
 
         usuario.get().setRoles(roles);
-        usuario.get().setIdEmpresa(empresaAdmin.idEmpresa());
+        usuario.get().setEmpresaId(empresaAdmin.idEmpresa());
 
         usuarioRepository.save(usuario.get());
     }
@@ -89,7 +89,7 @@ public class EmpresaService {
         var roleCliente = roleService.getByRoleName(RoleList.ROLE_CLIENTE);
         roles.add(roleCliente);
         usuario.get().setRoles(roles);
-        usuario.get().setIdEmpresa(null);
+        usuario.get().setEmpresaId(null);
         usuarioRepository.save(usuario.get());
     }
 

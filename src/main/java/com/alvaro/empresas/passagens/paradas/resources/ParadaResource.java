@@ -2,7 +2,7 @@ package com.alvaro.empresas.passagens.paradas.resources;
 
 import com.alvaro.empresas.passagens.enums.TypeParada;
 import com.alvaro.empresas.passagens.helpers.Mensaje;
-import com.alvaro.empresas.passagens.helpers.beans.MyUserComponent;
+import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
 import com.alvaro.empresas.passagens.helpers.validators.EmpresaEnabled;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
@@ -31,7 +31,7 @@ public class ParadaResource {
     @Autowired
     private ParadaService paradaService;
     @Autowired
-    private MyUserComponent myUserComponent;
+    private UserLoguedComponent userLogued;
     @Autowired
     private ViajeEmpresaService viajeEmpresaService;
     @Autowired
@@ -53,8 +53,7 @@ public class ParadaResource {
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
     public ResponseEntity<Object> save(@RequestBody @Valid ParadaDTO dto) {
         var viajeModel = this.viajeEmpresaService.findById(dto.idViaje());
-        var user = myUserComponent.getUser();
-        user.validIfIsMyEmpresa(viajeModel.getEmpresaId());
+        userLogued.validIfIsMyEmpresa(viajeModel.getEmpresaId());
 
         if (viajeEmpresaService.hasPasajes(viajeModel.getPrecios()))
             return ResponseEntity.badRequest().body(new Mensaje("El viaje ya posee un pasaje registrado"));
@@ -66,8 +65,7 @@ public class ParadaResource {
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
     public ResponseEntity<Object> update(@Valid @RequestBody ParadaDTOUpdate dto, @PathVariable Integer id) {
         var paradaModel = paradaService.findById(id);
-        var userLogin = myUserComponent.getUser();
-        userLogin.validIfIsMyEmpresa(paradaModel.getEmpresaId());
+        userLogued.validIfIsMyEmpresa(paradaModel.getEmpresaId());
 
         if (viajeEmpresaService.hasPasajes(paradaModel.getViaje().getPrecios()))
             return ResponseEntity.badRequest().body(new Mensaje("El viaje ya posee un pasaje registrado"));
@@ -78,10 +76,9 @@ public class ParadaResource {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
     public ResponseEntity<Mensaje> delete(@PathVariable Integer id) {
         var model = paradaService.findById(id);
-        var userLogin = myUserComponent.getUser();
 
-        if (!userLogin.hasRole(RoleList.ROLE_ADMIN.toString())) {
-            userLogin.validIfIsMyEmpresa(model.getEmpresaId());
+        if (!userLogued.hasRole(RoleList.ROLE_ADMIN)) {
+            userLogued.validIfIsMyEmpresa(model.getEmpresaId());
             empresaEnabled.validEmpresaEnabled(model.getEmpresaId());
         }
 

@@ -4,7 +4,7 @@ import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTO;
 import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTOResponse;
 import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTOUpdate;
 import com.alvaro.empresas.passagens.autobuses.services.AutobusService;
-import com.alvaro.empresas.passagens.helpers.beans.MyUserComponent;
+import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,13 +27,12 @@ public class AutobusResource {
     @Autowired
     private AutobusService autobusService;
     @Autowired
-    private MyUserComponent myUserComponent;
+    private UserLoguedComponent userLogued;
 
     @GetMapping("/from/{idEmpresa}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
     public ResponseEntity<Page<AutobusDTOResponse>> getAutobusesFromEmpresa(@PathVariable UUID idEmpresa, @PageableDefault(size = 10, sort = {"createdAt"}, direction = Sort.Direction.DESC) Pageable pageable) {
-        var user = myUserComponent.getUser();
-        user.validIfIsAdminOrOwnerEmpresa(idEmpresa);
+        userLogued.validIfIsAdminOrOwnerEmpresa(idEmpresa);
         return ResponseEntity.ok().body(autobusService.findAllFromEmpresa(idEmpresa, pageable));
     }
 
@@ -45,8 +44,8 @@ public class AutobusResource {
     @PostMapping
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN')")
     public ResponseEntity<Object> save(@RequestBody @Valid AutobusDTO dto, BindingResult bindingResult) {
-        var user = myUserComponent.getUser();
-        user.validIfIsMyEmpresa(dto.idEmpresa());
+
+        userLogued.validIfIsMyEmpresa(dto.idEmpresa());
         return ResponseEntity.status(HttpStatus.CREATED).body(autobusService.salvar(dto, bindingResult));
     }
 
@@ -54,9 +53,9 @@ public class AutobusResource {
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN')")
     public ResponseEntity<Object> update(@PathVariable Integer id, @RequestBody @Valid AutobusDTOUpdate dto, BindingResult bindingResult) {
-        var user = myUserComponent.getUser();
+
         var autobus = autobusService.findById(id);
-        user.validIfIsMyEmpresa(autobus.getEmpresaId());
+        userLogued.validIfIsMyEmpresa(autobus.getEmpresaId());
         return ResponseEntity.ok().body(autobusService.update(dto, autobus, bindingResult));
     }
 
@@ -64,8 +63,8 @@ public class AutobusResource {
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN')")
     public ResponseEntity<Object> delete(@PathVariable Integer id) {
         var model = autobusService.findById(id);
-        var user = myUserComponent.getUser();
-        user.validIfIsMyEmpresa(model.getEmpresaId());
+
+        userLogued.validIfIsMyEmpresa(model.getEmpresaId());
         autobusService.delete(model);
         return ResponseEntity.noContent().build();
     }

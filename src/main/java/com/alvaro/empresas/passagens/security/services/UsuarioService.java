@@ -3,7 +3,7 @@ package com.alvaro.empresas.passagens.security.services;
 import com.alvaro.empresas.passagens.configurations.exceptions.InternalException.GeneralException;
 import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
 import com.alvaro.empresas.passagens.enums.TypeSolicitudOperation;
-import com.alvaro.empresas.passagens.helpers.beans.MyUserComponent;
+import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
 import com.alvaro.empresas.passagens.helpers.services.EmailService;
 import com.alvaro.empresas.passagens.security.dtos.UsuarioDTOUpdate;
 import com.alvaro.empresas.passagens.security.dtos.UsuarioDTOUpdateValidation;
@@ -26,7 +26,7 @@ public class UsuarioService {
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
     @Autowired
-    private MyUserComponent myUserComponent;
+    private UserLoguedComponent userLoguedComponent;
     @Autowired
     private UsuarioRepository usuarioRepository;
 
@@ -35,7 +35,7 @@ public class UsuarioService {
     }
 
     public void updateProfile(UsuarioDTOUpdate solicitud) {
-        var usuarioModel = myUserComponent.getUserModel();
+        var usuarioModel = userLoguedComponent.getUserModel();
         boolean emailUsed = false;
 
         if (solicitud.email() != null && !solicitud.email().isBlank() && !solicitud.email().equals(usuarioModel.getLogin()))
@@ -59,7 +59,7 @@ public class UsuarioService {
     }
 
     public void validateUpdate(UsuarioDTOUpdateValidation form) {
-        var userLogado = myUserComponent.getUserModel();
+        var userLogado = userLoguedComponent.getUserModel();
         var usuarioSolicitud = usuarioSolicitudRepository.findById(form.codigo());
         if (usuarioSolicitud.isEmpty())
             throw new ValidationException("codigo", "El codigo de verificacion es invalido");

@@ -22,7 +22,8 @@ public interface ViajeRepository extends JpaRepository<ViajeModel, UUID> {
     Page<ViajeModel> findByEmpresaId(UUID id, Pageable pageable);
 
     @Query("SELECT v FROM ViajeModel v WHERE v.empresa.id = :empresaId AND v.dataHoraSalida >= :dataHoraSalida")
-    Page<ViajeModel> findViajesFuturos(UUID empresaId, LocalDateTime dataHoraSalida, Pageable pageable);
+    Page<ViajeModel> findAfterDate(UUID empresaId, LocalDateTime dataHoraSalida, Pageable pageable);
+
 
     @Query("SELECT new com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQL(v, s, d) " +
             "FROM ViajeModel v, ParadaModel s, ParadaModel d " +
@@ -30,7 +31,33 @@ public interface ViajeRepository extends JpaRepository<ViajeModel, UUID> {
             "AND v.dataHoraSalida BETWEEN :dataInicio AND :dataFim " +
             "AND s.viaje.codigo = v.codigo AND s.tipo = 'SALIDA' " +
             "AND d.viaje.codigo = v.codigo AND d.tipo = 'DESTINO'")
-    Page<ViajeDTOJPQL> findByEmpresaIdAndStartInInterval(UUID empresaId, LocalDateTime dataInicio, LocalDateTime dataFim, Pageable pageable);
+    Page<ViajeDTOJPQL> findByEmpresaAndStartInInterval(UUID empresaId,
+                                                       LocalDateTime dataInicio,
+                                                       LocalDateTime dataFim,
+                                                       Pageable pageable);
+
+    @Query("SELECT new com.alvaro.empresas.passagens.paradas.dtos.JPQL.ViajeEmpresaDTOJPQ(v, s, d) " +
+            "FROM ParadaModel s, ParadaModel d, ViajeModel v " +
+            "WHERE s.empresa.id = :id_empresa AND s.lugar.id = :id_lugar " +
+            "AND s.dataHora BETWEEN :data_start AND :data_end AND s.tipo != 'DESTINO' " +
+            "AND s.viaje.codigo = d.viaje.codigo AND d.tipo = 'DESTINO' " +
+            "AND v.codigo = s.viaje.codigo")
+    List<ViajeEmpresaDTOJPQ> findByEmpresaAndStartInInterval(@Param("id_empresa") UUID idEmpresa,
+                                                             @Param("id_lugar") Integer idLugar,
+                                                             @Param("data_start") LocalDateTime dataStart,
+                                                             @Param("data_end") LocalDateTime dataEnd);
+
+    @Query("SELECT new com.alvaro.empresas.passagens.paradas.dtos.JPQL.ViajeEmpresaDTOJPQ(v, s, d) " +
+            "FROM ParadaModel s, ParadaModel d, ViajeModel v " +
+            "WHERE s.empresa.id = :id_empresa AND s.lugar.id = :id_lugar_salida " +
+            "AND s.dataHora BETWEEN :data_start AND :data_end AND s.tipo != 'DESTINO' " +
+            "AND s.viaje.codigo = d.viaje.codigo AND d.lugar.id = :id_lugar_destino AND d.tipo != 'SALIDA' " +
+            "AND v.codigo = s.viaje.codigo")
+    List<ViajeEmpresaDTOJPQ> findByEmpresaAndStartInInterval(@Param("id_empresa") UUID idEmpresa,
+                                                      @Param("id_lugar_salida") Integer idLugarSalida,
+                                                      @Param("id_lugar_destino") Integer idLugarDestino,
+                                                      @Param("data_start") LocalDateTime dataStart,
+                                                      @Param("data_end") LocalDateTime dataEnd);
 
     @Query("SELECT new com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQL(v, s, d) " +
             "FROM ViajeModel v, ParadaModel s, ParadaModel d " +
@@ -39,7 +66,8 @@ public interface ViajeRepository extends JpaRepository<ViajeModel, UUID> {
             "AND v.autobus.id = :autobusId " +
             "AND s.viaje.codigo = v.codigo AND s.tipo = 'SALIDA' " +
             "AND d.viaje.codigo = v.codigo AND d.tipo = 'DESTINO' ")
-    Page<ViajeDTOJPQL> findByEmpresaIdAndAutobusId(UUID empresaId, Integer autobusId, LocalDateTime dataInicio, LocalDateTime dataFim, Pageable pageable);
+    Page<ViajeDTOJPQL> findByEmpresaAndAutobusAndStartInInterval(UUID empresaId, Integer autobusId, LocalDateTime dataInicio, LocalDateTime dataFim, Pageable pageable);
+
 
     Optional<ViajeModel> findFirst1ByAutobusId(Integer idAutobus);
 
@@ -50,7 +78,7 @@ public interface ViajeRepository extends JpaRepository<ViajeModel, UUID> {
             "AND v.cancelado = false AND d.fk_idtb_viaje = v.idtb_viaje AND d.tipo = 'DESTINO' AND d.data_hora >= :inicio " +
             "LIMIT 2",
             nativeQuery = true)
-    List<ViajeModel> findViajeFromAutobusInIntervalo(UUID empresaId, Integer autobusId, LocalDateTime inicio, LocalDateTime inicioAlterado, LocalDateTime fim);
+    List<ViajeModel> findByAutobusInIntervalo(UUID empresaId, Integer autobusId, LocalDateTime inicio, LocalDateTime inicioAlterado, LocalDateTime fim);
 
     @Query("SELECT new com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQLRelatorio(v, s.lugarId, d.lugarId) " +
             "FROM ViajeModel v, ParadaModel s, ParadaModel d " +
@@ -58,8 +86,7 @@ public interface ViajeRepository extends JpaRepository<ViajeModel, UUID> {
             "AND v.dataHoraSalida BETWEEN :dataInicioAlterado AND :dataFim " +
             "AND s.viaje.codigo = v.codigo AND s.tipo = 'SALIDA' " +
             "AND d.viaje.codigo = v.codigo AND d.tipo = 'DESTINO' AND d.dataHora >= :dataInicio")
-    List<ViajeDTOJPQLRelatorio> findByEmpresaIdMakedInInterval(UUID empresaId, LocalDateTime dataInicio, LocalDateTime dataInicioAlterado, LocalDateTime dataFim);
-
+    List<ViajeDTOJPQLRelatorio> findByEmpresaMakedInInterval(UUID empresaId, LocalDateTime dataInicio, LocalDateTime dataInicioAlterado, LocalDateTime dataFim);
 
     @Query("SELECT new com.alvaro.empresas.passagens.paradas.dtos.JPQL.ViajeBuscaDTOJPQL(s.viaje.codigo, s.viaje.empresa.logo, s, d) " +
             "FROM ParadaModel s, ParadaModel d " +
@@ -69,34 +96,13 @@ public interface ViajeRepository extends JpaRepository<ViajeModel, UUID> {
             "AND s.viaje.codigo = d.viaje.codigo " +
             "AND d.lugar.id = :id_lugar_destino " +
             "AND d.tipo != 'SALIDA'")
-    List<ViajeBuscaDTOJPQL> loadViajesDay(
+    List<ViajeBuscaDTOJPQL> findByStartInInterval(
             @Param("id_lugar_salida") Integer idLugarSalida,
             @Param("id_lugar_destino") Integer idLugarDestino,
             @Param("data_start") LocalDateTime dataStart,
             @Param("data_end") LocalDateTime dataEnd);
 
-    @Query("SELECT new com.alvaro.empresas.passagens.paradas.dtos.JPQL.ViajeEmpresaDTOJPQ(v, s, d) " +
-            "FROM ParadaModel s, ParadaModel d, ViajeModel v " +
-            "WHERE s.empresa.id = :id_empresa AND s.lugar.id = :id_lugar " +
-            "AND s.dataHora BETWEEN :data_start AND :data_end AND s.tipo != 'DESTINO' " +
-            "AND s.viaje.codigo = d.viaje.codigo AND d.tipo = 'DESTINO' " +
-            "AND v.codigo = s.viaje.codigo")
-    List<ViajeEmpresaDTOJPQ> loadViajesDayByEmpresaOnlySalida(@Param("id_empresa") UUID idEmpresa,
-                                                              @Param("id_lugar") Integer idLugar,
-                                                              @Param("data_start") LocalDateTime dataStart,
-                                                              @Param("data_end") LocalDateTime dataEnd);
 
-    @Query("SELECT new com.alvaro.empresas.passagens.paradas.dtos.JPQL.ViajeEmpresaDTOJPQ(v, s, d) " +
-            "FROM ParadaModel s, ParadaModel d, ViajeModel v " +
-            "WHERE s.empresa.id = :id_empresa AND s.lugar.id = :id_lugar_salida " +
-            "AND s.dataHora BETWEEN :data_start AND :data_end AND s.tipo != 'DESTINO' " +
-            "AND s.viaje.codigo = d.viaje.codigo AND d.lugar.id = :id_lugar_destino AND d.tipo != 'SALIDA' " +
-            "AND v.codigo = s.viaje.codigo")
-    List<ViajeEmpresaDTOJPQ> loadViajesDayByEmpresaId(@Param("id_empresa") UUID idEmpresa,
-                                                      @Param("id_lugar_salida") Integer idLugarSalida,
-                                                      @Param("id_lugar_destino") Integer idLugarDestino,
-                                                      @Param("data_start") LocalDateTime dataStart,
-                                                      @Param("data_end") LocalDateTime dataEnd);
 }
 
 /* No usage

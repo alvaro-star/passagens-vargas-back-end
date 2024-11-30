@@ -5,7 +5,7 @@ import com.alvaro.empresas.passagens.dtos.pasajes.PasajeDTOEmpresaResponse;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTO;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTOVenta;
 import com.alvaro.empresas.passagens.helpers.Mensaje;
-import com.alvaro.empresas.passagens.helpers.beans.MyUserComponent;
+import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
 import com.alvaro.empresas.passagens.helpers.validators.EmpresaEnabled;
 import com.alvaro.empresas.passagens.services.PasajeService;
 import com.alvaro.empresas.passagens.services.PrecioService;
@@ -32,7 +32,7 @@ public class PasajeResource {
     @Autowired
     private PasajeService pasajeService;
     @Autowired
-    private MyUserComponent myUserComponent;
+    private UserLoguedComponent userLogued;
     @Autowired
     private ViajeService viajeService;
     @Autowired
@@ -58,9 +58,8 @@ public class PasajeResource {
     @GetMapping("/from/{idPrecio}")
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_FUNCIONARIO', 'ROLE_EMPRESA_ADMIN', 'ROLE_ADMIN')")
     public ResponseEntity<List<PasajeDTOEmpresaResponse>> getPasajerosFromPrecio(@PathVariable UUID idPrecio) {
-        var usuario = myUserComponent.getUser();
         var precio = precioService.findById(idPrecio);
-        usuario.validIfIsAdminOrOwnerEmpresa(precio.getEmpresaId());
+        userLogued.validIfIsAdminOrOwnerEmpresa(precio.getEmpresaId());
         return ResponseEntity.ok(pasajeService.getPasajesFromPrecio(idPrecio));
     }
 
@@ -76,10 +75,9 @@ public class PasajeResource {
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_FUNCIONARIO', 'ROLE_EMPRESA_ADMIN')")
     public ResponseEntity<Object> vender(@RequestBody @Valid PasajesDTOVenta dto, BindingResult bindingResult) {
         ValidationErrorsWithList validacao;
-        var usuario = myUserComponent.getUser();
-        var viaje = viajeService.findById(dto.idViaje());
 
-        usuario.validIfIsMyEmpresa(viaje.getEmpresaId());
+        var viaje = viajeService.findById(dto.idViaje());
+        userLogued.validIfIsMyEmpresa(viaje.getEmpresaId());
         empresaEnabled.validEmpresaEnabled(viaje.getEmpresaId());
 
         validacao = ValidarCompraPasajes.validarPasajesDTOVenta(bindingResult, dto, "/pasajes/vender");

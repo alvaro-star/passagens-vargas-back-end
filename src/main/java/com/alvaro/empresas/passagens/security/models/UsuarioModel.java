@@ -33,7 +33,7 @@ public class UsuarioModel implements UserDetails {
     @Column(nullable = false)
     private String contrasena;
 
-    private UUID idEmpresa;
+    private UUID empresaId;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -60,12 +60,12 @@ public class UsuarioModel implements UserDetails {
         this.telefono = telefono;
     }
 
-    public UsuarioModel(String login, String nombre, String telefono, String contrasena, UUID idEmpresa) {
+    public UsuarioModel(String login, String nombre, String telefono, String contrasena, UUID empresaId) {
         this.login = login;
         this.nombre = nombre;
         this.telefono = telefono;
         this.contrasena = contrasena;
-        this.idEmpresa = idEmpresa;
+        this.empresaId = empresaId;
     }
 
     public UsuarioModel(UsuarioSolicitudModel usuarioSolicitudModel) {
@@ -73,9 +73,12 @@ public class UsuarioModel implements UserDetails {
         this.nombre = usuarioSolicitudModel.getNombre();
         this.telefono = usuarioSolicitudModel.getTelefono();
         this.contrasena = usuarioSolicitudModel.getContrasena();
-        this.idEmpresa = null;
+        this.empresaId = null;
     }
 
+    public List<String> rolesToListString() {
+        return this.roles.stream().map(RoleModel::getAuthority).toList();
+    }
 
     public boolean hasRole(String role) {
         for (RoleModel roleModel : this.roles) {

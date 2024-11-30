@@ -84,7 +84,7 @@ public class ViajeService {
         List<PrecioModel> preciosModels;
         for (LugarModel lugarSalida : lugaresSalida) {
             for (LugarModel lugarDestino : lugaresDestino) {
-                List<ViajeBuscaDTOJPQL> salidasDia = viajeRepository.loadViajesDay(lugarSalida.getId(), lugarDestino.getId(), startDay, endDay);
+                List<ViajeBuscaDTOJPQL> salidasDia = viajeRepository.findByStartInInterval(lugarSalida.getId(), lugarDestino.getId(), startDay, endDay);
                 for (ViajeBuscaDTOJPQL viajeJPQL : salidasDia) {
                     salidaDTO = new ParadaDTOComplete(viajeJPQL.getSalida());
                     destinoDTO = new ParadaDTOComplete(viajeJPQL.getDestino());

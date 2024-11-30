@@ -31,7 +31,7 @@ public class TiempoViajeService {
             LocalDateTime dataFim
     ) {
         LocalDateTime dataInicioAlterado = dataInicio.minusDays(tempoMaxViajeDias).minusSeconds(2);
-        return viajeRepository.findByEmpresaIdMakedInInterval(empresa.getId(), dataInicio, dataInicioAlterado, dataFim);
+        return viajeRepository.findByEmpresaMakedInInterval(empresa.getId(), dataInicio, dataInicioAlterado, dataFim);
     }
 
     public boolean existsViajesActiveFromAutobus(
@@ -64,6 +64,6 @@ public class TiempoViajeService {
                                                            LocalDateTime dataInicio,
                                                            LocalDateTime dataFim) {
         LocalDateTime dataInicioAlterado = dataInicio.minusDays(tempoMaxViajeDias).minusSeconds(2);
-        return viajeRepository.findViajeFromAutobusInIntervalo(empresaId, autobusId, dataInicio, dataInicioAlterado, dataFim);
+        return viajeRepository.findByAutobusInIntervalo(empresaId, autobusId, dataInicio, dataInicioAlterado, dataFim);
     }
 }

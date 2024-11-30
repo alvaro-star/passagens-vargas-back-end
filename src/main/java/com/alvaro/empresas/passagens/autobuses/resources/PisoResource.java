@@ -3,7 +3,7 @@ package com.alvaro.empresas.passagens.autobuses.resources;
 import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTOResponse;
 import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTOUpdate;
 import com.alvaro.empresas.passagens.autobuses.services.PisoService;
-import com.alvaro.empresas.passagens.helpers.beans.MyUserComponent;
+import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.*;
 @SecurityRequirement(name = "bearer-key")
 public class PisoResource {
     private final PisoService pisoService;
-    private final MyUserComponent myUserComponent;
+    private final UserLoguedComponent userLogued;
 
     @Autowired
-    public PisoResource(PisoService pisoService, MyUserComponent myUserComponent) {
+    public PisoResource(PisoService pisoService, UserLoguedComponent userLogued) {
         this.pisoService = pisoService;
-        this.myUserComponent = myUserComponent;
+        this.userLogued = userLogued;
     }
 
     @GetMapping("/{id}")
@@ -33,8 +33,7 @@ public class PisoResource {
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN')")
     public ResponseEntity<Object> update(@PathVariable Integer id, @RequestBody @Valid PisoDTOUpdate dto) {
         var piso = pisoService.findById(id);
-        var user = myUserComponent.getUser();
-        user.validIfIsMyEmpresa(piso.getAutobus().getEmpresaId());
+        userLogued.validIfIsMyEmpresa(piso.getAutobus().getEmpresaId());
         var updated = pisoService.update(dto, piso);
         return ResponseEntity.ok().body(updated);
     }

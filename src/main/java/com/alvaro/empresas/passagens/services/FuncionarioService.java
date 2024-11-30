@@ -27,7 +27,7 @@ public class FuncionarioService {
     private EmpresaEnabled empresaEnabled;
 
     public Page<FuncionarioDTO> findAllFromEmpresa(UUID idEmpresa, Pageable pageable) {
-        Page<UsuarioModel> models = usuarioRepository.findByIdEmpresa(idEmpresa, pageable);
+        Page<UsuarioModel> models = usuarioRepository.findByEmpresaId(idEmpresa, pageable);
         return models.map(FuncionarioDTO::new);
     }
 
@@ -37,7 +37,7 @@ public class FuncionarioService {
         var usuario = usuarioRepository.findByEmail(registerDto.email());
         if (usuario.isEmpty())
             throw new GeneralException("El usuario no esta registrado en el sistema");
-        usuario.get().setIdEmpresa(idEmpresa);
+        usuario.get().setEmpresaId(idEmpresa);
         if (usuario.get().hasRole(RoleList.ROLE_EMPRESA_FUNCIONARIO.toString()))
             throw new GeneralException("El funcionario ya esta relacionado con una empresa");
 
@@ -60,7 +60,7 @@ public class FuncionarioService {
         if (usuario.isEmpty())
             throw new GeneralException("El usuario no esta registrado en el sistema");
         RoleModel roleEmpresaFuncionario = roleService.getByRoleName(RoleList.ROLE_EMPRESA_FUNCIONARIO);
-        usuario.get().setIdEmpresa(null);
+        usuario.get().setEmpresaId(null);
 
         if (!usuario.get().removeRole(roleEmpresaFuncionario))
             throw new GeneralException("No seu pudo eliminar el cargo");

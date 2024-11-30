@@ -87,13 +87,13 @@ public class ViajeEmpresaService {
         return model.orElseThrow(() -> new ObjectNotFoundException(id, ViajeModel.class.getName()));
     }
 
-    public Page<ViajeDTOListBusquedaEmpresa> findAllFromEmpresaBetweenDates(ViajeDTOSolicitacaoFromEmpresa solicitacao, Pageable pageable) {
+    public Page<ViajeDTOListBusquedaEmpresa> findAllByEmpresaBetweenDates(ViajeDTOSolicitacaoFromEmpresa solicitacao, Pageable pageable) {
         var empresa = emrEmpresaService.findById(solicitacao.idEmpresa());
         Page<ViajeDTOJPQL> models;
         LocalDateTime dataInicio = helperDate.getFirstDayOfMonthDate(solicitacao.dataAnalise());
         LocalDateTime dataFim = helperDate.getLastDayOfMonthDate(solicitacao.dataAnalise());
 
-        models = viajeRepository.findByEmpresaIdAndStartInInterval(empresa.getId(), dataInicio, dataFim, pageable);
+        models = viajeRepository.findByEmpresaAndStartInInterval(empresa.getId(), dataInicio, dataFim, pageable);
 
         return models.map(model -> {
             if (model.salida() == null || model.destino() == null)
@@ -106,7 +106,7 @@ public class ViajeEmpresaService {
         LocalDateTime dataInicio = helperDate.getFirstDayOfMonthDate(solicitacao.dataAnalise());
         LocalDateTime dataFim = helperDate.getLastDayOfMonthDate(solicitacao.dataAnalise());
 
-        Page<ViajeDTOJPQL> models = viajeRepository.findByEmpresaIdAndAutobusId(autobusModel.getEmpresa().getId(), autobusModel.getId(), dataInicio, dataFim, pageable);
+        Page<ViajeDTOJPQL> models = viajeRepository.findByEmpresaAndAutobusAndStartInInterval(autobusModel.getEmpresa().getId(), autobusModel.getId(), dataInicio, dataFim, pageable);
 
         return models.map(model -> {
             if (model.salida() == null || model.destino() == null)
@@ -139,7 +139,7 @@ public class ViajeEmpresaService {
 
         for (LugarModel lugarSalida : lugaresSalida) {
             for (LugarModel lugarDestino : lugaresDestino) {
-                List<ViajeEmpresaDTOJPQ> salidasDia = viajeRepository.loadViajesDayByEmpresaId(idEmpresa, lugarSalida.getId(), lugarDestino.getId(), startDay, endDay);
+                List<ViajeEmpresaDTOJPQ> salidasDia = viajeRepository.findByEmpresaAndStartInInterval(idEmpresa, lugarSalida.getId(), lugarDestino.getId(), startDay, endDay);
                 for (ViajeEmpresaDTOJPQ ViajeEmpresaDTOJPQ : salidasDia) {
                     salidaDTO = new ParadaDTOComplete(ViajeEmpresaDTOJPQ.getSalida());
                     destinoDTO = new ParadaDTOComplete(ViajeEmpresaDTOJPQ.getDestino());
@@ -170,7 +170,7 @@ public class ViajeEmpresaService {
         List<PrecioDTO> precios;
 
         for (LugarModel lugarSalida : lugaresSalida) {
-            List<ViajeEmpresaDTOJPQ> salidasDia = viajeRepository.loadViajesDayByEmpresaOnlySalida(idEmpresa, lugarSalida.getId(), startDay, endDay);
+            List<ViajeEmpresaDTOJPQ> salidasDia = viajeRepository.findByEmpresaAndStartInInterval(idEmpresa, lugarSalida.getId(), startDay, endDay);
             for (ViajeEmpresaDTOJPQ ViajeEmpresaDTOJPQ : salidasDia) {
                 salidaDTO = new ParadaDTOComplete(ViajeEmpresaDTOJPQ.getSalida());
                 destinoDTO = new ParadaDTOComplete(ViajeEmpresaDTOJPQ.getDestino());
@@ -205,10 +205,13 @@ public class ViajeEmpresaService {
         empresaEnabled.validEmpresaEnabled(autobus.getEmpresaId());
 
         var lugarSalida = lugarRepository.findById(dto.idLugarSalida());
-        if (lugarSalida.isEmpty()) throw new ValidationException("idLugarSalida", "El lugarSalida no fue allado");
+        if (lugarSalida.isEmpty()) throw new ValidationException("idLugarSalida", "El origen no fue allado");
 
         var lugarDestino = lugarRepository.findById(dto.idLugarDestino());
-        if (lugarDestino.isEmpty()) throw new ValidationException("idLugarDestino", "El lugarDestino no fue allado");
+        if (lugarDestino.isEmpty()) throw new ValidationException("idLugarDestino", "El destino no fue allado");
+
+        if (dto.idLugarDestino().equals(dto.idLugarSalida()))
+            throw new ValidationException("idLugarDestino", "El destino es el mismo que la salida");
 
         LocalDateTime dataHoraSalidaAjustada = dto.fechaSalida().withSecond(0).withNano(0);
         LocalDateTime dataHoraDestino = dataHoraSalidaAjustada.plusHours(dto.horasViaje());

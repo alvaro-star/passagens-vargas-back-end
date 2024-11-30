@@ -2,15 +2,13 @@ package com.alvaro.empresas.passagens.security.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 
 @Entity
 @Table(name = "tb_role")
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 public class RoleModel implements GrantedAuthority {
     private static final long serialVersionUID = 2L;

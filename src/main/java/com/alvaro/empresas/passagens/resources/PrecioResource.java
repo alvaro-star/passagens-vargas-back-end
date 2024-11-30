@@ -3,7 +3,7 @@ package com.alvaro.empresas.passagens.resources;
 import com.alvaro.empresas.passagens.dtos.precios.PrecioDTO;
 import com.alvaro.empresas.passagens.dtos.precios.PrecioDTOResponseViaje;
 import com.alvaro.empresas.passagens.dtos.precios.PrecioDTOUpdate;
-import com.alvaro.empresas.passagens.helpers.beans.MyUserComponent;
+import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
 import com.alvaro.empresas.passagens.helpers.validators.EmpresaEnabled;
 import com.alvaro.empresas.passagens.services.PrecioService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -23,7 +23,7 @@ public class PrecioResource {
     @Autowired
     private PrecioService precioService;
     @Autowired
-    private MyUserComponent myUserComponent;
+    private UserLoguedComponent userLogued;
     @Autowired
     private EmpresaEnabled empresaEnabled;
 
@@ -41,8 +41,7 @@ public class PrecioResource {
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
     public ResponseEntity<Object> update(@PathVariable(value = "id") UUID id, @RequestBody @Valid PrecioDTOUpdate dto) {
         var precio = precioService.findById(id);
-        var usuario = myUserComponent.getUser();
-        usuario.validIfIsMyEmpresa(precio.getEmpresaId());
+        userLogued.validIfIsMyEmpresa(precio.getEmpresaId());
         empresaEnabled.validEmpresaEnabled(precio.getEmpresaId());
 
         return ResponseEntity.ok(precioService.update(dto, precio));
