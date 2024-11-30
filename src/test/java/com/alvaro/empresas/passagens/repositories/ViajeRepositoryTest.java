@@ -56,7 +56,7 @@ class ViajeRepositoryTest {
         cadastrarViaje(startViaje, autobusAbril, lugares);
         cadastrarViaje(startViaje, autobusMarzo, lugares);
 
-        List<ViajeModel> viaje = viajeRepository.findViajeFromAutobusInIntervalo(
+        List<ViajeModel> viaje = viajeRepository.findByAutobusInIntervalo(
                 empresasModels.get(empresasName[1]).getId(),
                 autobusAbril.getId(),
                 startViaje,
@@ -87,7 +87,7 @@ class ViajeRepositoryTest {
 
         int idLugarSalida = lugares.get(1).getId();
         int idLugarDestino = lugares.get(2).getId();
-        List<ViajeEmpresaDTOJPQ> viajesEncontrados = viajeRepository.loadViajesDayByEmpresaId(
+        List<ViajeEmpresaDTOJPQ> viajesEncontrados = viajeRepository.findByEmpresaAndStartInInterval(
                 autobusAbril.getEmpresaId(),
                 idLugarSalida,
                 idLugarDestino,

@@ -29,10 +29,10 @@ public class RoleService {
     }
 
     public static String getCargo(UsuarioModel model) {
-        var isAdmin = model.hasRole(RoleList.ROLE_EMPRESA_ADMIN.toString());
+        var isAdmin = model.hasRole(RoleList.ROLE_EMPRESA_ADMIN);
         if (isAdmin)
             return RoleList.ROLE_EMPRESA_ADMIN.toString();
-        var isFuncionario = model.hasRole(RoleList.ROLE_EMPRESA_FUNCIONARIO.toString());
+        var isFuncionario = model.hasRole(RoleList.ROLE_EMPRESA_FUNCIONARIO);
         if (isFuncionario)
             return RoleList.ROLE_EMPRESA_FUNCIONARIO.toString();
         return RoleList.ROLE_CLIENTE.toString();

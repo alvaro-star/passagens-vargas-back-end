@@ -25,8 +25,7 @@ public class UsuarioResource {
     @GetMapping("/mydata")
     public ResponseEntity<Object> getProfile() {
         var usuario = userLogued.getUserModel();
-
-        boolean isEmpresa = usuario.hasRole(RoleList.ROLE_EMPRESA_FUNCIONARIO.toString()) || usuario.hasRole(RoleList.ROLE_EMPRESA_ADMIN.toString());
+        boolean isEmpresa = usuario.hasRole(RoleList.ROLE_EMPRESA_FUNCIONARIO) || usuario.hasRole(RoleList.ROLE_EMPRESA_ADMIN);
         if (isEmpresa)
             return ResponseEntity.ok(new UsuarioEmpresaDTO(usuario));
         return ResponseEntity.ok(new UsuarioDTO(usuario));

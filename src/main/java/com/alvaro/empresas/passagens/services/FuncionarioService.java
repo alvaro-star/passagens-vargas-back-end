@@ -38,7 +38,7 @@ public class FuncionarioService {
         if (usuario.isEmpty())
             throw new GeneralException("El usuario no esta registrado en el sistema");
         usuario.get().setEmpresaId(idEmpresa);
-        if (usuario.get().hasRole(RoleList.ROLE_EMPRESA_FUNCIONARIO.toString()))
+        if (usuario.get().hasRole(RoleList.ROLE_EMPRESA_FUNCIONARIO))
             throw new GeneralException("El funcionario ya esta relacionado con una empresa");
 
         boolean adicionou;

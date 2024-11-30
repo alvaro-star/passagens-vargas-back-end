@@ -80,9 +80,9 @@ public class UsuarioModel implements UserDetails {
         return this.roles.stream().map(RoleModel::getAuthority).toList();
     }
 
-    public boolean hasRole(String role) {
+    public boolean hasRole(RoleList role) {
         for (RoleModel roleModel : this.roles) {
-            if (roleModel.getAuthority().equals(role))
+            if (roleModel.getNombre().equals(role))
                 return true;
         }
         return false;

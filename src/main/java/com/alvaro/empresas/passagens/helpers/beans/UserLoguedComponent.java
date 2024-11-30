@@ -12,6 +12,12 @@ import java.util.UUID;
 
 @Component
 public class UserLoguedComponent {
+    public UsuarioModel getUserModel() {
+        var usuario = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (usuario instanceof UsuarioModel) return (UsuarioModel) usuario;
+        throw new GeneralException(HttpStatus.FORBIDDEN, "El usuario no inicio session");
+    }
+
     public void validIfIsAdminOrOwnerEmpresa(UUID idEmpresa) {
         if (!isAdminOrOwnerEmpresa(idEmpresa))
             throw new GeneralException(HttpStatus.FORBIDDEN, "No esta autorizado a realizar esta accion");
@@ -38,11 +44,5 @@ public class UserLoguedComponent {
                 return true;
         }
         return false;
-    }
-
-    public UsuarioModel getUserModel() {
-        var usuario = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (usuario instanceof UsuarioModel) return (UsuarioModel) usuario;
-        throw new GeneralException(HttpStatus.FORBIDDEN, "El usuario no inicio session");
     }
 }

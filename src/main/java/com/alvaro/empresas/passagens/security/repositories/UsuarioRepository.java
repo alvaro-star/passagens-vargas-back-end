@@ -20,5 +20,5 @@ public interface UsuarioRepository extends JpaRepository<UsuarioModel, UUID> {
 
     Boolean existsByLogin(String email);
 
-    Page<UsuarioModel> findByIdEmpresa(UUID idEmpresa, Pageable pageable);
+    Page<UsuarioModel> findByEmpresaId(UUID idEmpresa, Pageable pageable);
 }

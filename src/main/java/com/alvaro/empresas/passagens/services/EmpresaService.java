@@ -65,13 +65,13 @@ public class EmpresaService {
 
         var empresa = empresaRepository.existsById(empresaAdmin.idEmpresa());
         if (!empresa) throw new GeneralException("La empresa no existe");
-        if (usuario.get().hasRole(RoleList.ROLE_EMPRESA_ADMIN.toString()))
+        if (usuario.get().hasRole(RoleList.ROLE_EMPRESA_ADMIN))
             throw new GeneralException("El usuario ya es un administrador");
 
         List<RoleModel> rolesModels = roleService.findAll();
         Set<RoleModel> roles = new HashSet<>(rolesModels);
 
-        if (usuario.get().hasRole(RoleList.ROLE_EMPRESA_FUNCIONARIO.toString()) && !usuario.get().getEmpresaId().equals(empresaAdmin.idEmpresa()))
+        if (usuario.get().hasRole(RoleList.ROLE_EMPRESA_FUNCIONARIO) && !usuario.get().getEmpresaId().equals(empresaAdmin.idEmpresa()))
             throw new GeneralException("El usuario esta relacionado con otra empresa");
 
         usuario.get().setRoles(roles);
