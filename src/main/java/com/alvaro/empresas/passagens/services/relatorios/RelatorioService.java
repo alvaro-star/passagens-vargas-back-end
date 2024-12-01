@@ -37,15 +37,14 @@ public class RelatorioService {
     private final LugarService lugarService;
     private final TiempoViajeService tiempoViajeService;
 
-    @Autowired
-    public RelatorioService(EmpresaService empresaService, PasajeRepository pasajeRepository, EmailService emailService, LugarService lugarService, TiempoViajeService tiempoViajeService, PDFThymeleaf pdfThymeleaf) {
+    public RelatorioService(EmpresaService empresaService, PasajeRepository pasajeRepository, EmailService emailService, DateAuxiliarFunctions dateAuxiliarFunctions, PDFThymeleaf pdfThymeleaf, LugarService lugarService, TiempoViajeService tiempoViajeService) {
         this.empresaService = empresaService;
         this.pasajeRepository = pasajeRepository;
         this.emailService = emailService;
-        this.dateAuxiliarFunctions = new DateAuxiliarFunctions();
+        this.dateAuxiliarFunctions = dateAuxiliarFunctions;
+        this.pdfThymeleaf = pdfThymeleaf;
         this.lugarService = lugarService;
         this.tiempoViajeService = tiempoViajeService;
-        this.pdfThymeleaf = pdfThymeleaf;
     }
 
     @Value("${api.viaje.max-time-viaje-day}")

@@ -54,10 +54,10 @@ public interface ViajeRepository extends JpaRepository<ViajeModel, UUID> {
             "AND s.viaje.codigo = d.viaje.codigo AND d.lugar.id = :id_lugar_destino AND d.tipo != 'SALIDA' " +
             "AND v.codigo = s.viaje.codigo")
     List<ViajeEmpresaDTOJPQ> findByEmpresaAndStartInInterval(@Param("id_empresa") UUID idEmpresa,
-                                                      @Param("id_lugar_salida") Integer idLugarSalida,
-                                                      @Param("id_lugar_destino") Integer idLugarDestino,
-                                                      @Param("data_start") LocalDateTime dataStart,
-                                                      @Param("data_end") LocalDateTime dataEnd);
+                                                             @Param("id_lugar_salida") Integer idLugarSalida,
+                                                             @Param("id_lugar_destino") Integer idLugarDestino,
+                                                             @Param("data_start") LocalDateTime dataStart,
+                                                             @Param("data_end") LocalDateTime dataEnd);
 
     @Query("SELECT new com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQL(v, s, d) " +
             "FROM ViajeModel v, ParadaModel s, ParadaModel d " +
@@ -82,11 +82,12 @@ public interface ViajeRepository extends JpaRepository<ViajeModel, UUID> {
 
     @Query("SELECT new com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQLRelatorio(v, s.lugarId, d.lugarId) " +
             "FROM ViajeModel v, ParadaModel s, ParadaModel d " +
-            "WHERE v.empresa.id = :empresaId " +
-            "AND v.dataHoraSalida BETWEEN :dataInicioAlterado AND :dataFim " +
-            "AND s.viaje.codigo = v.codigo AND s.tipo = 'SALIDA' " +
-            "AND d.viaje.codigo = v.codigo AND d.tipo = 'DESTINO' AND d.dataHora >= :dataInicio")
-    List<ViajeDTOJPQLRelatorio> findByEmpresaMakedInInterval(UUID empresaId, LocalDateTime dataInicio, LocalDateTime dataInicioAlterado, LocalDateTime dataFim);
+            "WHERE d.empresa.id = :empresaId " +
+            "AND d.dataHora BETWEEN :dataInicio AND :dataFim " +
+            "AND d.tipo = 'DESTINO' " +
+            "AND v.codigo = d.viaje.codigo " +
+            "AND s.viaje.codigo = v.codigo AND s.tipo = 'SALIDA'")
+    List<ViajeDTOJPQLRelatorio> findByEmpresaFinishedInInterval(UUID empresaId, LocalDateTime dataInicio, LocalDateTime dataFim);
 
     @Query("SELECT new com.alvaro.empresas.passagens.paradas.dtos.JPQL.ViajeBuscaDTOJPQL(s.viaje.codigo, s.viaje.empresa.logo, s, d) " +
             "FROM ParadaModel s, ParadaModel d " +
@@ -107,7 +108,13 @@ public interface ViajeRepository extends JpaRepository<ViajeModel, UUID> {
 
 /* No usage
 //Dado a alguns viajes, Si se pone el inervalo de tiempo al reves igual te devolvera el mismo registro
-
+@Query("SELECT new com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQLRelatorio(v, s.lugarId, d.lugarId) " +
+            "FROM ViajeModel v, ParadaModel s, ParadaModel d " +
+            "WHERE v.empresa.id = :empresaId " +
+            "AND v.dataHoraSalida BETWEEN :dataInicioAlterado AND :dataFim " +//Linha para
+            "AND s.viaje.codigo = v.codigo AND s.tipo = 'SALIDA' " +
+            "AND d.viaje.codigo = v.codigo AND d.tipo = 'DESTINO' AND d.dataHora >= :dataInicio")
+    List<ViajeDTOJPQLRelatorio> findByEmpresaFinishedInInterval(UUID empresaId, LocalDateTime dataInicio, LocalDateTime dataInicioAlterado, LocalDateTime dataFim);
 @Query(value = "SELECT s.*, d.* FROM tb_parada as s, tb_parada as d " +
             "AND :startViaje < :endViaje " +
             "AND :startViaje >= s.data_hora " +

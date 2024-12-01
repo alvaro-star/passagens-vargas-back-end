@@ -30,8 +30,7 @@ public class TiempoViajeService {
             LocalDateTime dataInicio,
             LocalDateTime dataFim
     ) {
-        LocalDateTime dataInicioAlterado = dataInicio.minusDays(tempoMaxViajeDias).minusSeconds(2);
-        return viajeRepository.findByEmpresaMakedInInterval(empresa.getId(), dataInicio, dataInicioAlterado, dataFim);
+        return viajeRepository.findByEmpresaFinishedInInterval(empresa.getId(), dataInicio, dataFim);
     }
 
     public boolean existsViajesActiveFromAutobus(

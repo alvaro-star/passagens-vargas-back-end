@@ -5,7 +5,6 @@ import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTOResponse
 import com.alvaro.empresas.passagens.autobuses.dtos.autobuses.AutobusDTOUpdate;
 import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTOResponse;
 import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
-import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import com.alvaro.empresas.passagens.autobuses.repositories.AutobusRepository;
 import com.alvaro.empresas.passagens.autobuses.services.validacao.ValidarPiso;
 import com.alvaro.empresas.passagens.configurations.exceptions.InternalException.GeneralException;
@@ -61,9 +60,9 @@ public class AutobusService {
 
     public AutobusDTOResponse getOne(Integer id) {
         var model = findById(id);
-        List<PisoDTOResponse> pisosDto = new ArrayList<>();
-        for (PisoModel piso : model.getPisos())
-            pisosDto.add(new PisoDTOResponse(piso));
+        System.out.println(model.getPisos().size());
+        System.out.println(id);
+        var pisosDto = model.getPisos().stream().map(PisoDTOResponse::new).toList();
         return new AutobusDTOResponse(model, pisosDto);
     }
 

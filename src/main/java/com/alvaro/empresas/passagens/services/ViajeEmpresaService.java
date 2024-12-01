@@ -43,6 +43,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.context.Context;
+import org.xhtmlrenderer.css.parser.property.PrimitivePropertyBuilders;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -196,7 +197,7 @@ public class ViajeEmpresaService {
         Context context = new Context();
         context.setVariable("pasajes", pasajesTh);
         PageSize pageSize = new PageSize(PageSize.A4.getHeight(), PageSize.A4.getWidth());
-        return pdfThymeleaf.generatePDFByTemplate("/empresa/pasajerosList", context, pageSize);
+        return pdfThymeleaf.generatePDFByTemplate("/empresa/pasajerosList", context, PageSize.A4);
     }
 
     @Transactional
@@ -217,11 +218,11 @@ public class ViajeEmpresaService {
         LocalDateTime dataHoraDestino = dataHoraSalidaAjustada.plusHours(dto.horasViaje());
 
         if (!tiempoViajeService.validarTempoMaximoViaje(dataHoraSalidaAjustada, dataHoraDestino))
-            throw new ValidationException("destino.dataHora", "Un viaje puede durar maximo 3 dias");
+            throw new GeneralException(HttpStatus.CONFLICT, "Un viaje puede durar maximo 3 dias");
 
         boolean viajeInIntervalo = tiempoViajeService.existsViajesActiveFromAutobus(autobus, dataHoraSalidaAjustada, dataHoraDestino);
         if (viajeInIntervalo)
-            throw new ValidationException("destino.dataHora", "Existe un viaje del autobus que ocurre en este intervalo");
+            throw new GeneralException(HttpStatus.CONFLICT, "El autobus estara ocupado con otro viaje");
 
         var model = new ViajeModel(autobus, dataHoraSalidaAjustada);
 
@@ -240,9 +241,9 @@ public class ViajeEmpresaService {
             precios.add(new PrecioModel(precioItemList, i, aux.getNSillas()));
         }
 
+        viajeRepository.save(model);
         //Guardando los precios
         List<PrecioDTO> preciosSalvos = precioService.saveAll(precios, model);
-
         model.addParada(salida);
         model.addParada(destino);
         viajeRepository.save(model);

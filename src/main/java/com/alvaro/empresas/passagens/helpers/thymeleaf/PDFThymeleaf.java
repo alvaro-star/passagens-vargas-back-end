@@ -18,7 +18,13 @@ public class PDFThymeleaf {
     private final String classpath = "templates";
 
     public byte[] generatePDFByTemplate(String templateName, Context context, PageSize pageSize) {
-        String html = parseThymeleafTemplate(templateName, context);
+        String html="";
+        try {
+            html = parseThymeleafTemplate(templateName, context);
+        }catch (Exception e ){
+            System.out.println("Erro na geracao de PDFs");
+        }
+
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         PdfWriter writer = new PdfWriter(byteArrayOutputStream);

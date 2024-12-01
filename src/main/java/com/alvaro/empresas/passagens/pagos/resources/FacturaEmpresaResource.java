@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,7 +23,7 @@ public class FacturaEmpresaResource {
     private RelatorioService relatorioService;
 
     @PostMapping
-    //@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN')")
     public ResponseEntity<byte[]> getRelatorioByEmpresa(@RequestBody @Valid RelatorioSolicitudDTO solicitudDTO) {
         byte[] relatorioPDF = relatorioService.makeRelatorioMensual(solicitudDTO);
         HttpHeaders headers = new HttpHeaders();

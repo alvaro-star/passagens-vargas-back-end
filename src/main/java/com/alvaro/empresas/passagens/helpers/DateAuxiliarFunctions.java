@@ -23,8 +23,7 @@ public class DateAuxiliarFunctions {
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
-        System.out.println(timeZone);
-        ZoneId zoneId = ZoneId.of("America/La_Paz");
+        ZoneId zoneId = ZoneId.of(timeZone);
         return calendar.getTime().toInstant().atZone(zoneId).toLocalDateTime();
     }
 

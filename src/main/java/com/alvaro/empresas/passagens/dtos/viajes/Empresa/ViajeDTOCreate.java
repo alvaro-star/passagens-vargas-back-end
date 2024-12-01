@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record ViajeDTOCreate(
-        UUID codigo,
         @NotNull
         Integer idAutobus,
 
@@ -22,10 +21,10 @@ public record ViajeDTOCreate(
         LocalDateTime fechaSalida,
         @NotNull
         Integer idLugarSalida,
-        @Positive
-        int horasViaje,
         @NotNull
         Integer idLugarDestino,
+        @Positive
+        int horasViaje,
 
         @NotNull
         @DecimalMin(value = "10.0")
