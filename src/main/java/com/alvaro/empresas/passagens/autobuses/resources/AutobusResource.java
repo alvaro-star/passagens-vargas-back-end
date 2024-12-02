@@ -44,7 +44,6 @@ public class AutobusResource {
     @PostMapping
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN')")
     public ResponseEntity<Object> save(@RequestBody @Valid AutobusDTO dto, BindingResult bindingResult) {
-
         userLogued.validIfIsMyEmpresa(dto.idEmpresa());
         return ResponseEntity.status(HttpStatus.CREATED).body(autobusService.salvar(dto, bindingResult));
     }

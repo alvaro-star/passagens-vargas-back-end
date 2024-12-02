@@ -60,8 +60,6 @@ public class AutobusService {
 
     public AutobusDTOResponse getOne(Integer id) {
         var model = findById(id);
-        System.out.println(model.getPisos().size());
-        System.out.println(id);
         var pisosDto = model.getPisos().stream().map(PisoDTOResponse::new).toList();
         return new AutobusDTOResponse(model, pisosDto);
     }
@@ -71,20 +69,17 @@ public class AutobusService {
     public AutobusDTOResponse salvar(AutobusDTO dto, BindingResult bindingResult) {
         empresaEnabled.validEmpresaEnabled(dto.idEmpresa());
         validarPiso.validarAutobusDTO(bindingResult, dto);
-
         var empresa = empresaService.findById(dto.idEmpresa());
         var model = new AutobusModel(dto);
 
         model.setEmpresa(empresa);
         autobusRepository.save(model);
-
         List<PisoDTOResponse> pisosGuardados = new ArrayList<>();
         pisosGuardados.add(pisoService.salvar(dto.pisos().get(0), model, 1, 1));
         if (dto.pisos().size() == 2) {
             var primeraSilla = pisosGuardados.get(0).nSillas() + 1;
             pisosGuardados.add(pisoService.salvar(dto.pisos().get(1), model, 2, primeraSilla));
         }
-
         return new AutobusDTOResponse(model, pisosGuardados);
     }
 

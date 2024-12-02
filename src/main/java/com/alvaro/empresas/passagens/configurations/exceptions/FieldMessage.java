@@ -15,7 +15,7 @@ public class FieldMessage {
     private String message;
 
     public FieldMessage(FieldError error) {
-        this.message = error.getField();
+        this.name = error.getField();
         this.message = error.getDefaultMessage();
     }
 }

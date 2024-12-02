@@ -57,14 +57,15 @@ public class PisoModel {
         StringBuilder str = new StringBuilder();
         for (Integer posicionBloqueada : dto.getPosicionesBloqueadas())
             str.append(posicionBloqueada).append(",");
+        str.deleteCharAt(str.length() - 1);
         this.posicionesBloqueadas = str.toString();
     }
 
     public int[] getPosicionesBloqueadasIntegerList() {
         String[] posiciones = this.posicionesBloqueadas.split(",");
-        int[] posicionesConvert = new int[posiciones.length - 1];
-        for (int i = 0; i < posiciones.length - 1; i++) {
-            posicionesConvert[i] = Integer.getInteger(posiciones[i]);
+        int[] posicionesConvert = new int[posiciones.length];
+        for (int i = 0; i < posiciones.length; i++) {
+            posicionesConvert[i] = Integer.parseInt(posiciones[i]);
         }
         return posicionesConvert;
     }

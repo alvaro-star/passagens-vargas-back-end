@@ -5,6 +5,7 @@ import com.alvaro.empresas.passagens.configurations.exceptions.InternalException
 import com.alvaro.empresas.passagens.services.validacao.ValidationErrorsWithList;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hibernate.ObjectNotFoundException;
+import org.slf4j.Logger;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,8 @@ import java.sql.SQLIntegrityConstraintViolationException;
 
 @RestControllerAdvice
 public class ExceptionsHandler {
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(ExceptionsHandler.class);
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<StandardError> exception(Exception ex, HttpServletRequest request) {
         StandardError error = new StandardError(
@@ -67,15 +70,27 @@ public class ExceptionsHandler {
     }
 
     @ExceptionHandler(ValidationWithErrorListExceptions.class)
-    public ResponseEntity<ValidationErrorsWithList> validationWithErrorListExceptions(ValidationWithErrorListExceptions ex, String path) {
+    public ResponseEntity<ValidationErrorsWithList> validationWithErrorListExceptions(ValidationWithErrorListExceptions ex) {
         ValidationErrorsWithList err = new ValidationErrorsWithList(
                 System.currentTimeMillis(),
                 HttpStatus.UNPROCESSABLE_ENTITY.value(),
                 "Erro de Validacao",
                 "Erro durante a validacao",
-                "/autobuses");
+                null);
         err.setErrorsList(ex.getErrorsList());
         err.setErrors(ex.getErrors());
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(err);
+    }
+
+    @ExceptionHandler(NullPointerException.class)
+    public ResponseEntity<StandardError> nullPointerException(NullPointerException ex, HttpServletRequest request) {
+        StandardError err = new StandardError(
+                System.currentTimeMillis(),
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Error interno del servidor",
+                "Llame al supervisor",
+                request.getRequestURI());
+        logger.error(ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(err);
     }
 
@@ -85,8 +100,9 @@ public class ExceptionsHandler {
                 System.currentTimeMillis(),
                 HttpStatus.CONFLICT.value(),
                 "A classe tem associados",
-                e.getMessage(),
+                "Un error interno",
                 request.getRequestURI());
+        logger.error(e.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(err);
     }
 
