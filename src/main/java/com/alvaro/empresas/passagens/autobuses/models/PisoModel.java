@@ -62,6 +62,7 @@ public class PisoModel {
     }
 
     public int[] getPosicionesBloqueadasIntegerList() {
+        if (posicionesBloqueadas.isBlank()) return new int[0];
         String[] posiciones = this.posicionesBloqueadas.split(",");
         int[] posicionesConvert = new int[posiciones.length];
         for (int i = 0; i < posiciones.length; i++) {
