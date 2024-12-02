@@ -14,7 +14,6 @@ import java.util.UUID;
 public record PasajesDTOVenta(
         @NotNull
         UUID idViaje,
-
         @Valid
         ContactoDTO contacto,
         @NotNull

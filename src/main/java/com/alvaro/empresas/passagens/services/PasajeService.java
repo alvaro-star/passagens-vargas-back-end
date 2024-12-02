@@ -18,6 +18,7 @@ import com.alvaro.empresas.passagens.pagos.services.FacturaPasajeService;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.alvaro.empresas.passagens.repositories.PasajeRepository;
 import com.alvaro.empresas.passagens.repositories.ViajeRepository;
+import com.alvaro.empresas.passagens.services.validacao.ValidarCompraPasajes;
 import org.hibernate.ObjectNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.BindingResult;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -45,12 +47,19 @@ public class PasajeService {
     private FacturaPasajeService facturaPasajeService;
     @Autowired
     private ViajeRepository viajeRepository;
+    @Autowired
+    private ValidarCompraPasajes validarCompraPasajes;
 
     private static final Logger logger = LoggerFactory.getLogger(PasajeService.class);
 
     public PasajeModel findById(UUID id) {
         var model = pasajeRepository.findById(id);
         return model.orElseThrow(() -> new ObjectNotFoundException(id, PasajeModel.class.getName()));
+    }
+
+    public PasajeDTOEmpresaResponse getOne(UUID id) {
+        var model = findById(id);
+        return new PasajeDTOEmpresaResponse(model);
     }
 
     public byte[] getOnePasajeDownload(UUID idPasaje) {
@@ -80,8 +89,9 @@ public class PasajeService {
 
     //Exclusivo para el servicio online
     @Transactional
-    public FacturaPasajeModel saveCliente(PasajesDTO dto) {
+    public FacturaPasajeModel saveCliente(PasajesDTO dto, BindingResult bindingResult) {
         var precio = precioService.findById(dto.idPrecio());
+        validarCompraPasajes.validarPasajesDTO(bindingResult, dto, "/pasajes");
         var viaje = precio.getViaje();
 
         validarViaje(viaje, dto.idLugarSalida(), dto.idLugarDestino());
@@ -113,7 +123,8 @@ public class PasajeService {
 
 
     @Transactional
-    public UUID saveEmpresa(PasajesDTOVenta dto, ViajeModel viaje) {
+    public UUID saveEmpresa(PasajesDTOVenta dto, ViajeModel viaje, BindingResult bindingResult) {
+        validarCompraPasajes.validarPasajesDTOVenta(bindingResult, dto, "/pasajes/vender");
         ParadaModel salida;
         ParadaModel destino;
 

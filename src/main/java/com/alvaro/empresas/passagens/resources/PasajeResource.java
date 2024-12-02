@@ -10,8 +10,6 @@ import com.alvaro.empresas.passagens.helpers.validators.EmpresaEnabled;
 import com.alvaro.empresas.passagens.services.PasajeService;
 import com.alvaro.empresas.passagens.services.PrecioService;
 import com.alvaro.empresas.passagens.services.ViajeService;
-import com.alvaro.empresas.passagens.services.validacao.ValidarCompraPasajes;
-import com.alvaro.empresas.passagens.services.validacao.ValidationErrorsWithList;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,8 +40,7 @@ public class PasajeResource {
 
     @GetMapping("/{id}")
     public ResponseEntity<PasajeDTOEmpresaResponse> getOne(@PathVariable UUID id) {
-        var model = pasajeService.findById(id);
-        return ResponseEntity.ok(new PasajeDTOEmpresaResponse(model));
+        return ResponseEntity.ok(pasajeService.getOne(id));
     }
 
     @GetMapping("/{id}/download")
@@ -64,34 +61,24 @@ public class PasajeResource {
     }
 
     public ResponseEntity<Object> save(@RequestBody @Valid PasajesDTO dto, BindingResult bindingResult) {//Venta de pasajes al publico
-        ValidationErrorsWithList validacao;
-        validacao = ValidarCompraPasajes.validarPasajesDTO(bindingResult, dto, "/pasajes");
-        if (!validacao.getErrorsList().isEmpty() || !validacao.getErrors().isEmpty())
-            return ResponseEntity.unprocessableEntity().body(validacao);
-        return ResponseEntity.status(HttpStatus.CREATED).body(pasajeService.saveCliente(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(pasajeService.saveCliente(dto, bindingResult));
     }
 
     @PostMapping("/vender")
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_FUNCIONARIO', 'ROLE_EMPRESA_ADMIN')")
     public ResponseEntity<Object> vender(@RequestBody @Valid PasajesDTOVenta dto, BindingResult bindingResult) {
-        ValidationErrorsWithList validacao;
-
         var viaje = viajeService.findById(dto.idViaje());
         userLogued.validIfIsMyEmpresa(viaje.getEmpresaId());
         empresaEnabled.validEmpresaEnabled(viaje.getEmpresaId());
 
-        validacao = ValidarCompraPasajes.validarPasajesDTOVenta(bindingResult, dto, "/pasajes/vender");
-        if (!validacao.getErrorsList().isEmpty() || !validacao.getErrors().isEmpty())
-            return ResponseEntity.unprocessableEntity().body(validacao);
-
-        var idPago = pasajeService.saveEmpresa(dto, viaje);
+        var idPago = pasajeService.saveEmpresa(dto, viaje, bindingResult);
         return ResponseEntity.status(HttpStatus.CREATED).body(new CodigoPago(idPago));
     }
 
     @DeleteMapping("{id}")//Habiliado solo para el rembolso fijo
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_FUNCIONARIO', 'ROLE_EMPRESA_ADMIN')")
-    public ResponseEntity<Mensaje> rembolso(@PathVariable UUID idPasaje) {
-        pasajeService.delete(idPasaje);
+    public ResponseEntity<Mensaje> rembolso(@PathVariable UUID id) {
+        pasajeService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

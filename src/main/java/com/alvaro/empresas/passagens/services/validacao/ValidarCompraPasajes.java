@@ -1,44 +1,51 @@
 package com.alvaro.empresas.passagens.services.validacao;
 
 import com.alvaro.empresas.passagens.configurations.exceptions.FieldMessage;
+import com.alvaro.empresas.passagens.configurations.exceptions.InternalException.ValidationWithErrorListExceptions;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajeDTO;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTO;
 import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTOVenta;
-import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+@Component
 public class ValidarCompraPasajes {
-    public static ValidationErrorsWithList validarPasajesDTOVenta(BindingResult bindingResult, PasajesDTOVenta pasajesDTO, String path) {
+    public void validarPasajesDTOVenta(BindingResult bindingResult, PasajesDTOVenta pasajesDTO, String path) {
         //Validacion normal
         int i;
         FieldMessageItemList itemList;
+
+        List<FieldMessageList> errorsList = new ArrayList<>();
         List<FieldMessageItemList> itensErrados = new ArrayList<>();
-        ValidationErrorsWithList err = new ValidationErrorsWithList(System.currentTimeMillis(), HttpStatus.UNPROCESSABLE_ENTITY.value(), "Erro de Validacao", "Erro durante a validacao", path);
-        for (FieldError erro : bindingResult.getFieldErrors())
-            err.addError(erro.getField(), erro.getDefaultMessage());
+        List<FieldMessage> errors = new ArrayList<>();
+
+        bindingResult.getFieldErrors().forEach(error -> errors.add(new FieldMessage(error)));
 
         for (i = 0; i < pasajesDTO.pasajes().size(); i++) {
             itemList = validarPasajeDto(i, pasajesDTO.pasajes().get(i));
-            if (itemList != null)
-                itensErrados.add(itemList);
+            if (itemList != null) itensErrados.add(itemList);
         }
         if (!itensErrados.isEmpty())
-            err.addErrorList(new FieldMessageList("pasajes", itensErrados));
-        return err;
+            errorsList.add(new FieldMessageList("pasajes", itensErrados));
+
+        if (!errorsList.isEmpty() || !errors.isEmpty())
+            throw new ValidationWithErrorListExceptions("Erro de validacao", errors, errorsList);
     }
-    public static ValidationErrorsWithList validarPasajesDTO(BindingResult bindingResult, PasajesDTO pasajesDTO, String path) {
+
+
+    public void validarPasajesDTO(BindingResult bindingResult, PasajesDTO pasajesDTO, String path) {
         //Validacion normal
         int i;
         FieldMessageItemList itemList;
+        List<FieldMessageList> errorsList = new ArrayList<>();
         List<FieldMessageItemList> itensErrados = new ArrayList<>();
-        ValidationErrorsWithList err = new ValidationErrorsWithList(System.currentTimeMillis(), HttpStatus.UNPROCESSABLE_ENTITY.value(), "Erro de Validacao", "Erro durante a validacao", path);
-        for (FieldError erro : bindingResult.getFieldErrors())
-            err.addError(erro.getField(), erro.getDefaultMessage());
+        List<FieldMessage> errors = new ArrayList<>();
+
+        bindingResult.getFieldErrors().forEach(error -> errors.add(new FieldMessage(error)));
 
         for (i = 0; i < pasajesDTO.pasajes().size(); i++) {
             itemList = validarPasajeDto(i, pasajesDTO.pasajes().get(i));
@@ -46,8 +53,9 @@ public class ValidarCompraPasajes {
                 itensErrados.add(itemList);
         }
         if (!itensErrados.isEmpty())
-            err.addErrorList(new FieldMessageList("pasajes", itensErrados));
-        return err;
+            errorsList.add(new FieldMessageList("pasajes", itensErrados));
+        if (!errorsList.isEmpty() || !errors.isEmpty())
+            throw new ValidationWithErrorListExceptions("Erro de validacao", errors, errorsList);
     }
 
     private static FieldMessageItemList validarPasajeDto(int indice, PasajeDTO pasajeDTO) {

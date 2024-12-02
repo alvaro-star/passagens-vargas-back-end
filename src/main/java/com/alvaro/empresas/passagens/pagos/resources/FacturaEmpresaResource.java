@@ -1,7 +1,7 @@
 package com.alvaro.empresas.passagens.pagos.resources;
 
 import com.alvaro.empresas.passagens.pagos.dtos.RelatorioSolicitudDTO;
-import com.alvaro.empresas.passagens.services.relatorios.RelatorioService;
+import com.alvaro.empresas.passagens.pagos.services.relatorios.RelatorioService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +9,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

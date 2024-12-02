@@ -1,4 +1,4 @@
-package com.alvaro.empresas.passagens.services.relatorios;
+package com.alvaro.empresas.passagens.pagos.services.relatorios;
 
 import lombok.Getter;
 import lombok.Setter;

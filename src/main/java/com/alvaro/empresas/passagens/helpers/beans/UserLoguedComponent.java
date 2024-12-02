@@ -20,7 +20,7 @@ public class UserLoguedComponent {
 
     public void validIfIsAdminOrOwnerEmpresa(UUID idEmpresa) {
         if (!isAdminOrOwnerEmpresa(idEmpresa))
-            throw new GeneralException(HttpStatus.FORBIDDEN, "No esta autorizado a realizar esta accion");
+            throw new GeneralException(HttpStatus.FORBIDDEN, "Usted no esta relacionado a esta empresa");
     }
 
     public boolean isAdminOrOwnerEmpresa(UUID idEmpresa) {

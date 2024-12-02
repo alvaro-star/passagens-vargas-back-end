@@ -25,9 +25,11 @@ public class ValidarPiso {
     public void validarAutobusDTO(BindingResult bindingResult, AutobusDTO dto) {
         int i;
         FieldMessageItemList itemList;
+
         List<FieldMessageList> errorsList = new ArrayList<>();
         List<FieldMessageItemList> itensErrados = new ArrayList<>();
         List<FieldMessage> errors = new ArrayList<>();
+
         bindingResult.getFieldErrors().forEach(error -> errors.add(new FieldMessage(error)));
 
         if (!bindingResult.hasFieldErrors("placa"))

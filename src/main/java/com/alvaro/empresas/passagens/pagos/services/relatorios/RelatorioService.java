@@ -1,4 +1,4 @@
-package com.alvaro.empresas.passagens.services.relatorios;
+package com.alvaro.empresas.passagens.pagos.services.relatorios;
 
 import com.alvaro.empresas.passagens.dtos.viajes.JPQL.PasajeJPQLBusca;
 import com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQLRelatorio;
@@ -16,7 +16,6 @@ import com.alvaro.empresas.passagens.repositories.PasajeRepository;
 import com.alvaro.empresas.passagens.services.EmpresaService;
 import com.alvaro.empresas.passagens.services.validacao.TiempoViajeService;
 import com.itextpdf.kernel.geom.PageSize;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;

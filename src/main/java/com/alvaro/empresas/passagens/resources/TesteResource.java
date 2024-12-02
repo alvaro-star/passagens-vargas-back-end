@@ -3,7 +3,7 @@ package com.alvaro.empresas.passagens.resources;
 import com.alvaro.empresas.passagens.pagos.dtos.RelatorioSolicitudDTO;
 import com.alvaro.empresas.passagens.repositories.EmpresaRepository;
 import com.alvaro.empresas.passagens.services.PasajeService;
-import com.alvaro.empresas.passagens.services.relatorios.RelatorioService;
+import com.alvaro.empresas.passagens.pagos.services.relatorios.RelatorioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDateTime;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
 
