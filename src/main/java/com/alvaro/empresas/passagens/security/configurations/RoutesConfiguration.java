@@ -27,7 +27,6 @@ public class RoutesConfiguration {
                 .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/teste/**").permitAll()
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll()
-                .requestMatchers("/teste/**").permitAll()
                 .anyRequest().authenticated();
     }
 

@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Service;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -44,6 +45,7 @@ import static org.mockito.Mockito.when;
         basePackages = {"com.alvaro.empresas.passagens.services.RepositoryMocks"},
         includeFilters = @ComponentScan.Filter(Service.class)
 )
+@ActiveProfiles("test")
 class ViajeEmpresaServiceTest {
     @Mock
     private TiempoViajeService tiempoViajeService;

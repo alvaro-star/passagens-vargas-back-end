@@ -26,9 +26,10 @@ public class ExceptionsHandler {
                 System.currentTimeMillis(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "Error interno",
-                ex.getMessage(),
+                "Contacte-se con el tecnico",
                 request.getRequestURI()
         );
+        logger.error(ex.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 
