@@ -274,7 +274,8 @@ public class PasajeService {
         boolean resultado;
         if (pasajeModel.getEnEfectivo()) {
             resultado = viaje.substractValueEfectivo(pasajeModel.getPrecioPagado());
-        } else if (!pasajeModel.getCompradoWeb()) resultado = viaje.substractValueNoWeb(pasajeModel.getPrecioPagado());
+        } else if (!pasajeModel.getCompradoWeb())
+            resultado = viaje.substractValueNoWeb(pasajeModel.getPrecioPagado());
         else {
             logger.warn("Se necessita una API para esta operacion");
             throw new GeneralException("El pasaje fue comprado en la web, no esta disponible");

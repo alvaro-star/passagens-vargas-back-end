@@ -19,6 +19,7 @@ import java.sql.SQLIntegrityConstraintViolationException;
 @RestControllerAdvice
 public class ExceptionsHandler {
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(ExceptionsHandler.class);
+    private static final String defaultMessage = "Contacte-se con el supervisor";
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<StandardError> exception(Exception ex, HttpServletRequest request) {
@@ -26,7 +27,7 @@ public class ExceptionsHandler {
                 System.currentTimeMillis(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "Error interno",
-                "Contacte-se con el tecnico",
+                defaultMessage,
                 request.getRequestURI()
         );
         logger.error(ex.getMessage());
@@ -89,7 +90,7 @@ public class ExceptionsHandler {
                 System.currentTimeMillis(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "Error interno del servidor",
-                "Llame al supervisor",
+                defaultMessage,
                 request.getRequestURI());
         logger.error(ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(err);
@@ -99,9 +100,9 @@ public class ExceptionsHandler {
     public ResponseEntity<Object> erroAssociacao(SQLIntegrityConstraintViolationException e, HttpServletRequest request) {
         StandardError err = new StandardError(
                 System.currentTimeMillis(),
-                HttpStatus.CONFLICT.value(),
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "A classe tem associados",
-                "Un error interno",
+                defaultMessage,
                 request.getRequestURI());
         logger.error(e.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(err);
@@ -120,7 +121,14 @@ public class ExceptionsHandler {
     }
 
     @ExceptionHandler(InvalidDataAccessApiUsageException.class)
-    public ResponseEntity<String> handleInvalidDataAccessApiUsageException(InvalidDataAccessApiUsageException ex) {
+    public ResponseEntity<String> handleInvalidDataAccessApiUsageException(InvalidDataAccessApiUsageException ex, HttpServletRequest request) {
+        ValidationError err = new ValidationError(
+                System.currentTimeMillis(),
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Error interno",
+                defaultMessage,
+                request.getRequestURI());
+        logger.error(ex.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
     }
 }

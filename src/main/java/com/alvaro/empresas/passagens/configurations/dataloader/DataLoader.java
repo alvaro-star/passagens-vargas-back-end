@@ -5,13 +5,10 @@ import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
 import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
 import com.alvaro.empresas.passagens.autobuses.repositories.AutobusRepository;
 import com.alvaro.empresas.passagens.autobuses.repositories.PisoRepository;
-import com.alvaro.empresas.passagens.enums.TipoPago;
 import com.alvaro.empresas.passagens.enums.TypeParada;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
-import com.alvaro.empresas.passagens.models.PasajeModel;
 import com.alvaro.empresas.passagens.models.PrecioModel;
 import com.alvaro.empresas.passagens.models.ViajeModel;
-import com.alvaro.empresas.passagens.pagos.models.FacturaPasajeModel;
 import com.alvaro.empresas.passagens.pagos.repositories.FacturaPasajeRepository;
 import com.alvaro.empresas.passagens.paradas.models.CiudadModel;
 import com.alvaro.empresas.passagens.paradas.models.DepartamentoModel;
@@ -38,7 +35,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 
 @Profile({"h2", "devsql", "share"})
 @Configuration
@@ -125,11 +125,11 @@ public class DataLoader {
                 for (PisoModel piso : pisos) {
                     var precio = precioRepository.save(new PrecioModel(precioBruto, piso.getNPiso(), piso.getNSillas(), viaje));
                     precioBruto = precioBruto.subtract(BigDecimal.valueOf(20));
-                    var facturaPasaje = new FacturaPasajeModel(precioBruto, BigDecimal.ZERO, BigDecimal.ZERO, true, TipoPago.EFECTIVO, precio.getViaje(), LocalDateTime.now(), null);
+                    /*var facturaPasaje = new FacturaPasajeModel(precioBruto, BigDecimal.ZERO, BigDecimal.ZERO, true, TipoPago.EFECTIVO, precio.getViaje(), LocalDateTime.now(), null);
                     facturaPasajeRepository.save(facturaPasaje);
 
-                    var pasaje = new PasajeModel(piso.getPrimeraSilla() + 3, false, precioBruto, true, true, "Alvaro Vargas Alvarez", "3308731", new Date(2000, 1, 1), paradas.get(0), paradas.get(2), precio, facturaPasaje);
-                    pasajeRepository.save(pasaje);
+                    var pasaje = new PasajeModel(piso.getPrimeraSilla() + 3, false, precioBruto, true, true, "Alvaro Vargas Alvarez", "3308731", new Date(2000, 1, 1), paradas.get(0), paradas.get(2), precio, facturaPasaje);*/
+                    /*pasajeRepository.save(pasaje);*/
                 }
             }
         }
