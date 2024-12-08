@@ -19,11 +19,12 @@ public class RoutesConfiguration {
                 .requestMatchers(HttpMethod.GET, "/viajes/{id}").permitAll()
                 .requestMatchers(HttpMethod.POST, "/pasajes").permitAll()
                 .requestMatchers(HttpMethod.GET, "/ciudades/{nombre}/like").permitAll();
+
     }
 
     public void loadDevRoutes(AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry routesConfigurations) {
         loadCommonRoutes(routesConfigurations);
-        routesConfigurations.requestMatchers(HttpMethod.GET, "/facturas/{idEmpresa}").permitAll()
+        routesConfigurations
                 .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/teste/**").permitAll()
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll()

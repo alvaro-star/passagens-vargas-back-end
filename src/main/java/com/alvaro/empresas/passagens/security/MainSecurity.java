@@ -46,9 +46,9 @@ public class MainSecurity {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         var http = httpSecurity
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        http.csrf(AbstractHttpConfigurer::disable);
         if (isProfileActive("h2") || isProfileActive("mysql")) {
             http.authorizeHttpRequests(routesConfiguration::loadDevRoutes);
-            http.csrf(AbstractHttpConfigurer::disable);
             http.cors(corsCustomConfiguration::loadDevCors);
             http.headers(h -> h.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
         } else if (isProfileActive("prod")) {

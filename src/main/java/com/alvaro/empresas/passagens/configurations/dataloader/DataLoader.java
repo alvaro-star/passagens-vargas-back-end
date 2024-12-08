@@ -40,7 +40,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
-@Profile({"h2", "devsql", "share"})
+@Profile({"h2", "mysql"})
 @Configuration
 public class DataLoader {
     @Autowired
