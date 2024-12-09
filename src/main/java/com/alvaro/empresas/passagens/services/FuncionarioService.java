@@ -60,8 +60,11 @@ public class FuncionarioService {
         if (usuario.isEmpty())
             throw new GeneralException("El usuario no esta registrado en el sistema");
         RoleModel roleEmpresaFuncionario = roleService.getByRoleName(RoleList.ROLE_EMPRESA_FUNCIONARIO);
+        RoleModel roleEmpresaAdmin = roleService.getByRoleName(RoleList.ROLE_EMPRESA_ADMIN);
         usuario.get().setEmpresaId(null);
 
+        if (usuario.get().hasRole(RoleList.ROLE_EMPRESA_ADMIN))
+            usuario.get().removeRole(roleEmpresaAdmin);
         if (!usuario.get().removeRole(roleEmpresaFuncionario))
             throw new GeneralException("No seu pudo eliminar el cargo");
         usuarioRepository.save(usuario.get());
