@@ -1,13 +1,12 @@
 package com.alvaro.empresas.passagens.dtos.viajes.Empresa;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 public record ViajeDTOCreate(
         @NotNull

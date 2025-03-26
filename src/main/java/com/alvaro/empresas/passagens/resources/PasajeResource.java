@@ -1,10 +1,9 @@
 package com.alvaro.empresas.passagens.resources;
 
-import com.alvaro.empresas.passagens.dtos.pasajes.CodigoPago;
-import com.alvaro.empresas.passagens.dtos.pasajes.PasajeDTOEmpresaResponse;
-import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTO;
-import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTOVenta;
-import com.alvaro.empresas.passagens.helpers.Mensaje;
+import com.alvaro.empresas.passagens.dtos.pasagens.CodigoPago;
+import com.alvaro.empresas.passagens.dtos.pasagens.PasagemDTOEmpresaResponse;
+import com.alvaro.empresas.passagens.dtos.pasagens.PaagensDTO;
+import com.alvaro.empresas.passagens.dtos.pasagens.PasagensDTOVenta;
 import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
 import com.alvaro.empresas.passagens.helpers.validators.EmpresaEnabled;
 import com.alvaro.empresas.passagens.services.PasajeService;
@@ -39,11 +38,13 @@ public class PasajeResource {
     private EmpresaEnabled empresaEnabled;
 
     @GetMapping("/{id}")
-    public ResponseEntity<PasajeDTOEmpresaResponse> getOne(@PathVariable UUID id) {
-        return ResponseEntity.ok(pasajeService.getOne(id));
+    @ResponseStatus(HttpStatus.OK)
+    public PasagemDTOEmpresaResponse getOne(@PathVariable UUID id) {
+        return pasajeService.getOne(id);
     }
 
     @GetMapping("/{id}/download")
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<byte[]> getFilePasaje(@PathVariable UUID id) {
         byte[] pasajePdf = pasajeService.getOnePasajeDownload(id);
         HttpHeaders headers = new HttpHeaders();
@@ -54,31 +55,36 @@ public class PasajeResource {
 
     @GetMapping("/from/{idPrecio}")
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_FUNCIONARIO', 'ROLE_EMPRESA_ADMIN', 'ROLE_ADMIN')")
-    public ResponseEntity<List<PasajeDTOEmpresaResponse>> getPasajerosFromPrecio(@PathVariable UUID idPrecio) {
+    @ResponseStatus(HttpStatus.OK)
+    public List<PasagemDTOEmpresaResponse> getPasajerosFromPrecio(@PathVariable UUID idPrecio) {
         var precio = precioService.findById(idPrecio);
         userLogued.validIfIsAdminOrOwnerEmpresa(precio.getEmpresaId());
-        return ResponseEntity.ok(pasajeService.getPasajesFromPrecio(idPrecio));
+        return pasajeService.getPasajesFromPrecio(idPrecio);
     }
 
-    public ResponseEntity<Object> save(@RequestBody @Valid PasajesDTO dto, BindingResult bindingResult) {//Venta de pasajes al publico
-        return ResponseEntity.status(HttpStatus.CREATED).body(pasajeService.saveCliente(dto, bindingResult));
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public Object save(@RequestBody @Valid PaagensDTO dto, BindingResult bindingResult) { // Venta de pasajes al público
+        return pasajeService.saveCliente(dto, bindingResult);
     }
 
     @PostMapping("/vender")
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_FUNCIONARIO', 'ROLE_EMPRESA_ADMIN')")
-    public ResponseEntity<Object> vender(@RequestBody @Valid PasajesDTOVenta dto, BindingResult bindingResult) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public CodigoPago vender(@RequestBody @Valid PasagensDTOVenta dto, BindingResult bindingResult) {
         var viaje = viajeService.findById(dto.idViaje());
         userLogued.validIfIsMyEmpresa(viaje.getEmpresaId());
         empresaEnabled.validEmpresaEnabled(viaje.getEmpresaId());
 
         var idPago = pasajeService.saveEmpresa(dto, viaje, bindingResult);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new CodigoPago(idPago));
+        return new CodigoPago(idPago);
     }
 
-    @DeleteMapping("{id}")//Habiliado solo para el rembolso fijo
+    @DeleteMapping("/{id}") // Habilitado solo para el reembolso fijo
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_FUNCIONARIO', 'ROLE_EMPRESA_ADMIN')")
-    public ResponseEntity<Mensaje> rembolso(@PathVariable UUID id) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void rembolso(@PathVariable UUID id) {
         pasajeService.delete(id);
-        return ResponseEntity.noContent().build();
     }
 }
+

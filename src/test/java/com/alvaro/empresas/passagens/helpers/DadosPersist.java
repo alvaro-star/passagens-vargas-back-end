@@ -1,15 +1,13 @@
 package com.alvaro.empresas.passagens.helpers;
 
-import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
+import com.alvaro.empresas.passagens.onibus.models.AutobusModel;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.paradas.models.CiudadModel;
 import com.alvaro.empresas.passagens.paradas.models.DepartamentoModel;
 import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import jakarta.persistence.EntityManager;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashMap;

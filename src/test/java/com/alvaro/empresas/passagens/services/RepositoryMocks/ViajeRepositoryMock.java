@@ -1,8 +1,8 @@
 package com.alvaro.empresas.passagens.services.RepositoryMocks;
 
-import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
+import com.alvaro.empresas.passagens.onibus.models.AutobusModel;
 import com.alvaro.empresas.passagens.enums.TypeParada;
-import com.alvaro.empresas.passagens.models.ViajeModel;
+import com.alvaro.empresas.passagens.models.ViagemModel;
 import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import org.springframework.stereotype.Service;
@@ -23,16 +23,16 @@ public class ViajeRepositoryMock {
         return ++lastIdParada;
     }
 
-    public ParadaModel newParada(LocalDateTime fechaPartida, TypeParada tipo, LugarModel lugar, ViajeModel viaje) {
+    public ParadaModel newParada(LocalDateTime fechaPartida, TypeParada tipo, LugarModel lugar, ViagemModel viaje) {
         var parada = new ParadaModel(fechaPartida, 10, tipo, lugar, viaje);
         parada.setId(gerarIdParada());
         return parada;
     }
 
-    public ViajeModel createViaje(AutobusModel autobus, LocalDateTime dataInicio, List<LugarModel> lugares, int diffDias) {
+    public ViagemModel createViaje(AutobusModel autobus, LocalDateTime dataInicio, List<LugarModel> lugares, int diffDias) {
         if (lugares.size() < 2)
             throw new ArrayIndexOutOfBoundsException("O numero de elementos de lugares eh menor que 2");
-        var viaje = new ViajeModel(autobus, dataInicio);
+        var viaje = new ViagemModel(autobus, dataInicio);
         viaje.setCodigo(UUID.randomUUID());
         var fechaPartida = dataInicio;
         viaje.addParada(newParada(dataInicio, TypeParada.SALIDA, lugares.get(0), viaje));

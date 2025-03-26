@@ -1,8 +1,8 @@
 package com.alvaro.empresas.passagens.resources;
 
-import com.alvaro.empresas.passagens.dtos.precios.PrecioDTO;
-import com.alvaro.empresas.passagens.dtos.precios.PrecioDTOResponseViaje;
-import com.alvaro.empresas.passagens.dtos.precios.PrecioDTOUpdate;
+import com.alvaro.empresas.passagens.dtos.precos.PrecioDTO;
+import com.alvaro.empresas.passagens.dtos.precos.PrecioDTOResponseViaje;
+import com.alvaro.empresas.passagens.dtos.precos.PrecioDTOUpdate;
 import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
 import com.alvaro.empresas.passagens.helpers.validators.EmpresaEnabled;
 import com.alvaro.empresas.passagens.services.PrecioService;

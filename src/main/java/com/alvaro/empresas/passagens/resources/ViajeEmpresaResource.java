@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.resources;
 
-import com.alvaro.empresas.passagens.autobuses.services.AutobusService;
+import com.alvaro.empresas.passagens.onibus.services.AutobusService;
 import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacaoEmpresa;
 import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacaoFromAutobus;
 import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacaoFromEmpresa;

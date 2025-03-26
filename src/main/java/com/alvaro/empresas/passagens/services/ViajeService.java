@@ -1,12 +1,13 @@
 package com.alvaro.empresas.passagens.services;
 
-import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
-import com.alvaro.empresas.passagens.dtos.precios.PrecioDTO;
+
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationException;
+import com.alvaro.empresas.passagens.dtos.precos.PrecioDTO;
 import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOListBusqueda;
 import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacao;
 import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOResponse;
-import com.alvaro.empresas.passagens.models.PrecioModel;
-import com.alvaro.empresas.passagens.models.ViajeModel;
+import com.alvaro.empresas.passagens.models.PrecoModel;
+import com.alvaro.empresas.passagens.models.ViagemModel;
 import com.alvaro.empresas.passagens.paradas.dtos.JPQL.ViajeBuscaDTOJPQL;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
 import com.alvaro.empresas.passagens.paradas.models.CiudadModel;
@@ -35,9 +36,9 @@ public class ViajeService {
     @Autowired
     private PrecioRepository precioRepository;
 
-    public ViajeModel findById(UUID id) {
+    public ViagemModel findById(UUID id) {
         var model = viajeRepository.findById(id);
-        return model.orElseThrow(() -> new ObjectNotFoundException(id, ViajeModel.class.getName()));
+        return model.orElseThrow(() -> new ObjectNotFoundException(id, ViagemModel.class.getName()));
     }
 
     public ViajeDTOResponse getOne(UUID id) {
@@ -48,8 +49,8 @@ public class ViajeService {
             paradasDTOs.add(new ParadaDTOComplete(paradaModel));
 
         List<PrecioDTO> precios = new ArrayList<>();
-        for (PrecioModel precioModel : model.getPrecios())
-            precios.add(new PrecioDTO(precioModel));
+        for (PrecoModel precoModel : model.getPrecios())
+            precios.add(new PrecioDTO(precoModel));
 
         return new ViajeDTOResponse(model, paradasDTOs, precios);
     }
@@ -81,7 +82,7 @@ public class ViajeService {
         ParadaDTOComplete salidaDTO;
         ParadaDTOComplete destinoDTO;
         List<PrecioDTO> preciosDTOs;
-        List<PrecioModel> preciosModels;
+        List<PrecoModel> preciosModels;
         for (LugarModel lugarSalida : lugaresSalida) {
             for (LugarModel lugarDestino : lugaresDestino) {
                 List<ViajeBuscaDTOJPQL> salidasDia = viajeRepository.findByStartInInterval(lugarSalida.getId(), lugarDestino.getId(), startDay, endDay);
@@ -89,9 +90,9 @@ public class ViajeService {
                     salidaDTO = new ParadaDTOComplete(viajeJPQL.getSalida());
                     destinoDTO = new ParadaDTOComplete(viajeJPQL.getDestino());
                     if (!destinoDTO.dataHora().isAfter(salidaDTO.dataHora())) continue;
-                    preciosModels = precioRepository.findByViajeCodigo(viajeJPQL.getIdViaje());
+                    preciosModels = precioRepository.findByViagemId(viajeJPQL.getIdViaje());
                     preciosDTOs = new ArrayList<>();
-                    for (PrecioModel precio : preciosModels)
+                    for (PrecoModel precio : preciosModels)
                         if (!precio.getLleno()) preciosDTOs.add(new PrecioDTO(precio));
 
                     viajesSelecionados.add(new ViajeDTOListBusqueda(

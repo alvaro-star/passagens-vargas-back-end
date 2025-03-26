@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.dtos;
 
-import com.alvaro.empresas.passagens.pagos.models.FacturaPasajeModel;
+import com.alvaro.empresas.passagens.pagamentos.models.FaturaPasagemModel;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -14,7 +14,7 @@ public record FacturaPasajeDTO(
         LocalDateTime fechaPago,
         LocalDateTime createdAt
 ) {
-    public FacturaPasajeDTO(FacturaPasajeModel model) {
-        this(model.getId(), model.getValorTotal(), model.getEstaPagado(), model.getMetodoPago().toString(), model.getFechaPago(), model.getCreatedAt());
+    public FacturaPasajeDTO(FaturaPasagemModel model) {
+        this(model.getId(), model.getValorTotal(), model.getEstaPago(), model.getEstaPago().toString(), model.getDataPagamento(), model.getCreatedAt());
     }
 }

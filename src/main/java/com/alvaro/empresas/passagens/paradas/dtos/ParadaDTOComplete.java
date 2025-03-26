@@ -22,7 +22,7 @@ public record ParadaDTOComplete(
                 model.getDataHora(),
                 model.getPlataforma(),
                 model.getTipo().toString(),
-                model.getViajeCodigo(),
+                model.getViagemId(),
                 model.getLugarId(),
                 model.getLugar().getNombre(),
                 model.getLugar().getCiudad().getNombre(),

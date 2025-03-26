@@ -1,6 +1,7 @@
 package com.alvaro.empresas.passagens.helpers.beans;
 
-import com.alvaro.empresas.passagens.configurations.exceptions.InternalException.GeneralException;
+
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
 import com.alvaro.empresas.passagens.security.models.RoleList;
 import com.alvaro.empresas.passagens.security.models.RoleModel;
 import com.alvaro.empresas.passagens.security.models.UsuarioModel;
@@ -15,12 +16,12 @@ public class UserLoguedComponent {
     public UsuarioModel getUserModel() {
         var usuario = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (usuario instanceof UsuarioModel) return (UsuarioModel) usuario;
-        throw new GeneralException(HttpStatus.FORBIDDEN, "El usuario no inicio session");
+        throw new RestRuntimeException(HttpStatus.FORBIDDEN, "El usuario no inicio session");
     }
 
     public void validIfIsAdminOrOwnerEmpresa(UUID idEmpresa) {
         if (!isAdminOrOwnerEmpresa(idEmpresa))
-            throw new GeneralException(HttpStatus.FORBIDDEN, "Usted no esta relacionado a esta empresa");
+            throw new RestRuntimeException(HttpStatus.FORBIDDEN, "Usted no esta relacionado a esta empresa");
     }
 
     public boolean isAdminOrOwnerEmpresa(UUID idEmpresa) {
@@ -34,7 +35,7 @@ public class UserLoguedComponent {
 
     public void validIfIsMyEmpresa(UUID idEmpresa) {
         if (!isMyEmpresa(idEmpresa))
-            throw new GeneralException("El usuario no esta relacionado con esta empresa");
+            throw new RestRuntimeException("El usuario no esta relacionado con esta empresa");
     }
 
     public boolean hasRole(RoleList role) {

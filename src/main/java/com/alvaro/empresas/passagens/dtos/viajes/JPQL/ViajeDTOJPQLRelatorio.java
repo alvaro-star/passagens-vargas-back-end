@@ -1,9 +1,9 @@
 package com.alvaro.empresas.passagens.dtos.viajes.JPQL;
 
-import com.alvaro.empresas.passagens.models.ViajeModel;
+import com.alvaro.empresas.passagens.models.ViagemModel;
 
 public record ViajeDTOJPQLRelatorio(
-        ViajeModel viaje,
+        ViagemModel viaje,
         Integer idSalida,
         Integer idDestino
 ) {

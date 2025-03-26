@@ -1,49 +1,6 @@
 package com.alvaro.empresas.passagens.services;
 
-import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
-import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
-import com.alvaro.empresas.passagens.autobuses.services.AutobusService;
-import com.alvaro.empresas.passagens.configurations.exceptions.InternalException.GeneralException;
-import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
-import com.alvaro.empresas.passagens.dtos.precios.PrecioDTO;
-import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacaoEmpresa;
-import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacaoFromAutobus;
-import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacaoFromEmpresa;
-import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOCreate;
-import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOEmpresaResponse;
-import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOFormCopy;
-import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOListBusquedaEmpresa;
-import com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQL;
-import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOUpdate;
-import com.alvaro.empresas.passagens.enums.TypeParada;
-import com.alvaro.empresas.passagens.helpers.DateAuxiliarFunctions;
-import com.alvaro.empresas.passagens.helpers.thymeleaf.PDFThymeleaf;
-import com.alvaro.empresas.passagens.helpers.thymeleaf.PasajeItemListTHModel;
-import com.alvaro.empresas.passagens.helpers.validators.AutobusEnabled;
-import com.alvaro.empresas.passagens.helpers.validators.EmpresaEnabled;
-import com.alvaro.empresas.passagens.models.PasajeModel;
-import com.alvaro.empresas.passagens.models.PrecioModel;
-import com.alvaro.empresas.passagens.models.ViajeModel;
-import com.alvaro.empresas.passagens.paradas.dtos.JPQL.ViajeEmpresaDTOJPQ;
-import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
-import com.alvaro.empresas.passagens.paradas.models.CiudadModel;
-import com.alvaro.empresas.passagens.paradas.models.LugarModel;
-import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
-import com.alvaro.empresas.passagens.paradas.repositories.LugarRepository;
-import com.alvaro.empresas.passagens.paradas.repositories.ParadaRepository;
-import com.alvaro.empresas.passagens.repositories.PrecioRepository;
-import com.alvaro.empresas.passagens.repositories.ViajeRepository;
-import com.alvaro.empresas.passagens.services.validacao.TiempoViajeService;
-import com.itextpdf.kernel.geom.PageSize;
-import org.hibernate.ObjectNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.thymeleaf.context.Context;
-import org.xhtmlrenderer.css.parser.property.PrimitivePropertyBuilders;
+import static com.alvaro.empresas.passagens.helpers.DateAuxiliarFunctions.copyLocalTimeInLocalDate;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -53,7 +10,50 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static com.alvaro.empresas.passagens.helpers.DateAuxiliarFunctions.copyLocalTimeInLocalDate;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationException;
+import com.alvaro.empresas.passagens.enums.TipoParada;
+import org.hibernate.ObjectNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.thymeleaf.context.Context;
+
+import com.alvaro.empresas.passagens.onibus.models.AutobusModel;
+import com.alvaro.empresas.passagens.onibus.models.PisoModel;
+import com.alvaro.empresas.passagens.onibus.services.AutobusService;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
+import com.alvaro.empresas.passagens.dtos.precos.PrecioDTO;
+import com.alvaro.empresas.passagens.dtos.viajes.ViajeDTOUpdate;
+import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacaoEmpresa;
+import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacaoFromAutobus;
+import com.alvaro.empresas.passagens.dtos.viajes.Busca.ViajeDTOSolicitacaoFromEmpresa;
+import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOCreate;
+import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOEmpresaResponse;
+import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOFormCopy;
+import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOListBusquedaEmpresa;
+import com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQL;
+import com.alvaro.empresas.passagens.helpers.DateAuxiliarFunctions;
+import com.alvaro.empresas.passagens.helpers.thymeleaf.PDFThymeleaf;
+import com.alvaro.empresas.passagens.helpers.thymeleaf.PasajeItemListTHModel;
+import com.alvaro.empresas.passagens.helpers.validators.AutobusEnabled;
+import com.alvaro.empresas.passagens.helpers.validators.EmpresaEnabled;
+import com.alvaro.empresas.passagens.models.PassagemModel;
+import com.alvaro.empresas.passagens.models.PrecoModel;
+import com.alvaro.empresas.passagens.models.ViagemModel;
+import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
+import com.alvaro.empresas.passagens.paradas.dtos.JPQL.ViajeEmpresaDTOJPQ;
+import com.alvaro.empresas.passagens.paradas.models.CiudadModel;
+import com.alvaro.empresas.passagens.paradas.models.LugarModel;
+import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
+import com.alvaro.empresas.passagens.paradas.repositories.LugarRepository;
+import com.alvaro.empresas.passagens.paradas.repositories.ParadaRepository;
+import com.alvaro.empresas.passagens.repositories.PrecioRepository;
+import com.alvaro.empresas.passagens.repositories.ViajeRepository;
+import com.alvaro.empresas.passagens.services.validacao.TiempoViajeService;
+import com.itextpdf.kernel.geom.PageSize;
 
 
 @Service
@@ -83,9 +83,9 @@ public class ViajeEmpresaService {
     @Autowired
     private AutobusService autobusService;
 
-    public ViajeModel findById(UUID id) {
+    public ViagemModel findById(UUID id) {
         var model = viajeRepository.findById(id);
-        return model.orElseThrow(() -> new ObjectNotFoundException(id, ViajeModel.class.getName()));
+        return model.orElseThrow(() -> new ObjectNotFoundException(id, ViagemModel.class.getName()));
     }
 
     public Page<ViajeDTOListBusquedaEmpresa> findAllByEmpresaBetweenDates(ViajeDTOSolicitacaoFromEmpresa solicitacao, Pageable pageable) {
@@ -98,7 +98,7 @@ public class ViajeEmpresaService {
 
         return models.map(model -> {
             if (model.salida() == null || model.destino() == null)
-                throw new GeneralException("Hay un viaje que no posse ninguna parada");
+                throw new RestRuntimeException("Hay un viaje que no posse ninguna parada");
             return new ViajeDTOListBusquedaEmpresa(model.viaje());
         });
     }
@@ -147,7 +147,7 @@ public class ViajeEmpresaService {
                     if (!destinoDTO.dataHora().isAfter(salidaDTO.dataHora())) continue;
 
                     precios = new ArrayList<>();
-                    for (PrecioModel precio : ViajeEmpresaDTOJPQ.getViaje().getPrecios())
+                    for (PrecoModel precio : ViajeEmpresaDTOJPQ.getViaje().getPrecios())
                         if (!precio.getLleno()) precios.add(new PrecioDTO(precio));
                     viajesSelecionados.add(new ViajeDTOListBusquedaEmpresa(ViajeEmpresaDTOJPQ.getViaje(), null, salidaDTO, destinoDTO, precios));
                 }
@@ -178,7 +178,7 @@ public class ViajeEmpresaService {
 
                 if (!destinoDTO.dataHora().isAfter(salidaDTO.dataHora())) continue;
                 precios = new ArrayList<>();
-                for (PrecioModel precio : ViajeEmpresaDTOJPQ.getViaje().getPrecios())
+                for (PrecoModel precio : ViajeEmpresaDTOJPQ.getViaje().getPrecios())
                     precios.add(new PrecioDTO(precio));
                 viajesSelecionados.add(new ViajeDTOListBusquedaEmpresa(ViajeEmpresaDTOJPQ.getViaje(), null, salidaDTO, destinoDTO, precios));
             }
@@ -189,8 +189,8 @@ public class ViajeEmpresaService {
 
     public byte[] getPdfFromViaje(UUID id) {
         var model = this.findById(id);
-        List<PasajeModel> pasajes = new ArrayList<>();
-        for (PrecioModel precio : model.getPrecios())
+        List<PassagemModel> pasajes = new ArrayList<>();
+        for (PrecoModel precio : model.getPrecios())
             pasajes.addAll(precio.getPasajes());
 
         List<PasajeItemListTHModel> pasajesTh = pasajes.stream().map(PasajeItemListTHModel::new).toList();
@@ -218,19 +218,19 @@ public class ViajeEmpresaService {
         LocalDateTime dataHoraDestino = dataHoraSalidaAjustada.plusHours(dto.horasViaje());
 
         if (!tiempoViajeService.validarTempoMaximoViaje(dataHoraSalidaAjustada, dataHoraDestino))
-            throw new GeneralException(HttpStatus.CONFLICT, "Un viaje puede durar maximo 3 dias");
+            throw new RestRuntimeException(HttpStatus.CONFLICT, "Un viaje puede durar maximo 3 dias");
 
         boolean viajeInIntervalo = tiempoViajeService.existsViajesActiveFromAutobus(autobus, dataHoraSalidaAjustada, dataHoraDestino);
         if (viajeInIntervalo)
-            throw new GeneralException(HttpStatus.CONFLICT, "El autobus estara ocupado con otro viaje");
+            throw new RestRuntimeException(HttpStatus.CONFLICT, "El autobus estara ocupado con otro viaje");
 
-        var model = new ViajeModel(autobus, dataHoraSalidaAjustada);
+        var model = new ViagemModel(autobus, dataHoraSalidaAjustada);
 
-        var salida = new ParadaModel(dataHoraSalidaAjustada, dto.plataforma(), TypeParada.SALIDA, lugarSalida.get(), model);
-        var destino = new ParadaModel(dataHoraDestino, 0, TypeParada.DESTINO, lugarDestino.get(), model);
+        var salida = new ParadaModel(dataHoraSalidaAjustada, dto.plataforma(), TipoParada.SALIDA, lugarSalida.get(), model);
+        var destino = new ParadaModel(dataHoraDestino, 0, TipoParada.DESTINO, lugarDestino.get(), model);
 
         //Tratando los precios del viaje
-        List<PrecioModel> precios = new ArrayList<>();
+        List<PrecoModel> precios = new ArrayList<>();
         List<BigDecimal> preciodDto = List.of(dto.precioPiso1(), dto.precioPiso2());
 
         PisoModel aux;
@@ -238,7 +238,7 @@ public class ViajeEmpresaService {
             aux = autobus.getPisoByNumero(i);
             BigDecimal precioItemList = preciodDto.get(i - 1);
             if (precioItemList == null) precioItemList = preciodDto.get(i - 2);
-            precios.add(new PrecioModel(precioItemList, i, aux.getNSillas()));
+            precios.add(new PrecoModel(precioItemList, i, aux.getNSillas()));
         }
 
         viajeRepository.save(model);
@@ -256,7 +256,7 @@ public class ViajeEmpresaService {
 
     @Transactional
     // Verificar si se quiere replicar un viaje futuro en un viaje menos futuro
-    public ViajeModel saveOneCopy(ViajeDTOFormCopy dto, ViajeModel viaje) {
+    public ViagemModel saveOneCopy(ViajeDTOFormCopy dto, ViagemModel viaje) {
         autobusEnabled.validAutobusEnabled(viaje.getAutobusId());
         empresaEnabled.validEmpresaEnabled(viaje.getEmpresaId());
 
@@ -273,10 +273,10 @@ public class ViajeEmpresaService {
         boolean existe = tiempoViajeService.existsViajesActiveFromAutobus(viaje.getAutobus(), firsHourViaje, lastHourViaje);
 
         if (existe)
-            throw new GeneralException(HttpStatus.CONFLICT, "El autobus esta ocupado en esa fecha con otro viaje");
+            throw new RestRuntimeException(HttpStatus.CONFLICT, "El autobus esta ocupado en esa fecha con otro viaje");
 
         viaje.getAutobus().setEmpresa(viaje.getEmpresa());
-        var viajeNew = new ViajeModel(viaje.getAutobus(), firsHourViaje);
+        var viajeNew = new ViagemModel(viaje.getAutobus(), firsHourViaje);
 
         var horaPartida = firsHourViaje;
         long diffSecondBetweenParadas;
@@ -288,9 +288,9 @@ public class ViajeEmpresaService {
             viajeNew.addParada(auxParada);
         }
 
-        PrecioModel precioAux;
-        for (PrecioModel precio : viaje.getPrecios()) {
-            precioAux = new PrecioModel(precio.getPrecio(), precio.getNPiso(), viaje.getAutobus().getPisoByNumero(precio.getNPiso()).getNSillas(), viajeNew);
+        PrecoModel precioAux;
+        for (PrecoModel precio : viaje.getPrecios()) {
+            precioAux = new PrecoModel(precio.getPrecio(), precio.getNPiso(), viaje.getAutobus().getPisoByNumero(precio.getNPiso()).getNSillas(), viajeNew);
             viajeNew.addPrecio(precioAux);
         }
 
@@ -303,7 +303,7 @@ public class ViajeEmpresaService {
 
         var autobus = autobusService.findById(dto.idAutobus());
         if (!autobus.getEmpresaId().equals(model.getEmpresaId()))
-            throw new GeneralException(HttpStatus.CONFLICT, "Este autobus le pertenece a otra empresa");
+            throw new RestRuntimeException(HttpStatus.CONFLICT, "Este autobus le pertenece a otra empresa");
         autobusEnabled.validAutobusEnabled(dto.idAutobus());
 
         boolean viajeInIntervalo = tiempoViajeService.existsViajesActiveFromAutobus(autobus, model.getSalida().getDataHora(), model.getDestino().getDataHora());
@@ -328,18 +328,18 @@ public class ViajeEmpresaService {
 
 
     @Transactional
-    public void delete(ViajeModel model) {
+    public void delete(ViagemModel model) {
         empresaEnabled.validEmpresaEnabled(model.getEmpresaId());
         if (this.hasPasajes(model.getPrecios()))
-            throw new GeneralException("El viaje ya posse un pasaje registrado");
+            throw new RestRuntimeException("El viaje ya posse un pasaje registrado");
         precioRepository.deleteAll(model.getPrecios());
         paradaRepository.deleteAll(model.getParadas());
         viajeRepository.delete(model);
     }
 
-    public boolean hasPasajes(List<PrecioModel> precios) {
+    public boolean hasPasajes(List<PrecoModel> precios) {
         Integer nPasajes;
-        for (PrecioModel precio : precios) {
+        for (PrecoModel precio : precios) {
             nPasajes = precioRepository.calculateNPasajes(precio.getId());
             if (nPasajes != null && nPasajes > 0) return true;
         }

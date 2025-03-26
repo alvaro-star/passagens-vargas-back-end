@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.helpers.thymeleaf;
 
-import com.alvaro.empresas.passagens.models.PasajeModel;
+import com.alvaro.empresas.passagens.models.PassagemModel;
 
 public record PasajeItemListTHModel(
         Integer nsilla,
@@ -10,13 +10,13 @@ public record PasajeItemListTHModel(
         ParadaTHModel origen,
         ParadaTHModel destino
 ) {
-    public PasajeItemListTHModel(PasajeModel model) {
+    public PasajeItemListTHModel(PassagemModel model) {
         this(
-                model.getNSilla(),
-                model.getCarnet(),
-                model.getNombre(),
-                model.getNacimentoString(),
-                new ParadaTHModel(model.getSalida()),
+                model.getNumeroAssento(),
+                model.getDocumento(),
+                model.getNome(),
+                model.getNascimentoString(),
+                new ParadaTHModel(model.getSaida()),
                 new ParadaTHModel(model.getDestino())
         );
     }

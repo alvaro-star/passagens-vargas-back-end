@@ -1,7 +1,7 @@
 package com.alvaro.empresas.passagens.dtos.viajes.Empresa;
 
-import com.alvaro.empresas.passagens.dtos.precios.PrecioDTO;
-import com.alvaro.empresas.passagens.models.ViajeModel;
+import com.alvaro.empresas.passagens.dtos.precos.PrecioDTO;
+import com.alvaro.empresas.passagens.models.ViagemModel;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
 
 import java.math.BigDecimal;
@@ -18,21 +18,21 @@ public record ViajeDTOListBusquedaEmpresa(
         boolean cancelado,
         ParadaDTOComplete salida,
         ParadaDTOComplete destino,
-        List<PrecioDTO> precios
-) {
-    public ViajeDTOListBusquedaEmpresa(ViajeModel model, String logo, ParadaDTOComplete salida, ParadaDTOComplete destino, List<PrecioDTO> precios) {
-        this(model.getCodigo(), logo, model.getValorArrecadadoEfectivo(), model.getValorArrecadadoWeb(), model.isCobrado(), model.isCancelado(), salida, destino, precios);
+        List<PrecioDTO> precios) {
+    public ViajeDTOListBusquedaEmpresa(ViagemModel model, String logo, ParadaDTOComplete salida,
+                                       ParadaDTOComplete destino, List<PrecioDTO> precios) {
+        this(model.getId(), logo, model.getValorArrecadadoEfectivo(), model.getValorArrecadadoWeb(),
+                model.isCobrado(), model.isCancelado(), salida, destino, precios);
     }
 
-    public ViajeDTOListBusquedaEmpresa(ViajeModel model) {
-        this(model.getCodigo(), "",
+    public ViajeDTOListBusquedaEmpresa(ViagemModel model) {
+        this(model.getId(), "",
                 model.getValorArrecadadoEfectivo(),
                 model.getValorArrecadadoWeb(),
                 model.isCobrado(),
                 model.isCancelado(),
                 new ParadaDTOComplete(model.getSalida()),
                 new ParadaDTOComplete(model.getDestino()),
-                new ArrayList<>()
-        );
+                new ArrayList<>());
     }
 }

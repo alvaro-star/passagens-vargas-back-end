@@ -1,10 +1,10 @@
 package com.alvaro.empresas.passagens.services.validacao;
 
-import com.alvaro.empresas.passagens.configurations.exceptions.FieldMessage;
-import com.alvaro.empresas.passagens.configurations.exceptions.InternalException.ValidationWithErrorListExceptions;
-import com.alvaro.empresas.passagens.dtos.pasajes.PasajeDTO;
-import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTO;
-import com.alvaro.empresas.passagens.dtos.pasajes.PasajesDTOVenta;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationWithErrorListExceptions;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.FieldMessage;
+import com.alvaro.empresas.passagens.dtos.pasagens.PasagemDTO;
+import com.alvaro.empresas.passagens.dtos.pasagens.PaagensDTO;
+import com.alvaro.empresas.passagens.dtos.pasagens.PasagensDTOVenta;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 
@@ -14,7 +14,7 @@ import java.util.List;
 
 @Component
 public class ValidarCompraPasajes {
-    public void validarPasajesDTOVenta(BindingResult bindingResult, PasajesDTOVenta pasajesDTO, String path) {
+    public void validarPasajesDTOVenta(BindingResult bindingResult, PasagensDTOVenta pasajesDTO, String path) {
         //Validacion normal
         int i;
         FieldMessageItemList itemList;
@@ -37,7 +37,7 @@ public class ValidarCompraPasajes {
     }
 
 
-    public void validarPasajesDTO(BindingResult bindingResult, PasajesDTO pasajesDTO, String path) {
+    public void validarPasajesDTO(BindingResult bindingResult, PaagensDTO paagensDTO, String path) {
         //Validacion normal
         int i;
         FieldMessageItemList itemList;
@@ -47,8 +47,8 @@ public class ValidarCompraPasajes {
 
         bindingResult.getFieldErrors().forEach(error -> errors.add(new FieldMessage(error)));
 
-        for (i = 0; i < pasajesDTO.pasajes().size(); i++) {
-            itemList = validarPasajeDto(i, pasajesDTO.pasajes().get(i));
+        for (i = 0; i < paagensDTO.pasajes().size(); i++) {
+            itemList = validarPasajeDto(i, paagensDTO.pasajes().get(i));
             if (itemList != null)
                 itensErrados.add(itemList);
         }
@@ -58,21 +58,21 @@ public class ValidarCompraPasajes {
             throw new ValidationWithErrorListExceptions("Erro de validacao", errors, errorsList);
     }
 
-    private static FieldMessageItemList validarPasajeDto(int indice, PasajeDTO pasajeDTO) {
+    private static FieldMessageItemList validarPasajeDto(int indice, PasagemDTO pasagemDTO) {
         String message;
         FieldMessageItemList itemList = new FieldMessageItemList();
 
         itemList.setIndex(indice);
-        message = validateCarnet(pasajeDTO.carnet());
+        message = validateCarnet(pasagemDTO.documento());
         if (!message.isEmpty())
             itemList.addError(new FieldMessage("carnet", message));
-        message = validateNombre(pasajeDTO.nombre(), 50);
+        message = validateNombre(pasagemDTO.nome(), 50);
         if (!message.isEmpty())
             itemList.addError(new FieldMessage("nombre", message));
-        message = validateNascimento(pasajeDTO.nascimento());
+        message = validateNascimento(pasagemDTO.nascimento());
         if (!message.isEmpty())
             itemList.addError(new FieldMessage("nascimento", message));
-        message = validateNSilla(pasajeDTO.nSilla());
+        message = validateNSilla(pasagemDTO.numeroAssento());
         if (!message.isEmpty())
             itemList.addError(new FieldMessage("nSilla", message));
 

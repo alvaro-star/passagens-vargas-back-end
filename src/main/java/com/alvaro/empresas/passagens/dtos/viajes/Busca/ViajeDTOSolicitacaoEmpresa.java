@@ -1,9 +1,8 @@
 package com.alvaro.empresas.passagens.dtos.viajes.Busca;
 
-import jakarta.validation.constraints.FutureOrPresent;
-import jakarta.validation.constraints.NotNull;
-
 import java.time.LocalDate;
+
+import jakarta.validation.constraints.NotNull;
 
 public record ViajeDTOSolicitacaoEmpresa(
         @NotNull

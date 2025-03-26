@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.services.validacao;
 
-import com.alvaro.empresas.passagens.configurations.exceptions.FieldMessage;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.FieldMessage;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

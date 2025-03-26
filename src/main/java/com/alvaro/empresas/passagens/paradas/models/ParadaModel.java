@@ -1,8 +1,8 @@
 package com.alvaro.empresas.passagens.paradas.models;
 
-import com.alvaro.empresas.passagens.enums.TypeParada;
+import com.alvaro.empresas.passagens.enums.TipoParada;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
-import com.alvaro.empresas.passagens.models.ViajeModel;
+import com.alvaro.empresas.passagens.models.ViagemModel;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOUpdate;
 import jakarta.persistence.*;
@@ -17,7 +17,7 @@ import java.util.UUID;
 @Table(name = "tb_parada", indexes = {
         @Index(name = "idxtb_parada_fk_idtb_lugar_dataHora", columnList = "fk_idtb_lugar, data_hora"),
         @Index(name = "idxtb_parada_fk_idtb_empresa_fk_idtb_lugar_dataHora", columnList = "fk_idtb_empresa, fk_idtb_lugar, data_hora"),
-        @Index(name = "idxtb_parada_fk_idtb_viaje", columnList = "fk_idtb_viaje")
+        @Index(name = "idxtb_parada_fk_idtb_viagem", columnList = "fk_idtb_viagem")
 })
 @Data
 @NoArgsConstructor
@@ -34,7 +34,7 @@ public class ParadaModel {
     @Column(nullable = false)
     private int plataforma;
     @Enumerated(EnumType.STRING)
-    private TypeParada tipo;
+    private TipoParada tipo;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_lugar")
@@ -43,10 +43,10 @@ public class ParadaModel {
     private Integer lugarId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "fk_idtb_viaje")
-    private ViajeModel viaje;
-    @Column(name = "fk_idtb_viaje", insertable = false, updatable = false)
-    private UUID viajeCodigo;
+    @JoinColumn(name = "fk_idtb_viagem")
+    private ViagemModel viagem;
+    @Column(name = "fk_idtb_viagem", insertable = false, updatable = false)
+    private UUID viagemId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_empresa")
@@ -54,22 +54,22 @@ public class ParadaModel {
     @Column(name = "fk_idtb_empresa", insertable = false, updatable = false)
     private UUID empresaId;
 
-    public ParadaModel(ParadaDTO dto, TypeParada tipo) {
+    public ParadaModel(ParadaDTO dto, TipoParada tipo) {
         dataHora = dto.dataHora();
         this.tipo = tipo;
         plataforma = dto.plataforma();
     }
 
-    public ParadaModel(LocalDateTime dataHora, int plataforma, TypeParada tipo, LugarModel lugar, ViajeModel viaje) {
+    public ParadaModel(LocalDateTime dataHora, int plataforma, TipoParada tipo, LugarModel lugar, ViagemModel viagem) {
         this.dataHora = dataHora;
         this.plataforma = plataforma;
         this.tipo = tipo;
         this.lugar = lugar;
         this.lugarId = lugar.getId();
-        this.viaje = viaje;
-        this.viajeCodigo = viaje.getCodigo();
-        this.empresa = viaje.getEmpresa();
-        this.empresaId = viaje.getEmpresaId();
+        this.viagem = viagem;
+        this.viagemId = viagem.getId();
+        this.empresa = viagem.getEmpresa();
+        this.empresaId = viagem.getEmpresaId();
     }
 
     public void setLugar(LugarModel lugar) {
@@ -78,14 +78,14 @@ public class ParadaModel {
 
     }
 
-    public void setViaje(ViajeModel viaje) {
-        this.viaje = viaje;
-        this.viajeCodigo = viaje.getCodigo();
+    public void setviagem(ViagemModel viagem) {
+        this.viagem = viagem;
+        this.viagemId = (viagem != null) ? viagem.getId() : null;
     }
 
     public void setEmpresa(EmpresaModel empresa) {
         this.empresa = empresa;
-        this.empresaId = empresa.getId();
+        if (empresa != null) this.empresaId = empresa.getId();
     }
 
     public void updateValues(ParadaDTOUpdate dtoUpdate) {

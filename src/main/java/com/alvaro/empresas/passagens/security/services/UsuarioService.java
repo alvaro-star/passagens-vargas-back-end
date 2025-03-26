@@ -1,7 +1,8 @@
 package com.alvaro.empresas.passagens.security.services;
 
-import com.alvaro.empresas.passagens.configurations.exceptions.InternalException.GeneralException;
-import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
+
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationException;
 import com.alvaro.empresas.passagens.enums.TypeSolicitudOperation;
 import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
 import com.alvaro.empresas.passagens.helpers.services.EmailService;
@@ -41,21 +42,21 @@ public class UsuarioService {
         if (solicitud.email() != null && !solicitud.email().isBlank() && !solicitud.email().equals(usuarioModel.getLogin()))
             emailUsed = usuarioRepository.existsByLogin(solicitud.email());
 
-        if (emailUsed) throw new GeneralException("El email esta indisponible");
+        if (emailUsed) throw new RestRuntimeException("El email esta indisponible");
         LocalDateTime thrityMinutesBefore = LocalDateTime.now().minusMinutes(60);
 
         var solicitudes = usuarioSolicitudRepository.findByEmailAfterTime(solicitud.email(), thrityMinutesBefore, TypeSolicitudOperation.UPDATE);
         if (solicitudes.size() >= 5)
-            throw new GeneralException("Fueron intentadas muchas solicitaciones");
+            throw new RestRuntimeException("Fueron intentadas muchas solicitaciones");
 
         if (!passwordEncoder.matches(solicitud.contrasena(), usuarioModel.getPassword()))
-            throw new GeneralException("La contrasena es invalida");
+            throw new RestRuntimeException("La contrasena es invalida");
 
         var usuarioSolicitud = new UsuarioSolicitudModel(solicitud, usuarioModel, usuarioModel.getPassword(), TypeSolicitudOperation.UPDATE);
         usuarioSolicitudRepository.save(usuarioSolicitud);
 
         var emailSended = emailService.mandarEmail(usuarioModel.getLogin(), "Cambio de datos del perfil", "Este es tu codigo de verificacion para editar tud datos: \n" + usuarioSolicitud.getId().toString() + "\nNo lo compartas con nadie");
-        if (!emailSended) throw new GeneralException(emailService.messageEmailNotSended);
+        if (!emailSended) throw new RestRuntimeException(emailService.messageEmailNotSended);
     }
 
     public void validateUpdate(UsuarioDTOUpdateValidation form) {

@@ -1,6 +1,7 @@
 package com.alvaro.empresas.passagens.paradas.resources;
 
-import com.alvaro.empresas.passagens.enums.TypeParada;
+
+import com.alvaro.empresas.passagens.enums.TipoParada;
 import com.alvaro.empresas.passagens.helpers.Mensaje;
 import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
 import com.alvaro.empresas.passagens.helpers.validators.EmpresaEnabled;
@@ -67,7 +68,7 @@ public class ParadaResource {
         var paradaModel = paradaService.findById(id);
         userLogued.validIfIsMyEmpresa(paradaModel.getEmpresaId());
 
-        if (viajeEmpresaService.hasPasajes(paradaModel.getViaje().getPrecios()))
+        if (viajeEmpresaService.hasPasajes(paradaModel.getViagem().getPrecios()))
             return ResponseEntity.badRequest().body(new Mensaje("El viaje ya posee un pasaje registrado"));
         return ResponseEntity.ok(paradaService.update(dto, paradaModel));
     }
@@ -82,17 +83,17 @@ public class ParadaResource {
             empresaEnabled.validEmpresaEnabled(model.getEmpresaId());
         }
 
-        if (!model.getViaje().getAutobus().isEnable())
+        if (!model.getViagem().getAutobus().isEnable())
             return ResponseEntity.badRequest().body(new Mensaje("El autobus esta inhabilitado"));
         int indice = -1;
 
-        if (!model.getTipo().equals(TypeParada.CAMINO))
+        if (!model.getTipo().equals(TipoParada.CAMINO))
             return ResponseEntity.badRequest().body(new Mensaje("No se puede eliminar la salida o el destino"));
 
         ParadaModel aux;
-        for (int i = 0; i < model.getViaje().getParadas().size(); i++) {
-            aux = model.getViaje().getParadas().get(i);
-            if (aux.getTipo().equals(TypeParada.DESTINO) && aux.getDataHora().isBefore(LocalDateTime.now()))
+        for (int i = 0; i < model.getViagem().getParadas().size(); i++) {
+            aux = model.getViagem().getParadas().get(i);
+            if (aux.getTipo().equals(TipoParada.DESTINO) && aux.getDataHora().isBefore(LocalDateTime.now()))
                 return ResponseEntity.badRequest().body(new Mensaje("No se puede eliminar una parada de un viaje del pasado"));
             if (aux.getId().equals(model.getId()))
                 indice = i;
@@ -100,10 +101,10 @@ public class ParadaResource {
         if (indice == -1)
             return ResponseEntity.badRequest().body(new Mensaje("La parada no esta relacionado"));
         //Causa de nao exclusao: a o relacionamento com viaje
-        if (viajeEmpresaService.hasPasajes(model.getViaje().getPrecios()))
+        if (viajeEmpresaService.hasPasajes(model.getViagem().getPrecios()))
             return ResponseEntity.badRequest().body(new Mensaje("El viaje ya esta relacionado con un pasaje"));
 
-        model.getViaje().getParadas().remove(indice);
+        model.getViagem().getParadas().remove(indice);
 
         paradaService.delete(model);
         return ResponseEntity.noContent().build();

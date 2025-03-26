@@ -1,8 +1,9 @@
 package com.alvaro.empresas.passagens.helpers.validators;
 
-import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
-import com.alvaro.empresas.passagens.autobuses.repositories.AutobusRepository;
-import com.alvaro.empresas.passagens.configurations.exceptions.InternalException.GeneralException;
+import com.alvaro.empresas.passagens.onibus.models.AutobusModel;
+import com.alvaro.empresas.passagens.onibus.repositories.AutobusRepository;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
+
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,6 @@ public class AutobusEnabled {
         var autobus = autobusRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundException(id, AutobusModel.class.getName()));
         if (!autobus.isEnable())
-            throw new GeneralException(HttpStatus.CONFLICT, "El autobus no esta habilitado");
+            throw new RestRuntimeException(HttpStatus.CONFLICT, "El autobus no esta habilitado");
     }
 }

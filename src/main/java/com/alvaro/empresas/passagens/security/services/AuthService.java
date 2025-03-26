@@ -1,7 +1,7 @@
 package com.alvaro.empresas.passagens.security.services;
 
-import com.alvaro.empresas.passagens.configurations.exceptions.InternalException.GeneralException;
-import com.alvaro.empresas.passagens.configurations.exceptions.ValidationException;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationException;
 import com.alvaro.empresas.passagens.enums.TypeSolicitudOperation;
 import com.alvaro.empresas.passagens.helpers.services.EmailService;
 import com.alvaro.empresas.passagens.security.dtos.LoginDto;
@@ -59,19 +59,19 @@ public class AuthService {
             var refreshToken = tokenService.generateRefreshToken((UsuarioModel) auth.getPrincipal());
             return new TokenDTO(token, refreshToken);
         } catch (Exception e) {
-            throw new GeneralException("Las credenciales son inválidos");
+            throw new RestRuntimeException("Las credenciales son inválidos");
         }
     }
 
     public TokenDTO refresh(String refreshToken) {
         if (refreshToken == null)
-            throw new GeneralException("El token es nulo");
+            throw new RestRuntimeException("El token es nulo");
         if (refreshToken.startsWith("Bearer "))
             refreshToken = refreshToken.replace("Bearer ", "");
 
         String user = tokenService.validateToken(refreshToken);
         var usuario = usuarioRepository.findByEmail(user);
-        if (usuario.isEmpty()) throw new GeneralException("Usuario invalido");
+        if (usuario.isEmpty()) throw new RestRuntimeException("Usuario invalido");
 
         String accessToken = tokenService.generateToken(usuario.get());
         return new TokenDTO(accessToken, null);
@@ -80,20 +80,20 @@ public class AuthService {
     public void register(RegisterDto registerDto) {
         var usuarioLogin = usuarioRepository.findByEmail(registerDto.login());
         if (usuarioLogin.isPresent())
-            throw new GeneralException("Ya hay un usuario registrado");
+            throw new RestRuntimeException("Ya hay un usuario registrado");
 
         LocalDateTime startDay = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(1);
         var solicitudes = usuarioSolicitudRepository.findByEmailAfterTime(registerDto.login(), startDay, TypeSolicitudOperation.CREATE);
 
         if (solicitudes.size() > 5)
-            throw new GeneralException("Ya hubo bastantes intentos con este email por hoy");
+            throw new RestRuntimeException("Ya hubo bastantes intentos con este email por hoy");
 
         var usuario = SecurityContextHolder.getContext().getAuthentication();
         boolean logado;
 
         logado = !(usuario == null || usuario.getName().equals("anonymousUser"));
         if (logado)
-            throw new GeneralException(HttpStatus.UNAUTHORIZED, "Hay un usuario que inicio session");
+            throw new RestRuntimeException(HttpStatus.UNAUTHORIZED, "Hay un usuario que inicio session");
 
         String encriptedPassword = this.passwordEncoder.encode(registerDto.contrasena());
         UsuarioSolicitudModel newUser = new UsuarioSolicitudModel(registerDto.login(), registerDto.nombre(), registerDto.telefono(), encriptedPassword, TypeSolicitudOperation.CREATE);
@@ -101,7 +101,7 @@ public class AuthService {
         boolean emailEnviado;
         emailEnviado = emailService.mandarEmail(newUser.getEmail(), "Codigo de Verificacion", newUser.getNombre() + ", este es tu codigo de verificacion para tu cuenta en la aplicacion: \n" + newUser.getId().toString() + "\nNo lo compartas con nadie");
         if (!emailEnviado)
-            throw new GeneralException(emailService.messageEmailNotSended);
+            throw new RestRuntimeException(emailService.messageEmailNotSended);
     }
 
     public void verificarRegistro(ValidadorDTO validadorDTO) {
@@ -110,11 +110,11 @@ public class AuthService {
         var solicitudes = usuarioSolicitudRepository.findByEmailAfterTime(validadorDTO.email(), halfHourAgo, TypeSolicitudOperation.CREATE);
         var usuario = usuarioRepository.findByEmail(validadorDTO.email());
         if (usuario.isPresent())
-            throw new GeneralException("El usuario ya esta registrado");
+            throw new RestRuntimeException("El usuario ya esta registrado");
         if (solicitudes.isEmpty())
-            throw new GeneralException("No hay solicitudes recientes");
+            throw new RestRuntimeException("No hay solicitudes recientes");
         if (!solicitudes.get(0).getId().equals(validadorDTO.codigo()))
-            throw new GeneralException("El codigo de verificacion es incorrecto");
+            throw new RestRuntimeException("El codigo de verificacion es incorrecto");
 
         usuarioSolicitudRepository.deleteByEmailBeforeTime(validadorDTO.email(), halfHourAgo);
         var usuaroNovo = new UsuarioModel(solicitudes.get(0));
@@ -127,18 +127,18 @@ public class AuthService {
 
     public void getCodigoToRestorePassword(SolicitudNewPassword solicitud) {
         var usuario = usuarioRepository.findByEmail(solicitud.email());
-        if (usuario.isEmpty()) throw new GeneralException("Informe un email valido");
+        if (usuario.isEmpty()) throw new RestRuntimeException("Informe un email valido");
         LocalDateTime thrityMinutesBefore = LocalDateTime.now().minusMinutes(60);
         List<CodigoVerificacao> codigos = codigoRepository.findByEmailAfterDate(solicitud.email(), thrityMinutesBefore);
         if (codigos.size() >= 5)
-            throw new GeneralException("Fueron intentadas muchas solicitaciones");
+            throw new RestRuntimeException("Fueron intentadas muchas solicitaciones");
 
         CodigoVerificacao codigo = new CodigoVerificacao();
         codigo.setEmail(solicitud.email());
         codigoRepository.save(codigo);
         var emailSended = emailService.mandarEmail(solicitud.email(), "Cambio de contrasena", "Este es tu codigo de verificacion para cambiar tu contrasena: \n" + codigo.getId() + "\nNo lo compartas con nadie");
         if (!emailSended)
-            throw new GeneralException(emailService.messageEmailNotSended);
+            throw new RestRuntimeException(emailService.messageEmailNotSended);
     }
 
     public void validarPassword(PasswordForm form) {

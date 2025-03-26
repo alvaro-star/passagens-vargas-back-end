@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.services;
 
-import com.alvaro.empresas.passagens.configurations.exceptions.InternalException.GeneralException;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
 import com.alvaro.empresas.passagens.dtos.EmpresaDTO;
 import com.alvaro.empresas.passagens.dtos.EmpresaDTOResponse;
 import com.alvaro.empresas.passagens.helpers.validators.EmpresaEnabled;
@@ -61,18 +61,18 @@ public class EmpresaService {
     public void saveAdmin(RegisterDtoEmpresaAdmin empresaAdmin) {
         var usuario = usuarioRepository.findByEmail(empresaAdmin.email());
         if (usuario.isEmpty())
-            throw new GeneralException("El usuario no esta registrado en el sistema");
+            throw new RestRuntimeException("El usuario no esta registrado en el sistema");
 
         var empresa = empresaRepository.existsById(empresaAdmin.idEmpresa());
-        if (!empresa) throw new GeneralException("La empresa no existe");
+        if (!empresa) throw new RestRuntimeException("La empresa no existe");
         if (usuario.get().hasRole(RoleList.ROLE_EMPRESA_ADMIN))
-            throw new GeneralException("El usuario ya es un administrador");
+            throw new RestRuntimeException("El usuario ya es un administrador");
 
         List<RoleModel> rolesModels = roleService.findAll();
         Set<RoleModel> roles = new HashSet<>(rolesModels);
 
         if (usuario.get().hasRole(RoleList.ROLE_EMPRESA_FUNCIONARIO) && !usuario.get().getEmpresaId().equals(empresaAdmin.idEmpresa()))
-            throw new GeneralException("El usuario esta relacionado con otra empresa");
+            throw new RestRuntimeException("El usuario esta relacionado con otra empresa");
 
         usuario.get().setRoles(roles);
         usuario.get().setEmpresaId(empresaAdmin.idEmpresa());
@@ -83,7 +83,7 @@ public class EmpresaService {
     public void removerAdmin(@NotBlank String email) {
         var usuario = usuarioRepository.findByEmail(email);
 
-        if (usuario.isEmpty()) throw new GeneralException("El usuario no esta registrado en el sistema");
+        if (usuario.isEmpty()) throw new RestRuntimeException("El usuario no esta registrado en el sistema");
 
         Set<RoleModel> roles = new HashSet<>();
         var roleCliente = roleService.getByRoleName(RoleList.ROLE_CLIENTE);

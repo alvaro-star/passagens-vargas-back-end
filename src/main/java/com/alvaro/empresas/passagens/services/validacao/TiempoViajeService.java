@@ -1,9 +1,9 @@
 package com.alvaro.empresas.passagens.services.validacao;
 
-import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
+import com.alvaro.empresas.passagens.onibus.models.AutobusModel;
 import com.alvaro.empresas.passagens.dtos.viajes.JPQL.ViajeDTOJPQLRelatorio;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
-import com.alvaro.empresas.passagens.models.ViajeModel;
+import com.alvaro.empresas.passagens.models.ViagemModel;
 import com.alvaro.empresas.passagens.repositories.ViajeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,12 +39,12 @@ public class TiempoViajeService {
             LocalDateTime dataFim,
             UUID viajeCodigo
     ) {
-        List<ViajeModel> viajes = findViajesFromAutobusInterval(autobus.getEmpresaId(), autobus.getId(), dataInicio, dataFim);
+        List<ViagemModel> viajes = findViajesFromAutobusInterval(autobus.getEmpresaId(), autobus.getId(), dataInicio, dataFim);
         if (viajeCodigo == null)
             return !viajes.isEmpty();
 
-        for (ViajeModel viajeModel : viajes)
-            if (!viajeCodigo.equals(viajeModel.getCodigo()))
+        for (ViagemModel viagemModel : viajes)
+            if (!viajeCodigo.equals(viagemModel.getId()))
                 return true;
         return false;
     }
@@ -54,14 +54,14 @@ public class TiempoViajeService {
             LocalDateTime dataInicio,
             LocalDateTime dataFim
     ) {
-        List<ViajeModel> viajes = findViajesFromAutobusInterval(autobus.getEmpresaId(), autobus.getId(), dataInicio, dataFim);
+        List<ViagemModel> viajes = findViajesFromAutobusInterval(autobus.getEmpresaId(), autobus.getId(), dataInicio, dataFim);
         return !viajes.isEmpty();
     }
 
-    private List<ViajeModel> findViajesFromAutobusInterval(UUID empresaId,
-                                                           Integer autobusId,
-                                                           LocalDateTime dataInicio,
-                                                           LocalDateTime dataFim) {
+    private List<ViagemModel> findViajesFromAutobusInterval(UUID empresaId,
+                                                            Integer autobusId,
+                                                            LocalDateTime dataInicio,
+                                                            LocalDateTime dataFim) {
         LocalDateTime dataInicioAlterado = dataInicio.minusDays(tempoMaxViajeDias).minusSeconds(2);
         return viajeRepository.findByAutobusInIntervalo(empresaId, autobusId, dataInicio, dataInicioAlterado, dataFim);
     }

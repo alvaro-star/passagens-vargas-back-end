@@ -1,9 +1,9 @@
 package com.alvaro.empresas.passagens.repositories;
 
-import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
+import com.alvaro.empresas.passagens.onibus.models.AutobusModel;
 import com.alvaro.empresas.passagens.enums.TypeParada;
 import com.alvaro.empresas.passagens.helpers.DadosPersist;
-import com.alvaro.empresas.passagens.models.ViajeModel;
+import com.alvaro.empresas.passagens.models.ViagemModel;
 import com.alvaro.empresas.passagens.paradas.dtos.JPQL.ViajeEmpresaDTOJPQ;
 import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
@@ -56,7 +56,7 @@ class ViajeRepositoryTest {
         cadastrarViaje(startViaje, autobusAbril, lugares);
         cadastrarViaje(startViaje, autobusMarzo, lugares);
 
-        List<ViajeModel> viaje = viajeRepository.findByAutobusInIntervalo(
+        List<ViagemModel> viaje = viajeRepository.findByAutobusInIntervalo(
                 empresasModels.get(empresasName[1]).getId(),
                 autobusAbril.getId(),
                 startViaje,
@@ -97,8 +97,8 @@ class ViajeRepositoryTest {
         assertThat(viajesEncontrados.get(0).getViaje()).isEqualTo(viaje1);
     }
 
-    private ViajeModel cadastrarViaje(LocalDateTime dataHoraSalida, AutobusModel autobusModel, List<LugarModel> lugares) {
-        var viaje = new ViajeModel(autobusModel, dataHoraSalida);
+    private ViagemModel cadastrarViaje(LocalDateTime dataHoraSalida, AutobusModel autobusModel, List<LugarModel> lugares) {
+        var viaje = new ViagemModel(autobusModel, dataHoraSalida);
 
         int contador = 0;
         viaje.addParada(new ParadaModel(dataHoraSalida.plusDays(contador), 10, TypeParada.SALIDA, lugares.get(0), viaje));

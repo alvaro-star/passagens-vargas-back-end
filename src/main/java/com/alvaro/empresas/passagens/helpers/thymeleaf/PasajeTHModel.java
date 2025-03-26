@@ -1,10 +1,7 @@
 package com.alvaro.empresas.passagens.helpers.thymeleaf;
 
-import com.alvaro.empresas.passagens.helpers.DateAuxiliarFunctions;
-import com.alvaro.empresas.passagens.models.PasajeModel;
+import com.alvaro.empresas.passagens.models.PassagemModel;
 import org.thymeleaf.context.Context;
-
-import java.time.LocalDateTime;
 
 public record PasajeTHModel(
         String empresa,
@@ -21,19 +18,19 @@ public record PasajeTHModel(
         String metodoPago,
         Float descuento
 ) {
-    public PasajeTHModel(String empresa, PasajeModel model, String fechaHora, String metodoPago) {
+    public PasajeTHModel(String empresa, PassagemModel model, String fechaHora, String metodoPago) {
         this(
                 empresa,
                 fechaHora,
-                model.getPrecio().getNPiso(),
-                model.getNSilla(),
-                model.getSalida().getPlataforma(),
-                model.getNombre(),
-                model.getCarnet(),
+                model.getPreco().getNPiso(),
+                model.getNumeroAssento(),
+                model.getSaida().getPlataforma(),
+                model.getNome(),
+                model.getDocumento(),
                 model.getNascimento().toString(),
-                new ParadaTHModel(model.getSalida()),
+                new ParadaTHModel(model.getSaida()),
                 new ParadaTHModel(model.getDestino()),
-                model.getPrecioPagado().toString(),
+                model.getPrecoPago().toString(),
                 metodoPago,
                 0f
         );

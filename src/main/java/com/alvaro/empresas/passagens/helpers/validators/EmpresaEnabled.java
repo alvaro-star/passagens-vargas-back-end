@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.helpers.validators;
 
-import com.alvaro.empresas.passagens.configurations.exceptions.InternalException.GeneralException;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.repositories.EmpresaRepository;
 import org.hibernate.ObjectNotFoundException;
@@ -14,10 +14,11 @@ import java.util.UUID;
 public class EmpresaEnabled {
     @Autowired
     private EmpresaRepository empresaRepository;
+
     public void validEmpresaEnabled(UUID idEmpresa) {
         var empresa = empresaRepository.findById(idEmpresa)
                 .orElseThrow(() -> new ObjectNotFoundException(idEmpresa, EmpresaModel.class.getName()));
         if (empresa.getBloqued() || !empresa.getEnabled())
-            throw new GeneralException(HttpStatus.CONFLICT, "La empresa esta inhabilitada");
+            throw new RestRuntimeException(HttpStatus.CONFLICT, "La empresa esta inhabilitada");
     }
 }

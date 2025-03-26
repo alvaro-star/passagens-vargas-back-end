@@ -1,12 +1,12 @@
 package com.alvaro.empresas.passagens.services;
 
-import com.alvaro.empresas.passagens.autobuses.dtos.pisos.PisoDTOResponse;
-import com.alvaro.empresas.passagens.autobuses.models.PisoModel;
-import com.alvaro.empresas.passagens.dtos.precios.PrecioDTO;
-import com.alvaro.empresas.passagens.dtos.precios.PrecioDTOResponseViaje;
-import com.alvaro.empresas.passagens.dtos.precios.PrecioDTOUpdate;
-import com.alvaro.empresas.passagens.models.PrecioModel;
-import com.alvaro.empresas.passagens.models.ViajeModel;
+import com.alvaro.empresas.passagens.dtos.precos.PrecioDTOResponseViaje;
+import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoDTOResponse;
+import com.alvaro.empresas.passagens.onibus.models.PisoModel;
+import com.alvaro.empresas.passagens.dtos.precos.PrecioDTO;
+import com.alvaro.empresas.passagens.dtos.precos.PrecioDTOUpdate;
+import com.alvaro.empresas.passagens.models.PrecoModel;
+import com.alvaro.empresas.passagens.models.ViagemModel;
 import com.alvaro.empresas.passagens.repositories.PasajeRepository;
 import com.alvaro.empresas.passagens.repositories.PrecioRepository;
 import org.hibernate.ObjectNotFoundException;
@@ -24,15 +24,15 @@ public class PrecioService {
     @Autowired
     private PasajeRepository pasajeRepository;
 
-    public PrecioModel findById(UUID id) {
+    public PrecoModel findById(UUID id) {
         var model = precioRepository.findById(id);
-        return model.orElseThrow(() -> new ObjectNotFoundException(id, PrecioModel.class.getName()));
+        return model.orElseThrow(() -> new ObjectNotFoundException(id, PrecoModel.class.getName()));
     }
 
-    public List<PrecioDTO> saveAll(List<PrecioModel> newModels, ViajeModel viaje) {
-        for (PrecioModel newModel : newModels) {
-            newModel.setViaje(viaje);
-            newModel.setEmpresa(viaje.getEmpresa());
+    public List<PrecioDTO> saveAll(List<PrecoModel> newModels, ViagemModel viagem) {
+        for (PrecoModel newModel : newModels) {
+            newModel.setViagem(viagem);
+            newModel.setEmpresa(viagem.getEmpresa());
         }
         precioRepository.saveAll(newModels);
         List<PrecioDTO> salvos = new ArrayList<>();
@@ -47,7 +47,7 @@ public class PrecioService {
 
     public PrecioDTOResponseViaje vender(UUID id) {
         var model = findById(id);
-        List<PisoModel> pisos = model.getViaje().getAutobus().getPisos();
+        List<PisoModel> pisos = model.getViagem().getAutobus().getPisos();
         var pisoElegido = new PisoModel();
 
         for (PisoModel piso : pisos)
@@ -58,13 +58,13 @@ public class PrecioService {
         return new PrecioDTOResponseViaje(model, pisoDto, ocupados);
     }
 
-    public PrecioDTO update(PrecioDTOUpdate dto, PrecioModel model) {
+    public PrecioDTO update(PrecioDTOUpdate dto, PrecoModel model) {
         model.updateValues(dto);
         precioRepository.save(model);
         return new PrecioDTO(model);
     }
 
-    public void updateFromService(PrecioModel precioModel) {
-        precioRepository.save(precioModel);
+    public void updateFromService(PrecoModel precoModel) {
+        precioRepository.save(precoModel);
     }
 }

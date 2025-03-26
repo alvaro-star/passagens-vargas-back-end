@@ -1,7 +1,7 @@
 package com.alvaro.empresas.passagens.dtos.viajes;
 
-import com.alvaro.empresas.passagens.dtos.precios.PrecioDTO;
-import com.alvaro.empresas.passagens.models.ViajeModel;
+import com.alvaro.empresas.passagens.dtos.precos.PrecioDTO;
+import com.alvaro.empresas.passagens.models.ViagemModel;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
 
 import java.util.List;
@@ -12,9 +12,8 @@ public record ViajeDTOResponse(
         Integer idAutobus,
         Boolean cancelado,
         List<ParadaDTOComplete> paradas,
-        List<PrecioDTO> precios
-) {
-    public ViajeDTOResponse(ViajeModel model, List<ParadaDTOComplete> paradas, List<PrecioDTO> precios) {
-        this(model.getCodigo(), model.getAutobusId(), model.isCancelado(), paradas, precios);
+        List<PrecioDTO> precios) {
+    public ViajeDTOResponse(ViagemModel model, List<ParadaDTOComplete> paradas, List<PrecioDTO> precios) {
+        this(model.getId(), model.getAutobusId(), model.isCancelado(), paradas, precios);
     }
 }

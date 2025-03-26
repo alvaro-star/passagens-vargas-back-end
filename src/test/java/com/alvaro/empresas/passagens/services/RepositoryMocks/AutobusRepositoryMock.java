@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.services.RepositoryMocks;
 
-import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
+import com.alvaro.empresas.passagens.onibus.models.AutobusModel;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import org.springframework.stereotype.Service;
 

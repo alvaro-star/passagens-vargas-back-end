@@ -1,29 +1,20 @@
 package com.alvaro.empresas.passagens.models;
 
-import com.alvaro.empresas.passagens.autobuses.models.AutobusModel;
+import com.alvaro.empresas.passagens.onibus.models.AutobusModel;
 import com.alvaro.empresas.passagens.dtos.EmpresaDTO;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import lombok.*;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
+@Data
+@EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor
 @Entity
 @Table(name = "tb_empresa")
-@Getter
-@Setter
-@NoArgsConstructor
-public class EmpresaModel {
-    @Id
-    @Column(name = "idtb_empresa")
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+@AttributeOverride(name = "id", column = @Column(name = "idtb_empresa"))
+public class EmpresaModel extends IEntityStandart {
     @Column(unique = true, nullable = false)
     private String nombre;
     @Column(nullable = false)
@@ -39,15 +30,7 @@ public class EmpresaModel {
     private List<AutobusModel> autobuses = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "empresa")
-    private List<ViajeModel> viajes = new ArrayList<>();
-
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
+    private List<ViagemModel> viajes = new ArrayList<>();
 
     public EmpresaModel(EmpresaDTO dto) {
         nombre = dto.nombre();

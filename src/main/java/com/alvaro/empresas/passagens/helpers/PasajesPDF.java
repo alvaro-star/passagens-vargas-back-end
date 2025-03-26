@@ -1,7 +1,7 @@
 package com.alvaro.empresas.passagens.helpers;
 
-import com.alvaro.empresas.passagens.enums.TipoPago;
-import com.alvaro.empresas.passagens.models.PasajeModel;
+import com.alvaro.empresas.passagens.enums.TipoPagamento;
+import com.alvaro.empresas.passagens.models.PassagemModel;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -58,7 +58,7 @@ public class PasajesPDF {
         showLongTextAndNewLine(contentStream, "Lugar: " + parada.getLugar().getNombre());
     }
 
-    public void addPasaje(PasajeModel model, String empresaName, ParadaModel salida, ParadaModel destino, TipoPago metodo) throws IOException {
+    public void addPasaje(PassagemModel model, String empresaName, ParadaModel salida, ParadaModel destino, TipoPagamento metodo) throws IOException {
         PDPage page = new PDPage(rectangle);
         document.addPage(page);
 
@@ -76,20 +76,20 @@ public class PasajesPDF {
         contentStream.newLine();
         contentStream.showText("Carril: " + salida.getPlataforma());
         contentStream.newLine();
-        contentStream.showText("Piso: piso " + model.getPrecio().getNPiso());
+        contentStream.showText("Piso: piso " + model.getPreco().getNPiso());
         contentStream.newLine();
-        contentStream.showText("Asiento: " + model.getNSilla());
+        contentStream.showText("Asiento: " + model.getNumeroAssento());
         contentStream.newLine();
 
         addParada(contentStream, "Origen", salida);
         addParada(contentStream, "Destino", destino);
 
         addRowBold(contentStream, "Datos del Pasajero", standardFontSize + 1);
-        showLongTextAndNewLine(contentStream, "Nombre: " + model.getNombre());
-        showLongTextAndNewLine(contentStream, "Carnet: " + model.getCarnet());
+        showLongTextAndNewLine(contentStream, "Nombre: " + model.getNome());
+        showLongTextAndNewLine(contentStream, "Carnet: " + model.getDocumento());
 
         addRowBold(contentStream, "Datos del Pago", standardFontSize + 1);
-        contentStream.showText("Precio: " + model.getPrecioPagado().toString() + " Bs");
+        contentStream.showText("Precio: " + model.getPrecoPago().toString() + " Bs");
         contentStream.newLine();
         contentStream.showText("Metodo de Pago: " + metodo.toString());
         contentStream.newLine();

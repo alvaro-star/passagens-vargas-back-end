@@ -1,13 +1,13 @@
 package com.alvaro.empresas.passagens.services;
 
-import com.alvaro.empresas.passagens.autobuses.services.AutobusService;
+import com.alvaro.empresas.passagens.onibus.services.AutobusService;
 import com.alvaro.empresas.passagens.dtos.viajes.Empresa.ViajeDTOFormCopy;
 import com.alvaro.empresas.passagens.helpers.DateAuxiliarFunctions;
 import com.alvaro.empresas.passagens.helpers.LugarEnum;
 import com.alvaro.empresas.passagens.helpers.validators.AutobusEnabled;
 import com.alvaro.empresas.passagens.helpers.validators.EmpresaEnabled;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
-import com.alvaro.empresas.passagens.models.ViajeModel;
+import com.alvaro.empresas.passagens.models.ViagemModel;
 import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.alvaro.empresas.passagens.paradas.repositories.LugarRepository;
@@ -102,7 +102,7 @@ class ViajeEmpresaServiceTest {
         return empresa;
     }
 
-    void testarSaveOneCopyWithDiffDays(ViajeModel viaje, int diffDiasEntreViajes) {
+    void testarSaveOneCopyWithDiffDays(ViagemModel viaje, int diffDiasEntreViajes) {
         var date = viaje.getSalida().getDataHora().plusDays(diffDiasEntreViajes).toLocalDate();
         var solicitud = new ViajeDTOFormCopy(viaje.getCodigo(), date);
 
@@ -130,7 +130,7 @@ class ViajeEmpresaServiceTest {
 
         when(tiempoViajeService.existsViajesActiveFromAutobus(any(), any(), any())).thenReturn(false);
         when(viajeRepository.save(any())).thenAnswer(invocation -> {
-            ViajeModel model = invocation.getArgument(0, ViajeModel.class);
+            ViagemModel model = invocation.getArgument(0, ViagemModel.class);
             model.setCodigo(UUID.randomUUID());
             return model;
         });
