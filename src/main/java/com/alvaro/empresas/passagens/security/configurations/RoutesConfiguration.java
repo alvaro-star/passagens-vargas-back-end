@@ -15,10 +15,10 @@ public class RoutesConfiguration {
                 .requestMatchers(HttpMethod.POST, "/auth/forget_password").permitAll()
                 .requestMatchers(HttpMethod.PUT, "/auth/reset_password").permitAll()
                 .requestMatchers(HttpMethod.POST, "/auth/validar").permitAll()
-                .requestMatchers(HttpMethod.POST, "/viajes").permitAll()
-                .requestMatchers(HttpMethod.GET, "/viajes/{id}").permitAll()
+                .requestMatchers(HttpMethod.POST, "/viagens").permitAll()
+                .requestMatchers(HttpMethod.GET, "/viagens/{id}").permitAll()
                 .requestMatchers(HttpMethod.POST, "/pasajes").permitAll()
-                .requestMatchers(HttpMethod.GET, "/ciudades/{nombre}/like").permitAll();
+                .requestMatchers(HttpMethod.GET, "/cidadees/{nome}/like").permitAll();
 
     }
 

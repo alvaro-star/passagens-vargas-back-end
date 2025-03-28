@@ -7,14 +7,14 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class LugarRepositoryMocker {
-    private Integer idCiudad;
+    private Integer idCidade;
     private Integer idLugar;
     private Integer idDepartamento;
 
     public LugarRepositoryMocker() {
         this.idDepartamento = 0;
         this.idLugar = 0;
-        this.idCiudad = 0;
+        this.idCidade = 0;
     }
 
     public int generateIdDepartamento() {
@@ -25,8 +25,8 @@ public class LugarRepositoryMocker {
         return ++idLugar;
     }
 
-    public int generateIdCiudad() {
-        return ++idCiudad;
+    public int generateIdCidade() {
+        return ++idCidade;
     }
 
     public DepartamentoModel generateDepartamento(String nome) {
@@ -35,16 +35,16 @@ public class LugarRepositoryMocker {
         return departamento;
     }
 
-    public CidadeModel generateCiudad(String nome, DepartamentoModel departamento) {
-        var ciudad = new CidadeModel(nome, departamento);
-        ciudad.setId(generateIdCiudad());
-        return ciudad;
+    public CidadeModel generateCidade(String nome, DepartamentoModel departamento) {
+        var cidade = new CidadeModel(nome, departamento);
+        cidade.setId(generateIdCidade());
+        return cidade;
     }
 
     public LugarModel generateLugar(String lugarName) {
         var departamento = generateDepartamento(lugarName);
-        var ciudad = generateCiudad(lugarName, departamento);
-        var lugar = new LugarModel(lugarName, ciudad);
+        var cidade = generateCidade(lugarName, departamento);
+        var lugar = new LugarModel(lugarName, cidade);
         lugar.setId(generateIdLugar());
         return lugar;
     }

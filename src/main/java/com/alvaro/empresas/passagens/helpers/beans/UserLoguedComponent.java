@@ -41,7 +41,7 @@ public class UserLoguedComponent {
     public boolean hasRole(RoleList role) {
         var user = getUserModel();
         for (RoleModel userRole : user.getRoles()) {
-            if (userRole.getNombre().equals(role))
+            if (userRole.getNome().equals(role))
                 return true;
         }
         return false;

@@ -40,7 +40,7 @@ public class LugarResource {
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public LugarDTO save(@RequestBody @Valid LugarDTO dto) {
-        var cidade = cidadeService.findById(dto.idCiudad());
+        var cidade = cidadeService.findById(dto.idCidade());
         var model = lugarService.save(dto, cidade);
         return new LugarDTO(model);
     }

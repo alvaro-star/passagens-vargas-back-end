@@ -14,9 +14,9 @@ public record PrecoDTOResponseViagem(
         Boolean cheio,
         Integer nAssentosDisponiveis,
         PisoDTOResponse piso,
-        List<Integer> assentosOcupados
-) {
+        List<Integer> assentosOcupados) {
     public PrecoDTOResponseViagem(PrecoModel model, PisoDTOResponse piso, List<Integer> assentosOcupados) {
-        this(model.getId(), model.getPrecio(), model.getNPiso(), model.getLleno(), model.getNSillasDisponibles(), piso, assentosOcupados);
+        this(model.getId(), model.getPreco(), model.getNPiso(), model.getCheio(), model.getNAssentosDisponiveis(), piso,
+                assentosOcupados);
     }
 }

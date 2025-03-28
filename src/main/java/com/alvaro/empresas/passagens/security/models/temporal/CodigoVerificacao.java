@@ -1,17 +1,22 @@
 package com.alvaro.empresas.passagens.security.models.temporal;
 
-import jakarta.persistence.*;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import org.hibernate.annotations.CreationTimestamp;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
+import lombok.Data;
+
 @Data
 @Entity
-@Table(name = "tb_codigo", indexes = @Index(name = "idxtb_viaje_email_created_at", columnList = "email, created_at"))
+@Table(name = "tb_codigo", indexes = @Index(name = "idxtb_codigo_email_created_at", columnList = "email, created_at"))
 public class CodigoVerificacao {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

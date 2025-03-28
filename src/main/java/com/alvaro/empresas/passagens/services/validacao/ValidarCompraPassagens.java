@@ -26,7 +26,7 @@ public class ValidarCompraPassagens {
         bindingResult.getFieldErrors().forEach(error -> erros.add(new FieldMessage(error)));
 
         for (i = 0; i < passagensDTO.passagens().size(); i++) {
-            itemList = validarPasagemDTO(i, passagensDTO.passagens().get(i));
+            itemList = validarPassagemDTO(i, passagensDTO.passagens().get(i));
             if (itemList != null) itensErrados.add(itemList);
         }
         if (!itensErrados.isEmpty())
@@ -47,7 +47,7 @@ public class ValidarCompraPassagens {
         bindingResult.getFieldErrors().forEach(error -> erros.add(new FieldMessage(error)));
 
         for (i = 0; i < passagensDTO.passagens().size(); i++) {
-            itemList = validarPasagemDTO(i, passagensDTO.passagens().get(i));
+            itemList = validarPassagemDTO(i, passagensDTO.passagens().get(i));
             if (itemList != null)
                 itensErrados.add(itemList);
         }
@@ -57,7 +57,7 @@ public class ValidarCompraPassagens {
             throw new ValidationWithErrorListExceptions("Erro de validação", erros, listaErros);
     }
 
-    private static FieldMessageItemList validarPasagemDTO(int indice, PassagemDTO passagemDTO) {
+    private static FieldMessageItemList validarPassagemDTO(int indice, PassagemDTO passagemDTO) {
         String mensagem;
         FieldMessageItemList itemList = new FieldMessageItemList();
 

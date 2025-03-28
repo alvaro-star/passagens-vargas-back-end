@@ -1,16 +1,16 @@
 /*
-    public List<ViajeModel> findViajesBeteween(UUID codigoTrayecto, LocalDateTime salida, LocalDateTime destino) {
-        return viagemRepository.cargarViajesConIntervalosComunes(codigoTrayecto, salida, destino);
+    public List<ViagemModel> findViagensBeteween(UUID codigoTrayecto, LocalDateTime saida, LocalDateTime destino) {
+        return viagemRepository.cargarViagensConIntervalosComunes(codigoTrayecto, saida, destino);
     }
 
     public ViajeDTOResponse update(ViajeDTOUpdate novosDados, Integer id) {
         var model = this.findById(id);
 
-        if (novosDados.salida() != null) {
-            var salida = model.getTrayecto().getParadaById(novosDados.salida());
-            if (salida == null)
-                throw new ValidationException("salida", "La salida no pertenece al trayecto"));
-            model.setSalida(salida);
+        if (novosDados.saida() != null) {
+            var saida = model.getTrayecto().getParadaById(novosDados.saida());
+            if (saida == null)
+                throw new ValidationException("saida", "La saida no pertenece al trayecto"));
+            model.setSaida(saida);
         }
 
         if (novosDados.destino() != null) {
@@ -21,32 +21,32 @@
             model.setDestino(destino);
         }
 
-        if (model.getSalida().getId() == model.getDestino().getId()) {
-            throw new ValidationException("destino", "El destino no puede ser el mismo que la salida"));
+        if (model.getSaida().getId() == model.getDestino().getId()) {
+            throw new ValidationException("destino", "El destino no puede ser el mismo que la saida"));
         }
 
-        if (!model.getDestino().getDataHora().isAfter(model.getSalida().getDataHora())) {
-            throw new ValidationException("salida", "La salida posee un horario superior al del destino"));
+        if (!model.getDestino().getDataHora().isAfter(model.getSaida().getDataHora())) {
+            throw new ValidationException("saida", "La saida posee un horario superior al del destino"));
         }
 
         var updated = viagemRepository.save(model);
 
         UUID trayecto = model.getTrayecto().getCodigo();
-        var salidaResponse = new ParadaDTO(updated.getSalida(), updated.getSalida().getLugar().getId(), trayecto);
+        var saidaResponse = new ParadaDTO(updated.getSaida(), updated.getSaida().getLugar().getId(), trayecto);
         var destinoResponse = new ParadaDTO(updated.getDestino(), updated.getDestino().getLugar().getId(), trayecto);
 
-        return new ViajeDTOResponse(updated, null, trayecto, salidaResponse, destinoResponse);
+        return new ViajeDTOResponse(updated, null, trayecto, saidaResponse, destinoResponse);
     }*/
 /*
 //Restos
 //Save
-        if (dto.salida().equals(dto.destino())) {
-            throw new ValidationException("destino", "El destino no puede ser el mismo que la salida"));
+        if (dto.saida().equals(dto.destino())) {
+            throw new ValidationException("destino", "El destino no puede ser el mismo que la saida"));
         }
-        var salida = trayecto.getParadaById(dto.salida());
+        var saida = trayecto.getParadaById(dto.saida());
 
-        if (salida == null) {
-            throw new ValidationException("salida", "La salida no pertenece al trayecto"));
+        if (saida == null) {
+            throw new ValidationException("saida", "La saida no pertenece al trayecto"));
         }
 
         var destino = trayecto.getParadaById(dto.destino());
@@ -58,30 +58,30 @@
 
  //
 
-        Como solo se podra registrar un viaje, no es necessario ver si hay viajes iguales
-        Integer viajesIguais = viagemRepository.getViajesIguais(trayecto.getCodigo(), salida.getId(), destino.getId());
-        if (viajesIguais > 0) {
+        Como solo se podra registrar un viaje, no es necessario ver si hay viagens iguales
+        Integer viagensIguais = viagemRepository.getViagensIguais(trayecto.getCodigo(), saida.getId(), destino.getId());
+        if (viagensIguais > 0) {
             throw new ValidationException("id", "El viaje ya se encuentra registrado"));
         }
  */
 
 
-    public int saveCopyDay(ViajeDTOFormCopy dto, AutobusModel autobus) {
+    public int saveCopyDay(ViajeDTOFormCopy dto, OnibusModel onibus) {
         LocalDateTime dataViajeOriginal;
         LocalDateTime startDaySerch = dto.dataNovo().atTime(0, 0, 0, 0);
         LocalDateTime endDaySearch = startDaySerch.plusDays(1).minusSeconds(1);
 
-        Sort sort = Sort.by("dataHoraSalida").ascending();
+        Sort sort = Sort.by("dataHoraSaida").ascending();
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, sort);
-        Page<ViajeDTOJPQL> viajes = viagemRepository.findByEmpresaIdAndAutobusId(autobus.getEmpresa().getId(), autobus.getId(), startDaySerch, endDaySearch, pageable);
+        Page<ViajeDTOJPQL> viagens = viagemRepository.findByEmpresaIdAndOnibusId(onibus.getEmpresa().getId(), onibus.getId(), startDaySerch, endDaySearch, pageable);
 
-        if (viajes.getContent().isEmpty()) return 1;
+        if (viagens.getContent().isEmpty()) return 1;
 
         long diffDias;
 
-        dataViajeOriginal = viajes.getContent().get(0).salida().getDataHora();
-        LocalDateTime firsHourViaje = viajes.getContent().get(0).salida().getDataHora();
-        LocalDateTime lastHourViaje = viajes.getContent().get(viajes.getContent().size() - 1).salida().getDataHora();
+        dataViajeOriginal = viagens.getContent().get(0).saida().getDataHora();
+        LocalDateTime firsHourViaje = viagens.getContent().get(0).saida().getDataHora();
+        LocalDateTime lastHourViaje = viagens.getContent().get(viagens.getContent().size() - 1).saida().getDataHora();
 
         diffDias = ChronoUnit.DAYS.between(firsHourViaje.toLocalDate(), lastHourViaje.toLocalDate());
         diffDias = (diffDias < 0) ? -diffDias : diffDias;
@@ -92,22 +92,22 @@
 
         if (diffDias > 0) lastHourViaje = lastHourViaje.plusDays(diffDias);
 
-        boolean existe = tiempoViajeService.existsViajesActiveFromAutobus(autobus, firsHourViaje, lastHourViaje);
+        boolean existe = tiempoViajeService.existsViagensActiveFromOnibus(onibus, firsHourViaje, lastHourViaje);
         if (existe) return -1;
 
-        List<ViajeModel> viajeModelsSave = new LinkedList<>();
+        List<ViagemModel> viajeModelsSave = new LinkedList<>();
         List<ParadaModel> paradaModelSave = new LinkedList<>();
 
-        ViajeModel viajeAuxiliar;
+        ViagemModel viajeAuxiliar;
 
         diffDias = ChronoUnit.DAYS.between(dataViajeOriginal.toLocalDate(), firsHourViaje.toLocalDate());
         diffDias = (diffDias < 0) ? -diffDias : diffDias;
 
 
-        for (ViajeDTOJPQL viajeDTOJPQL : viajes.getContent()) {
+        for (ViajeDTOJPQL viajeDTOJPQL : viagens.getContent()) {
             viajeAuxiliar = viajeDTOJPQL.viaje();
             viajeAuxiliar.setCodigo(null);
-            viajeAuxiliar.setDataHoraSalida(viajeAuxiliar.getDataHoraSalida().plusDays(diffDias));
+            viajeAuxiliar.setDataHoraSaida(viajeAuxiliar.getDataHoraSaida().plusDays(diffDias));
             for (ParadaModel aux : viajeAuxiliar.getParadas()) {
                 aux.setId(null);
                 aux.setViaje(viajeAuxiliar);

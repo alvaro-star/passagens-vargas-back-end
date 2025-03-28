@@ -9,7 +9,7 @@ public record LugarDTO(
         @NotBlank
         String nome,
         @NotNull
-        Integer idCiudad) {
+        Integer idCidade) {
 
     public LugarDTO(LugarModel model) {
         this(model.getId(), model.getNome(), model.getCidadeId());

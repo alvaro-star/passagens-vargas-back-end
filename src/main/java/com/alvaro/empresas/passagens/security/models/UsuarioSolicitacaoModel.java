@@ -3,13 +3,17 @@ package com.alvaro.empresas.passagens.security.models;
 import com.alvaro.empresas.passagens.enums.TipoSolicitacao;
 import com.alvaro.empresas.passagens.models.IEntityStandart;
 import com.alvaro.empresas.passagens.security.dtos.UsuarioDTOUpdate;
-import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 @Data
 @EqualsAndHashCode(callSuper = true)

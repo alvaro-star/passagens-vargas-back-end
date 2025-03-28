@@ -5,7 +5,7 @@ import com.alvaro.empresas.passagens.onibus.models.PisoModel;
 import java.util.UUID;
 
 public record PisoDTOResponse(
-        Integer id,
+        UUID id,
         Integer nLinhas,
         Integer nColunas,//Tipo Ônibus
         String distribuicaoFileira,

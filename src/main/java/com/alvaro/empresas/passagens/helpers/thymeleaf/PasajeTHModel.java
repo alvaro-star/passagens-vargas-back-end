@@ -9,21 +9,20 @@ public record PasajeTHModel(
         Integer piso,
         Integer nsilla,
         Integer carril,
-        String nombre,
+        String nome,
         String carnet,
         String nascimiento,
         ParadaTHModel origen,
         ParadaTHModel destino,
         String precio,
         String metodoPago,
-        Float descuento
-) {
+        Float descuento) {
     public PasajeTHModel(String empresa, PassagemModel model, String fechaHora, String metodoPago) {
         this(
                 empresa,
                 fechaHora,
                 model.getPreco().getNPiso(),
-                model.getNumeroAssento(),
+                model.getNAssento(),
                 model.getSaida().getPlataforma(),
                 model.getNome(),
                 model.getDocumento(),
@@ -32,8 +31,7 @@ public record PasajeTHModel(
                 new ParadaTHModel(model.getDestino()),
                 model.getPrecoPago().toString(),
                 metodoPago,
-                0f
-        );
+                0f);
     }
 
     public Context toContextThymeleaf() {
@@ -43,7 +41,7 @@ public record PasajeTHModel(
         context.setVariable("piso", this.piso);
         context.setVariable("nsilla", this.nsilla);
         context.setVariable("carril", this.carril);
-        context.setVariable("nombre", this.nombre);
+        context.setVariable("nome", this.nome);
         context.setVariable("carnet", this.carnet);
         context.setVariable("nascimiento", this.nascimiento);
         context.setVariable("origen", this.origen);

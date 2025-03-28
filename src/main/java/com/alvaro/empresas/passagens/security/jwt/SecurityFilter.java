@@ -1,11 +1,7 @@
 package com.alvaro.empresas.passagens.security.jwt;
 
-import com.alvaro.empresas.passagens.security.repositories.UsuarioRepository;
-import com.alvaro.empresas.passagens.security.services.TokenService;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -14,7 +10,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import java.io.IOException;
+import com.alvaro.empresas.passagens.security.repositories.UsuarioRepository;
+import com.alvaro.empresas.passagens.security.services.TokenService;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
@@ -25,13 +27,15 @@ public class SecurityFilter extends OncePerRequestFilter {
     private UsuarioRepository usuarioRepository;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
         try {
             var token = this.getToken(request);
             if (!isNullOrBlank(token)) {
                 var subject = tokenService.validateToken(token);
                 if (!isNullOrBlank(subject)) {
-                    UserDetails user = usuarioRepository.findByLogin(subject);
+                    UserDetails user = usuarioRepository.findByEmail(subject)
+                            .orElseThrow(() -> new RuntimeException("Token Invalido"));
                     var authenticate = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
                     SecurityContextHolder.getContext().setAuthentication(authenticate);
                 }

@@ -25,7 +25,7 @@ public class CidadeService {
     }
 
     public Page<CidadeDTO> findByNomeContaining(String nome, Pageable pageable) {
-        Page<CidadeModel> models = cidadeRepository.findByNombreContaining(nome, pageable);
+        Page<CidadeModel> models = cidadeRepository.findByNomeContaining(nome, pageable);
         return models.map(CidadeDTO::new);
     }
 

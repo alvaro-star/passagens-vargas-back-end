@@ -1,23 +1,31 @@
 package com.alvaro.empresas.passagens.paradas.resources;
 
-import com.alvaro.empresas.passagens.helpers.Mensagem;
-import com.alvaro.empresas.passagens.paradas.dtos.CidadeDTO;
-import com.alvaro.empresas.passagens.paradas.dtos.DepartamentoDTO;
-import com.alvaro.empresas.passagens.paradas.models.DepartamentoModel;
-import com.alvaro.empresas.passagens.paradas.services.DepartamentoService;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import jakarta.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.alvaro.empresas.passagens.paradas.dtos.CidadeDTO;
+import com.alvaro.empresas.passagens.paradas.dtos.DepartamentoDTO;
+import com.alvaro.empresas.passagens.paradas.models.DepartamentoModel;
+import com.alvaro.empresas.passagens.paradas.services.DepartamentoService;
+
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/departamentos")

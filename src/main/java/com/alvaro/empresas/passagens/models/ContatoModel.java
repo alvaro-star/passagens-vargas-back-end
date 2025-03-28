@@ -20,7 +20,7 @@ public class ContatoModel extends IEntityStandart {
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_factura_pasaje")
-    private FaturaPassagemModel faturaPasagem;
+    private FaturaPassagemModel faturaPassagem;
 
     public ContatoModel(ContatoDTO contatoDTO) {
         this.nome = contatoDTO.nome();

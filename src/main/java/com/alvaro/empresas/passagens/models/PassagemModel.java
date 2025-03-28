@@ -20,11 +20,11 @@ import java.util.UUID;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @Entity
-@Table(name = "tb_pasagem", indexes = {
-        @Index(name = "idxtb_pasagem_fk_idtb_preco", columnList = "fk_idtb_preco"),
-        @Index(name = "idxtb_pasagem_fk_idtb_fatura_pasagem", columnList = "fk_idtb_fatura_pasagem")
+@Table(name = "tb_passagem", indexes = {
+        @Index(name = "idxtb_passagem_fk_idtb_preco", columnList = "fk_idtb_preco"),
+        @Index(name = "idxtb_passagem_fk_idtb_fatura_passagem", columnList = "fk_idtb_fatura_passagem")
 })
-@AttributeOverride(name = "id", column = @Column(name = "idtb_pasagem"))
+@AttributeOverride(name = "id", column = @Column(name = "idtb_passagem"))
 public class PassagemModel extends IEntityStandart {
 
     @Column(nullable = false)
@@ -90,7 +90,7 @@ public class PassagemModel extends IEntityStandart {
         }
     }
 
-    public PassagemModel(PassagemDTO passagemDTO, Boolean compradoWeb, BigDecimal precoPago, Boolean estaPago, Boolean emDinheiro, ParadaModel saida, ParadaModel destino, PrecoModel preco, FaturaPassagemModel faturaPasagem) {
+    public PassagemModel(PassagemDTO passagemDTO, Boolean compradoWeb, BigDecimal precoPago, Boolean estaPago, Boolean emDinheiro, ParadaModel saida, ParadaModel destino, PrecoModel preco, FaturaPassagemModel faturaPassagem) {
         this.nAssento = passagemDTO.nAssento();
         this.documento = passagemDTO.documento();
         this.nome = passagemDTO.nome();
@@ -100,7 +100,7 @@ public class PassagemModel extends IEntityStandart {
         this.compradoWeb = compradoWeb;
         this.estaPago = estaPago;
         setFaturaReembolso(null);
-        setFaturaPassagem(faturaPasagem);
+        setFaturaPassagem(faturaPassagem);
         this.emDinheiro = emDinheiro;
         this.saida = saida;
         this.destino = destino;

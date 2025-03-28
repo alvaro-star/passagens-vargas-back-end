@@ -1,18 +1,18 @@
 package com.alvaro.empresas.passagens.paradas.services;
 
-import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
-import com.alvaro.empresas.passagens.paradas.dtos.DepartamentoDTO;
-import com.alvaro.empresas.passagens.paradas.models.DepartamentoModel;
-import com.alvaro.empresas.passagens.paradas.repositories.DepartamentoRepository;
+import java.util.Optional;
+
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Optional;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
+import com.alvaro.empresas.passagens.paradas.dtos.DepartamentoDTO;
+import com.alvaro.empresas.passagens.paradas.models.DepartamentoModel;
+import com.alvaro.empresas.passagens.paradas.repositories.DepartamentoRepository;
 
 @Service
 public class DepartamentoService {

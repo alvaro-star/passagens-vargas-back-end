@@ -7,9 +7,7 @@ import java.util.UUID;
 
 public record ViagemDTOUpdate(
         UUID idViagem,
-        @NotNull
-        Integer idOnibus
-) {
+        @NotNull UUID idOnibus) {
     public ViagemDTOUpdate(ViagemModel model) {
         this(model.getId(), model.getOnibusId());
     }

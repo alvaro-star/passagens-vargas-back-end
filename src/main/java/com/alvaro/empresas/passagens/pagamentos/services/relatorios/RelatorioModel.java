@@ -1,13 +1,12 @@
 package com.alvaro.empresas.passagens.pagamentos.services.relatorios;
 
-import com.alvaro.empresas.passagens.models.EmpresaModel;
-import com.alvaro.empresas.passagens.paradas.models.LugarModel;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.util.HashMap;
 import java.util.List;
+
+import com.alvaro.empresas.passagens.models.EmpresaModel;
+import com.alvaro.empresas.passagens.paradas.models.LugarModel;
+
+import lombok.Data;
 @Data
 public class RelatorioModel {
     private EmpresaModel empresa;

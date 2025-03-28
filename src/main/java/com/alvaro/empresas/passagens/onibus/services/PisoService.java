@@ -7,6 +7,7 @@ import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoDTOResponse;
 import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoDTOUpdate;
 import com.alvaro.empresas.passagens.onibus.models.OnibusModel;
 import com.alvaro.empresas.passagens.onibus.models.PisoModel;
+import com.alvaro.empresas.passagens.onibus.repositories.OnibusRepository;
 import com.alvaro.empresas.passagens.onibus.repositories.PisoRepository;
 
 import com.alvaro.empresas.passagens.repositories.ViagemRepository;
@@ -24,8 +25,6 @@ import java.util.UUID;
 
 @Service
 public class PisoService {
-    @Autowired
-    private OnibusService onibusService;
     @Autowired
     private PisoRepository pisoRepository;
     @Autowired
@@ -62,7 +61,7 @@ public class PisoService {
 
     @Transactional
     public PisoDTOResponse update(PisoDTOUpdate dto, PisoModel model) {
-        var onibus = onibusService.findById(model.getOnibusId());
+        var onibus = model.getOnibus();
         var empresa = onibus.getEmpresa();
         ValidEnabledEntities.validOnibus(onibus);
         ValidEnabledEntities.validEmpresa(empresa);

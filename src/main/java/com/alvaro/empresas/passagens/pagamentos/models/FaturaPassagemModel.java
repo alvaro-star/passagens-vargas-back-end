@@ -30,7 +30,7 @@ public class FaturaPassagemModel extends IFaturaStandart {
     private TipoPagamento metodoPagamento;
     private LocalDateTime dataPagamento;
 
-    @OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "faturaPasagem")
+    @OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "faturaPassagem")
     private ContatoModel contato;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -41,7 +41,7 @@ public class FaturaPassagemModel extends IFaturaStandart {
     @JoinColumn(name = "fk_idtb_viagem")
     private ViagemModel viagem;
 
-    @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "faturaPasagem")
+    @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "faturaPassagem")
     private List<PassagemModel> passagens;
 
     public FaturaPassagemModel(BigDecimal valorTotal, BigDecimal desconto, BigDecimal taxaServico, Boolean estaPago, TipoPagamento metodoPagamento, ViagemModel viagemModel, LocalDateTime dataPagamento, ContatoModel contato) {

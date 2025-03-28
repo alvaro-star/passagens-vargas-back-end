@@ -7,12 +7,12 @@ import org.springframework.http.HttpStatus;
 
 public class ValidEnabledEntities {
     public static void validOnibus(OnibusModel model) {
-        if (!model.isEnable())
-            throw new RestRuntimeException(HttpStatus.CONFLICT, "El autobus no esta habilitado");
+        if (!model.isHabilitado())
+            throw new RestRuntimeException(HttpStatus.CONFLICT, "El onibus no esta habilitado");
     }
 
     public static void validEmpresa(EmpresaModel model) {
-        if (model.getBloqueado() || !model.getEnabled())
+        if (model.getBloqueado() || !model.getHabilitado())
             throw new RestRuntimeException(HttpStatus.CONFLICT, "La empresa esta inhabilitada");
     }
 }

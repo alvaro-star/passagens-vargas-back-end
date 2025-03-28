@@ -2,7 +2,6 @@ package com.alvaro.empresas.passagens.paradas.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
 @AllArgsConstructor

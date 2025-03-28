@@ -29,6 +29,6 @@ public class ViagemResource {
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
     public List<ViagemDTOListBusca> getViagemFromDia(@RequestBody @Valid ViagemDTOSolicitacao dto) {
-        return viagemService.getViajesFromDia(dto);
+        return viagemService.getViagensFromDia(dto);
     }
 }

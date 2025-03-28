@@ -57,12 +57,13 @@ public class PasagensResource {
     public List<PassagemDTOEmpresaResponse> getPasajerosFromPrecio(@PathVariable UUID idPrecio) {
         var precio = precoService.findById(idPrecio);
         userLogued.validIfIsAdminOrOwnerEmpresa(precio.getEmpresaId());
-        return passagemService.getPasajesFromPrecio(idPrecio);
+        return passagemService.getPassagensByPreco(idPrecio);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Object save(@RequestBody @Valid PassagensDTO dto, BindingResult bindingResult) { // Venta de pasajes al público
+    public Object save(@RequestBody @Valid PassagensDTO dto, BindingResult bindingResult) { // Venta de pasajes al
+                                                                                            // público
         return passagemService.salvarCliente(dto, bindingResult);
     }
 
@@ -85,4 +86,3 @@ public class PasagensResource {
         passagemService.delete(id);
     }
 }
-

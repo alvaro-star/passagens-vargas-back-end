@@ -1,7 +1,7 @@
 package com.alvaro.empresas.passagens.helpers.thymeleaf;
 
-public record CiudadTHModel(
-        String nombre,
+public record CidadeTHModel(
+        String nome,
         Integer nPasajes
 ) {
 }

@@ -84,24 +84,24 @@
 <body>
 <div class="container">
     <h1>Relatorio de Ventas</h1>
-    <h2>Empresa: <span th:text="${empresaNombre}"></span></h2>
+    <h2>Empresa: <span th:text="${empresaNome}"></span></h2>
     <p><strong>Mês de Faturação:</strong> <span th:text="${nMes}"></span> <span th:text="${nAno}"></span></p>
-    <h3>Datos delos Viajes Realizados</h3>
+    <h3>Datos delos Viagens Realizados</h3>
     <table>
         <thead>
         <tr>
-            <th>Nombre</th>
+            <th>Nome</th>
             <th>Valor (Unid)</th>
         </tr>
         </thead>
         <tbody class="">
         <tr>
-            <td>N Viajes registrados</td>
-            <td class="text-right" th:text="${nViajes}">NViajes</td>
+            <td>N Viagens registrados</td>
+            <td class="text-right" th:text="${nViagens}">NViagens</td>
         </tr>
         <tr>
-            <td>N Viajes Cancelados</td>
-            <td class="text-right" th:text="${nViajesCancelados}">N Viajes Cancelados</td>
+            <td>N Viagens Cancelados</td>
+            <td class="text-right" th:text="${nViagensCancelados}">N Viagens Cancelados</td>
         </tr>
         <tr>
             <td>N Pasajes Vendidos</td>
@@ -109,38 +109,38 @@
         </tr>
         <tr>
             <td>N Pasajes Rembolsados</td>
-            <td class="text-right" th:text="${nPasajesCancelados}">N Viajes Cancelados</td>
+            <td class="text-right" th:text="${nPasajesCancelados}">N Viagens Cancelados</td>
         </tr>
         </tbody>
     </table>
-    <h3>Ciudades de Origen mas Compradas</h3>
+    <h3>Cidadees de Origen mas Compradas</h3>
     <table>
         <thead>
         <tr>
-            <th>Ciudad</th>
+            <th>Cidade</th>
             <th>N Pasajes</th>
         </tr>
         </thead>
         <tbody>
-        <tr th:each="salida : ${salidas}">
-            <td th:text="${salida.nombre}">Nombre</td>
-            <td th:text="${salida.nPasajes}">N Pasajes</td>
+        <tr th:each="saida : ${saidas}">
+            <td th:text="${saida.nome}">Nome</td>
+            <td th:text="${saida.nPasajes}">N Pasajes</td>
         </tr>
         </tbody>
     </table>
     <h3>
-        Ciudades de Destino mas Compradas
+        Cidadees de Destino mas Compradas
     </h3>
     <table>
         <thead>
         <tr>
-            <th>Ciudad</th>
+            <th>Cidade</th>
             <th>N Pasajes</th>
         </tr>
         </thead>
         <tbody>
         <tr th:each="destino : ${destinos}">
-            <td th:text="${destino.nombre}">Nombre</td>
+            <td th:text="${destino.nome}">Nome</td>
             <td th:text="${destino.nPasajes}">N Pasajes</td>
         </tr>
         </tbody>
@@ -156,7 +156,7 @@
         </thead>
         <tbody>
         <tr th:each="metodo : ${metodos}">
-            <td th:text="${metodo.nombre}">Nombre</td>
+            <td th:text="${metodo.nome}">Nome</td>
             <td th:text="${metodo.valueWeb}" class="text-right">Valor web</td>
             <td th:text="${metodo.valueNoWeb}" class="text-right">Valor no Web</td>
         </tr>

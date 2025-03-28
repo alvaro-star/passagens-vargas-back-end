@@ -3,17 +3,15 @@ package com.alvaro.empresas.passagens.helpers.thymeleaf;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 
 public record ParadaTHModel(
-        String ciudad,
+        String cidade,
         String departamento,
         String lugar,
-        String abreviacion
-) {
+        String abreviacion) {
     public ParadaTHModel(ParadaModel model) {
         this(
-                model.getLugar().getCiudad().getNombre(),
-                model.getLugar().getCiudad().getDepartamento().getNombre(),
-                model.getLugar().getNombre(),
-                model.getLugar().getCiudad().getDepartamento().getAbreviacion()
-        );
+                model.getLugar().getCidade().getNome(),
+                model.getLugar().getCidade().getDepartamento().getNome(),
+                model.getLugar().getNome(),
+                model.getLugar().getCidade().getDepartamento().getAbreviacao());
     }
 }

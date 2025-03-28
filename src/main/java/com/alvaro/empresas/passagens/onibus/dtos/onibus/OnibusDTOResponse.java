@@ -9,24 +9,23 @@ import java.util.List;
 import java.util.UUID;
 
 public record OnibusDTOResponse(
-        Integer id,
+        UUID id,
         String placa,
         Boolean habilitado,
         BigDecimal valorViagensDinheiro,
         BigDecimal valorViagensNaoWeb,
         BigDecimal valorViagensWeb,
         UUID idEmpresa,
-        List<PisoDTOResponse> pisos
-) {
+        List<PisoDTOResponse> pisos) {
 
     public OnibusDTOResponse(OnibusModel modelo,
-                             BigDecimal valorViagensDinheiro,
-                             BigDecimal valorViagensNaoWeb,
-                             BigDecimal valorViagensWeb,
-                             List<PisoDTOResponse> pisos) {
+            BigDecimal valorViagensDinheiro,
+            BigDecimal valorViagensNaoWeb,
+            BigDecimal valorViagensWeb,
+            List<PisoDTOResponse> pisos) {
         this(modelo.getId(),
                 modelo.getPlaca(),
-                modelo.isEnable(),
+                modelo.isHabilitado(),
                 valorViagensDinheiro,
                 valorViagensNaoWeb,
                 valorViagensWeb,

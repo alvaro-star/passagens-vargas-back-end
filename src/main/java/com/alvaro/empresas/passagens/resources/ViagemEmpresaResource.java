@@ -38,8 +38,8 @@ public class ViagemEmpresaResource {
     private OnibusService onibusService;
 
     @GetMapping("/{id}/pdf")
-    public ResponseEntity<Object> getPdfFromViaje(@PathVariable("id") UUID idViaje) {
-        byte[] viajeRelatorio = viagemEmpresaService.getPdfFromviagem(idViaje);
+    public ResponseEntity<Object> getPdfFromViagem(@PathVariable("id") UUID idViagem) {
+        byte[] viajeRelatorio = viagemEmpresaService.getPdfFromViagem(idViagem);
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=viaje.pdf");
         headers.add(HttpHeaders.CONTENT_TYPE, "application/pdf");
@@ -49,8 +49,9 @@ public class ViagemEmpresaResource {
     @PostMapping("/from/empresa")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
-    public Page<ViagemDTOListBusquedaEmpresa> getAllFromEmpresaBetweenMonth(@RequestBody @Valid ViagemDTOSolicitacaoFromEmpresa solicitacao,
-                                                                            @PageableDefault(sort = "dataHoraSaida") Pageable pageable) {
+    public Page<ViagemDTOListBusquedaEmpresa> getAllFromEmpresaBetweenMonth(
+            @RequestBody @Valid ViagemDTOSolicitacaoFromEmpresa solicitacao,
+            @PageableDefault(sort = "dataHoraSaida") Pageable pageable) {
         userLogued.validIfIsAdminOrOwnerEmpresa(solicitacao.idEmpresa());
         return viagemEmpresaService.findAllByEmpresaBetweenDates(solicitacao, pageable);
     }
@@ -58,23 +59,24 @@ public class ViagemEmpresaResource {
     @PostMapping("/from/onibus")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
-    public Page<ViagemDTOListBusquedaEmpresa> getAllFromOnibus(@RequestBody @Valid ViagemDTOSolicitacaoFromOnibus solicitacao,
-                                                               @PageableDefault(sort = "dataHoraSaida") Pageable pageable) {
+    public Page<ViagemDTOListBusquedaEmpresa> getAllFromOnibus(
+            @RequestBody @Valid ViagemDTOSolicitacaoFromOnibus solicitacao,
+            @PageableDefault(sort = "dataHoraSaida") Pageable pageable) {
         var onibusModel = onibusService.findById(solicitacao.idOnibus());
         userLogued.validIfIsAdminOrOwnerEmpresa(onibusModel.getEmpresaId());
-        return viagemEmpresaService.findAllFromAutobus(onibusModel, solicitacao, pageable);
+        return viagemEmpresaService.findAllFromOnibus(onibusModel, solicitacao, pageable);
     }
 
     @PostMapping("/{idEmpresa}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
     public List<ViagemDTOListBusquedaEmpresa> getViagemFromDia(@PathVariable(value = "idEmpresa") UUID idEmpresa,
-                                                               @RequestBody @Valid ViagemDTOSolicitacaoEmpresa dto) {
+            @RequestBody @Valid ViagemDTOSolicitacaoEmpresa dto) {
         userLogued.validIfIsAdminOrOwnerEmpresa(idEmpresa);
         if (dto.idCidadeDestino() == null || dto.idCidadeDestino() == 0)
-            return viagemEmpresaService.getviagemsFromsaida(idEmpresa, dto);
+            return viagemEmpresaService.findViagensBySaida(idEmpresa, dto);
         else
-            return viagemEmpresaService.getviagemsFromDia(idEmpresa, dto);
+            return viagemEmpresaService.findViagensByDay(idEmpresa, dto);
     }
 
     @PostMapping("/create")

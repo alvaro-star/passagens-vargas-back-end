@@ -14,12 +14,12 @@ import java.util.UUID;
 
 @Repository
 public interface CodigoRepository extends JpaRepository<CodigoVerificacao, UUID> {
-    @Query("SELECT c FROM CodigoVerificacao as c WHERE c.email = :email AND c.criadoEm >= :data")
+    @Query("SELECT c FROM CodigoVerificacao as c WHERE c.email = :email AND c.createdAt >= :data")
     List<CodigoVerificacao> findByEmailAfterDate(@Param("email") String email, @Param("data") LocalDateTime data);
 
 
     @Transactional
     @Modifying
-    @Query("DELETE from CodigoVerificacao as c WHERE c.email = :email AND c.criadoEm < :data")
+    @Query("DELETE from CodigoVerificacao as c WHERE c.email = :email AND c.createdAt < :data")
     int deleteAllBeforeTime(@Param("email") String email, @Param("data") LocalDateTime data);
 }

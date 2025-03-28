@@ -15,14 +15,14 @@ import java.util.UUID;
 
 @Repository
 public interface UsuarioSolicitacaoRepository extends JpaRepository<UsuarioSolicitacaoModel, UUID> {
-    @Query("SELECT u FROM UsuarioSolicitacaoModel u WHERE u.email=:email AND u.createdAt >= :criadoEm AND u.tipo = :tipo ORDER BY u.createdAt DESC")
+    @Query("SELECT u FROM UsuarioSolicitacaoModel u WHERE u.email=:email AND u.createdAt >= :createdAt AND u.tipo = :tipo ORDER BY u.createdAt DESC")
     List<UsuarioSolicitacaoModel> findByEmailAfterTime(
             @Param("email") String email,
-            @Param("criadoEm") LocalDateTime criadoEm,
+            @Param("createdAt") LocalDateTime createdAt,
             @Param("tipo") TipoSolicitacao tipoOperacao);
 
     @Modifying
     @Transactional
-    @Query("DELETE FROM UsuarioSolicitacaoModel u WHERE u.email = :email AND u.createdAt < :criadoEm")
-    void deleteByEmailBeforeTime(@Param("email") String email, @Param("criadoEm") LocalDateTime criadoEm);
+    @Query("DELETE FROM UsuarioSolicitacaoModel u WHERE u.email = :email AND u.createdAt < :createdAt")
+    void deleteByEmailBeforeTime(@Param("email") String email, @Param("createdAt") LocalDateTime createdAt);
 }

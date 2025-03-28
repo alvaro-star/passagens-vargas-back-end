@@ -46,7 +46,7 @@ public class EmpresaService {
     @Transactional
     public EmpresaModel save(InputEmpresaDTO dto) {
         var model = new EmpresaModel();
-        BeanUtils.copyProperties(dto, model, "id", "autobuses");
+        BeanUtils.copyProperties(dto, model, "id", "onibuses");
         model.setHabilitado(true);
         model.setBloqueado(false);
         return empresaRepository.save(model);
@@ -89,7 +89,7 @@ public class EmpresaService {
 
     public void update(InputEmpresaDTO dto, UUID id) {
         var model = this.findById(id);
-        BeanUtils.copyProperties(dto, model, "id", "autobuses");
+        BeanUtils.copyProperties(dto, model, "id", "onibuses");
         empresaRepository.save(model);
     }
 

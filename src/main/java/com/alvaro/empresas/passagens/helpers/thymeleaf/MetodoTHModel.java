@@ -1,7 +1,7 @@
 package com.alvaro.empresas.passagens.helpers.thymeleaf;
 
 public record MetodoTHModel(
-        String nombre,
+        String nome,
         Double valueWeb,
         Double valueNoWeb
 ) {

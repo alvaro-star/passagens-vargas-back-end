@@ -1,18 +1,20 @@
 package com.alvaro.empresas.passagens.helpers;
 
-import com.alvaro.empresas.passagens.onibus.models.OnibusModel;
-import com.alvaro.empresas.passagens.models.EmpresaModel;
-import com.alvaro.empresas.passagens.paradas.models.CidadeModel;
-import com.alvaro.empresas.passagens.paradas.models.DepartamentoModel;
-import com.alvaro.empresas.passagens.paradas.models.LugarModel;
-import jakarta.persistence.EntityManager;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
+import com.alvaro.empresas.passagens.models.EmpresaModel;
+import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusDTO;
+import com.alvaro.empresas.passagens.onibus.models.OnibusModel;
+import com.alvaro.empresas.passagens.paradas.models.CidadeModel;
+import com.alvaro.empresas.passagens.paradas.models.DepartamentoModel;
+import com.alvaro.empresas.passagens.paradas.models.LugarModel;
+
+import jakarta.persistence.EntityManager;
 
 public class DadosPersist {
     private EntityManager em;
@@ -33,16 +35,17 @@ public class DadosPersist {
         return PageRequest.of(pageNumber, pageSize);
     }
 
-    public EmpresaModel cadastrarEmpresa(String nombre) {
-        var empresa = new EmpresaModel(nombre, "logo", "numerocuenta", true, false);
+    public EmpresaModel cadastrarEmpresa(String nome) {
+        var empresa = new EmpresaModel(nome, "logo", "numerocuenta", true, false);
         em.persist(empresa);
         return empresa;
     }
 
-    public OnibusModel cadastrarAutobus(String placa, EmpresaModel empresaModel) {
-        var autobus = new OnibusModel(placa, true, empresaModel);
-        em.persist(autobus);
-        return autobus;
+    public OnibusModel cadastrarOnibus(String placa, EmpresaModel empresaModel) {
+        var dto = new OnibusDTO(placa);
+        var onibus = new OnibusModel(dto, empresaModel);
+        em.persist(onibus);
+        return onibus;
     }
 
     public List<LugarModel> loadLugares(String[] nomes) {
@@ -50,9 +53,9 @@ public class DadosPersist {
         for (String nome : nomes) {
             var depModel = new DepartamentoModel(nome, "SC");
             em.persist(depModel);
-            var ciudad = new CidadeModel(nome, depModel);
-            em.persist(ciudad);
-            var lugar = new LugarModel("Terminal " + nome, ciudad);
+            var cidade = new CidadeModel(nome, depModel);
+            em.persist(cidade);
+            var lugar = new LugarModel("Terminal " + nome, cidade);
             em.persist(lugar);
             lugares.add(lugar);
         }
@@ -69,21 +72,20 @@ public class DadosPersist {
         return models;
     }
 
-    public HashMap<String, List<OnibusModel>> laodAutobuses(HashMap<String, EmpresaModel> empresas, int nAutobuses) {
-        HashMap<String, List<OnibusModel>> autobuses = new HashMap<>();
+    public HashMap<String, List<OnibusModel>> laodOnibuses(HashMap<String, EmpresaModel> empresas, int nOnibuses) {
+        HashMap<String, List<OnibusModel>> onibuses = new HashMap<>();
         OnibusModel aux;
         int i;
         for (String key : empresas.keySet()) {
-            List<OnibusModel> autobusOfEmpresa = new ArrayList();
-            for (i = 0; i < nAutobuses; i++) {
-                aux = cadastrarAutobus(key, empresas.get(key));
-                autobusOfEmpresa.add(aux);
+            List<OnibusModel> onibusOfEmpresa = new ArrayList<>();
+            for (i = 0; i < nOnibuses; i++) {
+                aux = cadastrarOnibus(key, empresas.get(key));
+                onibusOfEmpresa.add(aux);
             }
-            autobuses.put(key, autobusOfEmpresa);
+            onibuses.put(key, onibusOfEmpresa);
         }
 
-        return autobuses;
+        return onibuses;
     }
-
 
 }

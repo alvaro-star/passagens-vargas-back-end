@@ -1,19 +1,28 @@
 package com.alvaro.empresas.passagens.onibus.models;
 
-import com.alvaro.empresas.passagens.models.IEntityStandart;
-import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusDTO;
-import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusDTOUpdate;
-import com.alvaro.empresas.passagens.models.EmpresaModel;
-import com.alvaro.empresas.passagens.models.ViagemModel;
-import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import com.alvaro.empresas.passagens.models.EmpresaModel;
+import com.alvaro.empresas.passagens.models.IEntityStandart;
+import com.alvaro.empresas.passagens.models.ViagemModel;
+import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusDTO;
+import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusDTOUpdate;
+
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "tb_onibus", indexes = {
@@ -38,10 +47,10 @@ public class OnibusModel extends IEntityStandart {
     @Column(name = "fk_idtb_empresa", insertable = false, updatable = false)
     private UUID empresaId;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "autobus")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "onibus")
     private List<PisoModel> pisos = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "autobus")
+    @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "onibus")
     private List<ViagemModel> viagens = new ArrayList<>();
 
     public void setEmpresa(EmpresaModel empresa) {

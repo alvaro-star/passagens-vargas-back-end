@@ -21,7 +21,7 @@ import java.util.UUID;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "tb_viagem",
-        indexes = @Index(name = "idxtb_viagem_fk_idtb_empresa_data_hora_salida", columnList = "fk_idtb_empresa, data_hora_salida")
+        indexes = @Index(name = "idxtb_viagem_fk_idtb_empresa_data_hora_saida", columnList = "fk_idtb_empresa, data_hora_saida")
 )
 @NoArgsConstructor
 @AttributeOverride(name = "id", column = @Column(name = "idtb_viagem"))
@@ -43,13 +43,13 @@ public class ViagemModel extends IEntityStandart {
     @Column(name = "cancelado", nullable = false)
     private boolean isCancelado = false;
 
-    @Column(nullable = false, name = "data_hora_salida")
+    @Column(nullable = false, name = "data_hora_saida")
     private LocalDateTime dataHoraSaida;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "fk_idtb_autobus")
+    @JoinColumn(name = "fk_idtb_onibus")
     private OnibusModel onibus;
-    @Column(name = "fk_idtb_autobus", updatable = false, insertable = false)
+    @Column(name = "fk_idtb_onibus", updatable = false, insertable = false)
     private UUID onibusId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

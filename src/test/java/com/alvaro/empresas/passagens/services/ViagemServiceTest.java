@@ -7,6 +7,6 @@ import org.springframework.test.context.ActiveProfiles;
 class ViagemServiceTest {
 
     @Test
-    void getViajesFromDia() {
+    void getViagensFromDia() {
     }
 }

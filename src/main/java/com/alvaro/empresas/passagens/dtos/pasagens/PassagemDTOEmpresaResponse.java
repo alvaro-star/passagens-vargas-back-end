@@ -15,8 +15,7 @@ public record PassagemDTOEmpresaResponse(
         Boolean estaPago,
         Integer nSilla,
         ParadaDTOComplete saida,
-        ParadaDTOComplete destino
-) {
+        ParadaDTOComplete destino) {
     public PassagemDTOEmpresaResponse(PassagemModel model) {
         this(
                 model.getId(),
@@ -25,7 +24,7 @@ public record PassagemDTOEmpresaResponse(
                 model.getNascimento(),
                 model.getFaturaReembolsoId() != null,
                 model.getEstaPago(),
-                model.getNumeroAssento(),
+                model.getNAssento(),
                 new ParadaDTOComplete(model.getSaida()),
                 new ParadaDTOComplete(model.getDestino()));
     }

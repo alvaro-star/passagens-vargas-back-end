@@ -16,10 +16,10 @@ public record EmpresaDTOResponse(
         BigDecimal valorViagensWeb
 ) {
     public EmpresaDTOResponse(EmpresaModel model, BigDecimal valorViagensEfeito, BigDecimal valorViagensNaoWeb, BigDecimal valorViagensWeb) {
-        this(model.getId(), model.getNome(), model.getLogo(), model.getBloqueado(), model.getEnabled(), valorViagensEfeito, valorViagensNaoWeb, valorViagensWeb);
+        this(model.getId(), model.getNome(), model.getLogo(), model.getBloqueado(), model.getHabilitado(), valorViagensEfeito, valorViagensNaoWeb, valorViagensWeb);
     }
 
     public EmpresaDTOResponse(EmpresaModel model) {
-        this(model.getId(), model.getNome(), model.getLogo(), model.getBloqueado(), model.getEnabled(), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+        this(model.getId(), model.getNome(), model.getLogo(), model.getBloqueado(), model.getHabilitado(), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
     }
 }

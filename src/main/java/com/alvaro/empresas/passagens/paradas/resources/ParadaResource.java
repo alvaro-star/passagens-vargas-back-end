@@ -89,7 +89,7 @@ public class ParadaResource {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O ônibus está desabilitado");
         int indice = -1;
 
-        if (!model.getTipo().equals(TipoParada.CAMINO))
+        if (!model.getTipo().equals(TipoParada.CAMINHO))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Não é possível excluir a saída ou o destino");
 
         ParadaModel aux;

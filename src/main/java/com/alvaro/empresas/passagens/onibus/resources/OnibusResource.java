@@ -33,7 +33,7 @@ public class OnibusResource {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
     public Page<OnibusDTOResponse> getOnibusFromEmpresa(
             @PathVariable UUID idEmpresa,
-            @PageableDefault(sort = {"criadoEm"}, direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(sort = {"createdAt"}, direction = Sort.Direction.DESC) Pageable pageable) {
         userLogued.validIfIsAdminOrOwnerEmpresa(idEmpresa);
         return onibusService.findAllFromEmpresa(idEmpresa, pageable);
     }

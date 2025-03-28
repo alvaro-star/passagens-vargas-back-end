@@ -73,7 +73,7 @@ public class FaturaPassagemService {
         }
 
         PrecoModel preco = pagamento.getPassagens().get(0).getPreco();
-        List<Integer> assentosVendidos = passagemRepository.getPasajesVendidosAndNoRembolso(preco.getId());
+        List<Integer> assentosVendidos = passagemRepository.getPassagensVendidasENaoReembolsadas(preco.getId());
 
         int nPassagens = 0;
         for (PassagemModel passagem : pagamento.getPassagens()) {
@@ -149,7 +149,7 @@ public class FaturaPassagemService {
         ParadaModel destino = fatura.get().getPassagens().get(0).getDestino();
         try {
             for (PassagemModel passagemModel : fatura.get().getPassagens())
-                passagensPDF.addPasaje(passagemModel, nomeEmpresa, saida, destino, fatura.get().getMetodoPagamento());
+                passagensPDF.addPassagem(passagemModel, nomeEmpresa, saida, destino, fatura.get().getMetodoPagamento());
             arrayBytesVazio = passagensPDF.closeAndGetBytes();
             return arrayBytesVazio;
         } catch (IOException exception) {

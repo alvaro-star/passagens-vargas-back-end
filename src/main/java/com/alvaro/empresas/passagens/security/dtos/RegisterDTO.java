@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Size;
 public record RegisterDTO(
         @Email(message = "Deve ser um email válido")
         @NotBlank
-        String login,
+        String email,
         @NotBlank
         @Size(min = 8, max = 8, message = "Deve ter 8 números")
         String telefone,
