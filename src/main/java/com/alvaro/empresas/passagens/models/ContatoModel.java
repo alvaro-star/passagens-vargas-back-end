@@ -1,7 +1,7 @@
 package com.alvaro.empresas.passagens.models;
 
-import com.alvaro.empresas.passagens.dtos.pasagens.ContactoDTO;
-import com.alvaro.empresas.passagens.pagamentos.models.FaturaPasagemModel;
+import com.alvaro.empresas.passagens.dtos.pasagens.ContatoDTO;
+import com.alvaro.empresas.passagens.pagamentos.models.FaturaPassagemModel;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,23 +13,23 @@ import lombok.*;
 @AttributeOverride(name = "id", column = @Column(name = "idtb_contato"))
 public class ContatoModel extends IEntityStandart {
     @Column(length = 70)
-    private String nombre;
+    private String nome;
     @Column(length = 50)
     private String email;
     private Integer numero;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_factura_pasaje")
-    private FaturaPasagemModel faturaPasagem;
+    private FaturaPassagemModel faturaPasagem;
 
-    public ContatoModel(ContactoDTO contactoDTO) {
-        this.nombre = contactoDTO.nombre();
-        this.email = contactoDTO.email();
-        this.numero = contactoDTO.telefono();
+    public ContatoModel(ContatoDTO contatoDTO) {
+        this.nome = contatoDTO.nome();
+        this.email = contatoDTO.email();
+        this.numero = contatoDTO.telefone();
     }
 
-    public ContatoModel(String nombre, String email, Integer numero) {
-        this.nombre = nombre;
+    public ContatoModel(String nome, String email, Integer numero) {
+        this.nome = nome;
         this.email = email;
         this.numero = numero;
     }

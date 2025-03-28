@@ -3,8 +3,7 @@ package com.alvaro.empresas.passagens.paradas.services;
 
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationException;
 import com.alvaro.empresas.passagens.enums.TipoParada;
-import com.alvaro.empresas.passagens.helpers.validators.AutobusEnabled;
-import com.alvaro.empresas.passagens.helpers.validators.EmpresaEnabled;
+import com.alvaro.empresas.passagens.helpers.validators.ValidEnabledEntities;
 import com.alvaro.empresas.passagens.models.ViagemModel;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
@@ -12,8 +11,8 @@ import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOUpdate;
 import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.alvaro.empresas.passagens.paradas.repositories.ParadaRepository;
-import com.alvaro.empresas.passagens.repositories.ViajeRepository;
-import com.alvaro.empresas.passagens.services.validacao.TiempoViajeService;
+import com.alvaro.empresas.passagens.repositories.ViagemRepository;
+import com.alvaro.empresas.passagens.services.validacao.TempoViagemService;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -26,17 +25,13 @@ import java.time.LocalDateTime;
 @Service
 public class ParadaService {
     @Autowired
-    private EmpresaEnabled empresaEnabled;
-    @Autowired
-    private AutobusEnabled autobusEnabled;
-    @Autowired
-    private TiempoViajeService tiempoViajeService;
+    private TempoViagemService tempoViagemService;
     @Autowired
     private ParadaRepository paradaRepository;
     @Autowired
     private LugarService lugarService;
     @Autowired
-    private ViajeRepository viajeRepository;
+    private ViagemRepository viagemRepository;
 
     public ParadaModel findById(Integer id) {
         var model = paradaRepository.findById(id);
@@ -54,79 +49,80 @@ public class ParadaService {
     }
 
     @Transactional
-    public ParadaDTOComplete save(ParadaDTO dtoSended, ViagemModel viaje) {
-        empresaEnabled.validEmpresaEnabled(viaje.getEmpresaId());
-        autobusEnabled.validAutobusEnabled(viaje.getAutobusId());
-        LugarModel lugar = lugarService.findById(dtoSended.idLugar());
-        if (!lugar.getEnable())
-            throw new ValidationException("idLugar", "El lugar no esta disponible");
-        //Validacao de Usuario
-        var dataParadaAjustada = dtoSended.dataHora().withSecond(0).withNano(0);
-        for (ParadaModel parada : viaje.getParadas()) {
-            if (parada.getTipo().equals(TipoParada.SALIDA) && parada.getDataHora().isBefore(LocalDateTime.now()))
-                throw new ValidationException("dataHora", "No se puede agregar una parada a un viaje que ya inicio");
+    public ParadaDTOComplete save(ParadaDTO dtoEnviado, ViagemModel viagem) {
+        ValidEnabledEntities.validEmpresa(viagem.getEmpresa());
+        ValidEnabledEntities.validOnibus(viagem.getOnibus());
+
+        LugarModel lugar = lugarService.findById(dtoEnviado.idLugar());
+        if (!lugar.getHabilitado())
+            throw new ValidationException("idLugar", "O lugar não está disponível");
+        //Validação de Usuário
+        var dataParadaAjustada = dtoEnviado.dataHora().withSecond(0).withNano(0);
+        for (ParadaModel parada : viagem.getParadas()) {
+            if (parada.getTipo().equals(TipoParada.SAIDA) && parada.getDataHora().isBefore(LocalDateTime.now()))
+                throw new ValidationException("dataHora", "Não é possível adicionar uma parada a uma viagem que já iniciou");
             if (parada.getDataHora().isEqual(dataParadaAjustada))
-                throw new ValidationException("dataHora", "Ya hay una parada registrada en esta esta hora");
-            if (parada.getLugar().getId().equals(dtoSended.idLugar()))
-                throw new ValidationException("idLugar", "Ya hay una parada registrada que passara por este lugar");
+                throw new ValidationException("dataHora", "Já existe uma parada registrada nesta hora");
+            if (parada.getLugar().getId().equals(dtoEnviado.idLugar()))
+                throw new ValidationException("idLugar", "Já existe uma parada registrada que passará por este lugar");
         }
 
-        if (!viaje.dataHoraValido(dataParadaAjustada))
-            throw new ValidationException("dataHora", "El horario no es valido");
+        if (!viagem.dataHoraValido(dataParadaAjustada))
+            throw new ValidationException("dataHora", "O horário não é válido");
 
-        var model = new ParadaModel(dtoSended, TipoParada.CAMINO);
+        var model = new ParadaModel(dtoEnviado, TipoParada.CAMINO);
         model.setLugar(lugar);
         model.setDataHora(dataParadaAjustada);
-        model.setviagem(viaje);
-        model.setEmpresa(viaje.getEmpresa());
+        model.setViagem(viagem);
+        model.setEmpresa(viagem.getEmpresa());
 
         paradaRepository.save(model);
         return new ParadaDTOComplete(model);
     }
 
     @Transactional
-    public ParadaDTOComplete update(ParadaDTOUpdate dtoSended, ParadaModel model) {
-        empresaEnabled.validEmpresaEnabled(model.getEmpresaId());
-        autobusEnabled.validAutobusEnabled(model.getViagem().getAutobusId());
+    public ParadaDTOComplete update(ParadaDTOUpdate dtoEnviado, ParadaModel model) {
+        ValidEnabledEntities.validEmpresa(model.getEmpresa());
+        ValidEnabledEntities.validOnibus(model.getViagem().getOnibus());
 
-        var dataParadaAjustada = dtoSended.dataHora().withSecond(0).withNano(0);
+        var dataParadaAjustada = dtoEnviado.dataHora().withSecond(0).withNano(0);
         for (ParadaModel parada : model.getViagem().getParadas()) {
-            if (parada.getTipo().equals(TipoParada.SALIDA) && parada.getDataHora().isBefore(LocalDateTime.now()))
-                throw new ValidationException("dataHora", "No se puede editar una parada de un viaje que ya inicio");
+            if (parada.getTipo().equals(TipoParada.SAIDA) && parada.getDataHora().isBefore(LocalDateTime.now()))
+                throw new ValidationException("dataHora", "Não é possível editar uma parada de uma viagem que já iniciou");
             if (parada.getDataHora().isEqual(dataParadaAjustada) && !parada.getId().equals(model.getId()))
-                throw new ValidationException("dataHora", "Ya hay una parada registrada en esta fecha");
-            if (parada.getLugar().getId().equals(dtoSended.idLugar()) && !parada.getId().equals(model.getId()))
-                throw new ValidationException("idLugar", "Ya hay una parada registrada que passara por este lugar");
+                throw new ValidationException("dataHora", "Já existe uma parada registrada nesta data");
+            if (parada.getLugar().getId().equals(dtoEnviado.idLugar()) && !parada.getId().equals(model.getId()))
+                throw new ValidationException("idLugar", "Já existe uma parada registrada que passará por este lugar");
         }
 
         if (model.getTipo().equals(TipoParada.CAMINO))
             if (!model.getViagem().dataHoraValido(dataParadaAjustada))
-                throw new ValidationException("dataHora", "La fecha y hora estan fuera del limite");
+                throw new ValidationException("dataHora", "A data e hora estão fora do limite");
 
-        if (model.getTipo().equals(TipoParada.SALIDA)) {
+        if (model.getTipo().equals(TipoParada.SAIDA)) {
             for (ParadaModel parada : model.getViagem().getParadas()) {
-                if (!parada.getTipo().equals(TipoParada.SALIDA) && dataParadaAjustada.isAfter(parada.getDataHora()))
-                    throw new ValidationException("dataHora", "El horario nuevo dela salida es maior que una del camino");
+                if (!parada.getTipo().equals(TipoParada.SAIDA) && dataParadaAjustada.isAfter(parada.getDataHora()))
+                    throw new ValidationException("dataHora", "O novo horário da saída é maior que o de uma parada do caminho");
             }
         }
         if (model.getTipo().equals(TipoParada.DESTINO)) {
             for (ParadaModel parada : model.getViagem().getParadas()) {
                 if (!parada.getTipo().equals(TipoParada.DESTINO) && dataParadaAjustada.isBefore(parada.getDataHora()))
-                    throw new ValidationException("dataHora", "El horario del destino es menor que una del camino");
+                    throw new ValidationException("dataHora", "O horário do destino é menor que o de uma parada do caminho");
             }
         }
-        model.updateValues(dtoSended);
+        model.updateValues(dtoEnviado);
 
-        if (dtoSended.idLugar() != null) {
-            LugarModel lugar = lugarService.findById(dtoSended.idLugar());
-            if (!lugar.getEnable())
-                throw new ValidationException("idLugar", "El lugar no esta disponible");
+        if (dtoEnviado.idLugar() != null) {
+            LugarModel lugar = lugarService.findById(dtoEnviado.idLugar());
+            if (!lugar.getHabilitado())
+                throw new ValidationException("idLugar", "O lugar não está disponível");
             model.setLugar(lugar);
         }
 
-        if (model.getTipo().equals(TipoParada.SALIDA)) {
-            model.getViagem().setDataHoraSalida(dataParadaAjustada);
-            viajeRepository.save(model.getViagem());
+        if (model.getTipo().equals(TipoParada.SAIDA)) {
+            model.getViagem().setDataHoraSaida(dataParadaAjustada);
+            viagemRepository.save(model.getViagem());
         }
 
         boolean valido = true;
@@ -134,7 +130,7 @@ public class ParadaService {
             valido = validarHorarioParadaExterno(model, dataParadaAjustada);
         }
         if (!valido)
-            throw new ValidationException("dataHora", "El autobus esta ocupado en esta hora");
+            throw new ValidationException("dataHora", "O ônibus está ocupado nesta hora");
 
         paradaRepository.save(model);
         return new ParadaDTOComplete(model);
@@ -144,23 +140,23 @@ public class ParadaService {
         var existe = true;
         var valido = false;
 
-        if (modelEscolhido.getTipo().equals(TipoParada.SALIDA)) {
-            existe = tiempoViajeService.existsViajesActiveFromAutobus(
-                    modelEscolhido.getViagem().getAutobus(),
+        if (modelEscolhido.getTipo().equals(TipoParada.SAIDA)) {
+            existe = tempoViagemService.existsViagensActiveFromOnibus(
+                    modelEscolhido.getViagem().getOnibus(),
                     novoDataHoraAjustada,
                     modelEscolhido.getViagem().getDestino().getDataHora(),
                     modelEscolhido.getViagem().getId()
             );
-            valido = tiempoViajeService.
-                    validarTempoMaximoViaje(novoDataHoraAjustada, modelEscolhido.getViagem().getDestino().getDataHora());
+            valido = tempoViagemService.
+                    validarTempoMaximoViagem(novoDataHoraAjustada, modelEscolhido.getViagem().getDestino().getDataHora());
         } else if (modelEscolhido.getTipo().equals(TipoParada.DESTINO)) {
-            existe = tiempoViajeService.existsViajesActiveFromAutobus(
-                    modelEscolhido.getViagem().getAutobus(),
-                    modelEscolhido.getViagem().getSalida().getDataHora(),
+            existe = tempoViagemService.existsViagensActiveFromOnibus(
+                    modelEscolhido.getViagem().getOnibus(),
+                    modelEscolhido.getViagem().getSaida().getDataHora(),
                     novoDataHoraAjustada,
                     modelEscolhido.getViagem().getId()
             );
-            valido = tiempoViajeService.validarTempoMaximoViaje(modelEscolhido.getViagem().getSalida().getDataHora(), novoDataHoraAjustada);
+            valido = tempoViagemService.validarTempoMaximoViagem(modelEscolhido.getViagem().getSaida().getDataHora(), novoDataHoraAjustada);
         }
 
         return !existe && valido;

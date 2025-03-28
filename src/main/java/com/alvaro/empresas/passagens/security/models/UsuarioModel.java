@@ -1,50 +1,35 @@
 package com.alvaro.empresas.passagens.security.models;
 
-import com.alvaro.empresas.passagens.pagamentos.models.FaturaPasagemModel;
+import com.alvaro.empresas.passagens.models.IEntityStandart;
+import com.alvaro.empresas.passagens.pagamentos.models.FaturaPassagemModel;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Table(name = "tb_usuario")
 @Entity
-@Getter
-@Setter
+@Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
-public class UsuarioModel implements UserDetails {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "idtb_usuario")
-    private UUID id;
+@AttributeOverride(name = "id", column = @Column(name = "idtb_usuario"))
+public class UsuarioModel extends IEntityStandart implements UserDetails {
     @Column(unique = true, name = "email", nullable = false)
-    private String login;
+    private String email;
     @Column(nullable = false)
-    private String nombre;
+    private String nome;
     @Column(nullable = false)
-    private String telefono;
+    private String telefone;
     @Column(nullable = false)
-    private String contrasena;
+    private String senha;
 
     private UUID empresaId;
 
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "cliente")
-    private List<FaturaPasagemModel> facturasPasaje;
+    private List<FaturaPassagemModel> faturasPassagem;
 
     @NotNull
     @ManyToMany(fetch = FetchType.EAGER)
@@ -53,26 +38,27 @@ public class UsuarioModel implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "idtb_role", referencedColumnName = "idtb_role"))
     private Set<RoleModel> roles = new HashSet<>();
 
-    public UsuarioModel(String login, String nombre, String telefono, String contrasena) {
-        this.login = login;
-        this.nombre = nombre;
-        this.contrasena = contrasena;
-        this.telefono = telefono;
+
+    public UsuarioModel(String email, String nome, String telefone, String senha) {
+        this.email = email;
+        this.nome = nome;
+        this.senha = senha;
+        this.telefone = telefone;
     }
 
-    public UsuarioModel(String login, String nombre, String telefono, String contrasena, UUID empresaId) {
-        this.login = login;
-        this.nombre = nombre;
-        this.telefono = telefono;
-        this.contrasena = contrasena;
+    public UsuarioModel(String email, String nome, String telefone, String senha, UUID empresaId) {
+        this.email = email;
+        this.nome = nome;
+        this.telefone = telefone;
+        this.senha = senha;
         this.empresaId = empresaId;
     }
 
-    public UsuarioModel(UsuarioSolicitudModel usuarioSolicitudModel) {
-        this.login = usuarioSolicitudModel.getEmail();
-        this.nombre = usuarioSolicitudModel.getNombre();
-        this.telefono = usuarioSolicitudModel.getTelefono();
-        this.contrasena = usuarioSolicitudModel.getContrasena();
+    public UsuarioModel(UsuarioSolicitacaoModel usuarioSolicitacaoModel) {
+        this.email = usuarioSolicitacaoModel.getEmail();
+        this.nome = usuarioSolicitacaoModel.getNome();
+        this.telefone = usuarioSolicitacaoModel.getTelefone();
+        this.senha = usuarioSolicitacaoModel.getSenha();
         this.empresaId = null;
     }
 
@@ -82,7 +68,7 @@ public class UsuarioModel implements UserDetails {
 
     public boolean hasRole(RoleList role) {
         for (RoleModel roleModel : this.roles) {
-            if (roleModel.getNombre().equals(role))
+            if (roleModel.getNome().equals(role))
                 return true;
         }
         return false;
@@ -104,12 +90,12 @@ public class UsuarioModel implements UserDetails {
 
     @Override
     public String getPassword() {
-        return contrasena;
+        return senha;
     }
 
     @Override
     public String getUsername() {
-        return login;
+        return email;
     }
 
     @Override
@@ -132,9 +118,9 @@ public class UsuarioModel implements UserDetails {
         return true;
     }
 
-    public void updateValues(UsuarioSolicitudModel usuarioSolicitud) {
-        this.login = usuarioSolicitud.getNewEmail();
-        this.telefono = usuarioSolicitud.getTelefono();
-        this.nombre = usuarioSolicitud.getNombre();
+    public void updateValues(UsuarioSolicitacaoModel usuarioSolicitacao) {
+        this.email = usuarioSolicitacao.getNewEmail();
+        this.telefone = usuarioSolicitacao.getTelefone();
+        this.nome = usuarioSolicitacao.getNome();
     }
 }

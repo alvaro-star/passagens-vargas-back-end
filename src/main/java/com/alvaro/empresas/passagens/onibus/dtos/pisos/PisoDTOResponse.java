@@ -2,30 +2,32 @@ package com.alvaro.empresas.passagens.onibus.dtos.pisos;
 
 import com.alvaro.empresas.passagens.onibus.models.PisoModel;
 
+import java.util.UUID;
+
 public record PisoDTOResponse(
         Integer id,
         Integer nLinhas,
-        Integer nColunas,//Tipo Onibus
+        Integer nColunas,//Tipo Ônibus
         String distribuicaoFileira,
         Integer nPiso,
         String inicioContagem,
-        Integer nSillas,
-        Integer primeraSilla,
-        Integer idAutobus,
+        Integer nAssentos,
+        Integer primeiroAssento,
+        UUID idOnibus,
         int[] posicoesBloqueadas
 ) {
-    public PisoDTOResponse(PisoModel model) {
+    public PisoDTOResponse(PisoModel modelo) {
         this(
-                model.getId(),
-                model.getNLinhas(),
-                model.getNColunas(),
-                model.getDistribuicaoFileira().toString(),
-                model.getNPiso(),
-                model.getInicioContagem().toString(),
-                model.getNSillas(),
-                model.getPrimeraSilla(),
-                model.getAutobusId(),
-                model.getPosicionesBloqueadasIntegerList()
+                modelo.getId(),
+                modelo.getNLinhas(),
+                modelo.getNColunas(),
+                modelo.getDistribuicaoFileira().toString(),
+                modelo.getNPiso(),
+                modelo.getInicioContagem().toString(),
+                modelo.getNAssentos(),
+                modelo.getPrimeiroAssento(),
+                modelo.getOnibusId(),
+                modelo.getPosicionesBloqueadasIntegerList()
         );
     }
 }

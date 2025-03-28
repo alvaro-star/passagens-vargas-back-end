@@ -1,105 +1,102 @@
 package com.alvaro.empresas.passagens.onibus.models;
 
+import com.alvaro.empresas.passagens.models.IEntityStandart;
 import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoDTOCreate;
 import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoDTOUpdate;
-import com.alvaro.empresas.passagens.onibus.enums.TypePosicao;
+import com.alvaro.empresas.passagens.onibus.enums.TipePosicao;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
+import java.util.UUID;
 
 
 @Entity
-@Table(name = "tb_piso", indexes = @Index(name = "idxtb_piso_fk_idtb_autobus", columnList = "fk_idtb_autobus"))
-@Getter
-@Setter
+@Table(name = "tb_piso", indexes = @Index(name = "idxtb_piso_fk_idtb_onibus", columnList = "fk_idtb_onibus"))
+@Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
-public class PisoModel {
-    @Id
-    @Column(name = "idtb_piso")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-
+@AttributeOverride(name = "id ", column = @Column(name = "idtb_piso"))
+public class PisoModel extends IEntityStandart {
     @Column(nullable = false)
     private Integer nLinhas;
     @Column(nullable = false)
     private Integer nColunas;
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private TypePosicao distribuicaoFileira;
+    private TipePosicao distribuicaoFileira;
     @Column(nullable = false)
     private Integer nPiso;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private TypePosicao inicioContagem;
+    private TipePosicao inicioContagem;
     @Column(nullable = false)
-    private Integer nSillas;
+    private Integer nAssentos;
     @Column(nullable = false)
-    private Integer primeraSilla;
+    private Integer primeiroAssento;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "fk_idtb_autobus")
-    private AutobusModel autobus;
-    @Column(name = "fk_idtb_autobus", insertable = false, updatable = false)
-    private Integer autobusId;
+    @JoinColumn(name = "fk_idtb_onibus")
+    private OnibusModel onibus;
+    @Column(name = "fk_idtb_onibus", insertable = false, updatable = false)
+    private UUID onibusId;
 
-    private String posicionesBloqueadas = "";
+    private String posicoesBloquedas = "";
 
-    public PisoModel(PisoDTOCreate dto, Integer nPiso, Integer primeraSilla) {
-        nSillas = dto.getNColunas() * dto.getNLinhas() - dto.getPosicionesBloqueadas().size();
+    public PisoModel(PisoDTOCreate dto, Integer nPiso, Integer primeiroAssento) {
+        nAssentos = dto.getNColunas() * dto.getNLinhas() - dto.getPosicoesBloquedas().size();
         nLinhas = dto.getNLinhas();
         nColunas = dto.getNColunas();
         distribuicaoFileira = dto.getDistribuicaoFileira();
         inicioContagem = dto.getInicioContagem();
         this.nPiso = nPiso;
-        this.primeraSilla = primeraSilla;
+        this.primeiroAssento = primeiroAssento;
         StringBuilder str = new StringBuilder();
-        for (Integer posicionBloqueada : dto.getPosicionesBloqueadas())
-            str.append(posicionBloqueada).append(",");
+        for (Integer posicaoBloqueada : dto.getPosicoesBloquedas())
+            str.append(posicaoBloqueada).append(",");
         str.deleteCharAt(str.length() - 1);
-        this.posicionesBloqueadas = str.toString();
+        this.posicoesBloquedas = str.toString();
     }
 
     public int[] getPosicionesBloqueadasIntegerList() {
-        if (posicionesBloqueadas.isBlank()) return new int[0];
-        String[] posiciones = this.posicionesBloqueadas.split(",");
-        int[] posicionesConvert = new int[posiciones.length];
-        for (int i = 0; i < posiciones.length; i++) {
-            posicionesConvert[i] = Integer.parseInt(posiciones[i]);
+        if (posicoesBloquedas.isBlank()) return new int[0];
+        String[] posicoes = this.posicoesBloquedas.split(",");
+        int[] posicoesConvertidas = new int[posicoes.length];
+        for (int i = 0; i < posicoes.length; i++) {
+            posicoesConvertidas[i] = Integer.parseInt(posicoes[i]);
         }
-        return posicionesConvert;
+        return posicoesConvertidas;
     }
 
-    public boolean hasNSilla(Integer nSilla) {
-        return nSilla >= primeraSilla && nSilla <= getUltimaSilla();
+    public boolean hasNAssento(Integer nAssento) {
+        return nAssento >= primeiroAssento && nAssento <= getUltimoAssento();
     }
 
-    public Integer getUltimaSilla() {
-        return nSillas + primeraSilla - 1;
+    public Integer getUltimoAssento() {
+        return nAssentos + primeiroAssento - 1;
     }
 
-    public PisoModel(Integer nLinhas, Integer nColunas, TypePosicao distribuicaoFileira, Integer nPiso, TypePosicao inicioContagem, Integer nSillas, Integer primeraSilla, AutobusModel autobus) {
+    public PisoModel(Integer nLinhas, Integer nColunas, TipePosicao distribuicaoFileira, Integer nPiso, TipePosicao inicioContagem, Integer nAssentos, Integer primeiroAssento, OnibusModel onibus) {
         this.nLinhas = nLinhas;
         this.nColunas = nColunas;
         this.distribuicaoFileira = distribuicaoFileira;
         this.nPiso = nPiso;
         this.inicioContagem = inicioContagem;
-        this.nSillas = nSillas;
-        this.primeraSilla = primeraSilla;
-        this.autobus = autobus;
+        this.nAssentos = nAssentos;
+        this.primeiroAssento = primeiroAssento;
+        this.onibus = onibus;
     }
 
     public void updateValues(PisoDTOUpdate dto) {
-        nSillas = dto.getNColunas() * dto.getNLinhas() - dto.getPosicoesIndisponiveis().size();
+        nAssentos = dto.getNColunas() * dto.getNLinhas() - dto.getPosicoesIndisponiveis().size();
         nLinhas = dto.getNLinhas();
         nColunas = dto.getNColunas();
         distribuicaoFileira = dto.getDistribuicaoFileira();
         inicioContagem = dto.getInicioContagem();
 
         String palavra = "";
-        for (Integer posicionBloqueada : dto.getPosicoesIndisponiveis())
-            palavra = palavra.concat(posicionBloqueada + ",");
-        this.posicionesBloqueadas = palavra;
+        for (Integer posicaoBloqueada : dto.getPosicoesIndisponiveis())
+            palavra = palavra.concat(posicaoBloqueada + ",");
+        this.posicoesBloquedas = palavra;
     }
 }

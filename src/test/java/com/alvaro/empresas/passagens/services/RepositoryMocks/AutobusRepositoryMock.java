@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.services.RepositoryMocks;
 
-import com.alvaro.empresas.passagens.onibus.models.AutobusModel;
+import com.alvaro.empresas.passagens.onibus.models.OnibusModel;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import org.springframework.stereotype.Service;
 
@@ -16,8 +16,8 @@ public class AutobusRepositoryMock {
         return ++idAutobus;
     }
 
-    public AutobusModel generateAutobus(String placa, boolean enabled, EmpresaModel empresa) {
-        var autobus = new AutobusModel(placa, enabled, empresa);
+    public OnibusModel generateAutobus(String placa, boolean enabled, EmpresaModel empresa) {
+        var autobus = new OnibusModel(placa, enabled, empresa);
         autobus.setId(generateId());
         return autobus;
     }

@@ -1,9 +1,12 @@
 package com.alvaro.empresas.passagens.models;
 
-import com.alvaro.empresas.passagens.onibus.models.AutobusModel;
-import com.alvaro.empresas.passagens.dtos.EmpresaDTO;
+import com.alvaro.empresas.passagens.dtos.InputEmpresaDTO;
+import com.alvaro.empresas.passagens.onibus.models.OnibusModel;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,33 +19,36 @@ import java.util.List;
 @AttributeOverride(name = "id", column = @Column(name = "idtb_empresa"))
 public class EmpresaModel extends IEntityStandart {
     @Column(unique = true, nullable = false)
-    private String nombre;
+    private String nome;
     @Column(nullable = false)
     private String logo;
     @Column(nullable = false)
-    private String numeroCuenta;
+    @JsonIgnore
+    private String nConta;
     @Column(nullable = false)
-    private Boolean enabled;
+    private Boolean habilitado;
     @Column(nullable = false)
-    private Boolean bloqued;
+    private Boolean bloqueado;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "empresa")
-    private List<AutobusModel> autobuses = new ArrayList<>();
+    @JsonIgnore
+    private List<OnibusModel> onibus = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "empresa")
-    private List<ViagemModel> viajes = new ArrayList<>();
+    @JsonIgnore
+    private List<ViagemModel> viagens = new ArrayList<>();
 
-    public EmpresaModel(EmpresaDTO dto) {
-        nombre = dto.nombre();
+    public EmpresaModel(InputEmpresaDTO dto) {
+        nome = dto.nome();
         logo = dto.logo();
-        numeroCuenta = dto.numeroCuenta();
+        nConta = dto.nConta();
     }
 
-    public EmpresaModel(String nombre, String logo, String numeroCuenta, Boolean enabled, Boolean bloqued) {
-        this.nombre = nombre;
+    public EmpresaModel(String nome, String logo, String nConta, Boolean habilitado, Boolean bloqueado) {
+        this.nome = nome;
         this.logo = logo;
-        this.numeroCuenta = numeroCuenta;
-        this.enabled = enabled;
-        this.bloqued = bloqued;
+        this.nConta = nConta;
+        this.habilitado = habilitado;
+        this.bloqueado = bloqueado;
     }
 }

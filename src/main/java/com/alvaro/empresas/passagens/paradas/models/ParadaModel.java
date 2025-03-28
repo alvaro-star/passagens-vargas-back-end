@@ -78,7 +78,7 @@ public class ParadaModel {
 
     }
 
-    public void setviagem(ViagemModel viagem) {
+    public void setViagem(ViagemModel viagem) {
         this.viagem = viagem;
         this.viagemId = (viagem != null) ? viagem.getId() : null;
     }
@@ -94,7 +94,7 @@ public class ParadaModel {
             plataforma = dtoUpdate.plataforma();
     }
 
-    public String toStringCiudadDepartamentoFormat() {
-        return lugar.getCiudad().getNombre() + " - " + lugar.getCiudad().getDepartamento().getAbreviacion();
+    public String toStringCidadeDepartamentoFormat() {
+        return lugar.getCidade().getNome() + " - " + lugar.getCidade().getDepartamento().getAbreviacao();
     }
 }

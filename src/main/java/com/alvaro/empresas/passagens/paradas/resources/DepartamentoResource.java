@@ -1,7 +1,7 @@
 package com.alvaro.empresas.passagens.paradas.resources;
 
-import com.alvaro.empresas.passagens.helpers.Mensaje;
-import com.alvaro.empresas.passagens.paradas.dtos.CiudadDTO;
+import com.alvaro.empresas.passagens.helpers.Mensagem;
+import com.alvaro.empresas.passagens.paradas.dtos.CidadeDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.DepartamentoDTO;
 import com.alvaro.empresas.passagens.paradas.models.DepartamentoModel;
 import com.alvaro.empresas.passagens.paradas.services.DepartamentoService;
@@ -12,9 +12,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,39 +27,40 @@ public class DepartamentoResource {
     private DepartamentoService departamentoService;
 
     @GetMapping
-    public ResponseEntity<Page<DepartamentoDTO>> getAll(@PageableDefault(size = 10) Pageable pageable) {
-        return ResponseEntity.ok().body(departamentoService.findAll(pageable));
+    @ResponseStatus(HttpStatus.OK)
+    public Page<DepartamentoDTO> getAll(@PageableDefault(size = 10) Pageable pageable) {
+        return departamentoService.findAll(pageable);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DepartamentoDTO> getOne(@PathVariable(value = "id") Integer id) {
+    @ResponseStatus(HttpStatus.OK)
+    public DepartamentoDTO getOne(@PathVariable(value = "id") Integer id) {
         DepartamentoModel model = departamentoService.findById(id);
-        List<CiudadDTO> ciudades = new ArrayList<>();
-        model.getCiudades().forEach(ciudadModel -> ciudades.add(new CiudadDTO(ciudadModel)));
-        return ResponseEntity.ok().body(new DepartamentoDTO(model, ciudades));
+        List<CidadeDTO> cidades = new ArrayList<>();
+        model.getCidades().forEach(cidadeModel -> cidades.add(new CidadeDTO(cidadeModel)));
+        return new DepartamentoDTO(model, cidades);
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    public ResponseEntity<DepartamentoDTO> save(@RequestBody @Valid DepartamentoDTO dto) {
+    public DepartamentoDTO save(@RequestBody @Valid DepartamentoDTO dto) {
         DepartamentoModel model = departamentoService.save(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new DepartamentoDTO(model));
+        return new DepartamentoDTO(model);
     }
 
     @PutMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    public ResponseEntity<DepartamentoDTO> update(@PathVariable(value = "id") Integer id, @RequestBody @Valid DepartamentoDTO dto) {
+    public DepartamentoDTO update(@PathVariable(value = "id") Integer id, @RequestBody @Valid DepartamentoDTO dto) {
         DepartamentoModel model = departamentoService.update(dto, id);
-        return ResponseEntity.ok().body(new DepartamentoDTO(model));
+        return new DepartamentoDTO(model);
     }
 
     @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    public ResponseEntity<Object> delete(@PathVariable(value = "id") Integer id) {
-        DepartamentoModel model = departamentoService.findById(id);
-        if (!model.getCiudades().isEmpty())
-            return ResponseEntity.badRequest().body(new Mensaje("El departamento posee ciudades registrados"));
-        departamentoService.eliminar(model);
-        return ResponseEntity.noContent().build();
+    public void delete(@PathVariable(value = "id") Integer id) {
+        departamentoService.delete(id);
     }
 }

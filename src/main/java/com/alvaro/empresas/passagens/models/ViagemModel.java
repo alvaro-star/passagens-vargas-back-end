@@ -1,8 +1,8 @@
 package com.alvaro.empresas.passagens.models;
 
 import com.alvaro.empresas.passagens.enums.TipoParada;
-import com.alvaro.empresas.passagens.onibus.models.AutobusModel;
-import com.alvaro.empresas.passagens.pagamentos.models.FaturaPasagemModel;
+import com.alvaro.empresas.passagens.onibus.models.OnibusModel;
+import com.alvaro.empresas.passagens.pagamentos.models.FaturaPassagemModel;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
@@ -28,11 +28,11 @@ import java.util.UUID;
 public class ViagemModel extends IEntityStandart {
     @Column(precision = 10, scale = 2, nullable = false)
     @DecimalMin("0.00")
-    private BigDecimal valorArrecadadoEfectivo;
+    private BigDecimal valorArrecadadoDinheiro;
 
     @Column(precision = 10, scale = 2, nullable = false)
     @DecimalMin("0.00")
-    private BigDecimal valorArrecadadoNoWeb;
+    private BigDecimal valorArrecadadoNaoWeb;
 
     @Column(precision = 10, scale = 2, nullable = false)
     @DecimalMin("0.00")
@@ -44,13 +44,13 @@ public class ViagemModel extends IEntityStandart {
     private boolean isCancelado = false;
 
     @Column(nullable = false, name = "data_hora_salida")
-    private LocalDateTime dataHoraSalida;
+    private LocalDateTime dataHoraSaida;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_autobus")
-    private AutobusModel autobus;
+    private OnibusModel onibus;
     @Column(name = "fk_idtb_autobus", updatable = false, insertable = false)
-    private Integer autobusId;
+    private UUID onibusId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_empresa")
@@ -58,60 +58,54 @@ public class ViagemModel extends IEntityStandart {
     @Column(name = "fk_idtb_empresa", insertable = false, updatable = false)
     private UUID empresaId;
 
-    public void setAutobus(AutobusModel autobus) {
-        this.autobus = autobus;
-        if (autobus != null)
-            autobusId = autobus.getId();
+    public void setOnibus(OnibusModel onibus) {
+        this.onibus = onibus;
+        this.onibusId = (onibus != null) ? onibus.getId() : null;
     }
 
     public void setEmpresa(EmpresaModel empresa) {
         this.empresa = empresa;
-        if (empresa != null)
-            empresaId = empresa.getId();
+        this.empresaId = (empresa != null) ? empresa.getId() : null;
     }
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "viagem")
     private List<ParadaModel> paradas = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "viagem")
-    private List<FaturaPasagemModel> facturasPasajes = new ArrayList<>();
+    private List<FaturaPassagemModel> faturasPassagens = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "viagem")
-    private List<PrecoModel> precios = new ArrayList<>();
+    private List<PrecoModel> precos = new ArrayList<>();
 
     public void addParada(ParadaModel parada) {
-        parada.setviagem(this);
+        parada.setViagem(this);
         this.paradas.add(parada);
     }
 
-    public void addPrecio(PrecoModel precio) {
-        precio.setViagem(this);
-        this.precios.add(precio);
+    public void addPreco(PrecoModel preco) {
+        preco.setViagem(this);
+        this.precos.add(preco);
     }
 
-    public ViagemModel(AutobusModel autobus, EmpresaModel empresa, BigDecimal valorArrecadadoEfectivo, BigDecimal valorArrecadadoNoWeb, BigDecimal valorArrecadadoWeb, boolean isCobrado, LocalDateTime dataHoraSalida) {
-        this.autobus = autobus;
-        this.autobusId = autobus.getId();
-        this.valorArrecadadoEfectivo = valorArrecadadoEfectivo;
-        this.valorArrecadadoNoWeb = valorArrecadadoNoWeb;
+    public ViagemModel(OnibusModel onibus, EmpresaModel empresa, BigDecimal valorArrecadadoDinheiro, BigDecimal valorArrecadadoNaoWeb, BigDecimal valorArrecadadoWeb, boolean isCobrado, LocalDateTime dataHoraSaida) {
+        setOnibus(onibus);
+        this.valorArrecadadoDinheiro = valorArrecadadoDinheiro;
+        this.valorArrecadadoNaoWeb = valorArrecadadoNaoWeb;
         this.valorArrecadadoWeb = valorArrecadadoWeb;
         this.isCobrado = isCobrado;
-        this.empresa = empresa;
-        this.empresaId = empresa.getId();
-        this.dataHoraSalida = dataHoraSalida;
+        setEmpresa(empresa);
+        this.dataHoraSaida = dataHoraSaida;
     }
 
-    public ViagemModel(AutobusModel autobus, LocalDateTime dataHoraSalida) {
-        valorArrecadadoEfectivo = BigDecimal.ZERO;
-        valorArrecadadoNoWeb = BigDecimal.ZERO;
+    public ViagemModel(OnibusModel onibus, LocalDateTime dataHoraSaida) {
+        valorArrecadadoDinheiro = BigDecimal.ZERO;
+        valorArrecadadoNaoWeb = BigDecimal.ZERO;
         valorArrecadadoWeb = BigDecimal.ZERO;
         isCobrado = false;
         isCancelado = false;
-        this.dataHoraSalida = dataHoraSalida;
-        this.autobus = autobus;
-        this.autobusId = autobus.getId();
-        this.empresa = autobus.getEmpresa();
-        this.empresaId = autobus.getEmpresaId();
+        this.dataHoraSaida = dataHoraSaida;
+        setOnibus(onibus);
+        setEmpresa(empresa);
         this.paradas = new ArrayList<>();
     }
 
@@ -121,36 +115,36 @@ public class ViagemModel extends IEntityStandart {
         return valorArrecadadoWeb;
     }
 
-    public BigDecimal addValorArrecadadoNoWeb(BigDecimal valor) {
-        if (valorArrecadadoNoWeb == null) valorArrecadadoNoWeb = valor;
-        else valorArrecadadoNoWeb = valorArrecadadoNoWeb.add(valor);
-        return valorArrecadadoNoWeb;
+    public BigDecimal addValorArrecadadoNaoWeb(BigDecimal valor) {
+        if (valorArrecadadoNaoWeb == null) valorArrecadadoNaoWeb = valor;
+        else valorArrecadadoNaoWeb = valorArrecadadoNaoWeb.add(valor);
+        return valorArrecadadoNaoWeb;
     }
 
-    public BigDecimal addValorArrecadadoEfectivo(BigDecimal valor) {
-        if (valorArrecadadoEfectivo == null) valorArrecadadoEfectivo = valor;
-        else valorArrecadadoEfectivo = valorArrecadadoEfectivo.add(valor);
-        return valorArrecadadoEfectivo;
+    public BigDecimal addValorArrecadadoDinheiro(BigDecimal valor) {
+        if (valorArrecadadoDinheiro == null) valorArrecadadoDinheiro = valor;
+        else valorArrecadadoDinheiro = valorArrecadadoDinheiro.add(valor);
+        return valorArrecadadoDinheiro;
     }
 
-    public boolean substractValueEfectivo(BigDecimal valor) {
-        int comparacao = valorArrecadadoEfectivo.compareTo(valor);
+    public boolean subtrairValorDinheiro(BigDecimal valor) {
+        int comparacao = valorArrecadadoDinheiro.compareTo(valor);
         if (comparacao < 0) return false;
-        this.valorArrecadadoEfectivo = valorArrecadadoEfectivo.subtract(valor);
+        this.valorArrecadadoDinheiro = valorArrecadadoDinheiro.subtract(valor);
         return true;
     }
 
-    public boolean substractValueWeb(BigDecimal valor) {
+    public boolean subtrairValorWeb(BigDecimal valor) {
         int comparacao = valorArrecadadoWeb.compareTo(valor);
         if (comparacao < 0) return false;
         this.valorArrecadadoWeb = valorArrecadadoWeb.subtract(valor);
         return true;
     }
 
-    public boolean substractValueNoWeb(BigDecimal valor) {
-        int comparacao = valorArrecadadoNoWeb.compareTo(valor);
+    public boolean subtrairValorNaoWeb(BigDecimal valor) {
+        int comparacao = valorArrecadadoNaoWeb.compareTo(valor);
         if (comparacao < 0) return false;
-        this.valorArrecadadoNoWeb = valorArrecadadoNoWeb.subtract(valor);
+        this.valorArrecadadoNaoWeb = valorArrecadadoNaoWeb.subtract(valor);
         return true;
     }
 
@@ -162,9 +156,9 @@ public class ViagemModel extends IEntityStandart {
         return null;
     }
 
-    public ParadaModel getSalida() {
+    public ParadaModel getSaida() {
         for (ParadaModel parada : this.paradas)
-            if (parada.getTipo().equals(TipoParada.SALIDA))
+            if (parada.getTipo().equals(TipoParada.SAIDA))
                 return parada;
         return null;
     }
@@ -177,10 +171,10 @@ public class ViagemModel extends IEntityStandart {
     }
 
 
-    public PrecoModel getPrecioByNPiso(Integer nPiso) {
-        for (PrecoModel precio : this.precios) {
-            if (precio.getNPiso().equals(nPiso))
-                return precio;
+    public PrecoModel getPrecoByNPiso(Integer nPiso) {
+        for (PrecoModel preco : this.precos) {
+            if (preco.getNPiso().equals(nPiso))
+                return preco;
         }
         return null;
     }

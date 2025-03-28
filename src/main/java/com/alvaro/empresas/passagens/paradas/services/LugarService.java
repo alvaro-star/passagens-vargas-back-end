@@ -1,8 +1,8 @@
 package com.alvaro.empresas.passagens.paradas.services;
 
 import com.alvaro.empresas.passagens.paradas.dtos.LugarDTO;
-import com.alvaro.empresas.passagens.paradas.dtos.LugarDtoUpdate;
-import com.alvaro.empresas.passagens.paradas.models.CiudadModel;
+import com.alvaro.empresas.passagens.paradas.dtos.LugarDTOUpdate;
+import com.alvaro.empresas.passagens.paradas.models.CidadeModel;
 import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import com.alvaro.empresas.passagens.paradas.repositories.LugarRepository;
 import com.alvaro.empresas.passagens.paradas.repositories.ParadaRepository;
@@ -36,21 +36,21 @@ public class LugarService {
         return models.map(LugarDTO::new);
     }
 
-    public LugarModel save(LugarDTO dto, CiudadModel ciudad) {
-        var model = new LugarModel(dto, ciudad);
+    public LugarModel save(LugarDTO dto, CidadeModel cidade) {
+        var model = new LugarModel(dto, cidade);
         return lugarRepository.save(model);
     }
 
-    public LugarModel update(LugarDtoUpdate dto, Integer id) {
+    public LugarModel update(LugarDTOUpdate dto, Integer id) {
         var model = this.findById(id);
-        model.setNombre(dto.nombre().toUpperCase());
+        model.setNome(dto.nome().toUpperCase());
         return lugarRepository.save(model);
     }
 
     public void delete(LugarModel model) {
         var parada = paradaRepository.findFirst1ByLugarId(model.getId());
         if (parada.isPresent()) {
-            model.setEnable(false);
+            model.setHabilitado(false);
             lugarRepository.save(model);
         } else
             lugarRepository.delete(model);

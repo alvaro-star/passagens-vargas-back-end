@@ -8,10 +8,10 @@ public record UsuarioDTOUpdate(
         @Email
         String email,
         @NotBlank
-        String contrasena,
+        String senha,
         @NotNull
-        String telefono,
+        String telefone,
         @NotNull
-        String nombre
+        String nome
 ) {
 }

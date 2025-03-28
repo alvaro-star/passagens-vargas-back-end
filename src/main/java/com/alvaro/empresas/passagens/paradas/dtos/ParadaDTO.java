@@ -19,10 +19,10 @@ public record ParadaDTO(
         @NotNull
         Integer idLugar,
         @NotNull
-        UUID idViaje
+        UUID idViagem
 ) {
 
     public ParadaDTO(ParadaModel model) {
-        this(model.getId(), model.getPlataforma(), model.getDataHora(), model.getLugarId(), model.getEmpresaId());
+        this(model.getId(), model.getPlataforma(), model.getDataHora(), model.getLugarId(), model.getViagemId());
     }
 }

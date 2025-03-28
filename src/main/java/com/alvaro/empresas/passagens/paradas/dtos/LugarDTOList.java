@@ -9,6 +9,6 @@ import lombok.Setter;
 public class LugarDTOList{
     private Integer id;
     private String nome;
-    private String ciudad;
+    private String cidade;
     private String departamento;
 }

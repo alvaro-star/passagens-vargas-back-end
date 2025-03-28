@@ -1,10 +1,10 @@
 package com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions;
 
+import com.alvaro.empresas.passagens.configuracoes.exceptions.dtos.FieldMessage;
+import lombok.Getter;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import com.alvaro.empresas.passagens.configuracoes.exceptions.FieldMessage;
-import lombok.Getter;
 
 @Getter
 public class ValidationException extends RuntimeException {

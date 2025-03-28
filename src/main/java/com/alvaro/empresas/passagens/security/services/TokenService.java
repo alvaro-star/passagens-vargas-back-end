@@ -22,7 +22,7 @@ public class TokenService {
         Algorithm algorithm = Algorithm.HMAC256(secret);
         return JWT.create()
                 .withIssuer("API passagens-back")
-                .withSubject(usuarioModel.getLogin())
+                .withSubject(usuarioModel.getEmail())
                 .withExpiresAt(this.getExpirationDate())
                 .sign(algorithm);
     }
@@ -31,7 +31,7 @@ public class TokenService {
         Algorithm algorithm = Algorithm.HMAC256(secret);
         return JWT.create()
                 .withIssuer("API passagens-back")
-                .withSubject(usuarioModel.getLogin())
+                .withSubject(usuarioModel.getEmail())
                 .withExpiresAt(this.getExpirationRefreshDate())
                 .sign(algorithm);
     }

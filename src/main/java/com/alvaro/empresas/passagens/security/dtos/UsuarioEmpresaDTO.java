@@ -6,13 +6,13 @@ import java.util.List;
 import java.util.UUID;
 
 public record UsuarioEmpresaDTO(
-        String login,
-        String nombre,
-        String telefono,
+        String email,
+        String nome,
+        String telefone,
         UUID idEmpresa,
         List<String> roles
 ) {
     public UsuarioEmpresaDTO(UsuarioModel usuario) {
-        this(usuario.getLogin(), usuario.getNombre(), usuario.getTelefono(), usuario.getEmpresaId(), usuario.rolesToListString());
+        this(usuario.getEmail(), usuario.getNome(), usuario.getTelefone(), usuario.getEmpresaId(), usuario.rolesToListString());
     }
 }

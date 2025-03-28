@@ -1,5 +1,6 @@
 package com.alvaro.empresas.passagens.paradas.services;
 
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
 import com.alvaro.empresas.passagens.paradas.dtos.DepartamentoDTO;
 import com.alvaro.empresas.passagens.paradas.models.DepartamentoModel;
 import com.alvaro.empresas.passagens.paradas.repositories.DepartamentoRepository;
@@ -7,7 +8,9 @@ import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -38,7 +41,10 @@ public class DepartamentoService {
         return departamentoRepository.save(model);
     }
 
-    public void eliminar(DepartamentoModel model) {
+    public void delete(Integer id) {
+        DepartamentoModel model = findById(id);
+        if (!model.getCidades().isEmpty())
+            throw new RestRuntimeException(HttpStatus.BAD_REQUEST, "O departamento possui cidades registradas");
         departamentoRepository.delete(model);
     }
 }

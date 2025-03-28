@@ -1,9 +1,8 @@
 package com.alvaro.empresas.passagens.resources;
 
-import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
-import com.alvaro.empresas.passagens.dtos.FuncionarioDTO;
+import com.alvaro.empresas.passagens.dtos.ResponseFuncionarioDTO;
 import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
-import com.alvaro.empresas.passagens.security.dtos.RegisterDtoFuncionario;
+import com.alvaro.empresas.passagens.security.dtos.RegisterDTOFuncionario;
 import com.alvaro.empresas.passagens.services.FuncionarioService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -28,7 +27,7 @@ public class FuncionarioResource {
     @GetMapping("/{idEmpresa}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN')")
     @ResponseStatus(HttpStatus.OK)
-    public Page<FuncionarioDTO> getAll(@PathVariable UUID idEmpresa, Pageable pageable) {
+    public Page<ResponseFuncionarioDTO> getAll(@PathVariable UUID idEmpresa, Pageable pageable) {
         userLogued.validIfIsAdminOrOwnerEmpresa(idEmpresa);
         return funcionarioService.findAllFromEmpresa(idEmpresa, pageable);
     }
@@ -36,7 +35,7 @@ public class FuncionarioResource {
     @PostMapping("/{idEmpresa}")
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void save(@RequestBody @Valid RegisterDtoFuncionario registerDto, @PathVariable UUID idEmpresa) {
+    public void save(@RequestBody @Valid RegisterDTOFuncionario registerDto, @PathVariable UUID idEmpresa) {
         userLogued.validIfIsMyEmpresa(idEmpresa);
         funcionarioService.save(registerDto, idEmpresa);
     }

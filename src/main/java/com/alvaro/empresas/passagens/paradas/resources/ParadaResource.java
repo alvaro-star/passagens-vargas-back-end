@@ -2,16 +2,15 @@ package com.alvaro.empresas.passagens.paradas.resources;
 
 
 import com.alvaro.empresas.passagens.enums.TipoParada;
-import com.alvaro.empresas.passagens.helpers.Mensaje;
 import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
-import com.alvaro.empresas.passagens.helpers.validators.EmpresaEnabled;
+import com.alvaro.empresas.passagens.helpers.validators.ValidEnabledEntities;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOUpdate;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.alvaro.empresas.passagens.paradas.services.ParadaService;
 import com.alvaro.empresas.passagens.security.models.RoleList;
-import com.alvaro.empresas.passagens.services.ViajeEmpresaService;
+import com.alvaro.empresas.passagens.services.ViagemEmpresaService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +18,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 
@@ -34,79 +33,81 @@ public class ParadaResource {
     @Autowired
     private UserLoguedComponent userLogued;
     @Autowired
-    private ViajeEmpresaService viajeEmpresaService;
-    @Autowired
-    private EmpresaEnabled empresaEnabled;
+    private ViagemEmpresaService viagemEmpresaService;
 
 
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    public ResponseEntity<Page<ParadaDTO>> getAll(@PageableDefault(size = 10) Pageable pageable) {
-        return ResponseEntity.ok(paradaService.getAll(pageable));
+    public Page<ParadaDTO> getAll(@PageableDefault(size = 10) Pageable pageable) {
+        return paradaService.getAll(pageable);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ParadaDTOComplete> getOne(@PathVariable Integer id) {
-        return ResponseEntity.ok(paradaService.getOne(id));
+    @ResponseStatus(HttpStatus.OK)
+    public ParadaDTOComplete getOne(@PathVariable Integer id) {
+        return paradaService.getOne(id);
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
-    public ResponseEntity<Object> save(@RequestBody @Valid ParadaDTO dto) {
-        var viajeModel = this.viajeEmpresaService.findById(dto.idViaje());
-        userLogued.validIfIsMyEmpresa(viajeModel.getEmpresaId());
+    public ParadaDTOComplete save(@RequestBody @Valid ParadaDTO dto) {
+        var viagemModel = this.viagemEmpresaService.findById(dto.idViagem());
+        userLogued.validIfIsMyEmpresa(viagemModel.getEmpresaId());
 
-        if (viajeEmpresaService.hasPasajes(viajeModel.getPrecios()))
-            return ResponseEntity.badRequest().body(new Mensaje("El viaje ya posee un pasaje registrado"));
-        return ResponseEntity.status(HttpStatus.CREATED).body(paradaService.save(dto, viajeModel));
+        if (viagemEmpresaService.hasPasajes(viagemModel.getPrecos()))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A viagem já possui uma passagem registrada");
+        return paradaService.save(dto, viagemModel);
     }
 
 
     @PutMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
-    public ResponseEntity<Object> update(@Valid @RequestBody ParadaDTOUpdate dto, @PathVariable Integer id) {
+    public ParadaDTOComplete update(@Valid @RequestBody ParadaDTOUpdate dto, @PathVariable Integer id) {
         var paradaModel = paradaService.findById(id);
         userLogued.validIfIsMyEmpresa(paradaModel.getEmpresaId());
 
-        if (viajeEmpresaService.hasPasajes(paradaModel.getViagem().getPrecios()))
-            return ResponseEntity.badRequest().body(new Mensaje("El viaje ya posee un pasaje registrado"));
-        return ResponseEntity.ok(paradaService.update(dto, paradaModel));
+        if (viagemEmpresaService.hasPasajes(paradaModel.getViagem().getPrecos()))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A viagem já possui uma passagem registrada");
+        return paradaService.update(dto, paradaModel);
     }
 
-    @DeleteMapping("/{id}")//Mejorar politica de exclusion, solo se puede eliminar si nádie pago o compro
+    @DeleteMapping("/{id}")//Melhorar política de exclusão, só pode excluir se ninguém pagou ou comprou
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
-    public ResponseEntity<Mensaje> delete(@PathVariable Integer id) {
+    public void delete(@PathVariable Integer id) {
         var model = paradaService.findById(id);
 
         if (!userLogued.hasRole(RoleList.ROLE_ADMIN)) {
             userLogued.validIfIsMyEmpresa(model.getEmpresaId());
-            empresaEnabled.validEmpresaEnabled(model.getEmpresaId());
+            ValidEnabledEntities.validEmpresa(model.getEmpresa());
         }
 
-        if (!model.getViagem().getAutobus().isEnable())
-            return ResponseEntity.badRequest().body(new Mensaje("El autobus esta inhabilitado"));
+        if (!model.getViagem().getOnibus().isHabilitado())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O ônibus está desabilitado");
         int indice = -1;
 
         if (!model.getTipo().equals(TipoParada.CAMINO))
-            return ResponseEntity.badRequest().body(new Mensaje("No se puede eliminar la salida o el destino"));
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Não é possível excluir a saída ou o destino");
 
         ParadaModel aux;
         for (int i = 0; i < model.getViagem().getParadas().size(); i++) {
             aux = model.getViagem().getParadas().get(i);
             if (aux.getTipo().equals(TipoParada.DESTINO) && aux.getDataHora().isBefore(LocalDateTime.now()))
-                return ResponseEntity.badRequest().body(new Mensaje("No se puede eliminar una parada de un viaje del pasado"));
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Não é possível excluir uma parada de uma viagem do passado");
             if (aux.getId().equals(model.getId()))
                 indice = i;
         }
         if (indice == -1)
-            return ResponseEntity.badRequest().body(new Mensaje("La parada no esta relacionado"));
-        //Causa de nao exclusao: a o relacionamento com viaje
-        if (viajeEmpresaService.hasPasajes(model.getViagem().getPrecios()))
-            return ResponseEntity.badRequest().body(new Mensaje("El viaje ya esta relacionado con un pasaje"));
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A parada não está relacionada");
+        //Causa de não exclusão: o relacionamento com viagem
+        if (viagemEmpresaService.hasPasajes(model.getViagem().getPrecos()))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A viagem já está relacionada com uma passagem");
 
         model.getViagem().getParadas().remove(indice);
 
         paradaService.delete(model);
-        return ResponseEntity.noContent().build();
     }
 }

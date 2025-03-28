@@ -3,6 +3,7 @@ package com.alvaro.empresas.passagens.paradas.models;
 import com.alvaro.empresas.passagens.paradas.dtos.DepartamentoDTO;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,8 +14,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "tb_departamento")
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 public class DepartamentoModel {
     @Id
@@ -24,26 +24,26 @@ public class DepartamentoModel {
 
     @NotBlank
     @Column(unique = true)
-    private String nombre;
+    private String nome;
     @NotBlank
     @Column(length = 4)
-    private String abreviacion;
+    private String abreviacao;
 
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "departamento")
-    private List<CiudadModel> ciudades = new ArrayList<>();
+    private List<CidadeModel> cidades = new ArrayList<>();
 
     public DepartamentoModel(DepartamentoDTO dto) {
-        nombre = dto.nombre().toUpperCase();
-        abreviacion = dto.abreviacion().toUpperCase();
+        nome = dto.nome().toUpperCase();
+        abreviacao = dto.abreviacao().toUpperCase();
     }
 
-    public DepartamentoModel(String nombre, String abreviacion) {
-        this.nombre = nombre.toUpperCase();
-        this.abreviacion = abreviacion.toUpperCase();
+    public DepartamentoModel(String nome, String abreviacao) {
+        this.nome = nome.toUpperCase();
+        this.abreviacao = abreviacao.toUpperCase();
     }
 
     public void updateValues(DepartamentoDTO dto) {
-        nombre = dto.nombre().toUpperCase();
-        abreviacion = dto.abreviacion().toUpperCase();
+        nome = dto.nome().toUpperCase();
+        abreviacao = dto.abreviacao().toUpperCase();
     }
 }

@@ -1,14 +1,12 @@
 package com.alvaro.empresas.passagens.configuracoes.exceptions.dtos;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.alvaro.empresas.passagens.configuracoes.exceptions.FieldMessage;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @EqualsAndHashCode(callSuper = false)

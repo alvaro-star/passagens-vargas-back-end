@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 public class EmailService {
     @Value("${spring.mail.username}")
     private String sender;
-    public final String messageEmailNotSended = "El mensaje no pudo ser enviado";
+    public final String messageEmailNotSended = "A mensagem não pôde ser enviada";
 
     @Autowired
     private JavaMailSender mailSender;

@@ -3,29 +3,27 @@ package com.alvaro.empresas.passagens.pagamentos.models;
 
 import com.alvaro.empresas.passagens.models.PassagemModel;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 
 @Table
 @Entity
-@Setter
-@Getter
+@Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
-@DiscriminatorValue("REMBOLSO")
+@DiscriminatorValue("REEMBOLSO")
 public class FaturaReembolsoModel extends IFaturaStandart {
     @ManyToOne
-    @JoinColumn(name = "fk_idtb_factura_pasaje")
-    private FaturaPasagemModel facturaPasaje;
+    @JoinColumn(name = "fk_idtb_fatura_passagem")
+    private FaturaPassagemModel faturaPassagem;
 
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "faturaReembolso")
-    private PassagemModel pasaje;
+    private PassagemModel passagem;
 
-    public FaturaReembolsoModel(BigDecimal valorTotal, FaturaPasagemModel facturaPasaje, PassagemModel pasaje) {
+    public FaturaReembolsoModel(BigDecimal valorTotal, FaturaPassagemModel faturaPassagem, PassagemModel passagem) {
         super(valorTotal);
-        this.facturaPasaje = facturaPasaje;
-        this.pasaje = pasaje;
+        this.faturaPassagem = faturaPassagem;
+        this.passagem = passagem;
     }
 }

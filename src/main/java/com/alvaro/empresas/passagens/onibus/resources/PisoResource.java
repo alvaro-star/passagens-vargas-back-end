@@ -7,34 +7,33 @@ import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/pisos")
 @SecurityRequirement(name = "bearer-key")
 public class PisoResource {
-    private final PisoService pisoService;
-    private final UserLoguedComponent userLogued;
-
     @Autowired
-    public PisoResource(PisoService pisoService, UserLoguedComponent userLogued) {
-        this.pisoService = pisoService;
-        this.userLogued = userLogued;
-    }
+    private PisoService pisoService;
+    @Autowired
+    private UserLoguedComponent userLogued;
 
     @GetMapping("/{id}")
-    public ResponseEntity<PisoDTOResponse> getOne(@PathVariable Integer id) {
-        return ResponseEntity.ok(pisoService.getOne(id));
+    @ResponseStatus(HttpStatus.OK)
+    public PisoDTOResponse getOne(@PathVariable UUID id) {
+        return pisoService.getOne(id);
     }
 
     @PutMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN')")
-    public ResponseEntity<Object> update(@PathVariable Integer id, @RequestBody @Valid PisoDTOUpdate dto) {
+    public Object update(@PathVariable UUID id, @RequestBody @Valid PisoDTOUpdate dto) {
         var piso = pisoService.findById(id);
-        userLogued.validIfIsMyEmpresa(piso.getAutobus().getEmpresaId());
-        var updated = pisoService.update(dto, piso);
-        return ResponseEntity.ok().body(updated);
+        userLogued.validIfIsMyEmpresa(piso.getOnibus().getEmpresaId());
+        return pisoService.update(dto, piso);
     }
 }

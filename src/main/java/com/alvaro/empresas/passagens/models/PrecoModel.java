@@ -1,7 +1,7 @@
 package com.alvaro.empresas.passagens.models;
 
-import com.alvaro.empresas.passagens.dtos.precos.PrecioDTO;
-import com.alvaro.empresas.passagens.dtos.precos.PrecioDTOUpdate;
+import com.alvaro.empresas.passagens.dtos.precos.PrecoDTO;
+import com.alvaro.empresas.passagens.dtos.precos.PrecoDTOUpdate;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import lombok.*;
@@ -20,16 +20,16 @@ import java.util.UUID;
 public class PrecoModel extends IEntityStandart {
     @Column(precision = 10, scale = 2, nullable = false)
     @DecimalMin("0.00")
-    private BigDecimal precio;
+    private BigDecimal preco;
 
     @Column(nullable = false)
     private Integer nPiso;
 
     @Column(nullable = false)
-    private Boolean lleno = false;
+    private Boolean cheio = false;
 
     @Column(nullable = false)
-    private Integer nSillasDisponibles;
+    private Integer nAssentosDisponiveis;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_viagem")
@@ -44,12 +44,11 @@ public class PrecoModel extends IEntityStandart {
     private UUID empresaId;
 
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "preco")
-    private List<PassagemModel> pasajes = new ArrayList<>();
+    private List<PassagemModel> passagens = new ArrayList<>();
 
     public void setViagem(ViagemModel viagem) {
         this.viagem = viagem;
-        if (viagem != null)
-            viagemId = viagem.getId();
+        viagemId = (viagem != null) ? viagem.getId() : null;
     }
 
     public void setEmpresa(EmpresaModel empresa) {
@@ -57,27 +56,27 @@ public class PrecoModel extends IEntityStandart {
         empresaId = (empresa.getId() != null) ? empresa.getId() : null;
     }
 
-    public PrecoModel(PrecioDTO dto) {
-        precio = dto.precio();
+    public PrecoModel(PrecoDTO dto) {
+        preco = dto.preco();
         nPiso = dto.nPiso();
     }
 
-    public PrecoModel(BigDecimal precio, Integer nPiso, Integer nSillasDisponibles) {
-        this.precio = precio;
+    public PrecoModel(BigDecimal preco, Integer nPiso, Integer nAssentosDisponiveis) {
+        this.preco = preco;
         this.nPiso = nPiso;
-        this.nSillasDisponibles = nSillasDisponibles;
+        this.nAssentosDisponiveis = nAssentosDisponiveis;
     }
 
-    public PrecoModel(BigDecimal precio, Integer nPiso, Integer nSillasDisponibles, ViagemModel viagem) {
-        this.precio = precio;
+    public PrecoModel(BigDecimal preco, Integer nPiso, Integer nAssentosDisponiveis, ViagemModel viagem) {
+        this.preco = preco;
         this.nPiso = nPiso;
-        this.nSillasDisponibles = nSillasDisponibles;
+        this.nAssentosDisponiveis = nAssentosDisponiveis;
         setViagem(viagem);
         this.empresaId = viagem.getEmpresaId();
         this.empresa = viagem.getEmpresa();
     }
 
-    public void updateValues(PrecioDTOUpdate dto) {
-        precio = dto.precio();
+    public void updateValues(PrecoDTOUpdate dto) {
+        preco = dto.preco();
     }
 }

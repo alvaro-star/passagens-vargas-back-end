@@ -5,12 +5,12 @@ import com.alvaro.empresas.passagens.security.models.UsuarioModel;
 import java.util.List;
 
 public record UsuarioDTO(
-        String login,
-        String nombre,
-        String telefono,
+        String email,
+        String nome,
+        String telefone,
         List<String> roles
 ) {
     public UsuarioDTO(UsuarioModel usuario) {
-        this(usuario.getLogin(), usuario.getNombre(), usuario.getTelefono(), usuario.rolesToListString());
+        this(usuario.getEmail(), usuario.getNome(), usuario.getTelefone(), usuario.rolesToListString());
     }
 }

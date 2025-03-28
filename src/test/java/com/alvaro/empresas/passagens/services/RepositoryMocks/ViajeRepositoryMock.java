@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.services.RepositoryMocks;
 
-import com.alvaro.empresas.passagens.onibus.models.AutobusModel;
+import com.alvaro.empresas.passagens.onibus.models.OnibusModel;
 import com.alvaro.empresas.passagens.enums.TypeParada;
 import com.alvaro.empresas.passagens.models.ViagemModel;
 import com.alvaro.empresas.passagens.paradas.models.LugarModel;
@@ -29,7 +29,7 @@ public class ViajeRepositoryMock {
         return parada;
     }
 
-    public ViagemModel createViaje(AutobusModel autobus, LocalDateTime dataInicio, List<LugarModel> lugares, int diffDias) {
+    public ViagemModel createViaje(OnibusModel autobus, LocalDateTime dataInicio, List<LugarModel> lugares, int diffDias) {
         if (lugares.size() < 2)
             throw new ArrayIndexOutOfBoundsException("O numero de elementos de lugares eh menor que 2");
         var viaje = new ViagemModel(autobus, dataInicio);

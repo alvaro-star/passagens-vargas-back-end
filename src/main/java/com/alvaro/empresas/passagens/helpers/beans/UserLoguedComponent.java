@@ -16,12 +16,12 @@ public class UserLoguedComponent {
     public UsuarioModel getUserModel() {
         var usuario = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (usuario instanceof UsuarioModel) return (UsuarioModel) usuario;
-        throw new RestRuntimeException(HttpStatus.FORBIDDEN, "El usuario no inicio session");
+        throw new RestRuntimeException(HttpStatus.FORBIDDEN, "O usuário não iniciou sessão");
     }
 
     public void validIfIsAdminOrOwnerEmpresa(UUID idEmpresa) {
         if (!isAdminOrOwnerEmpresa(idEmpresa))
-            throw new RestRuntimeException(HttpStatus.FORBIDDEN, "Usted no esta relacionado a esta empresa");
+            throw new RestRuntimeException(HttpStatus.FORBIDDEN, "Você não está relacionado a esta empresa");
     }
 
     public boolean isAdminOrOwnerEmpresa(UUID idEmpresa) {
@@ -35,7 +35,7 @@ public class UserLoguedComponent {
 
     public void validIfIsMyEmpresa(UUID idEmpresa) {
         if (!isMyEmpresa(idEmpresa))
-            throw new RestRuntimeException("El usuario no esta relacionado con esta empresa");
+            throw new RestRuntimeException("Você não está relacionado a esta empresa");
     }
 
     public boolean hasRole(RoleList role) {

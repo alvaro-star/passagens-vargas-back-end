@@ -1,65 +1,49 @@
 package com.alvaro.empresas.passagens.helpers;
 
-import com.alvaro.empresas.passagens.helpers.dtos.DataHoraFormatada;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Calendar;
-import java.util.Date;
+import com.alvaro.empresas.passagens.helpers.dtos.DataHoraFormatada;
 
 @Component
 public class DateAuxiliarFunctions {
     @Value("${spring.jackson.time-zone}")
-    private String timeZone;
+    private String fusoHorario;
 
-    public LocalDateTime getFirstDayOfMonthDate(Date date) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        calendar.set(Calendar.DAY_OF_MONTH, 1);
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
-        ZoneId zoneId = ZoneId.of(timeZone);
-        return calendar.getTime().toInstant().atZone(zoneId).toLocalDateTime();
+    public LocalDateTime getFirstDayOfMonth(LocalDate dataLocal) {
+        var primeiroDiaMes = LocalDate.of(dataLocal.getYear(), dataLocal.getMonthValue(), 1);
+        return primeiroDiaMes.atTime(0, 0, 0, 0);
     }
 
-    public LocalDateTime getLastDayOfMonthDate(Date date) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
-        calendar.set(Calendar.HOUR_OF_DAY, 23);
-        calendar.set(Calendar.MINUTE, 59);
-        calendar.set(Calendar.SECOND, 59);
-        calendar.set(Calendar.MILLISECOND, 999);
-        ZoneId zoneId = ZoneId.of(timeZone);
-        return calendar.getTime().toInstant().atZone(zoneId).toLocalDateTime();
+    public LocalDateTime getLastDayOfMonth(LocalDate dataLocal) {
+        var primeiroDiaMes = getFirstDayOfMonth(dataLocal.plusMonths(1));
+        return primeiroDiaMes.minusNanos(1);
     }
 
-    public static DataHoraFormatada getDataHoraToString(LocalDateTime dataHora) {
+    public static DataHoraFormatada getDataHoraFromDateTime(LocalDateTime dataHora) {
         if (dataHora == null)
             throw new IllegalArgumentException("A data e hora não podem ser nulas.");
 
-        StringBuilder dataBuilder = new StringBuilder();
-        StringBuilder horaBuilder = new StringBuilder();
+        StringBuilder construtorData = new StringBuilder();
+        StringBuilder construtorHora = new StringBuilder();
 
-        dataBuilder.append(String.format("%02d", dataHora.getDayOfMonth()))
+        construtorData.append(String.format("%02d", dataHora.getDayOfMonth()))
                 .append("/")
                 .append(String.format("%02d", dataHora.getMonthValue()))
                 .append("/")
                 .append(dataHora.getYear());
 
-        horaBuilder.append(String.format("%02d", dataHora.getHour()))
+        construtorHora.append(String.format("%02d", dataHora.getHour()))
                 .append(":")
                 .append(String.format("%02d", dataHora.getMinute()));
 
-        return new DataHoraFormatada(dataBuilder.toString(), horaBuilder.toString());
+        return new DataHoraFormatada(construtorData.toString(), construtorHora.toString());
     }
 
-    public static LocalDateTime copyLocalTimeInLocalDate(LocalDate localDate, LocalDateTime dateTime) {
-        return localDate.atTime(dateTime.getHour(), dateTime.getMinute(), dateTime.getSecond(), dateTime.getNano());
+    public static LocalDateTime copyLocalTimeInLocalDate(LocalDate dataLocal, LocalDateTime dataHora) {
+        return dataLocal.atTime(dataHora.getHour(), dataHora.getMinute(), dataHora.getSecond(), dataHora.getNano());
     }
 }

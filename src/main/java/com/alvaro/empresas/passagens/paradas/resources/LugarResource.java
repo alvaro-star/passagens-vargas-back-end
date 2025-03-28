@@ -1,9 +1,8 @@
 package com.alvaro.empresas.passagens.paradas.resources;
 
-import com.alvaro.empresas.passagens.helpers.Mensaje;
 import com.alvaro.empresas.passagens.paradas.dtos.LugarDTO;
-import com.alvaro.empresas.passagens.paradas.dtos.LugarDtoUpdate;
-import com.alvaro.empresas.passagens.paradas.services.CiudadService;
+import com.alvaro.empresas.passagens.paradas.dtos.LugarDTOUpdate;
+import com.alvaro.empresas.passagens.paradas.services.CidadeService;
 import com.alvaro.empresas.passagens.paradas.services.LugarService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -12,7 +11,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,39 +21,43 @@ public class LugarResource {
     @Autowired
     private LugarService lugarService;
     @Autowired
-    private CiudadService ciudadService;
+    private CidadeService cidadeService;
 
     @GetMapping
-    public ResponseEntity<Page<LugarDTO>> getAll(@PageableDefault(size = 10) Pageable pageable) {
-        return ResponseEntity.ok().body(lugarService.findAll(pageable));
+    @ResponseStatus(HttpStatus.OK)
+    public Page<LugarDTO> getAll(@PageableDefault(size = 10) Pageable pageable) {
+        return lugarService.findAll(pageable);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<LugarDTO> getOne(@PathVariable(value = "id") Integer id) {
+    @ResponseStatus(HttpStatus.OK)
+    public LugarDTO getOne(@PathVariable(value = "id") Integer id) {
         var model = lugarService.findById(id);
-        return ResponseEntity.ok().body(new LugarDTO(model));
+        return new LugarDTO(model);
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    public ResponseEntity<LugarDTO> save(@RequestBody @Valid LugarDTO dto) {
-        var ciudad = ciudadService.findById(dto.idCiudad());
-        var model = lugarService.save(dto, ciudad);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new LugarDTO(model));
+    public LugarDTO save(@RequestBody @Valid LugarDTO dto) {
+        var cidade = cidadeService.findById(dto.idCiudad());
+        var model = lugarService.save(dto, cidade);
+        return new LugarDTO(model);
     }
 
     @PutMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    public ResponseEntity<LugarDTO> update(@PathVariable(value = "id") Integer id, @RequestBody @Valid LugarDtoUpdate dto) {
+    public LugarDTO update(@PathVariable(value = "id") Integer id, @RequestBody @Valid LugarDTOUpdate dto) {
         var model = lugarService.update(dto, id);
-        return ResponseEntity.ok().body(new LugarDTO(model));
+        return new LugarDTO(model);
     }
 
     @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    public ResponseEntity<Mensaje> delete(@PathVariable(value = "id") Integer id) {
+    public void delete(@PathVariable(value = "id") Integer id) {
         var model = lugarService.findById(id);
         lugarService.delete(model);
-        return ResponseEntity.noContent().build();
     }
 }

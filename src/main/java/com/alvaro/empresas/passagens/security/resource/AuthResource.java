@@ -1,16 +1,16 @@
 package com.alvaro.empresas.passagens.security.resource;
 
-import com.alvaro.empresas.passagens.helpers.Mensaje;
-import com.alvaro.empresas.passagens.security.dtos.LoginDto;
-import com.alvaro.empresas.passagens.security.dtos.RegisterDto;
+import com.alvaro.empresas.passagens.helpers.Mensagem;
+import com.alvaro.empresas.passagens.security.dtos.LoginDTO;
+import com.alvaro.empresas.passagens.security.dtos.RegisterDTO;
+import com.alvaro.empresas.passagens.security.dtos.TokenDTO;
 import com.alvaro.empresas.passagens.security.dtos.ValidadorDTO;
-import com.alvaro.empresas.passagens.security.dtos.password.PasswordForm;
-import com.alvaro.empresas.passagens.security.dtos.password.SolicitudNewPassword;
+import com.alvaro.empresas.passagens.security.dtos.senha.SenhaForm;
+import com.alvaro.empresas.passagens.security.dtos.senha.NovaSenhaSolicitacao;
 import com.alvaro.empresas.passagens.security.services.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -22,37 +22,41 @@ public class AuthResource {
     private AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<Object> login(@RequestBody @Valid LoginDto loginDto) {
-        return ResponseEntity.ok(authService.login(loginDto));
+    @ResponseStatus(HttpStatus.OK)
+    public TokenDTO login(@RequestBody @Valid LoginDTO loginDto) {
+        return authService.login(loginDto);
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<Object> refresh(@RequestBody Map<String, String> request) {
-        return ResponseEntity.ok(authService.refresh(request.get("refreshToken")));
+    @ResponseStatus(HttpStatus.OK)
+    public TokenDTO refresh(@RequestBody Map<String, String> request) {
+        return authService.refresh(request.get("refreshToken"));
     }
 
-    //Es necessario crear una rutina para el registro de pasajes, una en el que se envien email con el codigo de verificacion
+    // É necessário criar uma rotina para o registro de passagens, uma em que se enviem emails com o código de verificação
     @PostMapping("/register")
-    public ResponseEntity<Mensaje> register(@RequestBody @Valid RegisterDto registerDto) {
-        authService.register(registerDto);
-        return ResponseEntity.ok(new Mensaje("Verifique el codigo de seguridad"));
+    @ResponseStatus(HttpStatus.OK)
+    public Mensagem register(@RequestBody @Valid RegisterDTO registerDto) {
+        authService.registrar(registerDto);
+        return new Mensagem("Verifique o código de segurança");
     }
 
     @PostMapping("/validar")
-    public ResponseEntity<Mensaje> verificarRegistro(@RequestBody ValidadorDTO validadorDTO) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public Mensagem verificarRegistro(@RequestBody ValidadorDTO validadorDTO) {
         authService.verificarRegistro(validadorDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new Mensaje("Usuario registrado con exito"));
+        return new Mensagem("Usuário registrado com sucesso");
     }
 
     @PostMapping("/forget_password")
-    public ResponseEntity<Object> getCodigoToRestorePassword(@RequestBody @Valid SolicitudNewPassword solicitud) {
-        authService.getCodigoToRestorePassword(solicitud);
-        return ResponseEntity.noContent().build();
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void getCodigoParaRecuperarSenha(@RequestBody @Valid NovaSenhaSolicitacao solicitacao) {
+        authService.obterCodigoParaRedefinirSenha(solicitacao);
     }
 
     @PutMapping("/reset_password")
-    public ResponseEntity<Object> validarPassword(@RequestBody @Valid PasswordForm form) {
-        authService.validarPassword(form);
-        return ResponseEntity.noContent().build();
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void validarSenha(@RequestBody @Valid SenhaForm form) {
+        authService.validarSenha(form);
     }
 }

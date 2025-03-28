@@ -13,12 +13,11 @@ import java.util.UUID;
 
 @Repository
 public interface UsuarioRepository extends JpaRepository<UsuarioModel, UUID> {
-    UserDetails findByLogin(String login);
 
     @Query("SELECT u FROM UsuarioModel as u WHERE u.login = :email")
     Optional<UsuarioModel> findByEmail(String email);
 
-    Boolean existsByLogin(String email);
+    Boolean existsByEmail(String email);
 
     Page<UsuarioModel> findByEmpresaId(UUID idEmpresa, Pageable pageable);
 }

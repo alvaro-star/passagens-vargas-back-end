@@ -2,19 +2,17 @@ package com.alvaro.empresas.passagens.pagamentos.models;
 
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
+@Data
+@EqualsAndHashCode(callSuper = true)
 @Entity
-@Table(name = "tb_factura_empresa", indexes = @Index(
-        name = "idxtb_factura_empresa_fk_idtb_empresa_inicio_conteo",
-        columnList = "fk_idtb_empresa, inicio_conteo"))
+@Table(name = "tb_fatura_empresa", indexes = @Index(
+        name = "idxtb_fatura_empresa_fk_idtb_empresa_inicio_contagem",
+        columnList = "fk_idtb_empresa, inicio_contagem"))
 @DiscriminatorValue("EMPRESA")
 @NoArgsConstructor
 public class FaturaEmpresaModel extends IFaturaStandart {
@@ -23,14 +21,14 @@ public class FaturaEmpresaModel extends IFaturaStandart {
     @JoinColumn(name = "fk_idtb_empresa")
     private EmpresaModel empresa;
     @Column(nullable = false)
-    private LocalDateTime inicioConteo;
+    private LocalDateTime inicioContagem;
     @Column(nullable = false)
-    private LocalDateTime finConteo;
+    private LocalDateTime fimContagem;
 
-    public FaturaEmpresaModel(BigDecimal valorTotal, EmpresaModel empresa, LocalDateTime inicioConteo, LocalDateTime finConteo) {
+    public FaturaEmpresaModel(BigDecimal valorTotal, EmpresaModel empresa, LocalDateTime inicioContagem, LocalDateTime fimContagem) {
         super(valorTotal);
         this.empresa = empresa;
-        this.inicioConteo = inicioConteo;
-        this.finConteo = finConteo;
+        this.inicioContagem = inicioContagem;
+        this.fimContagem = fimContagem;
     }
 }

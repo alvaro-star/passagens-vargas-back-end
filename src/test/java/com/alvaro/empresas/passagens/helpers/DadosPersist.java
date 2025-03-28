@@ -1,8 +1,8 @@
 package com.alvaro.empresas.passagens.helpers;
 
-import com.alvaro.empresas.passagens.onibus.models.AutobusModel;
+import com.alvaro.empresas.passagens.onibus.models.OnibusModel;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
-import com.alvaro.empresas.passagens.paradas.models.CiudadModel;
+import com.alvaro.empresas.passagens.paradas.models.CidadeModel;
 import com.alvaro.empresas.passagens.paradas.models.DepartamentoModel;
 import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import jakarta.persistence.EntityManager;
@@ -39,8 +39,8 @@ public class DadosPersist {
         return empresa;
     }
 
-    public AutobusModel cadastrarAutobus(String placa, EmpresaModel empresaModel) {
-        var autobus = new AutobusModel(placa, true, empresaModel);
+    public OnibusModel cadastrarAutobus(String placa, EmpresaModel empresaModel) {
+        var autobus = new OnibusModel(placa, true, empresaModel);
         em.persist(autobus);
         return autobus;
     }
@@ -50,7 +50,7 @@ public class DadosPersist {
         for (String nome : nomes) {
             var depModel = new DepartamentoModel(nome, "SC");
             em.persist(depModel);
-            var ciudad = new CiudadModel(nome, depModel);
+            var ciudad = new CidadeModel(nome, depModel);
             em.persist(ciudad);
             var lugar = new LugarModel("Terminal " + nome, ciudad);
             em.persist(lugar);
@@ -69,12 +69,12 @@ public class DadosPersist {
         return models;
     }
 
-    public HashMap<String, List<AutobusModel>> laodAutobuses(HashMap<String, EmpresaModel> empresas, int nAutobuses) {
-        HashMap<String, List<AutobusModel>> autobuses = new HashMap<>();
-        AutobusModel aux;
+    public HashMap<String, List<OnibusModel>> laodAutobuses(HashMap<String, EmpresaModel> empresas, int nAutobuses) {
+        HashMap<String, List<OnibusModel>> autobuses = new HashMap<>();
+        OnibusModel aux;
         int i;
         for (String key : empresas.keySet()) {
-            List<AutobusModel> autobusOfEmpresa = new ArrayList();
+            List<OnibusModel> autobusOfEmpresa = new ArrayList();
             for (i = 0; i < nAutobuses; i++) {
                 aux = cadastrarAutobus(key, empresas.get(key));
                 autobusOfEmpresa.add(aux);

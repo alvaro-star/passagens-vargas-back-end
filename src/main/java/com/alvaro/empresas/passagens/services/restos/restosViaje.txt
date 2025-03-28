@@ -1,6 +1,6 @@
 /*
     public List<ViajeModel> findViajesBeteween(UUID codigoTrayecto, LocalDateTime salida, LocalDateTime destino) {
-        return viajeRepository.cargarViajesConIntervalosComunes(codigoTrayecto, salida, destino);
+        return viagemRepository.cargarViajesConIntervalosComunes(codigoTrayecto, salida, destino);
     }
 
     public ViajeDTOResponse update(ViajeDTOUpdate novosDados, Integer id) {
@@ -29,7 +29,7 @@
             throw new ValidationException("salida", "La salida posee un horario superior al del destino"));
         }
 
-        var updated = viajeRepository.save(model);
+        var updated = viagemRepository.save(model);
 
         UUID trayecto = model.getTrayecto().getCodigo();
         var salidaResponse = new ParadaDTO(updated.getSalida(), updated.getSalida().getLugar().getId(), trayecto);
@@ -59,7 +59,7 @@
  //
 
         Como solo se podra registrar un viaje, no es necessario ver si hay viajes iguales
-        Integer viajesIguais = viajeRepository.getViajesIguais(trayecto.getCodigo(), salida.getId(), destino.getId());
+        Integer viajesIguais = viagemRepository.getViajesIguais(trayecto.getCodigo(), salida.getId(), destino.getId());
         if (viajesIguais > 0) {
             throw new ValidationException("id", "El viaje ya se encuentra registrado"));
         }
@@ -73,7 +73,7 @@
 
         Sort sort = Sort.by("dataHoraSalida").ascending();
         Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, sort);
-        Page<ViajeDTOJPQL> viajes = viajeRepository.findByEmpresaIdAndAutobusId(autobus.getEmpresa().getId(), autobus.getId(), startDaySerch, endDaySearch, pageable);
+        Page<ViajeDTOJPQL> viajes = viagemRepository.findByEmpresaIdAndAutobusId(autobus.getEmpresa().getId(), autobus.getId(), startDaySerch, endDaySearch, pageable);
 
         if (viajes.getContent().isEmpty()) return 1;
 
@@ -116,7 +116,7 @@
             }
             viajeModelsSave.add(viajeAuxiliar);
         }
-        viajeRepository.saveAll(viajeModelsSave);
+        viagemRepository.saveAll(viajeModelsSave);
         paradaRepository.saveAll(paradaModelSave);
         return 1;
     }

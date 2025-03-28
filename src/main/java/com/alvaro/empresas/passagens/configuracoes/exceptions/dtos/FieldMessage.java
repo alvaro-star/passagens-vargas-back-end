@@ -1,4 +1,4 @@
-package com.alvaro.empresas.passagens.configuracoes.exceptions;
+package com.alvaro.empresas.passagens.configuracoes.exceptions.dtos;
 
 import org.springframework.validation.FieldError;
 

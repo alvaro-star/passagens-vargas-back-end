@@ -1,10 +1,10 @@
 package com.alvaro.empresas.passagens.repositories;
 
-import com.alvaro.empresas.passagens.onibus.models.AutobusModel;
+import com.alvaro.empresas.passagens.onibus.models.OnibusModel;
 import com.alvaro.empresas.passagens.enums.TypeParada;
 import com.alvaro.empresas.passagens.helpers.DadosPersist;
 import com.alvaro.empresas.passagens.models.ViagemModel;
-import com.alvaro.empresas.passagens.paradas.dtos.JPQL.ViajeEmpresaDTOJPQ;
+import com.alvaro.empresas.passagens.paradas.dtos.JPQL.ViagemEmpresaDTOJPQ;
 import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import jakarta.persistence.EntityManager;
@@ -26,13 +26,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("test")
 class ViajeRepositoryTest {
     private DadosPersist dadosPersist;
-    private ViajeRepository viajeRepository;
+    private ViagemRepository viajeRepository;
     private EntityManager em;
 
     @Autowired
-    public ViajeRepositoryTest(EntityManager em, ViajeRepository viajeRepository) {
+    public ViajeRepositoryTest(EntityManager em, ViagemRepository viagemRepository) {
         this.em = em;
-        this.viajeRepository = viajeRepository;
+        this.viajeRepository = viagemRepository;
         this.dadosPersist = new DadosPersist(em);
     }
 
@@ -87,18 +87,18 @@ class ViajeRepositoryTest {
 
         int idLugarSalida = lugares.get(1).getId();
         int idLugarDestino = lugares.get(2).getId();
-        List<ViajeEmpresaDTOJPQ> viajesEncontrados = viajeRepository.findByEmpresaAndStartInInterval(
+        List<ViagemEmpresaDTOJPQ> viajesEncontrados = viajeRepository.findByEmpresaAndStartInInterval(
                 autobusAbril.getEmpresaId(),
                 idLugarSalida,
                 idLugarDestino,
                 startViaje,
                 startViaje.plusHours(3));
         assertThat(viajesEncontrados.size()).isEqualTo(1);
-        assertThat(viajesEncontrados.get(0).getViaje()).isEqualTo(viaje1);
+        assertThat(viajesEncontrados.get(0).viaje()).isEqualTo(viaje1);
     }
 
-    private ViagemModel cadastrarViaje(LocalDateTime dataHoraSalida, AutobusModel autobusModel, List<LugarModel> lugares) {
-        var viaje = new ViagemModel(autobusModel, dataHoraSalida);
+    private ViagemModel cadastrarViaje(LocalDateTime dataHoraSalida, OnibusModel onibusModel, List<LugarModel> lugares) {
+        var viaje = new ViagemModel(onibusModel, dataHoraSalida);
 
         int contador = 0;
         viaje.addParada(new ParadaModel(dataHoraSalida.plusDays(contador), 10, TypeParada.SALIDA, lugares.get(0), viaje));

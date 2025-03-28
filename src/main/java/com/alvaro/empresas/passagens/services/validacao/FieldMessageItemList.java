@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.services.validacao;
 
-import com.alvaro.empresas.passagens.configuracoes.exceptions.FieldMessage;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.dtos.FieldMessage;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,7 +15,7 @@ public class FieldMessageItemList {
     Integer index;
     List<FieldMessage> errors = new ArrayList<>();
 
-    public  void addError(FieldMessage erro){
+    public void addError(FieldMessage erro) {
         this.errors.add(erro);
     }
 

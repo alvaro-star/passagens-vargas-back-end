@@ -11,7 +11,6 @@ import org.springframework.security.core.GrantedAuthority;
 @Data
 @NoArgsConstructor
 public class RoleModel implements GrantedAuthority {
-    private static final long serialVersionUID = 2L;
 
     @Id
     @Column(name = "idtb_role")
@@ -21,14 +20,14 @@ public class RoleModel implements GrantedAuthority {
     @NotNull
     @Column(unique = true)
     @Enumerated(EnumType.STRING)
-    private RoleList nombre;
+    private RoleList nome;
 
-    public RoleModel(@NotNull RoleList nombre) {
-        this.nombre = nombre;
+    public RoleModel(@NotNull RoleList nome) {
+        this.nome = nome;
     }
 
     @Override
     public String getAuthority() {
-        return nombre.toString();
+        return nome.toString();
     }
 }

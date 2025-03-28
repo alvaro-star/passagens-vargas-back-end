@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.services.RepositoryMocks;
 
-import com.alvaro.empresas.passagens.paradas.models.CiudadModel;
+import com.alvaro.empresas.passagens.paradas.models.CidadeModel;
 import com.alvaro.empresas.passagens.paradas.models.DepartamentoModel;
 import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import org.springframework.stereotype.Service;
@@ -35,8 +35,8 @@ public class LugarRepositoryMocker {
         return departamento;
     }
 
-    public CiudadModel generateCiudad(String nome, DepartamentoModel departamento) {
-        var ciudad = new CiudadModel(nome, departamento);
+    public CidadeModel generateCiudad(String nome, DepartamentoModel departamento) {
+        var ciudad = new CidadeModel(nome, departamento);
         ciudad.setId(generateIdCiudad());
         return ciudad;
     }

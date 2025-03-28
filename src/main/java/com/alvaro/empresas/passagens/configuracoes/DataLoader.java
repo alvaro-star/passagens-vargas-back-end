@@ -14,23 +14,23 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import com.alvaro.empresas.passagens.onibus.enums.TypePosicao;
-import com.alvaro.empresas.passagens.onibus.models.AutobusModel;
+import com.alvaro.empresas.passagens.onibus.enums.TipePosicao;
+import com.alvaro.empresas.passagens.onibus.models.OnibusModel;
 import com.alvaro.empresas.passagens.onibus.models.PisoModel;
-import com.alvaro.empresas.passagens.onibus.repositories.AutobusRepository;
+import com.alvaro.empresas.passagens.onibus.repositories.OnibusRepository;
 import com.alvaro.empresas.passagens.onibus.repositories.PisoRepository;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.models.ViagemModel;
-import com.alvaro.empresas.passagens.paradas.models.CiudadModel;
+import com.alvaro.empresas.passagens.paradas.models.CidadeModel;
 import com.alvaro.empresas.passagens.paradas.models.DepartamentoModel;
 import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
-import com.alvaro.empresas.passagens.paradas.repositories.CiudadRepository;
+import com.alvaro.empresas.passagens.paradas.repositories.CidadeRepository;
 import com.alvaro.empresas.passagens.paradas.repositories.DepartamentoRepository;
 import com.alvaro.empresas.passagens.paradas.repositories.LugarRepository;
 import com.alvaro.empresas.passagens.paradas.repositories.ParadaRepository;
 import com.alvaro.empresas.passagens.repositories.EmpresaRepository;
-import com.alvaro.empresas.passagens.repositories.ViajeRepository;
+import com.alvaro.empresas.passagens.repositories.ViagemRepository;
 import com.alvaro.empresas.passagens.security.models.RoleList;
 import com.alvaro.empresas.passagens.security.models.RoleModel;
 import com.alvaro.empresas.passagens.security.models.UsuarioModel;
@@ -47,19 +47,19 @@ public class DataLoader {
     @Autowired
     private DepartamentoRepository departamentoRepository;
     @Autowired
-    private CiudadRepository ciudadRepository;
+    private CidadeRepository cidadeRepository;
     @Autowired
     private LugarRepository lugarRepository;
     @Autowired
     private EmpresaRepository empresaRepository;
     @Autowired
-    private AutobusRepository autobusRepository;
+    private OnibusRepository onibusRepository;
     @Autowired
     private PisoRepository pisoRepository;
     @Autowired
     private ParadaRepository paradaRepository;
     @Autowired
-    private ViajeRepository viajeRepository;
+    private ViagemRepository viagemRepository;
 
     @Autowired
     private UsuarioRepository usuarioRepository;
@@ -74,7 +74,7 @@ public class DataLoader {
         List<EmpresaModel> empresas = loadEmpresas();
         loadUsers(empresas);
         List<LugarModel> lugares = loadLugares();
-        List<AutobusModel> autobuses = loadAutobuses(empresas);
+        List<OnibusModel> autobuses = loadAutobuses(empresas);
         if (lugares.size() < 5) {
             System.out.println("Numero insuficientes de lugares");
             return "";
@@ -83,12 +83,12 @@ public class DataLoader {
         int indice = 0;
         int nLinhas = 12;
         int nColunas = 3;
-        for (AutobusModel autobus : autobuses) {
+        for (OnibusModel autobus : autobuses) {
             List<PisoModel> pisos = new ArrayList<>();
-            pisos.add(new PisoModel(nLinhas, nColunas, TypePosicao.IZQUIERDA, 1, TypePosicao.DERECHA,
+            pisos.add(new PisoModel(nLinhas, nColunas, TipePosicao.IZQUIERDA, 1, TipePosicao.DERECHA,
                     nLinhas * nColunas, 1, autobus));
             if (indice % 2 == 0) {
-                pisos.add(new PisoModel(nLinhas, nColunas, TypePosicao.IZQUIERDA, 2, TypePosicao.DERECHA,
+                pisos.add(new PisoModel(nLinhas, nColunas, TipePosicao.IZQUIERDA, 2, TipePosicao.DERECHA,
                         nLinhas * nColunas, nLinhas * nColunas + 1, autobus));
             }
             pisoRepository.saveAll(pisos);
@@ -101,12 +101,12 @@ public class DataLoader {
             for (j = 0; j < 15; j++) {
                 dia1SemanaAntes = dia1SemanaAntes.plusDays(1);
                 var dataInicio = dia1SemanaAntes.withHour(15).withMinute(0).withSecond(0).withNano(0);
-                var viaje = viajeRepository.save(new ViagemModel(autobus, autobus.getEmpresa(), BigDecimal.ZERO,
+                var viaje = viagemRepository.save(new ViagemModel(autobus, autobus.getEmpresa(), BigDecimal.ZERO,
                         BigDecimal.ZERO, BigDecimal.ZERO, false, dataInicio));
 
                 List<ParadaModel> paradas = new ArrayList<>();
 
-                var parada = new ParadaModel(dataInicio, 10, TipoParada.SALIDA, lugares.get(0), viaje);
+                var parada = new ParadaModel(dataInicio, 10, TipoParada.SAIDA, lugares.get(0), viaje);
                 dataInicio = dataInicio.plusHours(2);
                 paradas.add(parada);
                 for (int i = 1; i < 4; i++) {
@@ -179,15 +179,15 @@ public class DataLoader {
         List<LugarModel> lugares = new ArrayList<>();
         for (String nombreDepartamento : nombresDepartamentos) {
             var depModel = departamentoRepository.save(new DepartamentoModel(nombreDepartamento, "SC"));
-            var ciudad = ciudadRepository.save(new CiudadModel(nombreDepartamento, depModel));
+            var ciudad = cidadeRepository.save(new CidadeModel(nombreDepartamento, depModel));
             var lugar = lugarRepository.save(new LugarModel("Terminal de " + nombreDepartamento, ciudad));
             lugares.add(lugar);
         }
         return lugares;
     }
 
-    private List<AutobusModel> loadAutobuses(List<EmpresaModel> empresas) {
-        ArrayList<AutobusModel> autobuses = new ArrayList<>();
+    private List<OnibusModel> loadAutobuses(List<EmpresaModel> empresas) {
+        ArrayList<OnibusModel> autobuses = new ArrayList<>();
         int nRepeticoes = 3;
         char terminalPlacaChar;
         String terminalPlaca;
@@ -196,12 +196,12 @@ public class DataLoader {
             terminalPlacaChar = empresaName.charAt(0);
             terminalPlaca = Character.toString(terminalPlacaChar);
             for (int k = 0; k < nRepeticoes; k++)
-                autobuses.add(new AutobusModel(k + terminalPlaca + terminalPlaca + terminalPlaca, true,
+                autobuses.add(new OnibusModel(k + terminalPlaca + terminalPlaca + terminalPlaca, true,
                         empresas.get(i)));
             if (i == 2)
                 break;
         }
 
-        return autobusRepository.saveAll(autobuses);
+        return onibusRepository.saveAll(autobuses);
     }
 }

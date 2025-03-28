@@ -1,11 +1,11 @@
 package com.alvaro.empresas.passagens.onibus.services.validacao;
 
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationWithErrorListExceptions;
-import com.alvaro.empresas.passagens.configuracoes.exceptions.FieldMessage;
-import com.alvaro.empresas.passagens.onibus.dtos.autobuses.AutobusDTO;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.dtos.FieldMessage;
+import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusDTO;
 import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoDTOCreate;
-import com.alvaro.empresas.passagens.onibus.enums.TypePosicao;
-import com.alvaro.empresas.passagens.onibus.repositories.AutobusRepository;
+import com.alvaro.empresas.passagens.onibus.enums.TipePosicao;
+import com.alvaro.empresas.passagens.onibus.repositories.OnibusRepository;
 import com.alvaro.empresas.passagens.services.validacao.FieldMessageItemList;
 import com.alvaro.empresas.passagens.services.validacao.FieldMessageList;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,54 +20,54 @@ import java.util.Set;
 @Component
 public class ValidarPiso {
     @Autowired
-    private AutobusRepository autobusRepository;
+    private OnibusRepository onibusRepository;
 
-    public void validarAutobusDTO(BindingResult bindingResult, AutobusDTO dto) {
+    public void validarOnibusDTO(BindingResult bindingResult, OnibusDTO dto) {
         int i;
         FieldMessageItemList itemList;
 
-        List<FieldMessageList> errorsList = new ArrayList<>();
+        List<FieldMessageList> listaErros = new ArrayList<>();
         List<FieldMessageItemList> itensErrados = new ArrayList<>();
-        List<FieldMessage> errors = new ArrayList<>();
+        List<FieldMessage> erros = new ArrayList<>();
 
-        bindingResult.getFieldErrors().forEach(error -> errors.add(new FieldMessage(error)));
+        bindingResult.getFieldErrors().forEach(error -> erros.add(new FieldMessage(error)));
 
         if (!bindingResult.hasFieldErrors("placa"))
-            if (autobusRepository.existsByPlaca(dto.placa()))
-                errors.add(new FieldMessage("placa", "La placa ya esta registrada"));
+            if (onibusRepository.existsByPlaca(dto.placa()))
+                erros.add(new FieldMessage("placa", "A placa já está registrada"));
 
         for (i = 0; i < dto.pisos().size(); i++) {
             itemList = validarPisoDTO(i, dto.pisos().get(i));
             if (itemList != null) itensErrados.add(itemList);
         }
         if (!itensErrados.isEmpty())
-            errorsList.add(new FieldMessageList("pisos", itensErrados));
-        if (!errorsList.isEmpty() || !errors.isEmpty())
-            throw new ValidationWithErrorListExceptions("Erro de validacao", errors, errorsList);
+            listaErros.add(new FieldMessageList("pisos", itensErrados));
+        if (!listaErros.isEmpty() || !erros.isEmpty())
+            throw new ValidationWithErrorListExceptions("Erro de validação", erros, listaErros);
     }
 
     private static FieldMessageItemList validarPisoDTO(int indice, PisoDTOCreate dto) {
-        String message;
+        String mensagem;
         FieldMessageItemList itemList = new FieldMessageItemList();
         itemList.setIndex(indice);
 
-        message = validarNLinhas(dto.getNLinhas());
-        if (!message.isEmpty()) {
-            itemList.addError(new FieldMessage("nLinhas", message));
+        mensagem = validarNLinhas(dto.getNLinhas());
+        if (!mensagem.isEmpty()) {
+            itemList.addError(new FieldMessage("nLinhas", mensagem));
         }
 
-        message = validarNColunas(dto.getNColunas());
-        if (!message.isEmpty()) {
-            itemList.addError(new FieldMessage("nColunas", message));
+        mensagem = validarNColunas(dto.getNColunas());
+        if (!mensagem.isEmpty()) {
+            itemList.addError(new FieldMessage("nColunas", mensagem));
         }
 
-        message = validarDistribuicaoFileira(dto.getDistribuicaoFileira());
-        if (!message.isEmpty())
-            itemList.addError(new FieldMessage("distribuicaoFileira", message));
+        mensagem = validarDistribuicaoFileira(dto.getDistribuicaoFileira());
+        if (!mensagem.isEmpty())
+            itemList.addError(new FieldMessage("distribuicaoFileira", mensagem));
 
-        message = validarPosicoesBloqueadas(dto.getPosicionesBloqueadas());
-        if (!message.isEmpty())
-            itemList.addError(new FieldMessage("posicionesBloqueadas", message));
+        mensagem = validarPosicoesBloquedas(dto.getPosicoesBloquedas());
+        if (!mensagem.isEmpty())
+            itemList.addError(new FieldMessage("posicoesBloquedas", mensagem));
 
         if (!itemList.getErrors().isEmpty())
             return itemList;
@@ -76,31 +76,31 @@ public class ValidarPiso {
 
     private static String validarNLinhas(Integer nLinhas) {
         if (nLinhas == null || nLinhas == 0)
-            return "No puede ser nulo";
+            return "Não pode ser nulo";
         return "";
     }
 
     private static String validarNColunas(Integer nColunas) {
         if (nColunas == null || nColunas == 0)
-            return "No puede ser nulo";
+            return "Não pode ser nulo";
         if (nColunas > 4)
-            return "No puede ser maior que 4";
+            return "Não pode ser maior que 4";
         return "";
     }
 
-    private static String validarDistribuicaoFileira(TypePosicao distribuicaoFileira) {
+    private static String validarDistribuicaoFileira(TipePosicao distribuicaoFileira) {
         if (distribuicaoFileira == null)
-            return "No puede ser un valor nulo";
+            return "Não pode ser um valor nulo";
         return "";
     }
 
-    private static String validarPosicoesBloqueadas(List<Integer> posicoesBloqueadas) {
-        Set<Integer> set = new HashSet<>();
-        for (Integer posicion : posicoesBloqueadas) {
-            if (posicion < 1)
-                return "Una posicion no puede ser nula o negativa";
-            if (!set.add(posicion))
-                return "Una posicion aparece repetida"; // Se não conseguiu adicionar ao conjunto, é porque já existe
+    private static String validarPosicoesBloquedas(List<Integer> posicoesBloquedas) {
+        Set<Integer> conjunto = new HashSet<>();
+        for (Integer posicao : posicoesBloquedas) {
+            if (posicao < 1)
+                return "Uma posição não pode ser nula ou negativa";
+            if (!conjunto.add(posicao))
+                return "Uma posição aparece repetida"; // Se não conseguiu adicionar ao conjunto, é porque já existe
         }
 
         return "";

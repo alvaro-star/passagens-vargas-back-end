@@ -1,8 +1,8 @@
 package com.alvaro.empresas.passagens.models;
 
-import com.alvaro.empresas.passagens.dtos.pasagens.PasagemDTO;
+import com.alvaro.empresas.passagens.dtos.pasagens.PassagemDTO;
 import com.alvaro.empresas.passagens.enums.TipoPagamento;
-import com.alvaro.empresas.passagens.pagamentos.models.FaturaPasagemModel;
+import com.alvaro.empresas.passagens.pagamentos.models.FaturaPassagemModel;
 import com.alvaro.empresas.passagens.pagamentos.models.FaturaReembolsoModel;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import jakarta.persistence.*;
@@ -28,7 +28,7 @@ import java.util.UUID;
 public class PassagemModel extends IEntityStandart {
 
     @Column(nullable = false)
-    private Integer numeroAssento;
+    private Integer nAssento;
     @Column(nullable = false)
     private BigDecimal precoPago;
     @Column(name = "comprado_na_web", nullable = false)
@@ -68,30 +68,30 @@ public class PassagemModel extends IEntityStandart {
     private PrecoModel preco;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "fk_idtb_fatura_pasagem")
-    private FaturaPasagemModel faturaPasagem;
-    @Column(name = "fk_idtb_fatura_pasagem", updatable = false, insertable = false)
-    private UUID faturaPasagemId;
+    @JoinColumn(name = "fk_idtb_fatura_passagem")
+    private FaturaPassagemModel faturaPassagem;
+    @Column(name = "fk_idtb_fatura_passagem", updatable = false, insertable = false)
+    private UUID faturaPassagemId;
 
     public String getNascimentoString() {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
         return sdf.format(nascimento);
     }
 
-    public void setFaturaPasagem(FaturaPasagemModel faturaPasagem) {
-        if (faturaPasagem == null) {
+    public void setFaturaPassagem(FaturaPassagemModel faturaPassagem) {
+        if (faturaPassagem == null) {
             this.metodoPagamento = null;
-            this.faturaPasagem = null;
-            this.faturaPasagemId = null;
+            this.faturaPassagem = null;
+            this.faturaPassagemId = null;
         } else {
-            this.faturaPasagem = faturaPasagem;
-            this.metodoPagamento = faturaPasagem.getMetodoPagamento();
-            this.faturaPasagemId = faturaPasagem.getId();
+            this.faturaPassagem = faturaPassagem;
+            this.metodoPagamento = faturaPassagem.getMetodoPagamento();
+            this.faturaPassagemId = faturaPassagem.getId();
         }
     }
 
-    public PassagemModel(PasagemDTO passagemDTO, Boolean compradoWeb, BigDecimal precoPago, Boolean estaPago, Boolean emDinheiro, ParadaModel saida, ParadaModel destino, PrecoModel preco, FaturaPasagemModel faturaPasagem) {
-        this.numeroAssento = passagemDTO.numeroAssento();
+    public PassagemModel(PassagemDTO passagemDTO, Boolean compradoWeb, BigDecimal precoPago, Boolean estaPago, Boolean emDinheiro, ParadaModel saida, ParadaModel destino, PrecoModel preco, FaturaPassagemModel faturaPasagem) {
+        this.nAssento = passagemDTO.nAssento();
         this.documento = passagemDTO.documento();
         this.nome = passagemDTO.nome();
         this.nascimento = passagemDTO.nascimento();
@@ -99,17 +99,16 @@ public class PassagemModel extends IEntityStandart {
         this.precoPago = precoPago;
         this.compradoWeb = compradoWeb;
         this.estaPago = estaPago;
-        this.faturaReembolso = null;
-        this.faturaReembolsoId = null;
+        setFaturaReembolso(null);
+        setFaturaPassagem(faturaPasagem);
         this.emDinheiro = emDinheiro;
-        setFaturaPasagem(faturaPasagem);
         this.saida = saida;
         this.destino = destino;
         this.preco = preco;
     }
 
-    public PassagemModel(Integer numeroAssento, Boolean compradoWeb, BigDecimal precoPago, Boolean estaPago, Boolean emDinheiro, String nome, String documento, Date nascimento, ParadaModel saida, ParadaModel destino, PrecoModel preco, FaturaPasagemModel faturaPasagem) {
-        this.numeroAssento = numeroAssento;
+    public PassagemModel(Integer nAssento, Boolean compradoWeb, BigDecimal precoPago, Boolean estaPago, Boolean emDinheiro, String nome, String documento, Date nascimento, ParadaModel saida, ParadaModel destino, PrecoModel preco, FaturaPassagemModel faturaPassagem) {
+        this.nAssento = nAssento;
         this.compradoWeb = compradoWeb;
         this.estaPago = estaPago;
         this.emDinheiro = emDinheiro;
@@ -118,11 +117,9 @@ public class PassagemModel extends IEntityStandart {
         this.nascimento = nascimento;
         this.precoPago = precoPago;
         this.preco = preco;
-        this.faturaPasagem = faturaPasagem;
-        this.metodoPagamento = faturaPasagem.getMetodoPagamento();
+        setFaturaReembolso(null);
+        setFaturaPassagem(faturaPassagem);
         this.saida = saida;
         this.destino = destino;
-        this.faturaReembolso = null;
-        this.faturaReembolsoId = null;
     }
 }

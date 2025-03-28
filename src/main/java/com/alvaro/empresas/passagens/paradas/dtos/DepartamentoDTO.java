@@ -7,17 +7,17 @@ import java.util.List;
 
 public record DepartamentoDTO(
         Integer id,
-        @NotBlank(message = "Escriba un nombre valido")
-        String nombre,
-        @NotBlank(message = "Escriba una abreviacion valida")
-        String abreviacion,
-        List<CiudadDTO> ciudades) {
+        @NotBlank(message = "Escreva um nome válido")
+        String nome,
+        @NotBlank(message = "Escreva uma abreviação válida")
+        String abreviacao,
+        List<CidadeDTO> cidades) {
 
     public DepartamentoDTO(DepartamentoModel model) {
-        this(model.getId(), model.getNombre(), model.getAbreviacion(), null);
+        this(model.getId(), model.getNome(), model.getAbreviacao(), null);
     }
 
-    public DepartamentoDTO(DepartamentoModel model, List<CiudadDTO> ciudades) {
-        this(model.getId(), model.getNombre(), model.getAbreviacion(), ciudades);
+    public DepartamentoDTO(DepartamentoModel model, List<CidadeDTO> cidades) {
+        this(model.getId(), model.getNome(), model.getAbreviacao(), cidades);
     }
 }
