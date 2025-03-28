@@ -1,5 +1,6 @@
 package com.alvaro.empresas.passagens.services;
 
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationException;
 import com.alvaro.empresas.passagens.onibus.models.PisoModel;
@@ -20,7 +21,6 @@ import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.alvaro.empresas.passagens.repositories.PassagemRepository;
 import com.alvaro.empresas.passagens.repositories.ViagemRepository;
 import com.alvaro.empresas.passagens.services.validacao.ValidarCompraPassagens;
-import org.hibernate.ObjectNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +56,7 @@ public class PassagemService {
 
     public PassagemModel findById(UUID id) {
         var modelo = passagemRepository.findById(id);
-        return modelo.orElseThrow(() -> new ObjectNotFoundException(id, PassagemModel.class.getName()));
+        return modelo.orElseThrow(() -> new EntityNotFoundException(id, PassagemModel.class));
     }
 
     public PassagemDTOEmpresaResponse getOne(UUID id) {

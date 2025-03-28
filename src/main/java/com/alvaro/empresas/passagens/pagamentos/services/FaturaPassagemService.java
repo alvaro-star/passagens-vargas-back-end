@@ -17,7 +17,7 @@ import com.alvaro.empresas.passagens.pagamentos.repositories.FaturaPassagemRepos
 import com.alvaro.empresas.passagens.repositories.PassagemRepository;
 import com.alvaro.empresas.passagens.repositories.ViagemRepository;
 import com.alvaro.empresas.passagens.services.PrecoService;
-import org.hibernate.ObjectNotFoundException;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -65,7 +65,7 @@ public class FaturaPassagemService {
 
     @Transactional
     public void pagarQr(UUID idPagamento) {//
-        FaturaPassagemModel pagamento = faturaPassagemRepository.findById(idPagamento).orElseThrow(() -> new ObjectNotFoundException(idPagamento, FaturaPassagemModel.class.getName()));
+        FaturaPassagemModel pagamento = faturaPassagemRepository.findById(idPagamento).orElseThrow(() -> new EntityNotFoundException(idPagamento, FaturaPassagemModel.class));
         if (pagamento.getEstaPago()) {
             reembolso();
             mandarEmail("O preço já foi pago");
@@ -119,7 +119,7 @@ public class FaturaPassagemService {
     }
 
     public void codigoVencido(UUID idPagamento) {//
-        FaturaPassagemModel pagamento = faturaPassagemRepository.findById(idPagamento).orElseThrow(() -> new ObjectNotFoundException(idPagamento, FaturaPassagemModel.class.getName()));
+        FaturaPassagemModel pagamento = faturaPassagemRepository.findById(idPagamento).orElseThrow(() -> new EntityNotFoundException(idPagamento, FaturaPassagemModel.class));
         if (!pagamento.getEstaPago()) {
             for (PassagemModel passagem : pagamento.getPassagens())
                 passagemRepository.delete(passagem);
@@ -141,7 +141,7 @@ public class FaturaPassagemService {
         byte[] arrayBytesVazio = new byte[0];
 
         if (!fatura.isPresent())
-            throw new ObjectNotFoundException(id, FaturaEmpresaModel.class.getName());
+            throw new EntityNotFoundException(id, FaturaEmpresaModel.class);
         if (fatura.get().getViagem() == null)
             throw new ValidationException("protocolo", "O comprovante possui uma viagem nula");
         String nomeEmpresa = fatura.get().getViagem().getEmpresa().getNome();

@@ -1,5 +1,6 @@
 package com.alvaro.empresas.passagens.services;
 
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
 import com.alvaro.empresas.passagens.dtos.InputEmpresaDTO;
 import com.alvaro.empresas.passagens.helpers.validators.ValidEnabledEntities;
@@ -11,7 +12,6 @@ import com.alvaro.empresas.passagens.security.models.RoleModel;
 import com.alvaro.empresas.passagens.security.repositories.UsuarioRepository;
 import com.alvaro.empresas.passagens.security.services.RoleService;
 import jakarta.validation.constraints.NotBlank;
-import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -32,7 +32,7 @@ public class EmpresaService {
 
     public EmpresaModel findById(UUID id) {
         Optional<EmpresaModel> model = empresaRepository.findById(id);
-        return model.orElseThrow(() -> new ObjectNotFoundException(id, EmpresaModel.class.getName()));
+        return model.orElseThrow(() -> new EntityNotFoundException(id, EmpresaModel.class));
     }
 
     public EmpresaModel getOne(UUID id) {

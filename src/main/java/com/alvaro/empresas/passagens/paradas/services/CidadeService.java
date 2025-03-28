@@ -5,7 +5,7 @@ import com.alvaro.empresas.passagens.paradas.dtos.CidadeDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.CidadeDTOUpdate;
 import com.alvaro.empresas.passagens.paradas.models.CidadeModel;
 import com.alvaro.empresas.passagens.paradas.repositories.CidadeRepository;
-import org.hibernate.ObjectNotFoundException;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,7 +30,7 @@ public class CidadeService {
     }
 
     public CidadeModel findById(Integer id) {
-        return cidadeRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException(id, CidadeModel.class.getName()));
+        return cidadeRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(id, CidadeModel.class));
     }
 
     public CidadeDTO getOne(Integer id) {

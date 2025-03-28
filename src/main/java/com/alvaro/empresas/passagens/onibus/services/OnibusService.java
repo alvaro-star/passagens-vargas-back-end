@@ -12,7 +12,7 @@ import com.alvaro.empresas.passagens.onibus.repositories.OnibusRepository;
 import com.alvaro.empresas.passagens.onibus.services.validacao.ValidarPiso;
 import com.alvaro.empresas.passagens.repositories.ViagemRepository;
 import com.alvaro.empresas.passagens.services.EmpresaService;
-import org.hibernate.ObjectNotFoundException;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -42,7 +42,7 @@ public class OnibusService {
 
     public OnibusModel findById(UUID id) {
         var model = onibusRepository.findById(id);
-        return model.orElseThrow(() -> new ObjectNotFoundException(id, OnibusModel.class.getName()));
+        return model.orElseThrow(() -> new EntityNotFoundException(id, OnibusModel.class));
     }
 
     public Page<OnibusDTOResponse> findAll(Pageable pageable) {

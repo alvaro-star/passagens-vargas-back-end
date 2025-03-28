@@ -2,7 +2,9 @@ package com.alvaro.empresas.passagens.configuracoes.exceptions;
 
 import java.sql.SQLIntegrityConstraintViolationException;
 
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationException;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.dtos.EntityNotFoundError;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.dtos.StandardError;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.dtos.ValidationError;
 import org.hibernate.ObjectNotFoundException;
@@ -38,7 +40,7 @@ public class ExceptionsHandler {
     }
 
     @ExceptionHandler(RestRuntimeException.class)
-    public ResponseEntity<StandardError> generalException(RestRuntimeException ex, HttpServletRequest request) {
+    public ResponseEntity<StandardError> restRuntimeException(RestRuntimeException ex, HttpServletRequest request) {
         StandardError error = new StandardError(
                 System.currentTimeMillis(),
                 ex.getStatus(),
@@ -47,9 +49,22 @@ public class ExceptionsHandler {
         return ResponseEntity.status(ex.getStatus()).body(error);
     }
 
+    @ExceptionHandler(EntityNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public EntityNotFoundError entityNotFoundException(EntityNotFoundException ex, HttpServletRequest request) {
+        return new EntityNotFoundError(
+                System.currentTimeMillis(),
+                HttpStatus.NOT_FOUND,
+                request.getRequestURI(),
+                ex.getMessage(),
+                ex.getId(),
+                EntityNotFoundException.clearEntityName(ex.getEntityClass())
+        );
+    }
+
     @ExceptionHandler(ObjectNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public StandardError objectNotFound(ObjectNotFoundException ex, HttpServletRequest request) {
+    public StandardError objectNotFound(EntityNotFoundException ex, HttpServletRequest request) {
         return new StandardError(
                 System.currentTimeMillis(),
                 HttpStatus.NOT_FOUND,

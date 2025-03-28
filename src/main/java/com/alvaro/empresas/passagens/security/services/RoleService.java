@@ -4,7 +4,7 @@ import com.alvaro.empresas.passagens.security.models.RoleList;
 import com.alvaro.empresas.passagens.security.models.RoleModel;
 import com.alvaro.empresas.passagens.security.models.UsuarioModel;
 import com.alvaro.empresas.passagens.security.repositories.RoleRepository;
-import org.hibernate.ObjectNotFoundException;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +25,7 @@ public class RoleService {
 
     public RoleModel getByRoleName(RoleList name) {
         var model = roleRepository.findByNome(name);
-        return model.orElseThrow(() -> new ObjectNotFoundException(name, RoleModel.class.getName()));
+        return model.orElseThrow(() -> new EntityNotFoundException(name, RoleModel.class));
     }
 
     public static String getCargo(UsuarioModel model) {

@@ -9,7 +9,7 @@ import lombok.Data;
 
 @Data
 @NoArgsConstructor
-public class StandardError implements Serializable {
+public class StandardError {
     private Long timestamp;
     private Integer status;
     private String error;

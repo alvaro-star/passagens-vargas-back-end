@@ -9,7 +9,7 @@ import com.alvaro.empresas.passagens.models.PrecoModel;
 import com.alvaro.empresas.passagens.models.ViagemModel;
 import com.alvaro.empresas.passagens.repositories.PassagemRepository;
 import com.alvaro.empresas.passagens.repositories.PrecoRepository;
-import org.hibernate.ObjectNotFoundException;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +26,7 @@ public class PrecoService {
 
     public PrecoModel findById(UUID id) {
         var model = precoRepository.findById(id);
-        return model.orElseThrow(() -> new ObjectNotFoundException(id, PrecoModel.class.getName()));
+        return model.orElseThrow(() -> new EntityNotFoundException(id, PrecoModel.class));
     }
 
     public List<PrecoDTO> saveAll(List<PrecoModel> newModels, ViagemModel viagem) {

@@ -2,7 +2,7 @@ package com.alvaro.empresas.passagens.pagamentos.services;
 
 import java.util.UUID;
 
-import org.hibernate.ObjectNotFoundException;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +16,6 @@ public class FaturaEmpresaService {
 
     public FaturaEmpresaModel findById(UUID id) {
         var model = fERepository.findById(id);
-        return model.orElseThrow(() -> new ObjectNotFoundException(id, FaturaEmpresaModel.class.getName()));
+        return model.orElseThrow(() -> new EntityNotFoundException(id, FaturaEmpresaModel.class));
     }
 }

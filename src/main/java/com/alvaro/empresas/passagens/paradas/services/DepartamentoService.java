@@ -2,7 +2,7 @@ package com.alvaro.empresas.passagens.paradas.services;
 
 import java.util.Optional;
 
-import org.hibernate.ObjectNotFoundException;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,7 +22,7 @@ public class DepartamentoService {
 
     public DepartamentoModel findById(Integer id) {
         Optional<DepartamentoModel> model = departamentoRepository.findById(id);
-        return model.orElseThrow(() -> new ObjectNotFoundException(id, DepartamentoModel.class.getName()));
+        return model.orElseThrow(() -> new EntityNotFoundException(id, DepartamentoModel.class));
     }
 
     public Page<DepartamentoDTO> findAll(Pageable pageable) {

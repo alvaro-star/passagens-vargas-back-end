@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
-import org.hibernate.ObjectNotFoundException;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -79,7 +79,7 @@ public class ViagemEmpresaService {
 
     public ViagemModel findById(UUID id) {
         var model = viagemRepository.findById(id);
-        return model.orElseThrow(() -> new ObjectNotFoundException(id, ViagemModel.class.getName()));
+        return model.orElseThrow(() -> new EntityNotFoundException(id, ViagemModel.class));
     }
 
     public Page<ViagemDTOListBusquedaEmpresa> findAllByEmpresaBetweenDates(ViagemDTOSolicitacaoFromEmpresa solicitacao,

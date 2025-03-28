@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.hibernate.ObjectNotFoundException;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,7 +37,7 @@ public class ViagemService {
 
     public ViagemModel findById(UUID id) {
         var model = viagemRepository.findById(id);
-        return model.orElseThrow(() -> new ObjectNotFoundException(id, ViagemModel.class.getName()));
+        return model.orElseThrow(() -> new EntityNotFoundException(id, ViagemModel.class));
     }
 
     public ViagemDTOResponse getOne(UUID id) {
@@ -56,9 +56,9 @@ public class ViagemService {
         List<LugarModel> lugaresDestino = lugarRepository.findByCidadeId(dto.idCidadeDestino());
 
         if (lugaresSaida.isEmpty())
-            throw new ObjectNotFoundException(dto.idCidadeSaida(), CidadeModel.class.getName());
+            throw new EntityNotFoundException(dto.idCidadeSaida(), CidadeModel.class);
         if (lugaresDestino.isEmpty())
-            throw new ObjectNotFoundException(dto.idCidadeDestino(), CidadeModel.class.getName());
+            throw new EntityNotFoundException(dto.idCidadeDestino(), CidadeModel.class);
 
         LocalDateTime hj = LocalDateTime.now();
         LocalDateTime startDay;

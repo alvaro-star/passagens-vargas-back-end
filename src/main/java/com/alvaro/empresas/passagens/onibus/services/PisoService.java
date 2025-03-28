@@ -1,5 +1,6 @@
 package com.alvaro.empresas.passagens.onibus.services;
 
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationException;
 import com.alvaro.empresas.passagens.helpers.validators.ValidEnabledEntities;
 import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoDTOCreate;
@@ -11,7 +12,6 @@ import com.alvaro.empresas.passagens.onibus.repositories.OnibusRepository;
 import com.alvaro.empresas.passagens.onibus.repositories.PisoRepository;
 
 import com.alvaro.empresas.passagens.repositories.ViagemRepository;
-import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,7 +32,7 @@ public class PisoService {
 
     public PisoModel findById(UUID id) {
         Optional<PisoModel> model = pisoRepository.findById(id);
-        return model.orElseThrow(() -> new ObjectNotFoundException(id, PisoModel.class.getName()));
+        return model.orElseThrow(() -> new EntityNotFoundException(id, PisoModel.class));
     }
 
     public PisoDTOResponse getOne(UUID id) {

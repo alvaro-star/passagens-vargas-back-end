@@ -2,7 +2,7 @@ package com.alvaro.empresas.passagens.paradas.services;
 
 import java.time.LocalDateTime;
 
-import org.hibernate.ObjectNotFoundException;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,7 +35,7 @@ public class ParadaService {
 
     public ParadaModel findById(Integer id) {
         var model = paradaRepository.findById(id);
-        return model.orElseThrow(() -> new ObjectNotFoundException(id, ParadaModel.class.getName()));
+        return model.orElseThrow(() -> new EntityNotFoundException(id, ParadaModel.class));
     }
 
     public ParadaDTOComplete getOne(Integer id) {

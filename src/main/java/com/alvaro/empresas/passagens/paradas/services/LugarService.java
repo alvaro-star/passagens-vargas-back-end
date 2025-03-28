@@ -6,7 +6,7 @@ import com.alvaro.empresas.passagens.paradas.models.CidadeModel;
 import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import com.alvaro.empresas.passagens.paradas.repositories.LugarRepository;
 import com.alvaro.empresas.passagens.paradas.repositories.ParadaRepository;
-import org.hibernate.ObjectNotFoundException;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,7 +24,7 @@ public class LugarService {
 
     public LugarModel findById(Integer id) {
         var model = lugarRepository.findById(id);
-        return model.orElseThrow(() -> new ObjectNotFoundException(id, LugarModel.class.getName()));
+        return model.orElseThrow(() -> new EntityNotFoundException(id, LugarModel.class));
     }
 
     public List<LugarModel> findAllById(Set<Integer> ids) {

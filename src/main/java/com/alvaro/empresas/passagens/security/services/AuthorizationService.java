@@ -2,7 +2,7 @@ package com.alvaro.empresas.passagens.security.services;
 
 import com.alvaro.empresas.passagens.security.models.UsuarioModel;
 import com.alvaro.empresas.passagens.security.repositories.UsuarioRepository;
-import org.hibernate.ObjectNotFoundException;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -17,6 +17,6 @@ public class AuthorizationService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return usuarioRepository.findByEmail(username).orElseThrow(() -> new ObjectNotFoundException((Object) username, UsuarioModel.class.getSimpleName()));
+        return usuarioRepository.findByEmail(username).orElseThrow(() -> new EntityNotFoundException((Object) username, UsuarioModel.class));
     }
 }

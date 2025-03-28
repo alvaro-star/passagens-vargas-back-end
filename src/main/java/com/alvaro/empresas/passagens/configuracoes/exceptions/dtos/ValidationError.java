@@ -11,8 +11,6 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class ValidationError extends StandardError {
-    private static final long serialVersionUID = 1L;
-
     private List<FieldMessage> errors = new ArrayList<>();
 
     public ValidationError(Long timestamp, HttpStatus status, String message, String path) {
