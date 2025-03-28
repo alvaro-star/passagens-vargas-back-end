@@ -25,19 +25,19 @@ public class PrecoResource {
     @Autowired
     private UserLoguedComponent userLogued;
 
-    @GetMapping("/{id}")
+    @GetMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
     public PrecoDTO getOne(@PathVariable(value = "id") UUID id) {
         return precoService.getOne(id);
     }
 
-    @GetMapping("/{id}/vender")
+    @GetMapping("{id}/vender")
     @ResponseStatus(HttpStatus.OK)
     public PrecoDTOResponseViagem vender(@PathVariable(value = "id") UUID id) {
         return precoService.vender(id);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
     public PrecoDTO update(@PathVariable(value = "id") UUID id, @RequestBody @Valid PrecoDTOUpdate dto) {

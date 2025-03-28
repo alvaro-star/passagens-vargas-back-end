@@ -7,7 +7,9 @@ import org.springframework.stereotype.Repository;
 
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 
+import jakarta.validation.constraints.NotNull;
+
 @Repository
 public interface EmpresaRepository extends JpaRepository<EmpresaModel, UUID> {
-    boolean existsById(UUID id);
+    boolean existsById(@NotNull UUID id);
 }

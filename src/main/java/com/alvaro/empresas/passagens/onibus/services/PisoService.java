@@ -1,6 +1,7 @@
 package com.alvaro.empresas.passagens.onibus.services;
 
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationException;
 import com.alvaro.empresas.passagens.helpers.validators.ValidEnabledEntities;
 import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoDTOCreate;
@@ -15,6 +16,7 @@ import com.alvaro.empresas.passagens.repositories.ViagemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,7 +52,7 @@ public class PisoService {
         int nAssentos = dto.getNAssentos();
         for (Integer posicao : dto.getPosicoesBloquedas()) {
             if (posicao > nAssentos)
-                throw new ValidationException("As posições indisponíveis são inválidas");
+                throw new ValidationException("posicoesBloqueadas", "As posições indisponíveis são inválidas");
         }
 
         var pisoModel = new PisoModel(dto, nPiso, nPrimeiroAssento);
@@ -69,10 +71,10 @@ public class PisoService {
         var viagem = viagemRepository.findFirst1ByOnibusId(model.getOnibus().getId());
         int nAssentos = dto.getNAssentos();
         if (viagem.isPresent())
-            throw new ValidationException("O ônibus já tem uma viagem registrada");
+            throw new RestRuntimeException(HttpStatus.CONFLICT, "O ônibus já tem uma viagem registrada");
         for (Integer posicao : dto.getPosicoesIndisponiveis())
             if (posicao > nAssentos)
-                throw new ValidationException("Uma posição informada é inválida");
+                throw new RestRuntimeException(HttpStatus.CONFLICT, "Uma posição informada é inválida");
         List<PisoModel> pisos = new ArrayList<>();
         model.updateValues(dto);
         pisos.add(model);

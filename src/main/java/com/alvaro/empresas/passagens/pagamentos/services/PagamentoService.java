@@ -17,7 +17,7 @@ public class PagamentoService {
         return "Eliminado";
     }
 
-    private String generarQR(FaturaPassagemModel factura) {
+    private String generarQR(FaturaPassagemModel fatura) {
         return "Teste";
     }
 }

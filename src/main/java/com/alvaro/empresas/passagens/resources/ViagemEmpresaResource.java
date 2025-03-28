@@ -7,7 +7,7 @@ import com.alvaro.empresas.passagens.dtos.viagens.busca.ViagemDTOSolicitacaoFrom
 import com.alvaro.empresas.passagens.dtos.viagens.empresa.ViagemDTOCreate;
 import com.alvaro.empresas.passagens.dtos.viagens.empresa.ViagemDTOEmpresaResponse;
 import com.alvaro.empresas.passagens.dtos.viagens.empresa.ViagemDTOFormCopy;
-import com.alvaro.empresas.passagens.dtos.viagens.empresa.ViagemDTOListBusquedaEmpresa;
+import com.alvaro.empresas.passagens.dtos.viagens.empresa.ViagemDTOListBuscaEmpresa;
 import com.alvaro.empresas.passagens.dtos.viagens.ViagemDTOUpdate;
 import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
 import com.alvaro.empresas.passagens.services.ViagemEmpresaService;
@@ -37,7 +37,7 @@ public class ViagemEmpresaResource {
     @Autowired
     private OnibusService onibusService;
 
-    @GetMapping("/{id}/pdf")
+    @GetMapping("{id}/pdf")
     public ResponseEntity<Object> getPdfFromViagem(@PathVariable("id") UUID idViagem) {
         byte[] viajeRelatorio = viagemEmpresaService.getPdfFromViagem(idViagem);
         HttpHeaders headers = new HttpHeaders();
@@ -49,7 +49,7 @@ public class ViagemEmpresaResource {
     @PostMapping("/from/empresa")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
-    public Page<ViagemDTOListBusquedaEmpresa> getAllFromEmpresaBetweenMonth(
+    public Page<ViagemDTOListBuscaEmpresa> getAllFromEmpresaBetweenMonth(
             @RequestBody @Valid ViagemDTOSolicitacaoFromEmpresa solicitacao,
             @PageableDefault(sort = "dataHoraSaida") Pageable pageable) {
         userLogued.validIfIsAdminOrOwnerEmpresa(solicitacao.idEmpresa());
@@ -59,7 +59,7 @@ public class ViagemEmpresaResource {
     @PostMapping("/from/onibus")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
-    public Page<ViagemDTOListBusquedaEmpresa> getAllFromOnibus(
+    public Page<ViagemDTOListBuscaEmpresa> getAllFromOnibus(
             @RequestBody @Valid ViagemDTOSolicitacaoFromOnibus solicitacao,
             @PageableDefault(sort = "dataHoraSaida") Pageable pageable) {
         var onibusModel = onibusService.findById(solicitacao.idOnibus());
@@ -70,8 +70,8 @@ public class ViagemEmpresaResource {
     @PostMapping("/{idEmpresa}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
-    public List<ViagemDTOListBusquedaEmpresa> getViagemFromDia(@PathVariable(value = "idEmpresa") UUID idEmpresa,
-            @RequestBody @Valid ViagemDTOSolicitacaoEmpresa dto) {
+    public List<ViagemDTOListBuscaEmpresa> getViagemFromDia(@PathVariable(value = "idEmpresa") UUID idEmpresa,
+                                                            @RequestBody @Valid ViagemDTOSolicitacaoEmpresa dto) {
         userLogued.validIfIsAdminOrOwnerEmpresa(idEmpresa);
         if (dto.idCidadeDestino() == null || dto.idCidadeDestino() == 0)
             return viagemEmpresaService.findViagensBySaida(idEmpresa, dto);
@@ -97,7 +97,7 @@ public class ViagemEmpresaResource {
         viagemEmpresaService.saveOneCopy(dto, viagem);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
     public ViagemDTOUpdate update(@PathVariable UUID id, @RequestBody @Valid ViagemDTOUpdate dto) {
@@ -106,7 +106,7 @@ public class ViagemEmpresaResource {
         return viagemEmpresaService.update(dto);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
     public void delete(@PathVariable UUID id) {

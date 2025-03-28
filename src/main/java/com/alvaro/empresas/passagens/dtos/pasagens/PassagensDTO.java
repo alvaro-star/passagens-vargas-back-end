@@ -11,7 +11,7 @@ public record PassagensDTO(
         @NotNull
         UUID idPreco,
         @Valid
-        ContatoDTO contato,
+        InputContatoDTO contato,
         @NotNull
         Integer idLugarSaida,
         @NotNull

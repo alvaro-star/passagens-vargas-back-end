@@ -29,7 +29,7 @@ public class LugarResource {
         return lugarService.findAll(pageable);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
     public LugarDTO getOne(@PathVariable(value = "id") Integer id) {
         var model = lugarService.findById(id);
@@ -45,7 +45,7 @@ public class LugarResource {
         return new LugarDTO(model);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public LugarDTO update(@PathVariable(value = "id") Integer id, @RequestBody @Valid LugarDTOUpdate dto) {
@@ -53,7 +53,7 @@ public class LugarResource {
         return new LugarDTO(model);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public void delete(@PathVariable(value = "id") Integer id) {

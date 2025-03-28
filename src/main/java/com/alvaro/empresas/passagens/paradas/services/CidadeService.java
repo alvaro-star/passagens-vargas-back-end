@@ -29,13 +29,12 @@ public class CidadeService {
         return models.map(CidadeDTO::new);
     }
 
-    public CidadeModel findById(Integer id) {
-        return cidadeRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(id, CidadeModel.class));
+    public Page<CidadeModel> findByDepartamentoId(Integer id, Pageable pageable) {
+        return cidadeRepository.findByDepartamentoId(id, pageable);
     }
 
-    public CidadeDTO getOne(Integer id) {
-        var model = findById(id);
-        return new CidadeDTO(model);
+    public CidadeModel findById(Integer id) {
+        return cidadeRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(id, CidadeModel.class));
     }
 
     public CidadeDTO save(CidadeDTO dto) {

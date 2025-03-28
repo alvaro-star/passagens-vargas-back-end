@@ -1,7 +1,6 @@
 package com.alvaro.empresas.passagens.onibus.services.validacao;
 
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationWithErrorListExceptions;
-import com.alvaro.empresas.passagens.configuracoes.exceptions.dtos.FieldMessage;
 import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusDTO;
 import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoDTOCreate;
 import com.alvaro.empresas.passagens.onibus.enums.TipePosicao;
@@ -11,11 +10,10 @@ import com.alvaro.empresas.passagens.services.validacao.FieldMessageList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class ValidarPiso {
@@ -28,13 +26,12 @@ public class ValidarPiso {
 
         List<FieldMessageList> listaErros = new ArrayList<>();
         List<FieldMessageItemList> itensErrados = new ArrayList<>();
-        List<FieldMessage> erros = new ArrayList<>();
 
-        bindingResult.getFieldErrors().forEach(error -> erros.add(new FieldMessage(error)));
+        Map<String, String> erros = bindingResult.getFieldErrors().stream().collect(Collectors.toMap(FieldError::getField, e -> (e.getDefaultMessage() == null || e.getDefaultMessage().isEmpty()) ? "" : e.getDefaultMessage()));
 
         if (!bindingResult.hasFieldErrors("placa"))
             if (onibusRepository.existsByPlaca(dto.placa()))
-                erros.add(new FieldMessage("placa", "A placa já está registrada"));
+                erros.put("placa", "A placa já está registrada");
 
         for (i = 0; i < dto.pisos().size(); i++) {
             itemList = validarPisoDTO(i, dto.pisos().get(i));
@@ -43,7 +40,7 @@ public class ValidarPiso {
         if (!itensErrados.isEmpty())
             listaErros.add(new FieldMessageList("pisos", itensErrados));
         if (!listaErros.isEmpty() || !erros.isEmpty())
-            throw new ValidationWithErrorListExceptions("Erro de validação", erros, listaErros);
+            throw new ValidationWithErrorListExceptions("Erro de validação", (HashMap<String, String>) erros, listaErros);
     }
 
     private static FieldMessageItemList validarPisoDTO(int indice, PisoDTOCreate dto) {
@@ -53,21 +50,21 @@ public class ValidarPiso {
 
         mensagem = validarNLinhas(dto.getNLinhas());
         if (!mensagem.isEmpty()) {
-            itemList.addError(new FieldMessage("nLinhas", mensagem));
+            itemList.addError("nLinhas", mensagem);
         }
 
         mensagem = validarNColunas(dto.getNColunas());
         if (!mensagem.isEmpty()) {
-            itemList.addError(new FieldMessage("nColunas", mensagem));
+            itemList.addError("nColunas", mensagem);
         }
 
         mensagem = validarDistribuicaoFileira(dto.getDistribuicaoFileira());
         if (!mensagem.isEmpty())
-            itemList.addError(new FieldMessage("distribuicaoFileira", mensagem));
+            itemList.addError("distribuicaoFileira", mensagem);
 
         mensagem = validarPosicoesBloquedas(dto.getPosicoesBloquedas());
         if (!mensagem.isEmpty())
-            itemList.addError(new FieldMessage("posicoesBloquedas", mensagem));
+            itemList.addError("posicoesBloquedas", mensagem);
 
         if (!itemList.getErrors().isEmpty())
             return itemList;

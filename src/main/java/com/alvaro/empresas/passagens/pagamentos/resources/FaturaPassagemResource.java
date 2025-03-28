@@ -32,15 +32,15 @@ public class FaturaPassagemResource {
         return faturaPassagemService.findAllFromViagem(idViagem, pageable);
     }
 
-    @PostMapping("/{id}/pagar-qr")
+    @PostMapping("{id}/pagar-qr")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public void pagarQR(@PathVariable UUID id) {
         faturaPassagemService.pagarQr(id);
     }
 
-    @GetMapping("/{id}/download")
-    public ResponseEntity<byte[]> getFactura(@PathVariable UUID id) {
+    @GetMapping("{id}/download")
+    public ResponseEntity<byte[]> getFatura(@PathVariable UUID id) {
         byte[] pasajesPDF = faturaPassagemService.downloadFatura(id);
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=pasajes.pdf");

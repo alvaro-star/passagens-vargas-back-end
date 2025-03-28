@@ -3,6 +3,9 @@ package com.alvaro.empresas.passagens.paradas.resources;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.alvaro.empresas.passagens.paradas.dtos.DepartamentoOutputDTO;
+import com.alvaro.empresas.passagens.paradas.models.CidadeModel;
+import com.alvaro.empresas.passagens.paradas.services.CidadeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,7 +23,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alvaro.empresas.passagens.paradas.dtos.CidadeDTO;
-import com.alvaro.empresas.passagens.paradas.dtos.DepartamentoDTO;
+import com.alvaro.empresas.passagens.paradas.dtos.DepartamentoInputDTO;
 import com.alvaro.empresas.passagens.paradas.models.DepartamentoModel;
 import com.alvaro.empresas.passagens.paradas.services.DepartamentoService;
 
@@ -33,42 +36,42 @@ import jakarta.validation.Valid;
 public class DepartamentoResource {
     @Autowired
     private DepartamentoService departamentoService;
+    @Autowired
+    private CidadeService cidadeService;
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Page<DepartamentoDTO> getAll(@PageableDefault(size = 10) Pageable pageable) {
+    public Page<DepartamentoOutputDTO> getAll(@PageableDefault(size = 10) Pageable pageable) {
         return departamentoService.findAll(pageable);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
-    public DepartamentoDTO getOne(@PathVariable(value = "id") Integer id) {
-        DepartamentoModel model = departamentoService.findById(id);
-        List<CidadeDTO> cidades = new ArrayList<>();
-        model.getCidades().forEach(cidadeModel -> cidades.add(new CidadeDTO(cidadeModel)));
-        return new DepartamentoDTO(model, cidades);
+    public DepartamentoModel findById(@PathVariable Integer id) {
+        return departamentoService.findById(id);
     }
+
+
+
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    public DepartamentoDTO save(@RequestBody @Valid DepartamentoDTO dto) {
-        DepartamentoModel model = departamentoService.save(dto);
-        return new DepartamentoDTO(model);
+    public DepartamentoModel save(@RequestBody @Valid DepartamentoInputDTO dto) {
+        return departamentoService.save(dto);
     }
 
-    @PutMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    public DepartamentoDTO update(@PathVariable(value = "id") Integer id, @RequestBody @Valid DepartamentoDTO dto) {
-        DepartamentoModel model = departamentoService.update(dto, id);
-        return new DepartamentoDTO(model);
-    }
-
-    @DeleteMapping("/{id}")
+    @PutMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    public void delete(@PathVariable(value = "id") Integer id) {
+    public void update(@PathVariable Integer id, @RequestBody @Valid DepartamentoInputDTO dto) {
+        departamentoService.update(dto, id);
+    }
+
+    @DeleteMapping("{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    public void delete(@PathVariable Integer id) {
         departamentoService.delete(id);
     }
 }

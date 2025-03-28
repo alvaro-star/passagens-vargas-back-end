@@ -19,7 +19,7 @@ public abstract class IFaturaStandart {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "idtb_factura_empresa")
+    @Column(name = "idtb_fatura_empresa")
     private UUID id;
 
     @Column(nullable = false)

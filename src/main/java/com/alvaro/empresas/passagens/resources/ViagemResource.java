@@ -20,7 +20,7 @@ public class ViagemResource {
     @Autowired
     private ViagemService viagemService;
 
-    @GetMapping("/{id}")
+    @GetMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
     public ViagemDTOResponse getOne(@PathVariable UUID id) {
         return viagemService.getOne(id);

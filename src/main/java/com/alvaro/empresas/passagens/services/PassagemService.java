@@ -228,7 +228,7 @@ public class PassagemService {
         for (PassagemDTO sillasSolicitada : sillasSolicitadas) {
             for (Integer ocupado : ocupados)
                 if (ocupado.equals(sillasSolicitada.nAssento()))
-                    throw new ValidationException("Um dos assentos já foi comprado");
+                    throw new ValidationException("nAssento", "O assento já foi comprado");
 
             if (sillasSolicitada.nAssento() > numeroMaximo || sillasSolicitada.nAssento() < numeroMinimo)
                 throw new ValidationException("nAssento", "O número do assento informado é inválido");

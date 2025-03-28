@@ -73,7 +73,7 @@ public class DadosPersist {
     }
 
     public HashMap<String, List<OnibusModel>> laodOnibuses(HashMap<String, EmpresaModel> empresas, int nOnibuses) {
-        HashMap<String, List<OnibusModel>> onibuses = new HashMap<>();
+        HashMap<String, List<OnibusModel>> onibus = new HashMap<>();
         OnibusModel aux;
         int i;
         for (String key : empresas.keySet()) {
@@ -82,10 +82,10 @@ public class DadosPersist {
                 aux = cadastrarOnibus(key, empresas.get(key));
                 onibusOfEmpresa.add(aux);
             }
-            onibuses.put(key, onibusOfEmpresa);
+            onibus.put(key, onibusOfEmpresa);
         }
 
-        return onibuses;
+        return onibus;
     }
 
 }

@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.models;
 
-import com.alvaro.empresas.passagens.dtos.pasagens.ContatoDTO;
+import com.alvaro.empresas.passagens.dtos.pasagens.InputContatoDTO;
 import com.alvaro.empresas.passagens.pagamentos.models.FaturaPassagemModel;
 import jakarta.persistence.*;
 import lombok.*;
@@ -19,13 +19,13 @@ public class ContatoModel extends IEntityStandart {
     private Integer numero;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "fk_idtb_factura_pasaje")
+    @JoinColumn(name = "fk_idtb_fatura_pasaje")
     private FaturaPassagemModel faturaPassagem;
 
-    public ContatoModel(ContatoDTO contatoDTO) {
-        this.nome = contatoDTO.nome();
-        this.email = contatoDTO.email();
-        this.numero = contatoDTO.telefone();
+    public ContatoModel(InputContatoDTO inputContatoDTO) {
+        this.nome = inputContatoDTO.nome();
+        this.email = inputContatoDTO.email();
+        this.numero = Integer.valueOf(inputContatoDTO.telefone());
     }
 
     public ContatoModel(String nome, String email, Integer numero) {

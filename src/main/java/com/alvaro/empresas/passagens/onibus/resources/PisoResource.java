@@ -22,13 +22,13 @@ public class PisoResource {
     @Autowired
     private UserLoguedComponent userLogued;
 
-    @GetMapping("/{id}")
+    @GetMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
     public PisoDTOResponse getOne(@PathVariable UUID id) {
         return pisoService.getOne(id);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN')")
     public Object update(@PathVariable UUID id, @RequestBody @Valid PisoDTOUpdate dto) {

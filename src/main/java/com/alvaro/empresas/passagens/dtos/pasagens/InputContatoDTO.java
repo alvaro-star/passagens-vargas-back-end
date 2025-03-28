@@ -2,15 +2,14 @@ package com.alvaro.empresas.passagens.dtos.pasagens;
 
 import jakarta.validation.constraints.*;
 
-public record ContatoDTO(
+public record InputContatoDTO(
         @NotBlank
         String nome,
         @Email
         String email,
-        @NotNull
-        @Min(value = 11111111)
-        @Max(value = 99999999)
-        Integer telefone
+        @NotBlank
+        @Pattern(regexp = "^\\d{11}$", message = "O telefone precisa ter 11 digitos")
+        String telefone
 ) {
 
 }

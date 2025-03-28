@@ -3,6 +3,7 @@ package com.alvaro.empresas.passagens.paradas.resources;
 import com.alvaro.empresas.passagens.paradas.dtos.CidadeDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.CidadeDTOUpdate;
 import com.alvaro.empresas.passagens.paradas.dtos.LugarDTO;
+import com.alvaro.empresas.passagens.paradas.models.CidadeModel;
 import com.alvaro.empresas.passagens.paradas.services.CidadeService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -30,13 +31,13 @@ public class CidadeResource {
         return cidadeService.findAll(pageable);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
-    public CidadeDTO getOne(@PathVariable Integer id) {
-        return cidadeService.getOne(id);
+    public CidadeModel getOne(@PathVariable Integer id) {
+        return cidadeService.findById(id);
     }
 
-    @GetMapping("/{id}/lugares")
+    @GetMapping("{id}/lugares")
     @ResponseStatus(HttpStatus.OK)
     public List<LugarDTO> getLugaresFromCidade(@PathVariable Integer id) {
         var cidadeModel = cidadeService.findById(id);
@@ -58,14 +59,14 @@ public class CidadeResource {
         return cidadeService.save(dto);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public CidadeDTO update(@Valid @RequestBody CidadeDTOUpdate dto, @PathVariable Integer id) {
         return cidadeService.update(dto, id);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     public void delete(@PathVariable Integer id) {

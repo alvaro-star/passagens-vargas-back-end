@@ -3,7 +3,7 @@ package com.alvaro.empresas.passagens.pagamentos.services;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationException;
 import com.alvaro.empresas.passagens.dtos.FaturaPasajeDTO;
-import com.alvaro.empresas.passagens.dtos.pasagens.ContatoDTO;
+import com.alvaro.empresas.passagens.dtos.pasagens.InputContatoDTO;
 import com.alvaro.empresas.passagens.enums.TipoPagamento;
 import com.alvaro.empresas.passagens.helpers.PassagensPDF;
 import com.alvaro.empresas.passagens.models.ContatoModel;
@@ -42,14 +42,14 @@ public class FaturaPassagemService {
     @Autowired
     private ViagemRepository viagemRepository;
 
-    public FaturaPassagemModel saveCliente(ContatoDTO contatoDTO, BigDecimal precoTotal, ViagemModel viagem, TipoPagamento metodo) {
+    public FaturaPassagemModel saveCliente(InputContatoDTO inputContatoDTO, BigDecimal precoTotal, ViagemModel viagem, TipoPagamento metodo) {
         BigDecimal taxa = new BigDecimal("0.1");//Quanto será cobrado pelo serviço
         BigDecimal taxaServico = precoTotal.multiply(taxa);
 
         if (!metodo.equals(TipoPagamento.QR))
             throw new ValidationException("metodo", "Método de Pagamento inválido");
 
-        var contatoModel = new ContatoModel(contatoDTO);
+        var contatoModel = new ContatoModel(inputContatoDTO);
         var pagamento = new FaturaPassagemModel(precoTotal, BigDecimal.ZERO, taxaServico, false, metodo, viagem, null, contatoModel);
         return faturaPassagemRepository.save(pagamento);
     }

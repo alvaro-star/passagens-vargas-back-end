@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public record ViagemDTOListBusquedaEmpresa(
+public record ViagemDTOListBuscaEmpresa(
         UUID id,
         String logo,
         BigDecimal valorArrecadadoEfectivo,
@@ -19,13 +19,13 @@ public record ViagemDTOListBusquedaEmpresa(
         ParadaDTOComplete saida,
         ParadaDTOComplete destino,
         List<PrecoDTO> precos) {
-    public ViagemDTOListBusquedaEmpresa(ViagemModel model, String logo, ParadaDTOComplete saida,
-                                        ParadaDTOComplete destino, List<PrecoDTO> precos) {
+    public ViagemDTOListBuscaEmpresa(ViagemModel model, String logo, ParadaDTOComplete saida,
+                                     ParadaDTOComplete destino, List<PrecoDTO> precos) {
         this(model.getId(), logo, model.getValorArrecadadoDinheiro(), model.getValorArrecadadoWeb(),
                 model.isCobrado(), model.isCancelado(), saida, destino, precos);
     }
 
-    public ViagemDTOListBusquedaEmpresa(ViagemModel model) {
+    public ViagemDTOListBuscaEmpresa(ViagemModel model) {
         this(model.getId(), "",
                 model.getValorArrecadadoDinheiro(),
                 model.getValorArrecadadoWeb(),

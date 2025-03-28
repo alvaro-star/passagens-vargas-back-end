@@ -10,11 +10,19 @@ import java.util.UUID;
 
 public record PrecoDTO(
         UUID id,
-        @NotNull @DecimalMin(value = "10.00") BigDecimal preco,
-        @NotNull @Positive Integer nPiso,
-        @NotNull Boolean cheio,
-        @NotNull @Positive Integer nAssentosDisponiveis,
-        @NotNull UUID idViagem) {
+        @NotNull
+        @DecimalMin(value = "10.00")
+        BigDecimal preco,
+        @NotNull
+        @Positive
+        Integer nPiso,
+        @NotNull
+        Boolean cheio,
+        @NotNull
+        @Positive
+        Integer nAssentosDisponiveis,
+        @NotNull
+        UUID idViagem) {
 
     public PrecoDTO(PrecoModel model) {
         this(model.getId(), model.getPreco(), model.getNPiso(), model.getCheio(), model.getNAssentosDisponiveis(),

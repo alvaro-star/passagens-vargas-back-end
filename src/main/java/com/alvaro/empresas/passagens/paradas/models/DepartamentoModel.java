@@ -3,8 +3,9 @@ package com.alvaro.empresas.passagens.paradas.models;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.alvaro.empresas.passagens.paradas.dtos.DepartamentoDTO;
+import com.alvaro.empresas.passagens.paradas.dtos.DepartamentoInputDTO;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -37,9 +38,10 @@ public class DepartamentoModel {
     private String abreviacao;
 
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "departamento")
+    @JsonIgnore
     private List<CidadeModel> cidades = new ArrayList<>();
 
-    public DepartamentoModel(DepartamentoDTO dto) {
+    public DepartamentoModel(DepartamentoInputDTO dto) {
         nome = dto.nome().toUpperCase();
         abreviacao = dto.abreviacao().toUpperCase();
     }
@@ -49,7 +51,7 @@ public class DepartamentoModel {
         this.abreviacao = abreviacao.toUpperCase();
     }
 
-    public void updateValues(DepartamentoDTO dto) {
+    public void updateValues(DepartamentoInputDTO dto) {
         nome = dto.nome().toUpperCase();
         abreviacao = dto.abreviacao().toUpperCase();
     }

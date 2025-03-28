@@ -15,12 +15,12 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
-    public boolean mandarEmail(String destino, String assunto, String mensaje) {
+    public boolean mandarEmail(String destino, String assunto, String mensagem) {
         if (!destino.equals(sender)) {
             var message = new SimpleMailMessage();
             message.setTo(destino);
             message.setSubject(assunto);
-            message.setText(mensaje);
+            message.setText(mensagem);
             message.setFrom(sender);
             mailSender.send(message);
             return true;

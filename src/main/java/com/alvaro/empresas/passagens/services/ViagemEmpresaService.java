@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.UUID;
 
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
-import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,7 +30,7 @@ import com.alvaro.empresas.passagens.dtos.viagens.busca.ViagemDTOSolicitacaoFrom
 import com.alvaro.empresas.passagens.dtos.viagens.empresa.ViagemDTOCreate;
 import com.alvaro.empresas.passagens.dtos.viagens.empresa.ViagemDTOEmpresaResponse;
 import com.alvaro.empresas.passagens.dtos.viagens.empresa.ViagemDTOFormCopy;
-import com.alvaro.empresas.passagens.dtos.viagens.empresa.ViagemDTOListBusquedaEmpresa;
+import com.alvaro.empresas.passagens.dtos.viagens.empresa.ViagemDTOListBuscaEmpresa;
 import com.alvaro.empresas.passagens.enums.TipoParada;
 import com.alvaro.empresas.passagens.helpers.DateAuxiliarFunctions;
 import com.alvaro.empresas.passagens.helpers.thymeleaf.PDFThymeleaf;
@@ -82,8 +81,8 @@ public class ViagemEmpresaService {
         return model.orElseThrow(() -> new EntityNotFoundException(id, ViagemModel.class));
     }
 
-    public Page<ViagemDTOListBusquedaEmpresa> findAllByEmpresaBetweenDates(ViagemDTOSolicitacaoFromEmpresa solicitacao,
-            Pageable pageable) {
+    public Page<ViagemDTOListBuscaEmpresa> findAllByEmpresaBetweenDates(ViagemDTOSolicitacaoFromEmpresa solicitacao,
+                                                                        Pageable pageable) {
         var empresa = empresaService.findById(solicitacao.idEmpresa());
         Page<ViagemDTOJPQL> models;
         LocalDateTime dataInicio = helperDate.getFirstDayOfMonth(solicitacao.dataAnalise());
@@ -94,12 +93,12 @@ public class ViagemEmpresaService {
         return models.map(model -> {
             if (model.saida() == null || model.destino() == null)
                 throw new RestRuntimeException(HttpStatus.CONFLICT, "Existe uma viagem sem data de início ou fim");
-            return new ViagemDTOListBusquedaEmpresa(model.viagem());
+            return new ViagemDTOListBuscaEmpresa(model.viagem());
         });
     }
 
-    public Page<ViagemDTOListBusquedaEmpresa> findAllFromOnibus(OnibusModel onibusModel,
-            ViagemDTOSolicitacaoFromOnibus solicitacao, Pageable pageable) {
+    public Page<ViagemDTOListBuscaEmpresa> findAllFromOnibus(OnibusModel onibusModel,
+                                                             ViagemDTOSolicitacaoFromOnibus solicitacao, Pageable pageable) {
         LocalDateTime dataInicio = helperDate.getFirstDayOfMonth(solicitacao.dataAnalise());
         LocalDateTime dataFim = helperDate.getLastDayOfMonth(solicitacao.dataAnalise());
 
@@ -109,11 +108,11 @@ public class ViagemEmpresaService {
         return models.map(model -> {
             if (model.saida() == null || model.destino() == null)
                 throw new RestRuntimeException(HttpStatus.CONFLICT, "Existe uma viagem sem data de início ou fim");
-            return new ViagemDTOListBusquedaEmpresa(model.viagem());
+            return new ViagemDTOListBuscaEmpresa(model.viagem());
         });
     }
 
-    public List<ViagemDTOListBusquedaEmpresa> findViagensByDay(UUID idEmpresa, ViagemDTOSolicitacaoEmpresa dto) {
+    public List<ViagemDTOListBuscaEmpresa> findViagensByDay(UUID idEmpresa, ViagemDTOSolicitacaoEmpresa dto) {
         if (dto.idCidadeDestino().equals(dto.idCidadeSaida()))
             throw new ValidationException("idDestino", "O destino não pode ser o mesmo que a saída");
 
@@ -129,7 +128,7 @@ public class ViagemEmpresaService {
         LocalDateTime startDay = dto.dataSaida().atTime(LocalTime.MIN);
         LocalDateTime endDay = dto.dataSaida().atTime(LocalTime.MAX);
 
-        List<ViagemDTOListBusquedaEmpresa> viagensSelecionados = new ArrayList<>();
+        List<ViagemDTOListBuscaEmpresa> viagensSelecionados = new ArrayList<>();
 
         for (LugarModel lugarSaida : lugaresSaida) {
             for (LugarModel lugarDestino : lugaresDestino) {
@@ -144,7 +143,7 @@ public class ViagemEmpresaService {
                     var precos = viagem.viagem().getPrecos();
                     var precosDto = precos.stream().filter(p -> !p.getCheio()).map(PrecoDTO::new).toList();
                     viagensSelecionados
-                            .add(new ViagemDTOListBusquedaEmpresa(viagem.viagem(), null, saida, destino, precosDto));
+                            .add(new ViagemDTOListBuscaEmpresa(viagem.viagem(), null, saida, destino, precosDto));
                 }
             }
         }
@@ -152,7 +151,7 @@ public class ViagemEmpresaService {
         return viagensSelecionados;
     }
 
-    public List<ViagemDTOListBusquedaEmpresa> findViagensBySaida(UUID idEmpresa, ViagemDTOSolicitacaoEmpresa dto) {
+    public List<ViagemDTOListBuscaEmpresa> findViagensBySaida(UUID idEmpresa, ViagemDTOSolicitacaoEmpresa dto) {
         List<LugarModel> lugaresSaida = lugarRepository.findByCidadeId(dto.idCidadeSaida());
         if (lugaresSaida.isEmpty())
             throw new EntityNotFoundException(dto.idCidadeSaida(), CidadeModel.class);
@@ -160,7 +159,7 @@ public class ViagemEmpresaService {
         LocalDateTime inicioDia = dto.dataSaida().atTime(LocalTime.MIN);
         LocalDateTime fimDia = dto.dataSaida().atTime(LocalTime.MAX);
 
-        List<ViagemDTOListBusquedaEmpresa> viagensSelecionadas = new ArrayList<>();
+        List<ViagemDTOListBuscaEmpresa> viagensSelecionadas = new ArrayList<>();
 
         for (LugarModel lugarSaida : lugaresSaida) {
             List<ViagemEmpresaDTOJPQ> viagens = viagemRepository.findByEmpresaAndStartInInterval(idEmpresa,
@@ -175,7 +174,7 @@ public class ViagemEmpresaService {
                 var precos = viagem.viagem().getPrecos();
                 var precosDto = precos.stream().map(PrecoDTO::new).toList();
                 viagensSelecionadas
-                        .add(new ViagemDTOListBusquedaEmpresa(viagem.viagem(), null, saida, destino, precosDto));
+                        .add(new ViagemDTOListBuscaEmpresa(viagem.viagem(), null, saida, destino, precosDto));
             }
         }
 

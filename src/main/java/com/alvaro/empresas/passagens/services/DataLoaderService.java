@@ -1,27 +1,14 @@
-package com.alvaro.empresas.passagens.configuracoes;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+package com.alvaro.empresas.passagens.services;
 
 import com.alvaro.empresas.passagens.enums.TipoParada;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
+import com.alvaro.empresas.passagens.models.EmpresaModel;
+import com.alvaro.empresas.passagens.models.ViagemModel;
 import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusDTO;
 import com.alvaro.empresas.passagens.onibus.enums.TipePosicao;
 import com.alvaro.empresas.passagens.onibus.models.OnibusModel;
 import com.alvaro.empresas.passagens.onibus.models.PisoModel;
 import com.alvaro.empresas.passagens.onibus.repositories.OnibusRepository;
 import com.alvaro.empresas.passagens.onibus.repositories.PisoRepository;
-import com.alvaro.empresas.passagens.models.EmpresaModel;
-import com.alvaro.empresas.passagens.models.ViagemModel;
 import com.alvaro.empresas.passagens.paradas.models.CidadeModel;
 import com.alvaro.empresas.passagens.paradas.models.DepartamentoModel;
 import com.alvaro.empresas.passagens.paradas.models.LugarModel;
@@ -37,11 +24,19 @@ import com.alvaro.empresas.passagens.security.models.RoleModel;
 import com.alvaro.empresas.passagens.security.models.UsuarioModel;
 import com.alvaro.empresas.passagens.security.repositories.UsuarioRepository;
 import com.alvaro.empresas.passagens.security.services.RoleService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
 
-@Profile({ "h2", "mysql" })
-@Configuration
-public class DataLoader {
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 
+@Service
+public class DataLoaderService {
     private static final List<String> nomesEmpresas = List.of("MARZO", "ABRIL", "COPACABANA");
     @Autowired
     private RoleService roleService;
@@ -67,7 +62,7 @@ public class DataLoader {
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
-    @Bean
+
     public String loadDados() {
         List<EmpresaModel> empresas = loadEmpresas();
         loadUsuarios(empresas);
@@ -142,8 +137,8 @@ public class DataLoader {
         String apelidoAdmin, apelidoFuncionario;
         for (int i = 0; i < nomesEmpresas.size(); i++) {
             String valor = nomesEmpresas.get(i);
-            apelidoAdmin = valor.toString().toLowerCase() + "admin";
-            apelidoFuncionario = valor.toString().toLowerCase() + "funcionario";
+            apelidoAdmin = valor.toLowerCase() + "admin";
+            apelidoFuncionario = valor.toLowerCase() + "funcionario";
 
             var usuarioEmpresaAdmin = new UsuarioModel(apelidoAdmin + "@gmail.com", "Hero Nakamura",
                     "(33) - 33333-3333", passwordEncoder.encode(apelidoAdmin), empresas.get(i).getId());

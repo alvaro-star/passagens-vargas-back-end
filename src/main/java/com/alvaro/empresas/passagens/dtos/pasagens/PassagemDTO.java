@@ -4,7 +4,6 @@ import jakarta.validation.constraints.*;
 
 import java.util.Date;
 
-//Las sillas necessitan estar en el mismo piso
 public record PassagemDTO(
         Integer id,
         @NotBlank

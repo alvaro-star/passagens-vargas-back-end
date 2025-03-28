@@ -1,11 +1,9 @@
 package com.alvaro.empresas.passagens.configuracoes.exceptions.dtos;
 
-import java.io.Serializable;
-
-import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor

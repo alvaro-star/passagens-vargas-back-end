@@ -35,13 +35,13 @@ public class PasagensResource {
     @Autowired
     private PrecoService precoService;
 
-    @GetMapping("/{id}")
+    @GetMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
     public PassagemDTOEmpresaResponse getOne(@PathVariable UUID id) {
         return passagemService.getOne(id);
     }
 
-    @GetMapping("/{id}/download")
+    @GetMapping("{id}/download")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<byte[]> getFilePasaje(@PathVariable UUID id) {
         byte[] pasajePdf = passagemService.obterDownloadPassagem(id);
@@ -79,7 +79,7 @@ public class PasagensResource {
         return new CodigoPago(idPago);
     }
 
-    @DeleteMapping("/{id}") // Habilitado solo para el reembolso fijo
+    @DeleteMapping("{id}") // Habilitado solo para el reembolso fijo
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_FUNCIONARIO', 'ROLE_EMPRESA_ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void rembolso(@PathVariable UUID id) {

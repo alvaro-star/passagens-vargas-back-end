@@ -8,7 +8,7 @@ import lombok.*;
 import java.math.BigDecimal;
 
 @Table
-@Entity
+@Entity(name = "tb_fatura_reembolso")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor

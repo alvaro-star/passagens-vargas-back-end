@@ -38,7 +38,7 @@ public class OnibusResource {
         return onibusService.findAllFromEmpresa(idEmpresa, pageable);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
     public OnibusDTOResponse getOne(@PathVariable UUID id) {
         return onibusService.getOne(id);
@@ -53,7 +53,7 @@ public class OnibusResource {
     }
 
     //Somente o administrador
-    @PutMapping("/{id}")
+    @PutMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN')")
     public Object update(@PathVariable UUID id, @RequestBody @Valid OnibusDTOUpdate dto, BindingResult bindingResult) {
@@ -62,7 +62,7 @@ public class OnibusResource {
         return onibusService.update(dto, onibus, bindingResult);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN')")
     public void delete(@PathVariable UUID id) {

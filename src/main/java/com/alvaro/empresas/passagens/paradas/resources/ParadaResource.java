@@ -43,7 +43,7 @@ public class ParadaResource {
         return paradaService.getAll(pageable);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
     public ParadaDTOComplete getOne(@PathVariable Integer id) {
         return paradaService.getOne(id);
@@ -62,7 +62,7 @@ public class ParadaResource {
     }
 
 
-    @PutMapping("/{id}")
+    @PutMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
     public ParadaDTOComplete update(@Valid @RequestBody ParadaDTOUpdate dto, @PathVariable Integer id) {
@@ -74,7 +74,7 @@ public class ParadaResource {
         return paradaService.update(dto, paradaModel);
     }
 
-    @DeleteMapping("/{id}")//Melhorar política de exclusão, só pode excluir se ninguém pagou ou comprou
+    @DeleteMapping("{id}")//Melhorar política de exclusão, só pode excluir se ninguém pagou ou comprou
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
     public void delete(@PathVariable Integer id) {

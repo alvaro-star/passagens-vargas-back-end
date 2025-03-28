@@ -1,16 +1,15 @@
 package com.alvaro.empresas.passagens.services.validacao;
 
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationWithErrorListExceptions;
-import com.alvaro.empresas.passagens.configuracoes.exceptions.dtos.FieldMessage;
 import com.alvaro.empresas.passagens.dtos.pasagens.PassagemDTO;
 import com.alvaro.empresas.passagens.dtos.pasagens.PassagensDTO;
 import com.alvaro.empresas.passagens.dtos.pasagens.PassagensDTOVenta;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class ValidarCompraPassagens {
@@ -21,9 +20,9 @@ public class ValidarCompraPassagens {
 
         List<FieldMessageList> listaErros = new ArrayList<>();
         List<FieldMessageItemList> itensErrados = new ArrayList<>();
-        List<FieldMessage> erros = new ArrayList<>();
 
-        bindingResult.getFieldErrors().forEach(error -> erros.add(new FieldMessage(error)));
+
+        Map<String, String> erros = bindingResult.getFieldErrors().stream().collect(Collectors.toMap(FieldError::getField, e -> (e.getDefaultMessage() == null) ? "" : e.getDefaultMessage()));
 
         for (i = 0; i < passagensDTO.passagens().size(); i++) {
             itemList = validarPassagemDTO(i, passagensDTO.passagens().get(i));
@@ -33,7 +32,7 @@ public class ValidarCompraPassagens {
             listaErros.add(new FieldMessageList("passagens", itensErrados));
 
         if (!listaErros.isEmpty() || !erros.isEmpty())
-            throw new ValidationWithErrorListExceptions("Erro de validação", erros, listaErros);
+            throw new ValidationWithErrorListExceptions("Erro de validação", (HashMap<String, String>) erros, listaErros);
     }
 
     public void validarPassagensDTO(BindingResult bindingResult, PassagensDTO passagensDTO, String path) {
@@ -42,9 +41,8 @@ public class ValidarCompraPassagens {
         FieldMessageItemList itemList;
         List<FieldMessageList> listaErros = new ArrayList<>();
         List<FieldMessageItemList> itensErrados = new ArrayList<>();
-        List<FieldMessage> erros = new ArrayList<>();
 
-        bindingResult.getFieldErrors().forEach(error -> erros.add(new FieldMessage(error)));
+        var errors = bindingResult.getFieldErrors().stream().collect(Collectors.toMap(FieldError::getField, e -> (e.getDefaultMessage() == null) ? "" : e.getDefaultMessage()));
 
         for (i = 0; i < passagensDTO.passagens().size(); i++) {
             itemList = validarPassagemDTO(i, passagensDTO.passagens().get(i));
@@ -53,8 +51,8 @@ public class ValidarCompraPassagens {
         }
         if (!itensErrados.isEmpty())
             listaErros.add(new FieldMessageList("passagens", itensErrados));
-        if (!listaErros.isEmpty() || !erros.isEmpty())
-            throw new ValidationWithErrorListExceptions("Erro de validação", erros, listaErros);
+        if (!listaErros.isEmpty() || !errors.isEmpty())
+            throw new ValidationWithErrorListExceptions("Erro de validação", (HashMap<String, String>) errors, listaErros);
     }
 
     private static FieldMessageItemList validarPassagemDTO(int indice, PassagemDTO passagemDTO) {
@@ -64,16 +62,16 @@ public class ValidarCompraPassagens {
         itemList.setIndex(indice);
         mensagem = validarDocumento(passagemDTO.documento());
         if (!mensagem.isEmpty())
-            itemList.addError(new FieldMessage("documento", mensagem));
+            itemList.addError("documento", mensagem);
         mensagem = validarNome(passagemDTO.nome(), 50);
         if (!mensagem.isEmpty())
-            itemList.addError(new FieldMessage("nome", mensagem));
+            itemList.addError("nome", mensagem);
         mensagem = validarNascimento(passagemDTO.nascimento());
         if (!mensagem.isEmpty())
-            itemList.addError(new FieldMessage("nascimento", mensagem));
+            itemList.addError("nascimento", mensagem);
         mensagem = validarNAssento(passagemDTO.nAssento());
         if (!mensagem.isEmpty())
-            itemList.addError(new FieldMessage("nAssento", mensagem));
+            itemList.addError("nAssento", mensagem);
 
         if (!itemList.getErrors().isEmpty())
             return itemList;
