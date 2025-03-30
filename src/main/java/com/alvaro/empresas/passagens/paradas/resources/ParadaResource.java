@@ -42,14 +42,14 @@ public class ParadaResource {
 
     @GetMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ParadaModel findById(@PathVariable Integer id) {
+    public ParadaResponseDTO findById(@PathVariable Integer id) {
         return paradaService.findById(id);
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-    public PageOutput<ParadaModel> findAll(@PageableDefault(size = 10) Pageable pageable) {
+    public PageOutput<ParadaResponseDTO> findAll(@PageableDefault(size = 10) Pageable pageable) {
         return paradaService.findAll(pageable);
     }
 
