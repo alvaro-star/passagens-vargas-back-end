@@ -24,8 +24,8 @@ public class PisoResource {
 
     @GetMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
-    public PisoDTOResponse getOne(@PathVariable UUID id) {
-        return pisoService.getOne(id);
+    public PisoDTOResponse findById(@PathVariable UUID id) {
+        return pisoService.findById(id);
     }
 
     @PutMapping("{id}")

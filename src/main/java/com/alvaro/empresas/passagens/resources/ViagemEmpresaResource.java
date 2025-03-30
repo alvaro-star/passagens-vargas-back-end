@@ -49,7 +49,7 @@ public class ViagemEmpresaResource {
     @PostMapping("/from/empresa")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
-    public Page<ViagemDTOListBuscaEmpresa> getAllFromEmpresaBetweenMonth(
+    public Page<ViagemDTOListBuscaEmpresa> findAllFromEmpresaBetweenMonth(
             @RequestBody @Valid ViagemDTOSolicitacaoFromEmpresa solicitacao,
             @PageableDefault(sort = "dataHoraSaida") Pageable pageable) {
         userLogued.validIfIsAdminOrOwnerEmpresa(solicitacao.idEmpresa());
@@ -59,7 +59,7 @@ public class ViagemEmpresaResource {
     @PostMapping("/from/onibus")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
-    public Page<ViagemDTOListBuscaEmpresa> getAllFromOnibus(
+    public Page<ViagemDTOListBuscaEmpresa> findAllFromOnibus(
             @RequestBody @Valid ViagemDTOSolicitacaoFromOnibus solicitacao,
             @PageableDefault(sort = "dataHoraSaida") Pageable pageable) {
         var onibusModel = onibusService.findById(solicitacao.idOnibus());

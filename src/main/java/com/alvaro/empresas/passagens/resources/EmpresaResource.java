@@ -40,14 +40,14 @@ public class EmpresaResource {
     @GetMapping
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @ResponseStatus(HttpStatus.OK)
-    public Page<EmpresaModel> getAll(@PageableDefault Pageable pageable) {
+    public Page<EmpresaModel> findAll(@PageableDefault Pageable pageable) {
         return empresaService.findAll(pageable);
     }
 
     @GetMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
-    public EmpresaModel getOne(@PathVariable UUID id) {
-        return empresaService.getOne(id);
+    public EmpresaModel findById(@PathVariable UUID id) {
+        return empresaService.findById(id);
     }
 
     @PostMapping

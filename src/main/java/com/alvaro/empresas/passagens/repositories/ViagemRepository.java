@@ -2,6 +2,7 @@ package com.alvaro.empresas.passagens.repositories;
 
 import com.alvaro.empresas.passagens.dtos.viagens.JPQL.ViagemDTOJPQL;
 import com.alvaro.empresas.passagens.dtos.viagens.JPQL.ViagemDTOJPQLRelatorio;
+import com.alvaro.empresas.passagens.interfaces.ICustomRepository;
 import com.alvaro.empresas.passagens.models.ViagemModel;
 import com.alvaro.empresas.passagens.paradas.dtos.JPQL.ViagemBuscaDTOJPQL;
 import com.alvaro.empresas.passagens.paradas.dtos.JPQL.ViagemEmpresaDTOJPQ;
@@ -18,7 +19,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface ViagemRepository extends JpaRepository<ViagemModel, UUID> {
+public interface ViagemRepository extends JpaRepository<ViagemModel, UUID>, ICustomRepository<ViagemModel, UUID> {
     Page<ViagemModel> findByEmpresaId(UUID id, Pageable pageable);
 
     @Query("SELECT v FROM ViagemModel v WHERE v.empresa.id = :empresaId AND v.dataHoraSaida >= :dataHoraSaida")

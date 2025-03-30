@@ -56,7 +56,7 @@ public class OnibusService {
         return onibus.map(OnibusDTOResponse::new);
     }
 
-    public OnibusDTOResponse getOne(UUID id) {
+    public OnibusDTOResponse findById(UUID id) {
         var model = findById(id);
         var pisosDto = model.getPisos().stream().map(PisoDTOResponse::new).toList();
         return new OnibusDTOResponse(model, pisosDto);

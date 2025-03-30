@@ -7,17 +7,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationException;
 import com.alvaro.empresas.passagens.dtos.precos.PrecoDTO;
 import com.alvaro.empresas.passagens.dtos.viagens.ViagemDTOResponse;
 import com.alvaro.empresas.passagens.dtos.viagens.busca.ViagemDTOListBusca;
 import com.alvaro.empresas.passagens.dtos.viagens.busca.ViagemDTOSolicitacao;
 import com.alvaro.empresas.passagens.models.ViagemModel;
-import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
+import com.alvaro.empresas.passagens.paradas.dtos.ParadaResponseDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.JPQL.ViagemBuscaDTOJPQL;
 import com.alvaro.empresas.passagens.paradas.models.CidadeModel;
 import com.alvaro.empresas.passagens.paradas.models.LugarModel;
@@ -40,9 +40,9 @@ public class ViagemService {
         return model.orElseThrow(() -> new EntityNotFoundException(id, ViagemModel.class));
     }
 
-    public ViagemDTOResponse getOne(UUID id) {
+    public ViagemDTOResponse findById(UUID id) {
         var model = this.findById(id);
-        var paradas = model.getParadas().stream().map(ParadaDTOComplete::new).toList();
+        var paradas = model.getParadas().stream().map(ParadaResponseDTO::new).toList();
         var precos = model.getPrecos().stream().map(PrecoDTO::new).toList();
         return new ViagemDTOResponse(model, paradas, precos);
     }
@@ -75,8 +75,8 @@ public class ViagemService {
             for (LugarModel lugarDestino : lugaresDestino) {
                 List<ViagemBuscaDTOJPQL> viagens = viagemRepository.findByStartInInterval(lugarSaida.getId(), lugarDestino.getId(), startDay, endDay);
                 for (ViagemBuscaDTOJPQL viagem : viagens) {
-                    var saidaDTO = new ParadaDTOComplete(viagem.saida());
-                    var destinoDTO = new ParadaDTOComplete(viagem.destino());
+                    var saidaDTO = new ParadaResponseDTO(viagem.saida());
+                    var destinoDTO = new ParadaResponseDTO(viagem.destino());
                     if (!destinoDTO.dataHora().isAfter(saidaDTO.dataHora())) continue;
                     var precosModels = precoRepository.findByViagemId(viagem.idViagem());
                     var precosDTOs = precosModels.stream().map(PrecoDTO::new).toList();

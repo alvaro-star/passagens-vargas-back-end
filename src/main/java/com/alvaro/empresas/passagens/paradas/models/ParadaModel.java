@@ -3,8 +3,9 @@ package com.alvaro.empresas.passagens.paradas.models;
 import com.alvaro.empresas.passagens.enums.TipoParada;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.models.ViagemModel;
-import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTO;
-import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOUpdate;
+import com.alvaro.empresas.passagens.paradas.dtos.ParadaCreateDTO;
+import com.alvaro.empresas.passagens.paradas.dtos.ParadaUpdateDTO;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -36,28 +37,34 @@ public class ParadaModel {
     @Enumerated(EnumType.STRING)
     private TipoParada tipo;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "fk_idtb_lugar")
+    @JsonIgnore
     private LugarModel lugar;
     @Column(name = "fk_idtb_lugar", updatable = false, insertable = false)
     private Integer lugarId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_viagem")
+    @JsonIgnore
     private ViagemModel viagem;
     @Column(name = "fk_idtb_viagem", insertable = false, updatable = false)
     private UUID viagemId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_empresa")
+    @JsonIgnore
     private EmpresaModel empresa;
     @Column(name = "fk_idtb_empresa", insertable = false, updatable = false)
     private UUID empresaId;
 
-    public ParadaModel(ParadaDTO dto, TipoParada tipo) {
-        dataHora = dto.dataHora();
+    public ParadaModel(ParadaCreateDTO dto, TipoParada tipo, LugarModel lugar, ViagemModel viagem, EmpresaModel empresa) {
+        dataHora = dto.dataHora().withSecond(0).withNano(0);
         this.tipo = tipo;
         plataforma = dto.plataforma();
+        setViagem(viagem);
+        setLugar(lugar);
+        setEmpresa(empresa);
     }
 
     public ParadaModel(LocalDateTime dataHora, int plataforma, TipoParada tipo, LugarModel lugar, ViagemModel viagem) {
@@ -74,8 +81,7 @@ public class ParadaModel {
 
     public void setLugar(LugarModel lugar) {
         this.lugar = lugar;
-        this.lugarId = lugar.getId();
-
+        this.lugarId = (lugar != null) ? lugar.getId() : null;
     }
 
     public void setViagem(ViagemModel viagem) {
@@ -88,8 +94,8 @@ public class ParadaModel {
         if (empresa != null) this.empresaId = empresa.getId();
     }
 
-    public void updateValues(ParadaDTOUpdate dtoUpdate) {
-        dataHora = dtoUpdate.dataHora();
+    public void updateValues(ParadaUpdateDTO dtoUpdate) {
+        dataHora = dtoUpdate.dataHora().withSecond(0).withNano(0);
         if (dtoUpdate.plataforma() != null)
             plataforma = dtoUpdate.plataforma();
     }

@@ -5,11 +5,12 @@ import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 
-public record ParadaDTOUpdate(
-        Integer id,
+public record ParadaUpdateDTO(
         @NotNull
         @Future
         LocalDateTime dataHora,
+        @NotNull
         Integer plataforma,
-        Integer idLugar) {
+        Integer idLugar
+) {
 }

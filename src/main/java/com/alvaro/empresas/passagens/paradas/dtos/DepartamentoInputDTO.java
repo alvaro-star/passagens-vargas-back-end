@@ -9,7 +9,6 @@ public record DepartamentoInputDTO(
         @NotBlank
         String nome,
         @NotBlank
-        String abreviacao) {
-
-
+        String abreviacao
+) {
 }

@@ -179,20 +179,5 @@ public class ViagemModel extends IEntityStandart {
         return null;
     }
 
-    public boolean dataHoraValido(LocalDateTime dtoTime) {
-        if (this.getParadas().size() >= 2) {
-            LocalDateTime maior = this.getParadas().get(0).getDataHora();
-            LocalDateTime menor = this.getParadas().get(0).getDataHora();
-            for (ParadaModel parada : this.getParadas()) {
-                if (parada.getDataHora().isAfter(maior))
-                    maior = parada.getDataHora();
-
-                if (parada.getDataHora().isBefore(menor))
-                    menor = parada.getDataHora();
-            }
-            return dtoTime.isAfter(menor) && dtoTime.isBefore(maior);
-        }
-        return true;
-    }
 
 }

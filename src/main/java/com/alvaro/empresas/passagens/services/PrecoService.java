@@ -40,7 +40,7 @@ public class PrecoService {
         return salvos;
     }
 
-    public PrecoDTO getOne(UUID id) {
+    public PrecoDTO findById(UUID id) {
         var model = findById(id);
         return new PrecoDTO(model);
     }
@@ -51,7 +51,8 @@ public class PrecoService {
         var pisoElegido = new PisoModel();
 
         for (PisoModel piso : pisos)
-            if (piso.getNPiso().equals(model.getNPiso())) pisoElegido = piso;
+            if (piso.getNPiso().equals(model.getNPiso()))
+                pisoElegido = piso;
 
         PisoDTOResponse pisoDto = new PisoDTOResponse(pisoElegido);
         List<Integer> ocupados = passagemRepository.getPassagensVendidasENaoReembolsadas(model.getId());

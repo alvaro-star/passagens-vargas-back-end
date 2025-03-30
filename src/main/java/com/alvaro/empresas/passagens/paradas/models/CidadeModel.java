@@ -1,7 +1,8 @@
 package com.alvaro.empresas.passagens.paradas.models;
 
-import com.alvaro.empresas.passagens.paradas.dtos.CidadeDTO;
-import com.alvaro.empresas.passagens.paradas.dtos.CidadeDTOUpdate;
+import com.alvaro.empresas.passagens.paradas.dtos.CidadeCreateDTO;
+import com.alvaro.empresas.passagens.paradas.dtos.CidadeUpdateDTO;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -24,18 +25,21 @@ public class CidadeModel {
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "fk_idtb_departamento")
+    @JsonIgnore
     private DepartamentoModel departamento;
 
     @Column(name = "fk_idtb_departamento", insertable = false, updatable = false)
     private Integer departamentoId;
 
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "cidade")
+    @JsonIgnore
     private List<LugarModel> lugares = new ArrayList<>();
 
-    public CidadeModel(CidadeDTO dto, DepartamentoModel departamento) {
+    public CidadeModel(CidadeCreateDTO dto, DepartamentoModel departamento) {
         nome = dto.nome().toUpperCase();
         setDepartamento(departamento);
     }
+
     public CidadeModel(String nome, DepartamentoModel departamento) {
         this.nome = nome.toUpperCase();
         setDepartamento(departamento);
@@ -46,7 +50,7 @@ public class CidadeModel {
         this.departamentoId = (departamento != null) ? departamento.getId() : null;
     }
 
-    public void updateValues(CidadeDTOUpdate dto) {
+    public void updateValues(CidadeUpdateDTO dto) {
         nome = dto.nome().toUpperCase();
     }
 

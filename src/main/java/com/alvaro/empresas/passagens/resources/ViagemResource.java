@@ -22,8 +22,8 @@ public class ViagemResource {
 
     @GetMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ViagemDTOResponse getOne(@PathVariable UUID id) {
-        return viagemService.getOne(id);
+    public ViagemDTOResponse findById(@PathVariable UUID id) {
+        return viagemService.findById(id);
     }
 
     @PostMapping

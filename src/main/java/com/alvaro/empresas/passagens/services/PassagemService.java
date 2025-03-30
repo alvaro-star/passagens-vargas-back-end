@@ -1,26 +1,12 @@
 package com.alvaro.empresas.passagens.services;
 
-import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
-import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
-import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationException;
-import com.alvaro.empresas.passagens.onibus.models.PisoModel;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
-import com.alvaro.empresas.passagens.dtos.pasagens.PassagemDTO;
-import com.alvaro.empresas.passagens.dtos.pasagens.PassagemDTOEmpresaResponse;
-import com.alvaro.empresas.passagens.dtos.pasagens.PassagensDTO;
-import com.alvaro.empresas.passagens.dtos.pasagens.PassagensDTOVenta;
-import com.alvaro.empresas.passagens.enums.TipoPagamento;
-import com.alvaro.empresas.passagens.helpers.PassagensPDF;
-import com.alvaro.empresas.passagens.models.PassagemModel;
-import com.alvaro.empresas.passagens.models.PrecoModel;
-import com.alvaro.empresas.passagens.models.ViagemModel;
-import com.alvaro.empresas.passagens.pagamentos.models.FaturaPassagemModel;
-import com.alvaro.empresas.passagens.pagamentos.models.FaturaReembolsoModel;
-import com.alvaro.empresas.passagens.pagamentos.services.FaturaPassagemService;
-import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
-import com.alvaro.empresas.passagens.repositories.PassagemRepository;
-import com.alvaro.empresas.passagens.repositories.ViagemRepository;
-import com.alvaro.empresas.passagens.services.validacao.ValidarCompraPassagens;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,12 +16,25 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationException;
+import com.alvaro.empresas.passagens.dtos.pasagens.PassagemDTO;
+import com.alvaro.empresas.passagens.dtos.pasagens.PassagemDTOEmpresaResponse;
+import com.alvaro.empresas.passagens.dtos.pasagens.PassagensDTO;
+import com.alvaro.empresas.passagens.dtos.pasagens.PassagensDTOVenta;
+import com.alvaro.empresas.passagens.enums.TipoPagamento;
+import com.alvaro.empresas.passagens.helpers.PassagensPDF;
+import com.alvaro.empresas.passagens.models.PassagemModel;
+import com.alvaro.empresas.passagens.models.PrecoModel;
+import com.alvaro.empresas.passagens.models.ViagemModel;
+import com.alvaro.empresas.passagens.onibus.models.PisoModel;
+import com.alvaro.empresas.passagens.pagamentos.models.FaturaPassagemModel;
+import com.alvaro.empresas.passagens.pagamentos.models.FaturaReembolsoModel;
+import com.alvaro.empresas.passagens.pagamentos.services.FaturaPassagemService;
+import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
+import com.alvaro.empresas.passagens.repositories.PassagemRepository;
+import com.alvaro.empresas.passagens.repositories.ViagemRepository;
+import com.alvaro.empresas.passagens.services.validacao.ValidarCompraPassagens;
 
 @Service
 public class PassagemService {
@@ -54,18 +53,13 @@ public class PassagemService {
 
     private static final Logger logger = LoggerFactory.getLogger(PassagemService.class);
 
-    public PassagemModel findById(UUID id) {
-        var modelo = passagemRepository.findById(id);
-        return modelo.orElseThrow(() -> new EntityNotFoundException(id, PassagemModel.class));
-    }
-
-    public PassagemDTOEmpresaResponse getOne(UUID id) {
-        var modelo = findById(id);
+    public PassagemDTOEmpresaResponse findById(UUID id) {
+        var modelo = passagemRepository.findByIdOrThr(id);
         return new PassagemDTOEmpresaResponse(modelo);
     }
 
     public byte[] obterDownloadPassagem(UUID idPassagem) {
-        var passagemModel = findById(idPassagem);
+        var passagemModel = passagemRepository.findByIdOrThr(idPassagem);
         PassagensPDF passagemPDF = new PassagensPDF();
         byte[] arrayVazio = new byte[0];
         try {
@@ -245,7 +239,7 @@ public class PassagemService {
     }
 
     public void delete(UUID idPassagem) {
-        var model = findById(idPassagem);
+        var model = passagemRepository.findByIdOrThr(idPassagem);
 
         if (!model.getFaturaPassagem().getEstaPago()) {
             logger.error("Se tentou reembolsar uma passagem que não foi pago");

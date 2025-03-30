@@ -1,9 +1,5 @@
 package com.alvaro.empresas.passagens.paradas.services;
 
-import java.util.Optional;
-
-import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
-import com.alvaro.empresas.passagens.paradas.dtos.DepartamentoOutputDTO;
 import com.alvaro.empresas.passagens.paradas.repositories.CidadeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -28,8 +24,8 @@ public class DepartamentoService {
         return departamentoRepository.findByIdOrThr(id);
     }
 
-    public Page<DepartamentoOutputDTO> findAll(Pageable pageable) {
-        return departamentoRepository.findAll(pageable).map(DepartamentoOutputDTO::new);
+    public Page<DepartamentoModel> findAll(Pageable pageable) {
+        return departamentoRepository.findAll(pageable);
     }
 
     public DepartamentoModel save(DepartamentoInputDTO dto) {

@@ -1,7 +1,7 @@
 package com.alvaro.empresas.passagens.dtos.pasagens;
 
 import com.alvaro.empresas.passagens.models.PassagemModel;
-import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
+import com.alvaro.empresas.passagens.paradas.dtos.ParadaResponseDTO;
 
 import java.util.Date;
 import java.util.UUID;
@@ -14,8 +14,8 @@ public record PassagemDTOEmpresaResponse(
         Boolean estaRempolsado,
         Boolean estaPago,
         Integer nSilla,
-        ParadaDTOComplete saida,
-        ParadaDTOComplete destino) {
+        ParadaResponseDTO saida,
+        ParadaResponseDTO destino) {
     public PassagemDTOEmpresaResponse(PassagemModel model) {
         this(
                 model.getId(),
@@ -25,7 +25,7 @@ public record PassagemDTOEmpresaResponse(
                 model.getFaturaReembolsoId() != null,
                 model.getEstaPago(),
                 model.getNAssento(),
-                new ParadaDTOComplete(model.getSaida()),
-                new ParadaDTOComplete(model.getDestino()));
+                new ParadaResponseDTO(model.getSaida()),
+                new ParadaResponseDTO(model.getDestino()));
     }
 }

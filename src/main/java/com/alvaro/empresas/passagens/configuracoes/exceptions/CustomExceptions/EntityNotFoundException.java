@@ -19,7 +19,7 @@ public class EntityNotFoundException extends RuntimeException {
 
     private static String mountMessage(String id, Class<?> entityClass) {
         String entityName = clearEntityName(entityClass);
-        return "Entity " + entityName + " with id " + id + " not found";
+        return "Não existe um(a) " + entityName + " com o id " + id + " not found";
     }
 
     public EntityNotFoundException(Object id, Class<?> entityClass) {

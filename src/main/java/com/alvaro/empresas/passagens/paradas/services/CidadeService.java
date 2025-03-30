@@ -1,13 +1,15 @@
 package com.alvaro.empresas.passagens.paradas.services;
 
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
-import com.alvaro.empresas.passagens.paradas.dtos.CidadeDTO;
-import com.alvaro.empresas.passagens.paradas.dtos.CidadeDTOUpdate;
+import com.alvaro.empresas.passagens.paradas.dtos.CidadeCreateDTO;
+import com.alvaro.empresas.passagens.paradas.dtos.CidadeUpdateDTO;
 import com.alvaro.empresas.passagens.paradas.models.CidadeModel;
 import com.alvaro.empresas.passagens.paradas.repositories.CidadeRepository;
-import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
+import com.alvaro.empresas.passagens.paradas.repositories.DepartamentoRepository;
+import com.alvaro.empresas.passagens.paradas.repositories.LugarRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -15,46 +17,49 @@ import org.springframework.stereotype.Service;
 @Service
 public class CidadeService {
     @Autowired
+    private LugarRepository lugarRepository;
+    @Autowired
     private CidadeRepository cidadeRepository;
     @Autowired
-    private DepartamentoService departamentoService;
+    private DepartamentoRepository departamentoRepository;
 
-    public Page<CidadeDTO> findAll(Pageable pageable) {
-        Page<CidadeModel> models = cidadeRepository.findAll(pageable);
-        return models.map(CidadeDTO::new);
+    public CidadeModel findById(Integer id) {
+        return cidadeRepository.findByIdOrThr(id);
     }
 
-    public Page<CidadeDTO> findByNomeContaining(String nome, Pageable pageable) {
-        Page<CidadeModel> models = cidadeRepository.findByNomeContaining(nome, pageable);
-        return models.map(CidadeDTO::new);
+    public Page<CidadeModel> findAll(Pageable pageable) {
+        return cidadeRepository.findAll(pageable);
+    }
+
+    public Page<CidadeModel> findByNomeContaining(String nome, Pageable pageable) {
+        return cidadeRepository.findByNomeContaining(nome, pageable);
     }
 
     public Page<CidadeModel> findByDepartamentoId(Integer id, Pageable pageable) {
         return cidadeRepository.findByDepartamentoId(id, pageable);
     }
 
-    public CidadeModel findById(Integer id) {
-        return cidadeRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(id, CidadeModel.class));
-    }
-
-    public CidadeDTO save(CidadeDTO dto) {
-        var departamento = departamentoService.findById(dto.idDepartamento());
+    public CidadeModel save(CidadeCreateDTO dto) {
+        var departamento = departamentoRepository.findByIdOrThr(dto.idDepartamento());
         CidadeModel model = new CidadeModel(dto, departamento);
         cidadeRepository.save(model);
-        return new CidadeDTO(model);
+        return model;
     }
 
-    public CidadeDTO update(CidadeDTOUpdate dto, Integer id) {
+    public CidadeModel update(CidadeUpdateDTO dto, Integer id) {
         CidadeModel model = this.findById(id);
         model.updateValues(dto);
         cidadeRepository.save(model);
-        return new CidadeDTO(model);
+        return model;
     }
 
     public void delete(Integer id) {
         var model = findById(id);
-        if (!model.getLugares().isEmpty())
-            throw new RestRuntimeException(HttpStatus.BAD_REQUEST, "A cidade possui lugares registrados");
+        var pageable = PageRequest.of(0, 1);
+        var lugares = lugarRepository.findByCidadeId(id, pageable);
+        if (!lugares.isEmpty())
+            throw new RestRuntimeException(HttpStatus.CONFLICT, "A cidade possui lugares registrados");
         cidadeRepository.delete(model);
     }
+
 }

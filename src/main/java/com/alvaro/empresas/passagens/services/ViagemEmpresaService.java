@@ -41,7 +41,7 @@ import com.alvaro.empresas.passagens.models.ViagemModel;
 import com.alvaro.empresas.passagens.onibus.models.OnibusModel;
 import com.alvaro.empresas.passagens.onibus.models.PisoModel;
 import com.alvaro.empresas.passagens.onibus.services.OnibusService;
-import com.alvaro.empresas.passagens.paradas.dtos.ParadaDTOComplete;
+import com.alvaro.empresas.passagens.paradas.dtos.ParadaResponseDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.JPQL.ViagemEmpresaDTOJPQ;
 import com.alvaro.empresas.passagens.paradas.models.CidadeModel;
 import com.alvaro.empresas.passagens.paradas.models.LugarModel;
@@ -135,8 +135,8 @@ public class ViagemEmpresaService {
                 List<ViagemEmpresaDTOJPQ> viagens = viagemRepository.findByEmpresaAndStartInInterval(idEmpresa,
                         lugarSaida.getId(), lugarDestino.getId(), startDay, endDay);
                 for (ViagemEmpresaDTOJPQ viagem : viagens) {
-                    var saida = new ParadaDTOComplete(viagem.saida());
-                    var destino = new ParadaDTOComplete(viagem.destino());
+                    var saida = new ParadaResponseDTO(viagem.saida());
+                    var destino = new ParadaResponseDTO(viagem.destino());
                     if (!destino.dataHora().isAfter(saida.dataHora()))
                         continue;
 
@@ -165,8 +165,8 @@ public class ViagemEmpresaService {
             List<ViagemEmpresaDTOJPQ> viagens = viagemRepository.findByEmpresaAndStartInInterval(idEmpresa,
                     lugarSaida.getId(), inicioDia, fimDia);
             for (ViagemEmpresaDTOJPQ viagem : viagens) {
-                var saida = new ParadaDTOComplete(viagem.saida());
-                var destino = new ParadaDTOComplete(viagem.destino());
+                var saida = new ParadaResponseDTO(viagem.saida());
+                var destino = new ParadaResponseDTO(viagem.destino());
 
                 if (!destino.dataHora().isAfter(saida.dataHora()))
                     continue;
@@ -248,9 +248,9 @@ public class ViagemEmpresaService {
         model.addParada(destino);
         viagemRepository.save(model);
 
-        List<ParadaDTOComplete> paradas = new ArrayList<>();
-        paradas.add(new ParadaDTOComplete(saida));
-        paradas.add(new ParadaDTOComplete(destino));
+        List<ParadaResponseDTO> paradas = new ArrayList<>();
+        paradas.add(new ParadaResponseDTO(saida));
+        paradas.add(new ParadaResponseDTO(destino));
         return new ViagemDTOEmpresaResponse(model, paradas, preciosSalvos);
     }
 

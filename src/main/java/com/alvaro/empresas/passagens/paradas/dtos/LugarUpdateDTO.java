@@ -2,10 +2,8 @@ package com.alvaro.empresas.passagens.paradas.dtos;
 
 import jakarta.validation.constraints.NotBlank;
 
-public record CidadeDTOUpdate(
-        Integer id,
+public record LugarUpdateDTO(
         @NotBlank
         String nome
 ) {
-
 }

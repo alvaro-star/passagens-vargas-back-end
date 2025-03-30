@@ -2,6 +2,7 @@ package com.alvaro.empresas.passagens.repositories;
 
 import java.util.UUID;
 
+import com.alvaro.empresas.passagens.interfaces.ICustomRepository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -10,6 +11,6 @@ import com.alvaro.empresas.passagens.models.EmpresaModel;
 import jakarta.validation.constraints.NotNull;
 
 @Repository
-public interface EmpresaRepository extends JpaRepository<EmpresaModel, UUID> {
+public interface EmpresaRepository extends JpaRepository<EmpresaModel, UUID>, ICustomRepository<EmpresaModel, UUID> {
     boolean existsById(@NotNull UUID id);
 }

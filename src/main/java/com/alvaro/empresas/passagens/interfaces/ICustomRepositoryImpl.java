@@ -2,6 +2,7 @@ package com.alvaro.empresas.passagens.interfaces;
 
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -11,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.repository.core.RepositoryMethodContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+
 @Slf4j
 @Component
 public class ICustomRepositoryImpl<T, U> implements ICustomRepository<T, U> {
@@ -44,5 +46,18 @@ public class ICustomRepositoryImpl<T, U> implements ICustomRepository<T, U> {
                         "Houve um erro interno no servidor");
             }
         }
+    }
+
+    public T findByIdOrThr(U id, String fieldName) throws RuntimeException {
+        try {
+            var model = this.findByIdOrThr(id);
+            return model;
+        } catch (EntityNotFoundException ex) {
+            throw new ValidationException(fieldName, getDefaultMessageToValidationError(ex));
+        }
+    }
+
+    private String getDefaultMessageToValidationError(EntityNotFoundException ex) {
+        return "Não existe um(a) " + EntityNotFoundException.clearEntityName(ex.getEntityClass()) + " com este id";
     }
 }

@@ -40,8 +40,8 @@ public class OnibusResource {
 
     @GetMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
-    public OnibusDTOResponse getOne(@PathVariable UUID id) {
-        return onibusService.getOne(id);
+    public OnibusDTOResponse findById(@PathVariable UUID id) {
+        return onibusService.findById(id);
     }
 
     @PostMapping

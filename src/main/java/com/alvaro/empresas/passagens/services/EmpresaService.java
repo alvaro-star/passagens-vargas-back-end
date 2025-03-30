@@ -1,6 +1,17 @@
 package com.alvaro.empresas.passagens.services;
 
-import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
 import com.alvaro.empresas.passagens.dtos.InputEmpresaDTO;
 import com.alvaro.empresas.passagens.helpers.validators.ValidEnabledEntities;
@@ -11,15 +22,8 @@ import com.alvaro.empresas.passagens.security.models.RoleList;
 import com.alvaro.empresas.passagens.security.models.RoleModel;
 import com.alvaro.empresas.passagens.security.repositories.UsuarioRepository;
 import com.alvaro.empresas.passagens.security.services.RoleService;
-import jakarta.validation.constraints.NotBlank;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import jakarta.validation.constraints.NotBlank;
 
 @Service
 public class EmpresaService {
@@ -31,12 +35,7 @@ public class EmpresaService {
     private RoleService roleService;
 
     public EmpresaModel findById(UUID id) {
-        Optional<EmpresaModel> model = empresaRepository.findById(id);
-        return model.orElseThrow(() -> new EntityNotFoundException(id, EmpresaModel.class));
-    }
-
-    public EmpresaModel getOne(UUID id) {
-        return this.findById(id);
+        return empresaRepository.findByIdOrThr(id);
     }
 
     public Page<EmpresaModel> findAll(Pageable pageable) {
@@ -58,14 +57,16 @@ public class EmpresaService {
             throw new RestRuntimeException("O usuário não está registrado no sistema");
 
         var empresa = empresaRepository.existsById(empresaAdmin.idEmpresa());
-        if (!empresa) throw new RestRuntimeException("A empresa não existe");
+        if (!empresa)
+            throw new RestRuntimeException("A empresa não existe");
         if (usuario.get().hasRole(RoleList.ROLE_EMPRESA_ADMIN))
             throw new RestRuntimeException("O usuário já é um administrador");
 
         List<RoleModel> rolesModels = roleService.findAll();
         Set<RoleModel> roles = new HashSet<>(rolesModels);
 
-        if (usuario.get().hasRole(RoleList.ROLE_EMPRESA_FUNCIONARIO) && !usuario.get().getEmpresaId().equals(empresaAdmin.idEmpresa()))
+        if (usuario.get().hasRole(RoleList.ROLE_EMPRESA_FUNCIONARIO)
+                && !usuario.get().getEmpresaId().equals(empresaAdmin.idEmpresa()))
             throw new RestRuntimeException("O usuário está relacionado com outra empresa");
 
         usuario.get().setRoles(roles);
@@ -77,7 +78,8 @@ public class EmpresaService {
     public void removerAdmin(@NotBlank String email) {
         var usuario = usuarioRepository.findByEmail(email);
 
-        if (usuario.isEmpty()) throw new RestRuntimeException("O usuário não está registrado no sistema");
+        if (usuario.isEmpty())
+            throw new RestRuntimeException("O usuário não está registrado no sistema");
 
         Set<RoleModel> roles = new HashSet<>();
         var roleCliente = roleService.getByRoleName(RoleList.ROLE_CLIENTE);

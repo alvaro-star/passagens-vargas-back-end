@@ -1,9 +1,5 @@
 package com.alvaro.empresas.passagens.paradas.resources;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.alvaro.empresas.passagens.paradas.dtos.DepartamentoOutputDTO;
 import com.alvaro.empresas.passagens.paradas.models.CidadeModel;
 import com.alvaro.empresas.passagens.paradas.services.CidadeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.alvaro.empresas.passagens.paradas.dtos.CidadeDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.DepartamentoInputDTO;
 import com.alvaro.empresas.passagens.paradas.models.DepartamentoModel;
 import com.alvaro.empresas.passagens.paradas.services.DepartamentoService;
@@ -41,7 +36,7 @@ public class DepartamentoResource {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Page<DepartamentoOutputDTO> getAll(@PageableDefault(size = 10) Pageable pageable) {
+    public Page<DepartamentoModel> findAll(@PageableDefault(size = 10) Pageable pageable) {
         return departamentoService.findAll(pageable);
     }
 
@@ -51,8 +46,11 @@ public class DepartamentoResource {
         return departamentoService.findById(id);
     }
 
-
-
+    @GetMapping("{id}/cidades")
+    @ResponseStatus(HttpStatus.OK)
+    public Page<CidadeModel> findById(@PathVariable Integer id, Pageable pageable) {
+        return cidadeService.findByDepartamentoId(id, pageable);
+    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

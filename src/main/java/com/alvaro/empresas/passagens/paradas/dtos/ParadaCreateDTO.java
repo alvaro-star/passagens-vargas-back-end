@@ -1,6 +1,5 @@
 package com.alvaro.empresas.passagens.paradas.dtos;
 
-import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -8,8 +7,7 @@ import jakarta.validation.constraints.Positive;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record ParadaDTO(
-        Integer id,
+public record ParadaCreateDTO(
         @NotNull
         @Positive
         Integer plataforma,
@@ -21,8 +19,4 @@ public record ParadaDTO(
         @NotNull
         UUID idViagem
 ) {
-
-    public ParadaDTO(ParadaModel model) {
-        this(model.getId(), model.getPlataforma(), model.getDataHora(), model.getLugarId(), model.getViagemId());
-    }
 }

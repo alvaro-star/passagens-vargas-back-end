@@ -1,6 +1,7 @@
 package com.alvaro.empresas.passagens.repositories;
 
 import com.alvaro.empresas.passagens.dtos.viagens.JPQL.PassagemJPQLBusca;
+import com.alvaro.empresas.passagens.interfaces.ICustomRepository;
 import com.alvaro.empresas.passagens.models.PassagemModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface PassagemRepository extends JpaRepository<PassagemModel, UUID> {
+public interface PassagemRepository extends JpaRepository<PassagemModel, UUID>, ICustomRepository<PassagemModel, UUID> {
     @Modifying
     @Query(value = "UPDATE tb_passagem SET pago = :pago WHERE fk_idtb_fatura_passagem = :idFatura", nativeQuery = true)
     void updateValuePagado(@Param("idFatura") UUID id, @Param("pago") Boolean pago);

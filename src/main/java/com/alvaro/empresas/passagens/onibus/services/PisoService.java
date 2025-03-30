@@ -37,7 +37,7 @@ public class PisoService {
         return model.orElseThrow(() -> new EntityNotFoundException(id, PisoModel.class));
     }
 
-    public PisoDTOResponse getOne(UUID id) {
+    public PisoDTOResponse findById(UUID id) {
         var model = this.findById(id);
         return new PisoDTOResponse(model);
     }

@@ -37,8 +37,8 @@ public class PasagensResource {
 
     @GetMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
-    public PassagemDTOEmpresaResponse getOne(@PathVariable UUID id) {
-        return passagemService.getOne(id);
+    public PassagemDTOEmpresaResponse findById(@PathVariable UUID id) {
+        return passagemService.findById(id);
     }
 
     @GetMapping("{id}/download")

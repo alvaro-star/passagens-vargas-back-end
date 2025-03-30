@@ -27,8 +27,8 @@ public class PrecoResource {
 
     @GetMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
-    public PrecoDTO getOne(@PathVariable(value = "id") UUID id) {
-        return precoService.getOne(id);
+    public PrecoDTO findById(@PathVariable(value = "id") UUID id) {
+        return precoService.findById(id);
     }
 
     @GetMapping("{id}/vender")

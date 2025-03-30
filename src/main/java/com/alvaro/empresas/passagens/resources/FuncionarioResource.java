@@ -27,7 +27,7 @@ public class FuncionarioResource {
     @GetMapping("/{idEmpresa}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN')")
     @ResponseStatus(HttpStatus.OK)
-    public Page<ResponseFuncionarioDTO> getAll(@PathVariable UUID idEmpresa, Pageable pageable) {
+    public Page<ResponseFuncionarioDTO> findAll(@PathVariable UUID idEmpresa, Pageable pageable) {
         userLogued.validIfIsAdminOrOwnerEmpresa(idEmpresa);
         return funcionarioService.findAllFromEmpresa(idEmpresa, pageable);
     }
