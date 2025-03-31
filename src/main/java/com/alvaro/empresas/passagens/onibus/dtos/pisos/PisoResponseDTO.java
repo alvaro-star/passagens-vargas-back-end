@@ -7,7 +7,7 @@ import java.util.UUID;
 public record PisoDTOResponse(
         UUID id,
         Integer nLinhas,
-        Integer nColunas,//Tipo Ônibus
+        Integer nColunas,
         String distribuicaoFileira,
         Integer nPiso,
         String inicioContagem,
