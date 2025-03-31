@@ -1,7 +1,5 @@
 package com.alvaro.empresas.passagens.paradas.resources;
 
-import java.time.LocalDateTime;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -16,19 +14,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.alvaro.empresas.passagens.dtos.PageOutput;
-import com.alvaro.empresas.passagens.enums.TipoParada;
-import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
-import com.alvaro.empresas.passagens.helpers.validators.ValidEnabledEntities;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaCreateDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaResponseDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaUpdateDTO;
-import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.alvaro.empresas.passagens.paradas.services.ParadaService;
-import com.alvaro.empresas.passagens.security.models.RoleList;
-import com.alvaro.empresas.passagens.services.ViagemEmpresaService;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;

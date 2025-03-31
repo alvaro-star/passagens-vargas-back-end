@@ -35,9 +35,9 @@ public class FuncionarioResource {
     @PostMapping("/{idEmpresa}")
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void save(@RequestBody @Valid RegisterDTOFuncionario registerDto, @PathVariable UUID idEmpresa) {
+    public void save(@RequestBody @Valid RegisterDTOFuncionario registerDTO, @PathVariable UUID idEmpresa) {
         userLogued.validIfIsMyEmpresa(idEmpresa);
-        funcionarioService.save(registerDto, idEmpresa);
+        funcionarioService.save(registerDTO, idEmpresa);
     }
 
     @DeleteMapping("/{idEmpresa}/{email}")

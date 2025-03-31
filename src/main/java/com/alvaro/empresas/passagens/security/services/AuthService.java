@@ -77,13 +77,13 @@ public class AuthService {
         return new TokenDTO(accessToken, null);
     }
 
-    public void registrar(RegisterDTO registerDto) {
-        var usuarioLogin = usuarioRepository.findByEmail(registerDto.email());
+    public void registrar(RegisterDTO registerDTO) {
+        var usuarioLogin = usuarioRepository.findByEmail(registerDTO.email());
         if (usuarioLogin.isPresent())
             throw new RestRuntimeException("Já existe um usuário registrado");
 
         LocalDateTime inicioDoDia = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(1);
-        var solicitacoes = usuarioSolicitacaoRepository.findByEmailAfterTime(registerDto.email(), inicioDoDia, TipoSolicitacao.CREATE);
+        var solicitacoes = usuarioSolicitacaoRepository.findByEmailAfterTime(registerDTO.email(), inicioDoDia, TipoSolicitacao.CREATE);
 
         if (solicitacoes.size() > 5)
             throw new RestRuntimeException("Já houve muitas tentativas com este e-mail hoje");
@@ -95,8 +95,8 @@ public class AuthService {
         if (logado)
             throw new RestRuntimeException(HttpStatus.UNAUTHORIZED, "Há um usuário que já iniciou sessão");
 
-        String senhaCriptografada = this.passwordEncoder.encode(registerDto.senha());
-        UsuarioSolicitacaoModel novoUsuario = new UsuarioSolicitacaoModel(registerDto.email(), registerDto.nome(), registerDto.telefone(), senhaCriptografada, TipoSolicitacao.CREATE);
+        String senhaCriptografada = this.passwordEncoder.encode(registerDTO.senha());
+        UsuarioSolicitacaoModel novoUsuario = new UsuarioSolicitacaoModel(registerDTO.email(), registerDTO.nome(), registerDTO.telefone(), senhaCriptografada, TipoSolicitacao.CREATE);
         usuarioSolicitacaoRepository.save(novoUsuario);
         boolean emailEnviado;
         emailEnviado = emailService.mandarEmail(novoUsuario.getEmail(), "Código de Verificação", novoUsuario.getNome() + ", este é o seu código de verificação para sua conta no aplicativo: \n" + novoUsuario.getId().toString() + "\nNão compartilhe com ninguém");

@@ -3,7 +3,7 @@ package com.alvaro.empresas.passagens.services;
 import com.alvaro.empresas.passagens.enums.TipoParada;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.models.ViagemModel;
-import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusDTO;
+import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusCreateDTO;
 import com.alvaro.empresas.passagens.onibus.enums.TipePosicao;
 import com.alvaro.empresas.passagens.onibus.models.OnibusModel;
 import com.alvaro.empresas.passagens.onibus.models.PisoModel;
@@ -190,8 +190,8 @@ public class DataLoaderService {
             terminalPlacaChar = nomeEmpresa.charAt(0);
             terminalPlaca = Character.toString(terminalPlacaChar);
             for (int k = 0; k < nRepeticoes; k++) {
-                OnibusDTO onibusDTO = new OnibusDTO(k + terminalPlaca + terminalPlaca + terminalPlaca);
-                onibus.add(new OnibusModel(onibusDTO, empresas.get(i)));
+                OnibusCreateDTO onibusCreateDTO = new OnibusCreateDTO(k + terminalPlaca + terminalPlaca + terminalPlaca, null, new ArrayList<>());
+                onibus.add(new OnibusModel(onibusCreateDTO, empresas.get(i)));
             }
             if (i == 2)
                 break;

@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.dtos.precos;
 
-import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoDTOResponse;
+import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoResponseDTO;
 import com.alvaro.empresas.passagens.models.PrecoModel;
 
 import java.math.BigDecimal;
@@ -13,9 +13,9 @@ public record PrecoDTOResponseViagem(
         Integer nPiso,
         Boolean cheio,
         Integer nAssentosDisponiveis,
-        PisoDTOResponse piso,
+        PisoResponseDTO piso,
         List<Integer> assentosOcupados) {
-    public PrecoDTOResponseViagem(PrecoModel model, PisoDTOResponse piso, List<Integer> assentosOcupados) {
+    public PrecoDTOResponseViagem(PrecoModel model, PisoResponseDTO piso, List<Integer> assentosOcupados) {
         this(model.getId(), model.getPreco(), model.getNPiso(), model.getCheio(), model.getNAssentosDisponiveis(), piso,
                 assentosOcupados);
     }

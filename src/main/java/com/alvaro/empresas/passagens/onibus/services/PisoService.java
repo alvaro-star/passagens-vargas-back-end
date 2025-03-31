@@ -3,13 +3,13 @@ package com.alvaro.empresas.passagens.onibus.services;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationException;
+import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
 import com.alvaro.empresas.passagens.helpers.validators.ValidEnabledEntities;
-import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoDTOCreate;
-import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoDTOResponse;
-import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoDTOUpdate;
+import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoCreateDTO;
+import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoResponseDTO;
+import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoUpdateDTO;
 import com.alvaro.empresas.passagens.onibus.models.OnibusModel;
 import com.alvaro.empresas.passagens.onibus.models.PisoModel;
-import com.alvaro.empresas.passagens.onibus.repositories.OnibusRepository;
 import com.alvaro.empresas.passagens.onibus.repositories.PisoRepository;
 
 import com.alvaro.empresas.passagens.repositories.ViagemRepository;
@@ -31,40 +31,21 @@ public class PisoService {
     private PisoRepository pisoRepository;
     @Autowired
     private ViagemRepository viagemRepository;
+    @Autowired
+    private UserLoguedComponent userLogued;
 
-    public PisoModel findById(UUID id) {
-        Optional<PisoModel> model = pisoRepository.findById(id);
-        return model.orElseThrow(() -> new EntityNotFoundException(id, PisoModel.class));
-    }
-
-    public PisoDTOResponse findById(UUID id) {
-        var model = this.findById(id);
-        return new PisoDTOResponse(model);
-    }
-
-    public Page<PisoDTOResponse> findAll(Pageable pageable) {
-        Page<PisoModel> pisos = pisoRepository.findAll(pageable);
-        return pisos.map(PisoDTOResponse::new);
+    public PisoResponseDTO findById(UUID id) {
+        var model = pisoRepository.findByIdOrThr(id);
+        return new PisoResponseDTO(model);
     }
 
     @Transactional
-    public PisoDTOResponse salvar(PisoDTOCreate dto, OnibusModel onibusModel, Integer nPiso, Integer nPrimeiroAssento) {
-        int nAssentos = dto.getNAssentos();
-        for (Integer posicao : dto.getPosicoesBloquedas()) {
-            if (posicao > nAssentos)
-                throw new ValidationException("posicoesBloqueadas", "As posições indisponíveis são inválidas");
-        }
-
-        var pisoModel = new PisoModel(dto, nPiso, nPrimeiroAssento);
-        pisoModel.setOnibus(onibusModel);
-        var saved = pisoRepository.save(pisoModel);
-        return new PisoDTOResponse(saved);
-    }
-
-    @Transactional
-    public PisoDTOResponse update(PisoDTOUpdate dto, PisoModel model) {
+    public PisoResponseDTO update(UUID id, PisoUpdateDTO dto) {
+        var model = pisoRepository.findByIdOrThr(id);
         var onibus = model.getOnibus();
         var empresa = onibus.getEmpresa();
+
+        userLogued.validIfIsMyEmpresa(model.getOnibus().getEmpresaId());
         ValidEnabledEntities.validOnibus(onibus);
         ValidEnabledEntities.validEmpresa(empresa);
 
@@ -85,6 +66,6 @@ public class PisoService {
         }
 
         pisoRepository.saveAll(pisos);
-        return new PisoDTOResponse(model);
+        return new PisoResponseDTO(model);
     }
 }

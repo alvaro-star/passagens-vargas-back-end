@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.onibus.dtos.onibus;
 
-import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoDTOResponse;
+import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoResponseDTO;
 import com.alvaro.empresas.passagens.onibus.models.OnibusModel;
 
 import java.math.BigDecimal;
@@ -16,16 +16,18 @@ public record OnibusDTOResponse(
         BigDecimal valorViagensNaoWeb,
         BigDecimal valorViagensWeb,
         UUID idEmpresa,
-        List<PisoDTOResponse> pisos) {
+        List<PisoResponseDTO> pisos) {
 
-    public OnibusDTOResponse(OnibusModel modelo,
+    public OnibusDTOResponse(
+            OnibusModel modelo,
             BigDecimal valorViagensDinheiro,
             BigDecimal valorViagensNaoWeb,
             BigDecimal valorViagensWeb,
-            List<PisoDTOResponse> pisos) {
+            List<PisoResponseDTO> pisos
+    ) {
         this(modelo.getId(),
                 modelo.getPlaca(),
-                modelo.isHabilitado(),
+                modelo.isEnabled(),
                 valorViagensDinheiro,
                 valorViagensNaoWeb,
                 valorViagensWeb,
@@ -33,7 +35,7 @@ public record OnibusDTOResponse(
                 pisos);
     }
 
-    public OnibusDTOResponse(OnibusModel modelo, List<PisoDTOResponse> pisos) {
+    public OnibusDTOResponse(OnibusModel modelo, List<PisoResponseDTO> pisos) {
         this(modelo, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, pisos);
     }
 

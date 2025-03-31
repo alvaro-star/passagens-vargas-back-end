@@ -2,6 +2,8 @@ package com.alvaro.empresas.passagens.resources;
 
 import com.alvaro.empresas.passagens.dtos.InputEmpresaDTO;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
+import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusDTOResponse;
+import com.alvaro.empresas.passagens.onibus.services.OnibusService;
 import com.alvaro.empresas.passagens.security.dtos.RegisterDTOEmpresaAdmin;
 import com.alvaro.empresas.passagens.services.EmpresaService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -9,6 +11,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,6 +25,8 @@ import java.util.UUID;
 public class EmpresaResource {
     @Autowired
     private EmpresaService empresaService;
+    @Autowired
+    private OnibusService onibusService;
 
     @PostMapping("admin")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -44,10 +49,20 @@ public class EmpresaResource {
         return empresaService.findAll(pageable);
     }
 
+
     @GetMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
     public EmpresaModel findById(@PathVariable UUID id) {
         return empresaService.findById(id);
+    }
+
+    @GetMapping("{id}/onibus")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
+    public Page<OnibusDTOResponse> findOnibusFromEmpresa(
+            @PathVariable UUID id,
+            @PageableDefault(sort = {"createdAt"}, direction = Sort.Direction.DESC) Pageable pageable) {
+        return onibusService.findByEmpresaId(id, pageable);
     }
 
     @PostMapping

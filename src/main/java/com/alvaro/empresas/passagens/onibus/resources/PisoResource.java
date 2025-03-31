@@ -1,7 +1,7 @@
 package com.alvaro.empresas.passagens.onibus.resources;
 
-import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoDTOResponse;
-import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoDTOUpdate;
+import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoResponseDTO;
+import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoUpdateDTO;
 import com.alvaro.empresas.passagens.onibus.services.PisoService;
 import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -19,21 +19,17 @@ import java.util.UUID;
 public class PisoResource {
     @Autowired
     private PisoService pisoService;
-    @Autowired
-    private UserLoguedComponent userLogued;
 
     @GetMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
-    public PisoDTOResponse findById(@PathVariable UUID id) {
+    public PisoResponseDTO findById(@PathVariable UUID id) {
         return pisoService.findById(id);
     }
 
     @PutMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN')")
-    public Object update(@PathVariable UUID id, @RequestBody @Valid PisoDTOUpdate dto) {
-        var piso = pisoService.findById(id);
-        userLogued.validIfIsMyEmpresa(piso.getOnibus().getEmpresaId());
-        return pisoService.update(dto, piso);
+    public Object update(@PathVariable UUID id, @RequestBody @Valid PisoUpdateDTO dto) {
+        return pisoService.update(id, dto);
     }
 }

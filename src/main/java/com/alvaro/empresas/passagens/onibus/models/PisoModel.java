@@ -1,12 +1,13 @@
 package com.alvaro.empresas.passagens.onibus.models;
 
-import com.alvaro.empresas.passagens.models.IEntityStandart;
-import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoDTOCreate;
-import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoDTOUpdate;
+import com.alvaro.empresas.passagens.interfaces.IEntityStandart;
+import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoCreateDTO;
+import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoUpdateDTO;
 import com.alvaro.empresas.passagens.onibus.enums.TipePosicao;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
 import java.util.UUID;
 
 
@@ -43,19 +44,22 @@ public class PisoModel extends IEntityStandart {
 
     private String posicoesBloquedas = "";
 
-    public PisoModel(PisoDTOCreate dto, Integer nPiso, Integer primeiroAssento) {
-        nAssentos = dto.getNColunas() * dto.getNLinhas() - dto.getPosicoesBloquedas().size();
-        nLinhas = dto.getNLinhas();
-        nColunas = dto.getNColunas();
-        distribuicaoFileira = dto.getDistribuicaoFileira();
-        inicioContagem = dto.getInicioContagem();
+    public PisoModel(PisoCreateDTO dto, Integer nPiso, Integer primeiroAssento) {
+        nAssentos = dto.nAssentosDisponiveis();
+        nLinhas = dto.nLinhas();
+        nColunas = dto.nColunas();
+        distribuicaoFileira = dto.distribuicaoFileira();
+        inicioContagem = dto.inicioContagem();
         this.nPiso = nPiso;
         this.primeiroAssento = primeiroAssento;
+        this.posicoesBloquedas = joinString(",", dto.posicoesBloquedas());
+    }
+
+    private String joinString(String delimiter, List<Integer> numbers) {
         StringBuilder str = new StringBuilder();
-        for (Integer posicaoBloqueada : dto.getPosicoesBloquedas())
-            str.append(posicaoBloqueada).append(",");
-        str.deleteCharAt(str.length() - 1);
-        this.posicoesBloquedas = str.toString();
+        numbers.forEach(number -> str.append(number).append(delimiter));
+        if (numbers.size() > 1) str.deleteCharAt(str.length() - 1);
+        return str.toString();
     }
 
     public int[] getPosicionesBloqueadasIntegerList() {
@@ -87,7 +91,7 @@ public class PisoModel extends IEntityStandart {
         this.onibus = onibus;
     }
 
-    public void updateValues(PisoDTOUpdate dto) {
+    public void updateValues(PisoUpdateDTO dto) {
         nAssentos = dto.getNColunas() * dto.getNLinhas() - dto.getPosicoesIndisponiveis().size();
         nLinhas = dto.getNLinhas();
         nColunas = dto.getNColunas();

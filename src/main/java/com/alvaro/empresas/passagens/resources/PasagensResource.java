@@ -51,20 +51,20 @@ public class PasagensResource {
         return new ResponseEntity<>(pasajePdf, headers, HttpStatus.OK);
     }
 
-    @GetMapping("/from/{idPrecio}")
+    @GetMapping("/from/{idPreco}")
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_FUNCIONARIO', 'ROLE_EMPRESA_ADMIN', 'ROLE_ADMIN')")
     @ResponseStatus(HttpStatus.OK)
-    public List<PassagemDTOEmpresaResponse> getPasajerosFromPrecio(@PathVariable UUID idPrecio) {
-        var precio = precoService.findById(idPrecio);
+    public List<PassagemDTOEmpresaResponse> getPasajerosFromPreco(@PathVariable UUID idPreco) {
+        var precio = precoService.findById(idPreco);
         userLogued.validIfIsAdminOrOwnerEmpresa(precio.getEmpresaId());
-        return passagemService.getPassagensByPreco(idPrecio);
+        return passagemService.getPassagensByPreco(idPreco);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Object save(@RequestBody @Valid PassagensDTO dto, BindingResult bindingResult) { // Venta de pasajes al
                                                                                             // público
-        return passagemService.salvarCliente(dto, bindingResult);
+        return passagemService.saveCliente(dto, bindingResult);
     }
 
     @PostMapping("/vender")
@@ -75,7 +75,7 @@ public class PasagensResource {
         userLogued.validIfIsMyEmpresa(viaje.getEmpresaId());
         ValidEnabledEntities.validEmpresa(viaje.getEmpresa());
 
-        var idPago = passagemService.salvarEmpresa(dto, viaje, bindingResult);
+        var idPago = passagemService.saveEmpresa(dto, viaje, bindingResult);
         return new CodigoPago(idPago);
     }
 

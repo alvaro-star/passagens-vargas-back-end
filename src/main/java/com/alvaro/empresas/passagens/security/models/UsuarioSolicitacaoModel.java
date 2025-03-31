@@ -1,7 +1,7 @@
 package com.alvaro.empresas.passagens.security.models;
 
 import com.alvaro.empresas.passagens.enums.TipoSolicitacao;
-import com.alvaro.empresas.passagens.models.IEntityStandart;
+import com.alvaro.empresas.passagens.interfaces.IEntityStandart;
 import com.alvaro.empresas.passagens.security.dtos.UsuarioDTOUpdate;
 
 import jakarta.persistence.AttributeOverride;

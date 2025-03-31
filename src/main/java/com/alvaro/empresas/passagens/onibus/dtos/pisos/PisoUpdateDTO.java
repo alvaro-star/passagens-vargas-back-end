@@ -17,7 +17,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class PisoDTOUpdate {
+public class PisoUpdateDTO {
 
     @NotNull
     @Min(value = 1)

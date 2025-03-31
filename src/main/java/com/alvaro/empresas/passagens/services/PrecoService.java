@@ -1,21 +1,21 @@
 package com.alvaro.empresas.passagens.services;
 
-import com.alvaro.empresas.passagens.dtos.precos.PrecoDTOResponseViagem;
-import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoDTOResponse;
-import com.alvaro.empresas.passagens.onibus.models.PisoModel;
-import com.alvaro.empresas.passagens.dtos.precos.PrecoDTO;
-import com.alvaro.empresas.passagens.dtos.precos.PrecoDTOUpdate;
-import com.alvaro.empresas.passagens.models.PrecoModel;
-import com.alvaro.empresas.passagens.models.ViagemModel;
-import com.alvaro.empresas.passagens.repositories.PassagemRepository;
-import com.alvaro.empresas.passagens.repositories.PrecoRepository;
-import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.alvaro.empresas.passagens.dtos.precos.PrecoDTO;
+import com.alvaro.empresas.passagens.dtos.precos.PrecoDTOResponseViagem;
+import com.alvaro.empresas.passagens.dtos.precos.PrecoDTOUpdate;
+import com.alvaro.empresas.passagens.models.PrecoModel;
+import com.alvaro.empresas.passagens.models.ViagemModel;
+import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoResponseDTO;
+import com.alvaro.empresas.passagens.onibus.models.PisoModel;
+import com.alvaro.empresas.passagens.repositories.PassagemRepository;
+import com.alvaro.empresas.passagens.repositories.PrecoRepository;
 
 @Service
 public class PrecoService {
@@ -24,10 +24,6 @@ public class PrecoService {
     @Autowired
     private PassagemRepository passagemRepository;
 
-    public PrecoModel findById(UUID id) {
-        var model = precoRepository.findById(id);
-        return model.orElseThrow(() -> new EntityNotFoundException(id, PrecoModel.class));
-    }
 
     public List<PrecoDTO> saveAll(List<PrecoModel> newModels, ViagemModel viagem) {
         for (PrecoModel newModel : newModels) {
@@ -41,12 +37,12 @@ public class PrecoService {
     }
 
     public PrecoDTO findById(UUID id) {
-        var model = findById(id);
+        var model = precoRepository.findByIdOrThr(id);
         return new PrecoDTO(model);
     }
 
     public PrecoDTOResponseViagem vender(UUID id) {
-        var model = findById(id);
+        var model = precoRepository.findByIdOrThr(id);
         List<PisoModel> pisos = model.getViagem().getOnibus().getPisos();
         var pisoElegido = new PisoModel();
 
@@ -54,9 +50,9 @@ public class PrecoService {
             if (piso.getNPiso().equals(model.getNPiso()))
                 pisoElegido = piso;
 
-        PisoDTOResponse pisoDto = new PisoDTOResponse(pisoElegido);
+        PisoResponseDTO pisoDTO = new PisoResponseDTO(pisoElegido);
         List<Integer> ocupados = passagemRepository.getPassagensVendidasENaoReembolsadas(model.getId());
-        return new PrecoDTOResponseViagem(model, pisoDto, ocupados);
+        return new PrecoDTOResponseViagem(model, pisoDTO, ocupados);
     }
 
     public PrecoDTO update(PrecoDTOUpdate dto, PrecoModel model) {

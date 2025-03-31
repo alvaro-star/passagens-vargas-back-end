@@ -74,8 +74,8 @@ public class PassagemService {
         }
     }
 
-    public List<PassagemDTOEmpresaResponse> getPassagensByPreco(UUID idPrecio) {
-        return passagemRepository.findByPrecoIdAndEstaPago(idPrecio, true).stream().map(PassagemDTOEmpresaResponse::new)
+    public List<PassagemDTOEmpresaResponse> getPassagensByPreco(UUID idPreco) {
+        return passagemRepository.findByPrecoIdAndEstaPago(idPreco, true).stream().map(PassagemDTOEmpresaResponse::new)
                 .toList();
     }
 
@@ -91,7 +91,7 @@ public class PassagemService {
     }
 
     @Transactional
-    public FaturaPassagemModel salvarCliente(PassagensDTO dto, BindingResult bindingResult) {
+    public FaturaPassagemModel saveCliente(PassagensDTO dto, BindingResult bindingResult) {
         var preco = precioService.findById(dto.idPreco());
         validarCompraPassagens.validarPassagensDTO(bindingResult, dto, "/passagens");
         var viagem = preco.getViagem();
@@ -125,7 +125,7 @@ public class PassagemService {
     }
 
     @Transactional
-    public UUID salvarEmpresa(PassagensDTOVenta dto, ViagemModel viagem, BindingResult bindingResult) {
+    public UUID saveEmpresa(PassagensDTOVenta dto, ViagemModel viagem, BindingResult bindingResult) {
         validarCompraPassagens.validarPassagensDTOVenta(bindingResult, dto, "/passagens/vender");
         ParadaModel saida;
         ParadaModel destino;

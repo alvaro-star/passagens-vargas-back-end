@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.UUID;
 
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
+import com.alvaro.empresas.passagens.onibus.repositories.OnibusRepository;
+import com.alvaro.empresas.passagens.repositories.EmpresaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -58,13 +60,13 @@ public class ViagemEmpresaService {
     @Autowired
     private TempoViagemService tempoViagemService;
     @Autowired
-    private EmpresaService empresaService;
+    private EmpresaRepository empresaRepository;
     @Autowired
     private ViagemRepository viagemRepository;
     @Autowired
     private ParadaRepository paradaRepository;
     @Autowired
-    private PrecoService precoService;
+    private PrecoRepository precoRepository;
     @Autowired
     private LugarRepository lugarRepository;
     @Autowired
@@ -74,16 +76,15 @@ public class ViagemEmpresaService {
     @Autowired
     private PDFThymeleaf pdfThymeleaf;
     @Autowired
-    private OnibusService onibusService;
+    private OnibusRepository onibusRepository;
 
     public ViagemModel findById(UUID id) {
-        var model = viagemRepository.findById(id);
-        return model.orElseThrow(() -> new EntityNotFoundException(id, ViagemModel.class));
+        return viagemRepository.findByIdOrThr(id);
     }
 
     public Page<ViagemDTOListBuscaEmpresa> findAllByEmpresaBetweenDates(ViagemDTOSolicitacaoFromEmpresa solicitacao,
                                                                         Pageable pageable) {
-        var empresa = empresaService.findById(solicitacao.idEmpresa());
+        var empresa = empresaRepository.findByIdOrThr(solicitacao.idEmpresa());
         Page<ViagemDTOJPQL> models;
         LocalDateTime dataInicio = helperDate.getFirstDayOfMonth(solicitacao.dataAnalise());
         LocalDateTime dataFim = helperDate.getLastDayOfMonth(solicitacao.dataAnalise());
@@ -141,9 +142,9 @@ public class ViagemEmpresaService {
                         continue;
 
                     var precos = viagem.viagem().getPrecos();
-                    var precosDto = precos.stream().filter(p -> !p.getCheio()).map(PrecoDTO::new).toList();
+                    var precosDTO = precos.stream().filter(p -> !p.getCheio()).map(PrecoDTO::new).toList();
                     viagensSelecionados
-                            .add(new ViagemDTOListBuscaEmpresa(viagem.viagem(), null, saida, destino, precosDto));
+                            .add(new ViagemDTOListBuscaEmpresa(viagem.viagem(), null, saida, destino, precosDTO));
                 }
             }
         }
@@ -172,9 +173,9 @@ public class ViagemEmpresaService {
                     continue;
 
                 var precos = viagem.viagem().getPrecos();
-                var precosDto = precos.stream().map(PrecoDTO::new).toList();
+                var precosDTO = precos.stream().map(PrecoDTO::new).toList();
                 viagensSelecionadas
-                        .add(new ViagemDTOListBuscaEmpresa(viagem.viagem(), null, saida, destino, precosDto));
+                        .add(new ViagemDTOListBuscaEmpresa(viagem.viagem(), null, saida, destino, precosDTO));
             }
         }
 
@@ -243,7 +244,7 @@ public class ViagemEmpresaService {
 
         viagemRepository.save(model);
         // Guardando los precios
-        List<PrecoDTO> preciosSalvos = precoService.saveAll(precos, model);
+        List<PrecoDTO> preciosSalvos = precoRepository.saveAll(precos, model);
         model.addParada(saida);
         model.addParada(destino);
         viagemRepository.save(model);
@@ -302,7 +303,7 @@ public class ViagemEmpresaService {
         ValidEnabledEntities.validEmpresa(model.getEmpresa());
         ValidEnabledEntities.validOnibus(model.getOnibus());
 
-        var onibus = onibusService.findById(dto.idOnibus());
+        var onibus = onibusRepository.findByIdOrThr(dto.idOnibus());
         if (!onibus.getEmpresaId().equals(model.getEmpresaId()))
             throw new RestRuntimeException(HttpStatus.CONFLICT, "Este ônibus pertence a outra empresa");
         ValidEnabledEntities.validOnibus(onibus);

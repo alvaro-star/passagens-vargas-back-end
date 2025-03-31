@@ -4,7 +4,7 @@ import com.alvaro.empresas.passagens.onibus.models.PisoModel;
 
 import java.util.UUID;
 
-public record PisoDTOResponse(
+public record PisoResponseDTO(
         UUID id,
         Integer nLinhas,
         Integer nColunas,
@@ -16,7 +16,7 @@ public record PisoDTOResponse(
         UUID idOnibus,
         int[] posicoesBloqueadas
 ) {
-    public PisoDTOResponse(PisoModel modelo) {
+    public PisoResponseDTO(PisoModel modelo) {
         this(
                 modelo.getId(),
                 modelo.getNLinhas(),

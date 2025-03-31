@@ -6,35 +6,27 @@ import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-import java.util.ArrayList;
 import java.util.List;
 
-@Getter
-@Setter
-@NoArgsConstructor
-public class PisoDTOCreate {
-    @NotNull
-    @Min(value = 1)
-    private Integer nLinhas;
-    @NotNull
-    @Min(value = 1)
-    @Max(value = 4)
-    private Integer nColunas;
-
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    private TipePosicao distribuicaoFileira;
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    private TipePosicao inicioContagem;
-
-    private List<Integer> posicoesBloquedas = new ArrayList<>();
-
-    public int getNAssentos() {
-        return nColunas * nLinhas;
+public record PisoCreateDTO(
+        @NotNull
+        @Min(value = 1)
+        Integer nLinhas,
+        @NotNull
+        @Min(value = 1)
+        @Max(value = 4)
+        Integer nColunas,
+        @NotNull
+        @Enumerated(EnumType.STRING)
+        TipePosicao distribuicaoFileira,
+        @NotNull
+        @Enumerated(EnumType.STRING)
+        TipePosicao inicioContagem,
+        List<Integer> posicoesBloquedas
+) {
+    public Integer nAssentosDisponiveis() {
+        int nPosicoesDisponiveis = (posicoesBloquedas != null) ? posicoesBloquedas.size() : 0;
+        return nColunas * nLinhas - nPosicoesDisponiveis;
     }
 }

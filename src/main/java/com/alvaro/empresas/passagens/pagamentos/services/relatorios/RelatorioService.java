@@ -130,7 +130,7 @@ public class RelatorioService {
             if (passagem.isCompradoWeb()) {
                 pagamentosWeb.get(passagem.metodoPagamento().toString()).valor += passagem.precoPago().doubleValue();
                 if (passagem.emDinheiro())
-                    emailService.mandarEmail("vargasalvaro248@gmail.com", "Web - Erro de Processamento",
+                    emailService.mandarEmail("vargasaveo248@gmail.com", "Web - Erro de Processamento",
                             "Existe uma passagem que foi comprada em dinheiro");
             } else {
                 pagamentosNaoWeb.get(passagem.metodoPagamento().toString()).valor += passagem.precoPago().doubleValue();

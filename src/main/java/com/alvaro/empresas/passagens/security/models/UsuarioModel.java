@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.security.models;
 
-import com.alvaro.empresas.passagens.models.IEntityStandart;
+import com.alvaro.empresas.passagens.interfaces.IEntityStandart;
 import com.alvaro.empresas.passagens.pagamentos.models.FaturaPassagemModel;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;

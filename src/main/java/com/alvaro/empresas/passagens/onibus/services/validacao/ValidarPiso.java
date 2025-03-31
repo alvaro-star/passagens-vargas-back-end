@@ -1,8 +1,8 @@
 package com.alvaro.empresas.passagens.onibus.services.validacao;
 
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationWithErrorListExceptions;
-import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusDTO;
-import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoDTOCreate;
+import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusCreateDTO;
+import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoCreateDTO;
 import com.alvaro.empresas.passagens.onibus.enums.TipePosicao;
 import com.alvaro.empresas.passagens.onibus.repositories.OnibusRepository;
 import com.alvaro.empresas.passagens.services.validacao.FieldMessageItemList;
@@ -17,52 +17,44 @@ import java.util.stream.Collectors;
 
 @Component
 public class ValidarPiso {
-    @Autowired
-    private OnibusRepository onibusRepository;
-
-    public void validarOnibusDTO(BindingResult bindingResult, OnibusDTO dto) {
+    public void validarOnibusDTO(OnibusCreateDTO dto) {
         int i;
         FieldMessageItemList itemList;
 
         List<FieldMessageList> listaErros = new ArrayList<>();
         List<FieldMessageItemList> itensErrados = new ArrayList<>();
 
-        Map<String, String> erros = bindingResult.getFieldErrors().stream().collect(Collectors.toMap(FieldError::getField, e -> (e.getDefaultMessage() == null || e.getDefaultMessage().isEmpty()) ? "" : e.getDefaultMessage()));
-
-        if (!bindingResult.hasFieldErrors("placa"))
-            if (onibusRepository.existsByPlaca(dto.placa()))
-                erros.put("placa", "A placa já está registrada");
-
         for (i = 0; i < dto.pisos().size(); i++) {
             itemList = validarPisoDTO(i, dto.pisos().get(i));
             if (itemList != null) itensErrados.add(itemList);
         }
+
         if (!itensErrados.isEmpty())
             listaErros.add(new FieldMessageList("pisos", itensErrados));
-        if (!listaErros.isEmpty() || !erros.isEmpty())
-            throw new ValidationWithErrorListExceptions("Erro de validação", (HashMap<String, String>) erros, listaErros);
+        if (!listaErros.isEmpty())
+            throw new ValidationWithErrorListExceptions("Erro de validação", new HashMap<>(), listaErros);
     }
 
-    private static FieldMessageItemList validarPisoDTO(int indice, PisoDTOCreate dto) {
+    private static FieldMessageItemList validarPisoDTO(int indice, PisoCreateDTO dto) {
         String mensagem;
         FieldMessageItemList itemList = new FieldMessageItemList();
         itemList.setIndex(indice);
 
-        mensagem = validarNLinhas(dto.getNLinhas());
+        mensagem = validarNLinhas(dto.nLinhas());
         if (!mensagem.isEmpty()) {
             itemList.addError("nLinhas", mensagem);
         }
 
-        mensagem = validarNColunas(dto.getNColunas());
+        mensagem = validarNColunas(dto.nColunas());
         if (!mensagem.isEmpty()) {
             itemList.addError("nColunas", mensagem);
         }
 
-        mensagem = validarDistribuicaoFileira(dto.getDistribuicaoFileira());
+        mensagem = validarDistribuicaoFileira(dto.distribuicaoFileira());
         if (!mensagem.isEmpty())
             itemList.addError("distribuicaoFileira", mensagem);
 
-        mensagem = validarPosicoesBloquedas(dto.getPosicoesBloquedas());
+        mensagem = validarPosicoesBloquedas(dto.nLinhas() * dto.nColunas(), dto.posicoesBloquedas());
         if (!mensagem.isEmpty())
             itemList.addError("posicoesBloquedas", mensagem);
 
@@ -91,13 +83,15 @@ public class ValidarPiso {
         return "";
     }
 
-    private static String validarPosicoesBloquedas(List<Integer> posicoesBloquedas) {
+    private static String validarPosicoesBloquedas(Integer nPosicoes, List<Integer> posicoesBloquedas) {
         Set<Integer> conjunto = new HashSet<>();
         for (Integer posicao : posicoesBloquedas) {
             if (posicao < 1)
                 return "Uma posição não pode ser nula ou negativa";
             if (!conjunto.add(posicao))
-                return "Uma posição aparece repetida"; // Se não conseguiu adicionar ao conjunto, é porque já existe
+                return "Uma posição aparece repetida";
+            if (posicao > nPosicoes)
+                return "Uma posição não existe";
         }
 
         return "";

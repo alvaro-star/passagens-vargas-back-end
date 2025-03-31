@@ -1,18 +1,22 @@
 package com.alvaro.empresas.passagens.onibus.services;
 
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationException;
+import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
 import com.alvaro.empresas.passagens.helpers.validators.ValidEnabledEntities;
 import com.alvaro.empresas.passagens.models.ViagemModel;
-import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusDTO;
+import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusCreateDTO;
 import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusDTOResponse;
-import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusDTOUpdate;
-import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoDTOResponse;
+import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusUpdateDTO;
+import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoCreateDTO;
+import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoResponseDTO;
 import com.alvaro.empresas.passagens.onibus.models.OnibusModel;
+import com.alvaro.empresas.passagens.onibus.models.PisoModel;
 import com.alvaro.empresas.passagens.onibus.repositories.OnibusRepository;
 import com.alvaro.empresas.passagens.onibus.services.validacao.ValidarPiso;
+import com.alvaro.empresas.passagens.repositories.EmpresaRepository;
 import com.alvaro.empresas.passagens.repositories.ViagemRepository;
 import com.alvaro.empresas.passagens.services.EmpresaService;
-import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,17 +36,18 @@ public class OnibusService {
     @Autowired
     private OnibusRepository onibusRepository;
     @Autowired
-    private EmpresaService empresaService;
-    @Autowired
-    private PisoService pisoService;
+    private EmpresaRepository empresaRepository;
     @Autowired
     private ViagemRepository viagemRepository;
     @Autowired
     private ValidarPiso validarPiso;
+    @Autowired
+    private UserLoguedComponent userLogued;
 
-    public OnibusModel findById(UUID id) {
-        var model = onibusRepository.findById(id);
-        return model.orElseThrow(() -> new EntityNotFoundException(id, OnibusModel.class));
+    public OnibusDTOResponse findById(UUID id) {
+        var model = onibusRepository.findByIdOrThr(id);
+        var pisosDTO = model.getPisos().stream().map(PisoResponseDTO::new).toList();
+        return new OnibusDTOResponse(model, pisosDTO);
     }
 
     public Page<OnibusDTOResponse> findAll(Pageable pageable) {
@@ -50,48 +55,57 @@ public class OnibusService {
         return models.map(OnibusDTOResponse::new);
     }
 
-    public Page<OnibusDTOResponse> findAllFromEmpresa(UUID idEmpresa, Pageable pageable) {
-        var empresa = empresaService.findById(idEmpresa);
-        Page<OnibusModel> onibus = onibusRepository.findByEmpresaId(empresa.getId(), pageable);
+    public Page<OnibusDTOResponse> findByEmpresaId(UUID idEmpresa, Pageable pageable) {
+        userLogued.validIfIsAdminOrOwnerEmpresa(idEmpresa);
+        Page<OnibusModel> onibus = onibusRepository.findByEmpresaId(idEmpresa, pageable);
         return onibus.map(OnibusDTOResponse::new);
     }
 
-    public OnibusDTOResponse findById(UUID id) {
-        var model = findById(id);
-        var pisosDto = model.getPisos().stream().map(PisoDTOResponse::new).toList();
-        return new OnibusDTOResponse(model, pisosDto);
-    }
-
     @Transactional
-    public OnibusDTOResponse salvar(OnibusDTO dto, BindingResult bindingResult) {
-        validarPiso.validarOnibusDTO(bindingResult, dto);
-        var empresa = empresaService.findById(dto.idEmpresa());
+    public OnibusDTOResponse save(OnibusCreateDTO dto) {
+        var empresa = empresaRepository.findByIdOrThr(dto.idEmpresa());
+        userLogued.validIfIsMyEmpresa(empresa.getId());
         ValidEnabledEntities.validEmpresa(empresa);
-        var model = new OnibusModel(dto, empresa);
+        validarPiso.validarOnibusDTO(dto);
 
+        var model = new OnibusModel(dto, empresa);
+        validarPlaca(dto.placa());
+
+        dto.pisos().forEach(pisoDTO -> {
+            var nPisos = (model.getPisos() != null) ? model.getPisos().size() : 0;
+            int nPrimeiroAssento = (nPisos == 0) ? 1 : model.getPisos().get(nPisos - 1).getNAssentos() + 1;
+            var pisoModel = new PisoModel(pisoDTO, nPisos + 1, nPrimeiroAssento);
+            model.addPiso(pisoModel);
+        });
         onibusRepository.save(model);
-        List<PisoDTOResponse> pisosSalvos = new ArrayList<>();
-        pisosSalvos.add(pisoService.salvar(dto.pisos().get(0), model, 1, 1));
-        if (dto.pisos().size() == 2) {
-            var primeiroAssento = pisosSalvos.get(0).nAssentos() + 1;
-            pisosSalvos.add(pisoService.salvar(dto.pisos().get(1), model, 2, primeiroAssento));
-        }
-        return new OnibusDTOResponse(model, pisosSalvos);
+
+        var pisosDTO = model.getPisos().stream().map(PisoResponseDTO::new).toList();
+        return new OnibusDTOResponse(model, pisosDTO);
     }
 
-    public OnibusDTOResponse update(OnibusDTOUpdate dto, OnibusModel model, BindingResult bindingResult) {
-        var empresa = empresaService.findById(model.getEmpresaId());
-        ValidEnabledEntities.validEmpresa(empresa);
-        var transform = new OnibusDTO(dto.placa());
-        validarPiso.validarOnibusDTO(bindingResult, transform);
+    public OnibusDTOResponse update(UUID id, OnibusUpdateDTO dto) {
+        var model = onibusRepository.findByIdOrThr(id);
+        userLogued.validIfIsMyEmpresa(model.getEmpresaId());
+
+        ValidEnabledEntities.validEmpresa(model.getEmpresa());
+        ValidEnabledEntities.validOnibus(model);
+
+        if (!model.getPlaca().equals(dto.placa()))
+            validarPlaca(dto.placa());
+
         model.updateValues(dto);
         onibusRepository.save(model);
-        return new OnibusDTOResponse(model);
+
+        var pisosDTO = model.getPisos().stream().map(PisoResponseDTO::new).toList();
+        return new OnibusDTOResponse(model, pisosDTO);
     }
 
     @Transactional
-    public void delete(OnibusModel model) {
-        var empresa = empresaService.findById(model.getEmpresaId());
+    public void delete(UUID id) {
+        var model = onibusRepository.findByIdOrThr(id);
+        userLogued.validIfIsMyEmpresa(model.getEmpresaId());
+
+        var empresa = model.getEmpresa();
         ValidEnabledEntities.validEmpresa(empresa);
         var agora = LocalDateTime.now();
 
@@ -102,9 +116,15 @@ public class OnibusService {
         if (viagem.isEmpty())
             onibusRepository.delete(model);
         else if (viagensFuturas.getTotalElements() == 0) {
-            model.setHabilitado(false);
+            model.setEnabled(false);
             onibusRepository.save(model);
         } else
-            throw new RestRuntimeException(HttpStatus.BAD_REQUEST, "O ônibus tem uma viagem programada no futuro");
+            throw new RestRuntimeException(HttpStatus.CONFLICT, "O ônibus tem uma viagem programada no futuro");
+    }
+
+    private void validarPlaca(String placa) {
+        var existe = onibusRepository.existsByPlaca(placa);
+        if (existe)
+            throw new ValidationException("placa", "A placa já esta registrada");
     }
 }

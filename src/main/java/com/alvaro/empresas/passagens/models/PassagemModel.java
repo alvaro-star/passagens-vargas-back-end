@@ -2,6 +2,7 @@ package com.alvaro.empresas.passagens.models;
 
 import com.alvaro.empresas.passagens.dtos.pasagens.PassagemDTO;
 import com.alvaro.empresas.passagens.enums.TipoPagamento;
+import com.alvaro.empresas.passagens.interfaces.IEntityStandart;
 import com.alvaro.empresas.passagens.pagamentos.models.FaturaPassagemModel;
 import com.alvaro.empresas.passagens.pagamentos.models.FaturaReembolsoModel;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;

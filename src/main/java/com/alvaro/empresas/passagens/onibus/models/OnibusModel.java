@@ -5,11 +5,12 @@ import java.util.List;
 import java.util.UUID;
 
 import com.alvaro.empresas.passagens.models.EmpresaModel;
-import com.alvaro.empresas.passagens.models.IEntityStandart;
+import com.alvaro.empresas.passagens.interfaces.IEntityStandart;
 import com.alvaro.empresas.passagens.models.ViagemModel;
-import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusDTO;
-import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusDTOUpdate;
+import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusCreateDTO;
+import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusUpdateDTO;
 
+import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoCreateDTO;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -38,7 +39,7 @@ public class OnibusModel extends IEntityStandart {
     private String placa;
 
     @Column(nullable = false)
-    private boolean habilitado;
+    private boolean enabled;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_empresa")
@@ -47,7 +48,7 @@ public class OnibusModel extends IEntityStandart {
     @Column(name = "fk_idtb_empresa", insertable = false, updatable = false)
     private UUID empresaId;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "onibus")
+    @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "onibus")
     private List<PisoModel> pisos = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "onibus")
@@ -58,13 +59,18 @@ public class OnibusModel extends IEntityStandart {
         this.empresaId = (empresa != null) ? empresa.getId() : null;
     }
 
-    public OnibusModel(OnibusDTO dto, EmpresaModel empresa) {
+    public OnibusModel(OnibusCreateDTO dto, EmpresaModel empresa) {
         placa = dto.placa();
-        habilitado = true;
+        enabled = true;
         setEmpresa(empresa);
     }
 
-    public void updateValues(OnibusDTOUpdate dto) {
+    public void addPiso(PisoModel piso) {
+        piso.setOnibus(this);
+        pisos.add(piso);
+    }
+
+    public void updateValues(OnibusUpdateDTO dto) {
         placa = dto.placa();
     }
 

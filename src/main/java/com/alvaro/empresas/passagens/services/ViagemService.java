@@ -16,7 +16,6 @@ import com.alvaro.empresas.passagens.dtos.precos.PrecoDTO;
 import com.alvaro.empresas.passagens.dtos.viagens.ViagemDTOResponse;
 import com.alvaro.empresas.passagens.dtos.viagens.busca.ViagemDTOListBusca;
 import com.alvaro.empresas.passagens.dtos.viagens.busca.ViagemDTOSolicitacao;
-import com.alvaro.empresas.passagens.models.ViagemModel;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaResponseDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.JPQL.ViagemBuscaDTOJPQL;
 import com.alvaro.empresas.passagens.paradas.models.CidadeModel;
@@ -35,13 +34,8 @@ public class ViagemService {
     @Autowired
     private PrecoRepository precoRepository;
 
-    public ViagemModel findById(UUID id) {
-        var model = viagemRepository.findById(id);
-        return model.orElseThrow(() -> new EntityNotFoundException(id, ViagemModel.class));
-    }
-
     public ViagemDTOResponse findById(UUID id) {
-        var model = this.findById(id);
+        var model = viagemRepository.findByIdOrThr(id);
         var paradas = model.getParadas().stream().map(ParadaResponseDTO::new).toList();
         var precos = model.getPrecos().stream().map(PrecoDTO::new).toList();
         return new ViagemDTOResponse(model, paradas, precos);

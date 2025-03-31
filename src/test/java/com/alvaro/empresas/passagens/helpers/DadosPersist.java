@@ -8,7 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import com.alvaro.empresas.passagens.models.EmpresaModel;
-import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusDTO;
+import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusCreateDTO;
 import com.alvaro.empresas.passagens.onibus.models.OnibusModel;
 import com.alvaro.empresas.passagens.paradas.models.CidadeModel;
 import com.alvaro.empresas.passagens.paradas.models.DepartamentoModel;
@@ -42,7 +42,7 @@ public class DadosPersist {
     }
 
     public OnibusModel cadastrarOnibus(String placa, EmpresaModel empresaModel) {
-        var dto = new OnibusDTO(placa);
+        var dto = new OnibusCreateDTO(placa);
         var onibus = new OnibusModel(dto, empresaModel);
         em.persist(onibus);
         return onibus;

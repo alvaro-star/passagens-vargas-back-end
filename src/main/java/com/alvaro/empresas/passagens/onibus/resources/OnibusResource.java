@@ -1,8 +1,8 @@
 package com.alvaro.empresas.passagens.onibus.resources;
 
-import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusDTO;
+import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusCreateDTO;
 import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusDTOResponse;
-import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusDTOUpdate;
+import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusUpdateDTO;
 import com.alvaro.empresas.passagens.onibus.services.OnibusService;
 import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -25,18 +25,6 @@ import java.util.UUID;
 public class OnibusResource {
     @Autowired
     private OnibusService onibusService;
-    @Autowired
-    private UserLoguedComponent userLogued;
-
-    @GetMapping("/from/{idEmpresa}")
-    @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
-    public Page<OnibusDTOResponse> getOnibusFromEmpresa(
-            @PathVariable UUID idEmpresa,
-            @PageableDefault(sort = {"createdAt"}, direction = Sort.Direction.DESC) Pageable pageable) {
-        userLogued.validIfIsAdminOrOwnerEmpresa(idEmpresa);
-        return onibusService.findAllFromEmpresa(idEmpresa, pageable);
-    }
 
     @GetMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
@@ -47,27 +35,21 @@ public class OnibusResource {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN')")
-    public Object save(@RequestBody @Valid OnibusDTO dto, BindingResult bindingResult) {
-        userLogued.validIfIsMyEmpresa(dto.idEmpresa());
-        return onibusService.salvar(dto, bindingResult);
+    public Object save(@RequestBody @Valid OnibusCreateDTO dto) {
+        return onibusService.save(dto);
     }
 
-    //Somente o administrador
     @PutMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN')")
-    public Object update(@PathVariable UUID id, @RequestBody @Valid OnibusDTOUpdate dto, BindingResult bindingResult) {
-        var onibus = onibusService.findById(id);
-        userLogued.validIfIsMyEmpresa(onibus.getEmpresaId());
-        return onibusService.update(dto, onibus, bindingResult);
+    public Object update(@PathVariable UUID id, @RequestBody @Valid OnibusUpdateDTO dto) {
+        return onibusService.update(id, dto);
     }
 
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN')")
     public void delete(@PathVariable UUID id) {
-        var model = onibusService.findById(id);
-        userLogued.validIfIsMyEmpresa(model.getEmpresaId());
-        onibusService.delete(model);
+        onibusService.delete(id);
     }
 }

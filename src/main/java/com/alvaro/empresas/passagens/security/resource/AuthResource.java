@@ -23,8 +23,8 @@ public class AuthResource {
 
     @PostMapping("/login")
     @ResponseStatus(HttpStatus.OK)
-    public TokenDTO login(@RequestBody @Valid LoginDTO loginDto) {
-        return authService.login(loginDto);
+    public TokenDTO login(@RequestBody @Valid LoginDTO loginDTO) {
+        return authService.login(loginDTO);
     }
 
     @PostMapping("/refresh")
@@ -36,8 +36,8 @@ public class AuthResource {
     // É necessário criar uma rotina para o registro de passagens, uma em que se enviem emails com o código de verificação
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.OK)
-    public Mensagem register(@RequestBody @Valid RegisterDTO registerDto) {
-        authService.registrar(registerDto);
+    public Mensagem register(@RequestBody @Valid RegisterDTO registerDTO) {
+        authService.registrar(registerDTO);
         return new Mensagem("Verifique o código de segurança");
     }
 

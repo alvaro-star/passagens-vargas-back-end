@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.services.RepositoryMocks;
 
-import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusDTO;
+import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusCreateDTO;
 import com.alvaro.empresas.passagens.onibus.models.OnibusModel;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,7 @@ public class OnibusRepositoryMock {
     }
 
     public OnibusModel generateOnibus(String placa, boolean enabled, EmpresaModel empresa) {
-        var onibusDTO = new OnibusDTO(placa);
+        var onibusDTO = new OnibusCreateDTO(placa);
         var onibus = new OnibusModel(onibusDTO, empresa);
         onibus.setHabilitado(enabled);
         return onibus;

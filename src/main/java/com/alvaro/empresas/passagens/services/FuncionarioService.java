@@ -36,10 +36,10 @@ public class FuncionarioService {
     }
 
     @Transactional
-    public void save(RegisterDTOFuncionario registerDto, UUID idEmpresa) {
+    public void save(RegisterDTOFuncionario registerDTO, UUID idEmpresa) {
         var empresa = empresaService.findById(idEmpresa);
         ValidEnabledEntities.validEmpresa(empresa);
-        var usuario = usuarioRepository.findByEmail(registerDto.email());
+        var usuario = usuarioRepository.findByEmail(registerDTO.email());
         if (usuario.isEmpty())
             throw new RestRuntimeException("O usuário não está registrado no sistema");
         usuario.get().setEmpresaId(idEmpresa);

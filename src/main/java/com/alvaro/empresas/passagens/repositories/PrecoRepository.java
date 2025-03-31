@@ -1,15 +1,15 @@
 package com.alvaro.empresas.passagens.repositories;
 
-import com.alvaro.empresas.passagens.interfaces.ICustomRepository;
-import com.alvaro.empresas.passagens.models.PassagemModel;
-import com.alvaro.empresas.passagens.models.PrecoModel;
+import java.util.List;
+import java.util.UUID;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.UUID;
+import com.alvaro.empresas.passagens.interfaces.ICustomRepository;
+import com.alvaro.empresas.passagens.models.PrecoModel;
 
 @Repository
 public interface PrecoRepository extends JpaRepository<PrecoModel, UUID>, ICustomRepository<PrecoModel, UUID> {
