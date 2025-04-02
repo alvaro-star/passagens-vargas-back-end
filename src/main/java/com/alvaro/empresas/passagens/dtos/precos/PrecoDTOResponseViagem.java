@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.dtos.precos;
 
-import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoResponseDTO;
+import com.alvaro.empresas.passagens.onibus.dtos.PisoResponseDTO;
 import com.alvaro.empresas.passagens.models.PrecoModel;
 
 import java.math.BigDecimal;

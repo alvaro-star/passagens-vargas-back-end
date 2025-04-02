@@ -104,12 +104,12 @@
             <td class="text-right" th:text="${nViagensCancelados}">N Viagens Cancelados</td>
         </tr>
         <tr>
-            <td>N Pasajes Vendidos</td>
-            <td class="text-right" th:text="${nPasajesVendidos}">N Pasajes Vendidos</td>
+            <td>N Passagens Vendidos</td>
+            <td class="text-right" th:text="${nPassagensVendidos}">N Passagens Vendidos</td>
         </tr>
         <tr>
-            <td>N Pasajes Rembolsados</td>
-            <td class="text-right" th:text="${nPasajesCancelados}">N Viagens Cancelados</td>
+            <td>N Passagens Rembolsados</td>
+            <td class="text-right" th:text="${nPassagensCancelados}">N Viagens Cancelados</td>
         </tr>
         </tbody>
     </table>
@@ -118,13 +118,13 @@
         <thead>
         <tr>
             <th>Cidade</th>
-            <th>N Pasajes</th>
+            <th>N Passagens</th>
         </tr>
         </thead>
         <tbody>
         <tr th:each="saida : ${saidas}">
             <td th:text="${saida.nome}">Nome</td>
-            <td th:text="${saida.nPasajes}">N Pasajes</td>
+            <td th:text="${saida.nPassagens}">N Passagens</td>
         </tr>
         </tbody>
     </table>
@@ -135,13 +135,13 @@
         <thead>
         <tr>
             <th>Cidade</th>
-            <th>N Pasajes</th>
+            <th>N Passagens</th>
         </tr>
         </thead>
         <tbody>
         <tr th:each="destino : ${destinos}">
             <td th:text="${destino.nome}">Nome</td>
-            <td th:text="${destino.nPasajes}">N Pasajes</td>
+            <td th:text="${destino.nPassagens}">N Passagens</td>
         </tr>
         </tbody>
     </table>

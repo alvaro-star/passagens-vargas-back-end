@@ -1,23 +1,23 @@
 package com.alvaro.empresas.passagens.services;
 
-import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
-import com.alvaro.empresas.passagens.dtos.ResponseFuncionarioDTO;
-import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
-import com.alvaro.empresas.passagens.helpers.validators.ValidEnabledEntities;
-import com.alvaro.empresas.passagens.security.dtos.RegisterDTOFuncionario;
-import com.alvaro.empresas.passagens.security.models.RoleList;
-import com.alvaro.empresas.passagens.security.models.RoleModel;
-import com.alvaro.empresas.passagens.security.models.UsuarioModel;
-import com.alvaro.empresas.passagens.security.repositories.UsuarioRepository;
-import com.alvaro.empresas.passagens.security.services.RoleService;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
+import com.alvaro.empresas.passagens.dtos.FuncionarioResponseDTO;
+import com.alvaro.empresas.passagens.dtos.PageOutput;
+import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
+import com.alvaro.empresas.passagens.helpers.validators.ValidEnabledEntities;
+import com.alvaro.empresas.passagens.security.dtos.RegisterDTOFuncionario;
+import com.alvaro.empresas.passagens.security.models.RoleList;
+import com.alvaro.empresas.passagens.security.models.RoleModel;
+import com.alvaro.empresas.passagens.security.repositories.UsuarioRepository;
+import com.alvaro.empresas.passagens.security.services.RoleService;
 
 @Service
 public class FuncionarioService {
@@ -30,13 +30,16 @@ public class FuncionarioService {
     @Autowired
     private UserLoguedComponent userLogued;
 
-    public Page<ResponseFuncionarioDTO> findAllFromEmpresa(UUID idEmpresa, Pageable pageable) {
-        Page<UsuarioModel> models = usuarioRepository.findByEmpresaId(idEmpresa, pageable);
-        return models.map(ResponseFuncionarioDTO::new);
+    public PageOutput<FuncionarioResponseDTO> findAllFromEmpresa(UUID idEmpresa, Pageable pageable) {
+        userLogued.validIfIsAdminOrOwnerEmpresa(idEmpresa);
+        var models = usuarioRepository.findByEmpresaId(idEmpresa, pageable);
+        var dtos = models.map(FuncionarioResponseDTO::new);
+        return new PageOutput<>(dtos);
     }
 
     @Transactional
     public void save(RegisterDTOFuncionario registerDTO, UUID idEmpresa) {
+        userLogued.validIfIsMyEmpresa(idEmpresa);
         var empresa = empresaService.findById(idEmpresa);
         ValidEnabledEntities.validEmpresa(empresa);
         var usuario = usuarioRepository.findByEmail(registerDTO.email());
@@ -57,6 +60,7 @@ public class FuncionarioService {
 
     @Transactional
     public void delete(String email, UUID idEmpresa) {
+        userLogued.validIfIsMyEmpresa(idEmpresa);
         var empresa = empresaService.findById(idEmpresa);
         ValidEnabledEntities.validEmpresa(empresa);
         var usuario = usuarioRepository.findByEmail(email);

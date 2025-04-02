@@ -7,13 +7,13 @@ import java.util.UUID;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
-import com.alvaro.empresas.passagens.dtos.InputEmpresaDTO;
+import com.alvaro.empresas.passagens.dtos.EmpresaInputDTO;
+import com.alvaro.empresas.passagens.dtos.PageOutput;
 import com.alvaro.empresas.passagens.helpers.validators.ValidEnabledEntities;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.repositories.EmpresaRepository;
@@ -38,12 +38,13 @@ public class EmpresaService {
         return empresaRepository.findByIdOrThr(id);
     }
 
-    public Page<EmpresaModel> findAll(Pageable pageable) {
-        return empresaRepository.findAll(pageable);
+    public PageOutput<EmpresaModel> findAll(Pageable pageable) {
+        var models = empresaRepository.findAll(pageable);
+        return new PageOutput<>(models);
     }
 
     @Transactional
-    public EmpresaModel save(InputEmpresaDTO dto) {
+    public EmpresaModel save(EmpresaInputDTO dto) {
         var model = new EmpresaModel();
         BeanUtils.copyProperties(dto, model, "id", "onibus");
         model.setHabilitado(true);
@@ -89,7 +90,7 @@ public class EmpresaService {
         usuarioRepository.save(usuario.get());
     }
 
-    public void update(InputEmpresaDTO dto, UUID id) {
+    public void update(EmpresaInputDTO dto, UUID id) {
         var model = this.findById(id);
         BeanUtils.copyProperties(dto, model, "id", "onibus");
         empresaRepository.save(model);

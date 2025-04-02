@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/viagens")
+@RequestMapping("viagens")
 @SecurityRequirement(name = "bearer-key")
 public class ViagemResource {
     @Autowired

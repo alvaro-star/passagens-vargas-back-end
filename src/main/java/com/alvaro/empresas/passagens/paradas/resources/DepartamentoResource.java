@@ -1,9 +1,6 @@
 package com.alvaro.empresas.passagens.paradas.resources;
 
-import com.alvaro.empresas.passagens.paradas.models.CidadeModel;
-import com.alvaro.empresas.passagens.paradas.services.CidadeService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -18,15 +15,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.alvaro.empresas.passagens.dtos.PageOutput;
 import com.alvaro.empresas.passagens.paradas.dtos.DepartamentoInputDTO;
+import com.alvaro.empresas.passagens.paradas.models.CidadeModel;
 import com.alvaro.empresas.passagens.paradas.models.DepartamentoModel;
+import com.alvaro.empresas.passagens.paradas.services.CidadeService;
 import com.alvaro.empresas.passagens.paradas.services.DepartamentoService;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/departamentos")
+@RequestMapping("departamentos")
 @SecurityRequirement(name = "bearer-key")
 public class DepartamentoResource {
     @Autowired
@@ -36,7 +36,7 @@ public class DepartamentoResource {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Page<DepartamentoModel> findAll(@PageableDefault(size = 10) Pageable pageable) {
+    public PageOutput<DepartamentoModel> findAll(@PageableDefault(size = 10) Pageable pageable) {
         return departamentoService.findAll(pageable);
     }
 
@@ -48,7 +48,7 @@ public class DepartamentoResource {
 
     @GetMapping("{id}/cidades")
     @ResponseStatus(HttpStatus.OK)
-    public Page<CidadeModel> findById(@PathVariable Integer id, Pageable pageable) {
+    public PageOutput<CidadeModel> findById(@PathVariable Integer id, Pageable pageable) {
         return cidadeService.findByDepartamentoId(id, pageable);
     }
 

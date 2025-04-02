@@ -1,36 +1,31 @@
 package com.alvaro.empresas.passagens.pagamentos.resources;
 
 
-import com.alvaro.empresas.passagens.dtos.FaturaPasajeDTO;
-import com.alvaro.empresas.passagens.pagamentos.services.FaturaPassagemService;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.UUID;
+import com.alvaro.empresas.passagens.pagamentos.services.FaturaPassagemService;
+
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 
 @RestController
-@RequestMapping("/pagamentos")
+@RequestMapping("pagamentos")
 @SecurityRequirement(name = "bearer-key")
 public class FaturaPassagemResource {
     @Autowired
     private FaturaPassagemService faturaPassagemService;
-
-    @GetMapping("/{idViagem}/from/viagem")
-    @ResponseStatus(HttpStatus.OK)
-    public Page<FaturaPasajeDTO> findAll(@PathVariable UUID idViagem,
-                                         @PageableDefault(sort = "created_at", direction = Sort.Direction.DESC) Pageable pageable) {
-        return faturaPassagemService.findAllFromViagem(idViagem, pageable);
-    }
 
     @PostMapping("{id}/pagar-qr")
     @ResponseStatus(HttpStatus.NO_CONTENT)

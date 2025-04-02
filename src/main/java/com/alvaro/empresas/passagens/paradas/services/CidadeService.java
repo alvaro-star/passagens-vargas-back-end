@@ -1,18 +1,19 @@
 package com.alvaro.empresas.passagens.paradas.services;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
+import com.alvaro.empresas.passagens.dtos.PageOutput;
 import com.alvaro.empresas.passagens.paradas.dtos.CidadeCreateDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.CidadeUpdateDTO;
 import com.alvaro.empresas.passagens.paradas.models.CidadeModel;
 import com.alvaro.empresas.passagens.paradas.repositories.CidadeRepository;
 import com.alvaro.empresas.passagens.paradas.repositories.DepartamentoRepository;
 import com.alvaro.empresas.passagens.paradas.repositories.LugarRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
 
 @Service
 public class CidadeService {
@@ -27,16 +28,19 @@ public class CidadeService {
         return cidadeRepository.findByIdOrThr(id);
     }
 
-    public Page<CidadeModel> findAll(Pageable pageable) {
-        return cidadeRepository.findAll(pageable);
+    public PageOutput<CidadeModel> findAll(Pageable pageable) {
+        var models = cidadeRepository.findAll(pageable);
+        return new PageOutput<>(models);
     }
 
-    public Page<CidadeModel> findByNomeContaining(String nome, Pageable pageable) {
-        return cidadeRepository.findByNomeContaining(nome, pageable);
+    public PageOutput<CidadeModel> findByNomeContaining(String nome, Pageable pageable) {
+        var models = cidadeRepository.findByNomeContaining(nome, pageable);
+        return new PageOutput<>(models);
     }
 
-    public Page<CidadeModel> findByDepartamentoId(Integer id, Pageable pageable) {
-        return cidadeRepository.findByDepartamentoId(id, pageable);
+    public PageOutput<CidadeModel> findByDepartamentoId(Integer id, Pageable pageable) {
+        var models = cidadeRepository.findByDepartamentoId(id, pageable);
+        return new PageOutput<>(models);
     }
 
     public CidadeModel save(CidadeCreateDTO dto) {

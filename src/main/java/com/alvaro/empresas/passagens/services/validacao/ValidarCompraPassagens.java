@@ -13,16 +13,13 @@ import java.util.stream.Collectors;
 
 @Component
 public class ValidarCompraPassagens {
-    public void validarPassagensDTOVenta(BindingResult bindingResult, PassagensDTOVenta passagensDTO, String path) {
+    public void validarPassagensDTOVenta(PassagensDTOVenta passagensDTO, String path) {
         // Validação normal
         int i;
         FieldMessageItemList itemList;
 
         List<FieldMessageList> listaErros = new ArrayList<>();
         List<FieldMessageItemList> itensErrados = new ArrayList<>();
-
-
-        Map<String, String> erros = bindingResult.getFieldErrors().stream().collect(Collectors.toMap(FieldError::getField, e -> (e.getDefaultMessage() == null) ? "" : e.getDefaultMessage()));
 
         for (i = 0; i < passagensDTO.passagens().size(); i++) {
             itemList = validarPassagemDTO(i, passagensDTO.passagens().get(i));
@@ -31,8 +28,8 @@ public class ValidarCompraPassagens {
         if (!itensErrados.isEmpty())
             listaErros.add(new FieldMessageList("passagens", itensErrados));
 
-        if (!listaErros.isEmpty() || !erros.isEmpty())
-            throw new ValidationWithErrorListExceptions("Erro de validação", (HashMap<String, String>) erros, listaErros);
+        if (!listaErros.isEmpty())
+            throw new ValidationWithErrorListExceptions("Erro de validação", new HashMap<>(), listaErros);
     }
 
     public void validarPassagensDTO(BindingResult bindingResult, PassagensDTO passagensDTO, String path) {

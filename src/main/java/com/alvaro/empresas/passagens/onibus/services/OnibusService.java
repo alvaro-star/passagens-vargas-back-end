@@ -1,38 +1,34 @@
 package com.alvaro.empresas.passagens.onibus.services;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationException;
+import com.alvaro.empresas.passagens.dtos.PageOutput;
 import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
 import com.alvaro.empresas.passagens.helpers.validators.ValidEnabledEntities;
-import com.alvaro.empresas.passagens.models.ViagemModel;
-import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusCreateDTO;
-import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusDTOResponse;
-import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusUpdateDTO;
-import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoCreateDTO;
-import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoResponseDTO;
+import com.alvaro.empresas.passagens.onibus.dtos.OnibusCreateDTO;
+import com.alvaro.empresas.passagens.onibus.dtos.OnibusDTOResponse;
+import com.alvaro.empresas.passagens.onibus.dtos.OnibusUpdateDTO;
+import com.alvaro.empresas.passagens.onibus.dtos.PisoResponseDTO;
 import com.alvaro.empresas.passagens.onibus.models.OnibusModel;
 import com.alvaro.empresas.passagens.onibus.models.PisoModel;
 import com.alvaro.empresas.passagens.onibus.repositories.OnibusRepository;
 import com.alvaro.empresas.passagens.onibus.services.validacao.ValidarPiso;
 import com.alvaro.empresas.passagens.repositories.EmpresaRepository;
 import com.alvaro.empresas.passagens.repositories.ViagemRepository;
-import com.alvaro.empresas.passagens.services.EmpresaService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.BindingResult;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 @Service
 public class OnibusService {
+
     @Autowired
     private OnibusRepository onibusRepository;
     @Autowired
@@ -50,15 +46,17 @@ public class OnibusService {
         return new OnibusDTOResponse(model, pisosDTO);
     }
 
-    public Page<OnibusDTOResponse> findAll(Pageable pageable) {
-        Page<OnibusModel> models = onibusRepository.findAll(pageable);
-        return models.map(OnibusDTOResponse::new);
+    public PageOutput<OnibusDTOResponse> findAll(Pageable pageable) {
+        var models = onibusRepository.findAll(pageable);
+        var dtos = models.map(OnibusDTOResponse::new);
+        return new PageOutput<>(dtos);
     }
 
-    public Page<OnibusDTOResponse> findByEmpresaId(UUID idEmpresa, Pageable pageable) {
+    public PageOutput<OnibusDTOResponse> findByEmpresaId(UUID idEmpresa, Pageable pageable) {
         userLogued.validIfIsAdminOrOwnerEmpresa(idEmpresa);
-        Page<OnibusModel> onibus = onibusRepository.findByEmpresaId(idEmpresa, pageable);
-        return onibus.map(OnibusDTOResponse::new);
+        var models = onibusRepository.findByEmpresaId(idEmpresa, pageable);
+        var dtos = models.map(OnibusDTOResponse::new);
+        return new PageOutput<>(dtos);
     }
 
     @Transactional
@@ -110,7 +108,8 @@ public class OnibusService {
         var agora = LocalDateTime.now();
 
         Pageable pageable = PageRequest.of(0, 1);
-        Page<ViagemModel> viagensFuturas = viagemRepository.findAfterDate(model.getEmpresa().getId(), agora, pageable);
+        var viagensFuturas = viagemRepository.findAfterDate(model.getEmpresa().getId(), agora,
+                pageable);
 
         var viagem = viagemRepository.findFirst1ByOnibusId(model.getId());
         if (viagem.isEmpty())

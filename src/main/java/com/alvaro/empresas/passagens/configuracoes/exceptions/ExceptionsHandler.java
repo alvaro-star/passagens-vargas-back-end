@@ -2,22 +2,21 @@ package com.alvaro.empresas.passagens.configuracoes.exceptions;
 
 import java.sql.SQLIntegrityConstraintViolationException;
 
-import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
-import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationException;
-import com.alvaro.empresas.passagens.configuracoes.exceptions.dtos.EntityNotFoundError;
-import com.alvaro.empresas.passagens.configuracoes.exceptions.dtos.StandardError;
-import com.alvaro.empresas.passagens.configuracoes.exceptions.dtos.ValidationError;
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationException;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationWithErrorListExceptions;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.dtos.EntityNotFoundError;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.dtos.StandardError;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.dtos.ValidationError;
 import com.alvaro.empresas.passagens.services.validacao.ValidationErrorsWithList;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,6 +31,7 @@ public class ExceptionsHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public StandardError exception(Exception ex, HttpServletRequest request) {
         log.error(ex.getMessage());
+
         return new StandardError(
                 System.currentTimeMillis(),
                 HttpStatus.INTERNAL_SERVER_ERROR,
@@ -80,8 +80,7 @@ public class ExceptionsHandler {
                 HttpStatus.UNPROCESSABLE_ENTITY,
                 e.getMessage(),
                 request.getRequestURI());
-        for (FieldError erro : e.getBindingResult().getFieldErrors())
-            err.addError(erro.getField(), erro.getDefaultMessage());
+        e.getBindingResult().getFieldErrors().forEach(err::addError);
         return err;
     }
 
@@ -130,5 +129,16 @@ public class ExceptionsHandler {
                 e.getMessage(),
                 request.getRequestURI(),
                 e.getErrors());
+    }
+
+    @ExceptionHandler(NoSuchMethodError.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public StandardError exception(NoSuchMethodError e, HttpServletRequest request) {
+        log.error(e.getMessage());
+        return new StandardError(
+                System.currentTimeMillis(),
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                e.getMessage(),
+                request.getRequestURI());
     }
 }

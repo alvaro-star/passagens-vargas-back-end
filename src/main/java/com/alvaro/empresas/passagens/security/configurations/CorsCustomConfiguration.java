@@ -19,7 +19,7 @@ public class CorsCustomConfiguration {
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration("**", configuration);
         cors.configurationSource(source);
     }
 
@@ -33,7 +33,7 @@ public class CorsCustomConfiguration {
         configuration.addAllowedHeader("*");
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration("**", configuration);
 
         cors.configurationSource(source);
     }

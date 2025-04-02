@@ -1,9 +1,8 @@
 package com.alvaro.empresas.passagens.onibus.resources;
 
-import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoResponseDTO;
-import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoUpdateDTO;
+import com.alvaro.empresas.passagens.onibus.dtos.PisoResponseDTO;
+import com.alvaro.empresas.passagens.onibus.dtos.PisoUpdateDTO;
 import com.alvaro.empresas.passagens.onibus.services.PisoService;
-import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/pisos")
+@RequestMapping("pisos")
 @SecurityRequirement(name = "bearer-key")
 public class PisoResource {
     @Autowired

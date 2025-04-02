@@ -1,5 +1,6 @@
 package com.alvaro.empresas.passagens.pagamentos.repositories;
 
+import com.alvaro.empresas.passagens.interfaces.ICustomRepository;
 import com.alvaro.empresas.passagens.pagamentos.models.FaturaEmpresaModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -10,7 +11,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 @Repository
-public interface FaturaEmpresaRepository extends JpaRepository<FaturaEmpresaModel, UUID> {
+public interface FaturaEmpresaRepository extends JpaRepository<FaturaEmpresaModel, UUID>, ICustomRepository<FaturaEmpresaModel, UUID> {
 
     @Query(value = "SELECT f FROM FaturaEmpresaModel f " +
             "WHERE f.empresa.id = :empresaId " +

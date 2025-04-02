@@ -19,7 +19,7 @@ public class SpringDocConfiguration {
                         new SecurityScheme().type(SecurityScheme.Type.HTTP)
                                 .scheme("bearer").bearerFormat("JWT")))
                 .info(new Info()
-                        .title("Pasajes Vargas API").description("Api Docs")
+                        .title("Passagens Vargas API").description("Api Docs")
                         .contact(new Contact()
                                 .name("Time BackEnd")
                                 .email("vargas@gmail.com")

@@ -1,8 +1,8 @@
 package com.alvaro.empresas.passagens.onibus.models;
 
 import com.alvaro.empresas.passagens.interfaces.IEntityStandart;
-import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoCreateDTO;
-import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoUpdateDTO;
+import com.alvaro.empresas.passagens.onibus.dtos.PisoCreateDTO;
+import com.alvaro.empresas.passagens.onibus.dtos.PisoUpdateDTO;
 import com.alvaro.empresas.passagens.onibus.enums.TipePosicao;
 import jakarta.persistence.*;
 import lombok.*;

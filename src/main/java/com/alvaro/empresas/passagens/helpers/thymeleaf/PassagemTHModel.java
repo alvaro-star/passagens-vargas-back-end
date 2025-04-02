@@ -3,7 +3,7 @@ package com.alvaro.empresas.passagens.helpers.thymeleaf;
 import com.alvaro.empresas.passagens.models.PassagemModel;
 import org.thymeleaf.context.Context;
 
-public record PasajeTHModel(
+public record PassagemTHModel(
         String empresa,
         String fechaHora,
         Integer piso,
@@ -14,10 +14,10 @@ public record PasajeTHModel(
         String nascimiento,
         ParadaTHModel origen,
         ParadaTHModel destino,
-        String precio,
+        String preco,
         String metodoPago,
         Float descuento) {
-    public PasajeTHModel(String empresa, PassagemModel model, String fechaHora, String metodoPago) {
+    public PassagemTHModel(String empresa, PassagemModel model, String fechaHora, String metodoPago) {
         this(
                 empresa,
                 fechaHora,
@@ -46,7 +46,7 @@ public record PasajeTHModel(
         context.setVariable("nascimiento", this.nascimiento);
         context.setVariable("origen", this.origen);
         context.setVariable("destino", this.destino);
-        context.setVariable("precio", this.precio);
+        context.setVariable("preco", this.preco);
         context.setVariable("metodoPago", this.metodoPago);
         context.setVariable("descuento", this.descuento);
         return context;

@@ -1,5 +1,17 @@
 package com.alvaro.empresas.passagens.pagamentos.services.relatorios;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.thymeleaf.context.Context;
+
 import com.alvaro.empresas.passagens.dtos.viagens.JPQL.PassagemJPQLBusca;
 import com.alvaro.empresas.passagens.dtos.viagens.JPQL.ViagemDTOJPQLRelatorio;
 import com.alvaro.empresas.passagens.enums.TipoPagamento;
@@ -9,54 +21,41 @@ import com.alvaro.empresas.passagens.helpers.thymeleaf.CidadeTHModel;
 import com.alvaro.empresas.passagens.helpers.thymeleaf.MetodoTHModel;
 import com.alvaro.empresas.passagens.helpers.thymeleaf.PDFThymeleaf;
 import com.alvaro.empresas.passagens.models.PrecoModel;
-import com.alvaro.empresas.passagens.pagamentos.dtos.RelatorioSolicitacaoDTO;
 import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import com.alvaro.empresas.passagens.paradas.services.LugarService;
+import com.alvaro.empresas.passagens.repositories.EmpresaRepository;
 import com.alvaro.empresas.passagens.repositories.PassagemRepository;
-import com.alvaro.empresas.passagens.services.EmpresaService;
 import com.alvaro.empresas.passagens.services.validacao.TempoViagemService;
 import com.itextpdf.kernel.geom.PageSize;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.thymeleaf.context.Context;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
 
 @Service
 public class RelatorioService {
-    private final EmpresaService empresaService;
-    private final PassagemRepository passagemRepository;
-    private final EmailService emailService;
-    private final DateAuxiliarFunctions dateAuxiliarFunctions;
-    private final PDFThymeleaf pdfThymeleaf;
-    private final LugarService lugarService;
-    private final TempoViagemService tempoViagemService;
+    @Autowired
+    private EmpresaRepository empresaRepository;
+    @Autowired
+    private PassagemRepository passagemRepository;
+    @Autowired
+    private EmailService emailService;
+    @Autowired
+    private DateAuxiliarFunctions dateAuxiliarFunctions;
+    @Autowired
+    private PDFThymeleaf pdfThymeleaf;
+    @Autowired
+    private LugarService lugarService;
+    @Autowired
+    private TempoViagemService tempoViagemService;
 
-    public RelatorioService(EmpresaService empresaService, PassagemRepository passagemRepository,
-            EmailService emailService, DateAuxiliarFunctions dateAuxiliarFunctions, PDFThymeleaf pdfThymeleaf,
-            LugarService lugarService, TempoViagemService tempoViagemService) {
-        this.empresaService = empresaService;
-        this.passagemRepository = passagemRepository;
-        this.emailService = emailService;
-        this.dateAuxiliarFunctions = dateAuxiliarFunctions;
-        this.pdfThymeleaf = pdfThymeleaf;
-        this.lugarService = lugarService;
-        this.tempoViagemService = tempoViagemService;
-    }
 
     @Value("${api.viaje.max-time-viaje-day}")
     private Integer tempoMaxViagemDias;
 
     // Categorize cidades pelo número de passageiros indo para elas, não por ônibus
     // Ordena as listas de cidades com base no número de passagens vendidas
-    public byte[] makeRelatorioMensal(RelatorioSolicitacaoDTO solicitacaoDTO) {
-        var empresa = empresaService.findById(solicitacaoDTO.idEmpresa());
-        LocalDateTime inicio = dateAuxiliarFunctions.getFirstDayOfMonth(solicitacaoDTO.data());
-        LocalDateTime fim = dateAuxiliarFunctions.getLastDayOfMonth(solicitacaoDTO.data());
+    public byte[] makeRelatorioMensal(UUID empresaId, String mesAnalise) {
+        var empresa = empresaRepository.findByIdOrThr(empresaId);
+        Integer[] anoMes = DateAuxiliarFunctions.splitAnoMonth(mesAnalise);
+        LocalDateTime inicio = dateAuxiliarFunctions.getFirstDayOfMonth(anoMes);
+        LocalDateTime fim = dateAuxiliarFunctions.getLastDayOfMonth(anoMes);
         List<ViagemDTOJPQLRelatorio> viagens = tempoViagemService.findViagensFromEmpresa(empresa, inicio, fim);
 
         HashMap<Integer, Integer> saidasIdNPassagens = new HashMap<>(), destinosIdNPassagens = new HashMap<>();
@@ -116,8 +115,8 @@ public class RelatorioService {
     }
 
     public void classificarPassagemFromPreco(List<PassagemJPQLBusca> passagens, HashMap<Integer, Integer> saidasId,
-            HashMap<Integer, Integer> destinosId, HashMap<String, HashMetodoPagamentoValor> pagamentosWeb,
-            HashMap<String, HashMetodoPagamentoValor> pagamentosNaoWeb, RelatorioModel relatorio) {
+                                             HashMap<Integer, Integer> destinosId, HashMap<String, HashMetodoPagamentoValor> pagamentosWeb,
+                                             HashMap<String, HashMetodoPagamentoValor> pagamentosNaoWeb, RelatorioModel relatorio) {
 
         relatorio.nPassagensTotal += passagens.size();
         for (PassagemJPQLBusca passagem : passagens) {
@@ -154,7 +153,7 @@ public class RelatorioService {
     }
 
     public byte[] generatePdfFromHtml(RelatorioModel relatorio, List<CidadeTHModel> saidasThModels,
-            List<CidadeTHModel> destinosThModels, List<MetodoTHModel> metodos) {
+                                      List<CidadeTHModel> destinosThModels, List<MetodoTHModel> metodos) {
         var context = new Context();
         context.setVariable("empresaNome", relatorio.getEmpresa().getNome());
         context.setVariable("nMes", relatorio.getNMes());
@@ -169,6 +168,6 @@ public class RelatorioService {
         context.setVariable("valorArrecadadoWeb", relatorio.getValorArrecadadoWeb());
         context.setVariable("valorArrecadadoNaoWeb", relatorio.getValorArrecadadoNaoWeb());
         context.setVariable("valorTotal", relatorio.getValorArrecadadoNaoWeb() + relatorio.getValorArrecadadoWeb());
-        return pdfThymeleaf.generatePDFByTemplate("/empresa/relatorio", context, PageSize.A4);
+        return pdfThymeleaf.generatePDFByTemplate("empresa/relatorio", context, PageSize.A4);
     }
 }

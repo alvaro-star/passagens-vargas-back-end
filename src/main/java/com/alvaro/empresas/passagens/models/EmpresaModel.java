@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.models;
 
-import com.alvaro.empresas.passagens.dtos.InputEmpresaDTO;
+import com.alvaro.empresas.passagens.dtos.EmpresaInputDTO;
 import com.alvaro.empresas.passagens.interfaces.IEntityStandart;
 import com.alvaro.empresas.passagens.onibus.models.OnibusModel;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -39,7 +39,7 @@ public class EmpresaModel extends IEntityStandart {
     @JsonIgnore
     private List<ViagemModel> viagens = new ArrayList<>();
 
-    public EmpresaModel(InputEmpresaDTO dto) {
+    public EmpresaModel(EmpresaInputDTO dto) {
         nome = dto.nome();
         logo = dto.logo();
         nConta = dto.nConta();

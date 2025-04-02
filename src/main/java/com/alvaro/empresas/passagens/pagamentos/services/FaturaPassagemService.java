@@ -1,8 +1,21 @@
 package com.alvaro.empresas.passagens.pagamentos.services;
 
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationException;
-import com.alvaro.empresas.passagens.dtos.FaturaPasajeDTO;
+import com.alvaro.empresas.passagens.dtos.PageOutput;
 import com.alvaro.empresas.passagens.dtos.pasagens.InputContatoDTO;
 import com.alvaro.empresas.passagens.enums.TipoPagamento;
 import com.alvaro.empresas.passagens.helpers.PassagensPDF;
@@ -10,26 +23,11 @@ import com.alvaro.empresas.passagens.models.ContatoModel;
 import com.alvaro.empresas.passagens.models.PassagemModel;
 import com.alvaro.empresas.passagens.models.PrecoModel;
 import com.alvaro.empresas.passagens.models.ViagemModel;
-import com.alvaro.empresas.passagens.pagamentos.models.FaturaEmpresaModel;
 import com.alvaro.empresas.passagens.pagamentos.models.FaturaPassagemModel;
-import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.alvaro.empresas.passagens.pagamentos.repositories.FaturaPassagemRepository;
 import com.alvaro.empresas.passagens.repositories.PassagemRepository;
+import com.alvaro.empresas.passagens.repositories.PrecoRepository;
 import com.alvaro.empresas.passagens.repositories.ViagemRepository;
-import com.alvaro.empresas.passagens.services.PrecoService;
-import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
 
 @Service
 public class FaturaPassagemService {
@@ -38,37 +36,37 @@ public class FaturaPassagemService {
     @Autowired
     private PassagemRepository passagemRepository;
     @Autowired
-    private PrecoService precoService;
+    private PrecoRepository precoRepository;
     @Autowired
     private ViagemRepository viagemRepository;
 
-    public FaturaPassagemModel saveCliente(InputContatoDTO inputContatoDTO, BigDecimal precoTotal, ViagemModel viagem, TipoPagamento metodo) {
+    public FaturaPassagemModel saveCliente(InputContatoDTO inputContatoDTO, BigDecimal precoTotal, ViagemModel viagem, TipoPagamento metodo, boolean estaPago) {
         BigDecimal taxa = new BigDecimal("0.1");//Quanto será cobrado pelo serviço
         BigDecimal taxaServico = precoTotal.multiply(taxa);
 
         if (!metodo.equals(TipoPagamento.QR))
             throw new ValidationException("metodo", "Método de Pagamento inválido");
 
+        LocalDateTime dataPagamento = (estaPago) ? LocalDateTime.now() : null;
         var contatoModel = new ContatoModel(inputContatoDTO);
-        var pagamento = new FaturaPassagemModel(precoTotal, BigDecimal.ZERO, taxaServico, false, metodo, viagem, null, contatoModel);
+        var pagamento = new FaturaPassagemModel(precoTotal, BigDecimal.ZERO, taxaServico, estaPago, metodo, viagem, dataPagamento, contatoModel);
         return faturaPassagemRepository.save(pagamento);
     }
 
     public FaturaPassagemModel saveEmpresa(BigDecimal precoTotal, ViagemModel viagem, TipoPagamento metodo, boolean estaPago) {
-        LocalDateTime dataPagamento = LocalDateTime.now();
+        LocalDateTime dataPagamento = (estaPago) ? LocalDateTime.now() : null;
         BigDecimal taxaServico = BigDecimal.ZERO;
-        var pagamento = new FaturaPassagemModel(precoTotal, BigDecimal.valueOf(0), taxaServico, estaPago, metodo, viagem, dataPagamento, null);
+
+        var pagamento = new FaturaPassagemModel(precoTotal, BigDecimal.ZERO, taxaServico, estaPago, metodo, viagem, dataPagamento, null);
         return faturaPassagemRepository.save(pagamento);
     }
-
-    //O tipo de retorno é vazio, mas estamos colocando booleano por teste
 
     @Transactional
     public void pagarQr(UUID idPagamento) {//
         FaturaPassagemModel pagamento = faturaPassagemRepository.findById(idPagamento).orElseThrow(() -> new EntityNotFoundException(idPagamento, FaturaPassagemModel.class));
         if (pagamento.getEstaPago()) {
             reembolso();
-            mandarEmail("O preço já foi pago");
+            mandarEmail("O preço da passagem já foi pago");
             throw new RestRuntimeException(HttpStatus.CONFLICT, "O preço já foi pago");
         }
 
@@ -79,8 +77,8 @@ public class FaturaPassagemService {
         for (PassagemModel passagem : pagamento.getPassagens()) {
             if (assentosVendidos.contains(passagem.getNAssento())) {
                 reembolso();
-                mandarEmail("Um dos assentos já foi pago, o pagamento foi cancelado");
-                throw new RestRuntimeException(HttpStatus.CONFLICT, "Um dos assentos já foi pago, o pagamento foi cancelado");
+                mandarEmail("Um dos assentos já foi vendido, o pagamento foi cancelado");
+                throw new RestRuntimeException(HttpStatus.CONFLICT, "Um dos assentos já foi vendido, o pagamento foi cancelado");
             }
             nPassagens++;
         }
@@ -96,7 +94,7 @@ public class FaturaPassagemService {
             return;
         }
 
-        precoService.updateFromService(preco);
+        precoRepository.save(preco);
         passagemRepository.updateValuePagado(pagamento.getId(), true);
         var viagem = calcularValorArrecadado(pagamento);
         viagemRepository.save(viagem);
@@ -118,8 +116,8 @@ public class FaturaPassagemService {
         return viagem;
     }
 
-    public void codigoVencido(UUID idPagamento) {//
-        FaturaPassagemModel pagamento = faturaPassagemRepository.findById(idPagamento).orElseThrow(() -> new EntityNotFoundException(idPagamento, FaturaPassagemModel.class));
+    public void deletePassagemCodigoVencido(UUID idPagamento) {
+        FaturaPassagemModel pagamento = faturaPassagemRepository.findByIdOrThr(idPagamento);
         if (!pagamento.getEstaPago()) {
             for (PassagemModel passagem : pagamento.getPassagens())
                 passagemRepository.delete(passagem);
@@ -136,31 +134,26 @@ public class FaturaPassagemService {
     }
 
     public byte[] downloadFatura(UUID id) {
-        var fatura = faturaPassagemRepository.findById(id);
-        PassagensPDF passagensPDF = new PassagensPDF();
-        byte[] arrayBytesVazio = new byte[0];
+        var fatura = faturaPassagemRepository.findByIdOrThr(id);
+        PassagensPDF pdfPassagens = new PassagensPDF();
 
-        if (!fatura.isPresent())
-            throw new EntityNotFoundException(id, FaturaEmpresaModel.class);
-        if (fatura.get().getViagem() == null)
-            throw new ValidationException("protocolo", "O comprovante possui uma viagem nula");
-        String nomeEmpresa = fatura.get().getViagem().getEmpresa().getNome();
-        ParadaModel saida = fatura.get().getPassagens().get(0).getSaida();
-        ParadaModel destino = fatura.get().getPassagens().get(0).getDestino();
+        if (fatura.getViagemId() == null)
+            throw new RestRuntimeException(HttpStatus.CONFLICT, "O comprovante possui uma viagem nula");
+        String nomeEmpresa = fatura.getViagem().getEmpresa().getNome();
+
         try {
-            for (PassagemModel passagemModel : fatura.get().getPassagens())
-                passagensPDF.addPassagem(passagemModel, nomeEmpresa, saida, destino, fatura.get().getMetodoPagamento());
-            arrayBytesVazio = passagensPDF.closeAndGetBytes();
-            return arrayBytesVazio;
+            for (PassagemModel passagemModel : fatura.getPassagens())
+                pdfPassagens.addPassagem(passagemModel, nomeEmpresa, fatura.getMetodoPagamento());
+            return pdfPassagens.closePdfAndToBytes();
         } catch (IOException exception) {
-            throw new ValidationException("passagens", "Houve um erro na hora de criar os bilhetes");
+            throw new RestRuntimeException(HttpStatus.INTERNAL_SERVER_ERROR, "Houve um erro na hora de criar o documento com os bilhetes");
         }
     }
 
-    public Page<FaturaPasajeDTO> findAllFromViagem(UUID idViagem, Pageable pageable) {
+    public PageOutput<FaturaPassagemModel> findAllFromViagem(UUID idViagem, Pageable pageable) {
         if (idViagem == null)
             throw new RestRuntimeException(HttpStatus.BAD_REQUEST, "ID da viagem não pode ser nulo");
-        Page<FaturaPassagemModel> models = faturaPassagemRepository.findByViagemId(idViagem, pageable);
-        return models.map(FaturaPasajeDTO::new);
+        var models = faturaPassagemRepository.findByViagemId(idViagem, pageable);
+        return new PageOutput<>(models);
     }
 }

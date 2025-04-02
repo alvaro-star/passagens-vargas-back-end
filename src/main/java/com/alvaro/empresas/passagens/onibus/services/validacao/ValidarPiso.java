@@ -1,19 +1,14 @@
 package com.alvaro.empresas.passagens.onibus.services.validacao;
 
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationWithErrorListExceptions;
-import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusCreateDTO;
-import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoCreateDTO;
+import com.alvaro.empresas.passagens.onibus.dtos.OnibusCreateDTO;
+import com.alvaro.empresas.passagens.onibus.dtos.PisoCreateDTO;
 import com.alvaro.empresas.passagens.onibus.enums.TipePosicao;
-import com.alvaro.empresas.passagens.onibus.repositories.OnibusRepository;
 import com.alvaro.empresas.passagens.services.validacao.FieldMessageItemList;
 import com.alvaro.empresas.passagens.services.validacao.FieldMessageList;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 public class ValidarPiso {

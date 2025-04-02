@@ -56,7 +56,7 @@ public class PassagemModel extends IEntityStandart {
     @Column(nullable = false)
     private Date nascimento;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "fk_id_saida")
     private ParadaModel saida;
 

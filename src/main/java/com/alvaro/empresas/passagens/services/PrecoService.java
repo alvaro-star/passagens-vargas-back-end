@@ -10,9 +10,11 @@ import org.springframework.stereotype.Service;
 import com.alvaro.empresas.passagens.dtos.precos.PrecoDTO;
 import com.alvaro.empresas.passagens.dtos.precos.PrecoDTOResponseViagem;
 import com.alvaro.empresas.passagens.dtos.precos.PrecoDTOUpdate;
+import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
+import com.alvaro.empresas.passagens.helpers.validators.ValidEnabledEntities;
 import com.alvaro.empresas.passagens.models.PrecoModel;
 import com.alvaro.empresas.passagens.models.ViagemModel;
-import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoResponseDTO;
+import com.alvaro.empresas.passagens.onibus.dtos.PisoResponseDTO;
 import com.alvaro.empresas.passagens.onibus.models.PisoModel;
 import com.alvaro.empresas.passagens.repositories.PassagemRepository;
 import com.alvaro.empresas.passagens.repositories.PrecoRepository;
@@ -23,7 +25,8 @@ public class PrecoService {
     private PrecoRepository precoRepository;
     @Autowired
     private PassagemRepository passagemRepository;
-
+    @Autowired
+    private UserLoguedComponent userLogued;
 
     public List<PrecoDTO> saveAll(List<PrecoModel> newModels, ViagemModel viagem) {
         for (PrecoModel newModel : newModels) {
@@ -55,13 +58,13 @@ public class PrecoService {
         return new PrecoDTOResponseViagem(model, pisoDTO, ocupados);
     }
 
-    public PrecoDTO update(PrecoDTOUpdate dto, PrecoModel model) {
+    public PrecoDTO update(UUID id, PrecoDTOUpdate dto) {
+        var model = precoRepository.findByIdOrThr(id);
+        userLogued.validIfIsMyEmpresa(model.getEmpresaId());
+        ValidEnabledEntities.validEmpresa(model.getEmpresa());
+
         model.updateValues(dto);
         precoRepository.save(model);
         return new PrecoDTO(model);
-    }
-
-    public void updateFromService(PrecoModel precoModel) {
-        precoRepository.save(precoModel);
     }
 }

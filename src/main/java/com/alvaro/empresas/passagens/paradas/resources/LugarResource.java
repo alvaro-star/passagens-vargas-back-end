@@ -17,7 +17,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/lugares")
+@RequestMapping("lugares")
 @SecurityRequirement(name = "bearer-key")
 public class LugarResource {
     @Autowired

@@ -1,28 +1,21 @@
 package com.alvaro.empresas.passagens.onibus.services;
 
-import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
-import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationException;
 import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
 import com.alvaro.empresas.passagens.helpers.validators.ValidEnabledEntities;
-import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoCreateDTO;
-import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoResponseDTO;
-import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoUpdateDTO;
-import com.alvaro.empresas.passagens.onibus.models.OnibusModel;
+import com.alvaro.empresas.passagens.onibus.dtos.PisoResponseDTO;
+import com.alvaro.empresas.passagens.onibus.dtos.PisoUpdateDTO;
 import com.alvaro.empresas.passagens.onibus.models.PisoModel;
 import com.alvaro.empresas.passagens.onibus.repositories.PisoRepository;
 
 import com.alvaro.empresas.passagens.repositories.ViagemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service

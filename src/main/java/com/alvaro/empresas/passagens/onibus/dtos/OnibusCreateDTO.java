@@ -1,6 +1,5 @@
-package com.alvaro.empresas.passagens.onibus.dtos.onibus;
+package com.alvaro.empresas.passagens.onibus.dtos;
 
-import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoCreateDTO;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;

@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record FaturaPasajeDTO(
+public record FaturaPassagemDTO(
         UUID id,
         BigDecimal valorTotal,
         Boolean estaPago,
@@ -14,7 +14,7 @@ public record FaturaPasajeDTO(
         LocalDateTime dataPagamento,
         LocalDateTime createdAt
 ) {
-    public FaturaPasajeDTO(FaturaPassagemModel model) {
+    public FaturaPassagemDTO(FaturaPassagemModel model) {
         this(model.getId(), model.getValorTotal(), model.getEstaPago(), model.getEstaPago().toString(), model.getDataPagamento(), model.getCreatedAt());
     }
 }

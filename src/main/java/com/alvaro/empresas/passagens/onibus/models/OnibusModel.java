@@ -7,10 +7,9 @@ import java.util.UUID;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.interfaces.IEntityStandart;
 import com.alvaro.empresas.passagens.models.ViagemModel;
-import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusCreateDTO;
-import com.alvaro.empresas.passagens.onibus.dtos.onibus.OnibusUpdateDTO;
+import com.alvaro.empresas.passagens.onibus.dtos.OnibusCreateDTO;
+import com.alvaro.empresas.passagens.onibus.dtos.OnibusUpdateDTO;
 
-import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoCreateDTO;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;

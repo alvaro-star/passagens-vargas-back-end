@@ -2,10 +2,14 @@ package com.alvaro.empresas.passagens.helpers;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
 import com.alvaro.empresas.passagens.helpers.dtos.DataHoraFormatada;
 
 @Component
@@ -13,14 +17,30 @@ public class DateAuxiliarFunctions {
     @Value("${spring.jackson.time-zone}")
     private String fusoHorario;
 
-    public LocalDateTime getFirstDayOfMonth(LocalDate dataLocal) {
-        var primeiroDiaMes = LocalDate.of(dataLocal.getYear(), dataLocal.getMonthValue(), 1);
+    public LocalDateTime getFirstDayOfMonth(Integer[] anoMes) {
+        var primeiroDiaMes = LocalDate.of(anoMes[0], anoMes[1], 1);
         return primeiroDiaMes.atTime(0, 0, 0, 0);
     }
 
-    public LocalDateTime getLastDayOfMonth(LocalDate dataLocal) {
-        var primeiroDiaMes = getFirstDayOfMonth(dataLocal.plusMonths(1));
+    public LocalDateTime getLastDayOfMonth(Integer[] anoMes) {
+        anoMes[1] += 1;
+        var primeiroDiaMes = getFirstDayOfMonth(anoMes);
         return primeiroDiaMes.minusNanos(1);
+    }
+
+    public static Integer[] splitAnoMonth(String mesAnalise) {
+        String regex = "^(\\d{4})-(0[1-9]|1[0-2])$";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(mesAnalise);
+        if (!matcher.matches())
+            throw new RestRuntimeException(HttpStatus.BAD_REQUEST, "O mes precisa seguir o seguinte formato YYYY-MM");
+        String[] mesAnaliseSplit = mesAnalise.split("-");
+        Integer[] anoMes = new Integer[2];
+        for (int i = 0; i < mesAnaliseSplit.length; i++) {
+            anoMes[i] = Integer.valueOf(mesAnaliseSplit[i]);
+        }
+        return anoMes;
+
     }
 
     public static DataHoraFormatada getDataHoraFromDateTime(LocalDateTime dataHora) {

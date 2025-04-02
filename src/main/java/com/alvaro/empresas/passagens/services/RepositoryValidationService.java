@@ -13,10 +13,10 @@ public class RepositoryValidationService {
     private PrecoRepository precoRepository;
 
     public boolean viagemHasPassagem(ViagemModel viagem) {
-        Integer nPasajes;
-        for (PrecoModel precio : viagem.getPrecos()) {
-            nPasajes = precoRepository.calcularNPassagens(precio.getId());
-            if (nPasajes != null && nPasajes > 0)
+        Integer nPassagens;
+        for (PrecoModel preco : viagem.getPrecos()) {
+            nPassagens = precoRepository.calcularNPassagens(preco.getId());
+            if (nPassagens != null && nPassagens > 0)
                 return true;
         }
         return false;

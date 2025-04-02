@@ -58,9 +58,12 @@ public class PassagensPDF {
         showLongTextAndNewLine(fluxoConteudo, "Lugar: " + parada.getLugar().getNome());
     }
 
-    public void addPassagem(PassagemModel modelo, String nomeEmpresa, ParadaModel saida, ParadaModel destino, TipoPagamento metodo) throws IOException {
+    public void addPassagem(PassagemModel modelo, String nomeEmpresa, TipoPagamento metodo) throws IOException {
         PDPage pagina = new PDPage(retangulo);
         documento.addPage(pagina);
+        var saida = modelo.getSaida();
+        var destino = modelo.getDestino();
+
 
         PDPageContentStream fluxoConteudo = new PDPageContentStream(documento, pagina);
         fluxoConteudo.beginText();
@@ -99,7 +102,7 @@ public class PassagensPDF {
         fluxoConteudo.close();
     }
 
-    public byte[] closeAndGetBytes() throws IOException {
+    public byte[] closePdfAndToBytes() throws IOException {
         ByteArrayOutputStream fluxoSaida = new ByteArrayOutputStream();
         documento.save(fluxoSaida);
         documento.close();

@@ -22,7 +22,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/usuarios")
+@RequestMapping("usuarios")
 @SecurityRequirement(name = "bearer-key")
 public class UsuarioResource {
 
@@ -32,7 +32,7 @@ public class UsuarioResource {
     @Autowired
     private UsuarioService servicoUsuario;
 
-    @GetMapping("/mydata")
+    @GetMapping("mydata")
     @ResponseStatus(HttpStatus.OK)
     public Object obterPerfil() {
         var usuario = usuarioLogado.getUserModel();
@@ -42,13 +42,13 @@ public class UsuarioResource {
         return new UsuarioDTO(usuario);
     }
 
-    @PostMapping("/update")
+    @PutMapping("update")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void atualizarPerfil(@RequestBody @Valid UsuarioDTOUpdate solicitacao) {
         servicoUsuario.updateProfile(solicitacao);
     }
 
-    @PutMapping("/validar_update")
+    @PutMapping("validar_update")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void validarAtualizacao(@RequestBody @Valid UsuarioDTOUpdateValidation formulario) {
         servicoUsuario.validateUpdate(formulario);

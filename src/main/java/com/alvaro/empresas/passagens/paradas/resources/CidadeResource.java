@@ -1,5 +1,20 @@
 package com.alvaro.empresas.passagens.paradas.resources;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.alvaro.empresas.passagens.dtos.PageOutput;
 import com.alvaro.empresas.passagens.paradas.dtos.CidadeCreateDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.CidadeUpdateDTO;
@@ -7,18 +22,12 @@ import com.alvaro.empresas.passagens.paradas.models.CidadeModel;
 import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import com.alvaro.empresas.passagens.paradas.services.CidadeService;
 import com.alvaro.empresas.passagens.paradas.services.LugarService;
+
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/cidades")
+@RequestMapping("cidades")
 @SecurityRequirement(name = "bearer-key")
 public class CidadeResource {
     @Autowired
@@ -28,7 +37,7 @@ public class CidadeResource {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Page<CidadeModel> findAll(@PageableDefault(size = 20) Pageable pageable) {
+    public PageOutput<CidadeModel> findAll(@PageableDefault(size = 20) Pageable pageable) {
         return cidadeService.findAll(pageable);
     }
 
@@ -44,9 +53,9 @@ public class CidadeResource {
         return lugarService.findByCidadeId(id, pageable);
     }
 
-    @GetMapping("/{nome}/like")
+    @GetMapping("{nome}/like")
     @ResponseStatus(HttpStatus.OK)
-    public Page<CidadeModel> findAllLike(@PathVariable(value = "nome") String nome, @PageableDefault(size = 8, sort = "nome") Pageable pageable) {
+    public PageOutput<CidadeModel> findAllLike(@PathVariable(value = "nome") String nome, @PageableDefault(size = 8, sort = "nome") Pageable pageable) {
         return cidadeService.findByNomeContaining(nome.toUpperCase(), pageable);
     }
 

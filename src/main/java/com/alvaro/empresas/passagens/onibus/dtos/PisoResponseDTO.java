@@ -1,4 +1,4 @@
-package com.alvaro.empresas.passagens.onibus.dtos.pisos;
+package com.alvaro.empresas.passagens.onibus.dtos;
 
 import com.alvaro.empresas.passagens.onibus.models.PisoModel;
 

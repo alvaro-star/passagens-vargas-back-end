@@ -1,6 +1,5 @@
-package com.alvaro.empresas.passagens.onibus.dtos.onibus;
+package com.alvaro.empresas.passagens.onibus.dtos;
 
-import com.alvaro.empresas.passagens.onibus.dtos.pisos.PisoResponseDTO;
 import com.alvaro.empresas.passagens.onibus.models.OnibusModel;
 
 import java.math.BigDecimal;

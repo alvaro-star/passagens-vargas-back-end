@@ -1,4 +1,4 @@
-package com.alvaro.empresas.passagens.onibus.dtos.onibus;
+package com.alvaro.empresas.passagens.onibus.dtos;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

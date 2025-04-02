@@ -2,7 +2,7 @@ package com.alvaro.empresas.passagens.dtos;
 
 import jakarta.validation.constraints.NotBlank;
 
-public record InputEmpresaDTO(
+public record EmpresaInputDTO(
         @NotBlank
         String nome,
         @NotBlank

@@ -25,7 +25,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/paradas")
+@RequestMapping("paradas")
 @SecurityRequirement(name = "bearer-key")
 public class ParadaResource {
     @Autowired
@@ -58,7 +58,7 @@ public class ParadaResource {
         return paradaService.update(id, dto);
     }
 
-    @DeleteMapping("{id}") // Melhorar política de exclusão, só pode excluir se ninguém pagou ou comprou
+    @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
     public void delete(@PathVariable Integer id) {

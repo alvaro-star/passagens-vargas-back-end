@@ -5,12 +5,14 @@ import com.alvaro.empresas.passagens.models.ContatoModel;
 import com.alvaro.empresas.passagens.models.PassagemModel;
 import com.alvaro.empresas.passagens.models.ViagemModel;
 import com.alvaro.empresas.passagens.security.models.UsuarioModel;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -35,14 +37,25 @@ public class FaturaPassagemModel extends IFaturaStandart {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fk_idtb_cliente")
+    @JsonIgnore
     private UsuarioModel cliente;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fk_idtb_viagem")
+    @JsonIgnore
     private ViagemModel viagem;
+    @Column(name = "fk_idtb_viagem", updatable = false, insertable = false)
+    @JsonIgnore
+    private UUID viagemId;
 
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "faturaPassagem")
+    @JsonIgnore
     private List<PassagemModel> passagens;
+
+    public void setViagem(ViagemModel viagem) {
+        this.viagem = viagem;
+        this.viagemId = (viagem != null) ? viagem.getId() : null;
+    }
 
     public FaturaPassagemModel(BigDecimal valorTotal, BigDecimal desconto, BigDecimal taxaServico, Boolean estaPago, TipoPagamento metodoPagamento, ViagemModel viagemModel, LocalDateTime dataPagamento, ContatoModel contato) {
         super(valorTotal);
@@ -51,6 +64,7 @@ public class FaturaPassagemModel extends IFaturaStandart {
         this.estaPago = estaPago;
         this.metodoPagamento = metodoPagamento;
         this.dataPagamento = dataPagamento;
+        setViagem(viagemModel);
         this.viagem = viagemModel;
         this.contato = contato;
     }

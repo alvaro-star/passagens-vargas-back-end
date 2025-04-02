@@ -171,7 +171,6 @@ public class ParadaService {
     @Transactional
     public void delete(Integer id) {
         var model = paradaRepository.findByIdOrThr(id);
-
         if (!userLogued.hasRole(RoleList.ROLE_ADMIN))
             userLogued.validIfIsMyEmpresa(model.getEmpresaId());
 
@@ -183,17 +182,18 @@ public class ParadaService {
 
         int indice = -1;
         ParadaModel aux;
+
+        var destinoParada = model.getViagem().getDestino();
+        if (destinoParada.getDataHora().isBefore(LocalDateTime.now()))
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Não é possível excluir uma parada de uma viagem do passado");
         for (int i = 0; i < model.getViagem().getParadas().size(); i++) {
             aux = model.getViagem().getParadas().get(i);
-            if (aux.getTipo().equals(TipoParada.DESTINO) && aux.getDataHora().isBefore(LocalDateTime.now()))
-                throw new ResponseStatusException(HttpStatus.CONFLICT,
-                        "Não é possível excluir uma parada de uma viagem do passado");
             if (aux.getId().equals(model.getId()))
                 indice = i;
         }
         if (indice == -1)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A parada não está relacionada");
-        // Causa de não exclusão: o relacionamento com viagem
         if (validationService.viagemHasPassagem(model.getViagem()))
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Não é possível eliminar uma parada de uma viagem que já possui um passageiro");
 

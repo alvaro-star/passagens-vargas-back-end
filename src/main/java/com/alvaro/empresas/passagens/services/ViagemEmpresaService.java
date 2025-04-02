@@ -10,39 +10,34 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
-import com.alvaro.empresas.passagens.onibus.repositories.OnibusRepository;
-import com.alvaro.empresas.passagens.repositories.EmpresaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.context.Context;
 
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationException;
+import com.alvaro.empresas.passagens.dtos.PageOutput;
 import com.alvaro.empresas.passagens.dtos.precos.PrecoDTO;
 import com.alvaro.empresas.passagens.dtos.viagens.ViagemDTOUpdate;
-import com.alvaro.empresas.passagens.dtos.viagens.JPQL.ViagemDTOJPQL;
 import com.alvaro.empresas.passagens.dtos.viagens.busca.ViagemDTOSolicitacaoEmpresa;
-import com.alvaro.empresas.passagens.dtos.viagens.busca.ViagemDTOSolicitacaoFromEmpresa;
-import com.alvaro.empresas.passagens.dtos.viagens.busca.ViagemDTOSolicitacaoFromOnibus;
 import com.alvaro.empresas.passagens.dtos.viagens.empresa.ViagemDTOCreate;
 import com.alvaro.empresas.passagens.dtos.viagens.empresa.ViagemDTOEmpresaResponse;
 import com.alvaro.empresas.passagens.dtos.viagens.empresa.ViagemDTOFormCopy;
 import com.alvaro.empresas.passagens.dtos.viagens.empresa.ViagemDTOListBuscaEmpresa;
 import com.alvaro.empresas.passagens.enums.TipoParada;
 import com.alvaro.empresas.passagens.helpers.DateAuxiliarFunctions;
+import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
 import com.alvaro.empresas.passagens.helpers.thymeleaf.PDFThymeleaf;
-import com.alvaro.empresas.passagens.helpers.thymeleaf.PasajeItemListTHModel;
+import com.alvaro.empresas.passagens.helpers.thymeleaf.PassagemItemListTHModel;
 import com.alvaro.empresas.passagens.helpers.validators.ValidEnabledEntities;
 import com.alvaro.empresas.passagens.models.PrecoModel;
 import com.alvaro.empresas.passagens.models.ViagemModel;
-import com.alvaro.empresas.passagens.onibus.models.OnibusModel;
 import com.alvaro.empresas.passagens.onibus.models.PisoModel;
-import com.alvaro.empresas.passagens.onibus.services.OnibusService;
+import com.alvaro.empresas.passagens.onibus.repositories.OnibusRepository;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaResponseDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.JPQL.ViagemEmpresaDTOJPQ;
 import com.alvaro.empresas.passagens.paradas.models.CidadeModel;
@@ -50,6 +45,7 @@ import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.alvaro.empresas.passagens.paradas.repositories.LugarRepository;
 import com.alvaro.empresas.passagens.paradas.repositories.ParadaRepository;
+import com.alvaro.empresas.passagens.repositories.EmpresaRepository;
 import com.alvaro.empresas.passagens.repositories.PrecoRepository;
 import com.alvaro.empresas.passagens.repositories.ViagemRepository;
 import com.alvaro.empresas.passagens.services.validacao.TempoViagemService;
@@ -72,120 +68,105 @@ public class ViagemEmpresaService {
     @Autowired
     private DateAuxiliarFunctions helperDate;
     @Autowired
-    private PrecoRepository precioRepository;
-    @Autowired
     private PDFThymeleaf pdfThymeleaf;
     @Autowired
     private OnibusRepository onibusRepository;
+    @Autowired
+    private UserLoguedComponent userLogued;
 
     public ViagemModel findById(UUID id) {
         return viagemRepository.findByIdOrThr(id);
     }
 
-    public Page<ViagemDTOListBuscaEmpresa> findAllByEmpresaBetweenDates(ViagemDTOSolicitacaoFromEmpresa solicitacao,
-                                                                        Pageable pageable) {
-        var empresa = empresaRepository.findByIdOrThr(solicitacao.idEmpresa());
-        Page<ViagemDTOJPQL> models;
-        LocalDateTime dataInicio = helperDate.getFirstDayOfMonth(solicitacao.dataAnalise());
-        LocalDateTime dataFim = helperDate.getLastDayOfMonth(solicitacao.dataAnalise());
+    public PageOutput<ViagemDTOListBuscaEmpresa> findAllByEmpresaBetweenDates(UUID empresaId, String mesAnalise,
+            Pageable pageable) {
 
-        models = viagemRepository.findByEmpresaAndStartInInterval(empresa.getId(), dataInicio, dataFim, pageable);
+        Integer[] anoMes = DateAuxiliarFunctions.splitAnoMonth(mesAnalise);
 
-        return models.map(model -> {
+        userLogued.validIfIsAdminOrOwnerEmpresa(empresaId);
+        var empresa = empresaRepository.findByIdOrThr(empresaId);
+
+        LocalDateTime dataInicio = helperDate.getFirstDayOfMonth(anoMes);
+        LocalDateTime dataFim = helperDate.getLastDayOfMonth(anoMes);
+
+        var page = viagemRepository.findByEmpresaAndStartInInterval(empresa.getId(), dataInicio, dataFim, pageable);
+
+        var dtos = page.map(model -> {
             if (model.saida() == null || model.destino() == null)
                 throw new RestRuntimeException(HttpStatus.CONFLICT, "Existe uma viagem sem data de início ou fim");
             return new ViagemDTOListBuscaEmpresa(model.viagem());
         });
+
+        return new PageOutput<>(dtos);
     }
 
-    public Page<ViagemDTOListBuscaEmpresa> findAllFromOnibus(OnibusModel onibusModel,
-                                                             ViagemDTOSolicitacaoFromOnibus solicitacao, Pageable pageable) {
-        LocalDateTime dataInicio = helperDate.getFirstDayOfMonth(solicitacao.dataAnalise());
-        LocalDateTime dataFim = helperDate.getLastDayOfMonth(solicitacao.dataAnalise());
+    public PageOutput<ViagemDTOListBuscaEmpresa> findAllFromOnibus(UUID onibusId, String mesAnalise,
+            Pageable pageable) {
+        var onibus = onibusRepository.findByIdOrThr(onibusId);
+        userLogued.validIfIsAdminOrOwnerEmpresa(onibus.getEmpresaId());
 
-        Page<ViagemDTOJPQL> models = viagemRepository.findByEmpresaAndOnibusAndStartInInterval(
-                onibusModel.getEmpresa().getId(), onibusModel.getId(), dataInicio, dataFim, pageable);
+        Integer[] anoMes = DateAuxiliarFunctions.splitAnoMonth(mesAnalise);
+        LocalDateTime dataInicio = helperDate.getFirstDayOfMonth(anoMes);
+        LocalDateTime dataFim = helperDate.getLastDayOfMonth(anoMes);
 
-        return models.map(model -> {
+        var models = viagemRepository.findByEmpresaAndOnibusAndStartInInterval(onibus.getEmpresa().getId(),
+                onibus.getId(), dataInicio, dataFim, pageable);
+
+        var dtos = models.map(model -> {
             if (model.saida() == null || model.destino() == null)
                 throw new RestRuntimeException(HttpStatus.CONFLICT, "Existe uma viagem sem data de início ou fim");
             return new ViagemDTOListBuscaEmpresa(model.viagem());
         });
+        return new PageOutput<>(dtos);
     }
 
     public List<ViagemDTOListBuscaEmpresa> findViagensByDay(UUID idEmpresa, ViagemDTOSolicitacaoEmpresa dto) {
-        if (dto.idCidadeDestino().equals(dto.idCidadeSaida()))
-            throw new ValidationException("idDestino", "O destino não pode ser o mesmo que a saída");
-
+        userLogued.validIfIsAdminOrOwnerEmpresa(idEmpresa);
         List<LugarModel> lugaresSaida = lugarRepository.findByCidadeId(dto.idCidadeSaida());
-        List<LugarModel> lugaresDestino = lugarRepository.findByCidadeId(dto.idCidadeDestino());
-
         if (lugaresSaida.isEmpty())
             throw new EntityNotFoundException(dto.idCidadeSaida(), CidadeModel.class);
 
-        if (lugaresDestino.isEmpty())
-            throw new EntityNotFoundException(dto.idCidadeDestino(), CidadeModel.class);
+        List<LugarModel> lugaresDestino = null;
+        if (dto.idCidadeDestino() != null && dto.idCidadeDestino() != 0) {
+            if (dto.idCidadeDestino().equals(dto.idCidadeSaida()))
+                throw new ValidationException("idDestino", "O destino não pode ser o mesmo que a saída");
+            lugaresDestino = lugarRepository.findByCidadeId(dto.idCidadeDestino());
+            if (lugaresDestino.isEmpty())
+                throw new EntityNotFoundException(dto.idCidadeDestino(), CidadeModel.class);
+        }
 
         LocalDateTime startDay = dto.dataSaida().atTime(LocalTime.MIN);
         LocalDateTime endDay = dto.dataSaida().atTime(LocalTime.MAX);
 
-        List<ViagemDTOListBuscaEmpresa> viagensSelecionados = new ArrayList<>();
+        List<ViagemEmpresaDTOJPQ> viagensDisponiveis = new ArrayList<>();
 
-        for (LugarModel lugarSaida : lugaresSaida) {
-            for (LugarModel lugarDestino : lugaresDestino) {
-                List<ViagemEmpresaDTOJPQ> viagens = viagemRepository.findByEmpresaAndStartInInterval(idEmpresa,
-                        lugarSaida.getId(), lugarDestino.getId(), startDay, endDay);
-                for (ViagemEmpresaDTOJPQ viagem : viagens) {
-                    var saida = new ParadaResponseDTO(viagem.saida());
-                    var destino = new ParadaResponseDTO(viagem.destino());
-                    if (!destino.dataHora().isAfter(saida.dataHora()))
-                        continue;
-
-                    var precos = viagem.viagem().getPrecos();
-                    var precosDTO = precos.stream().filter(p -> !p.getCheio()).map(PrecoDTO::new).toList();
-                    viagensSelecionados
-                            .add(new ViagemDTOListBuscaEmpresa(viagem.viagem(), null, saida, destino, precosDTO));
-                }
+        for (LugarModel saida : lugaresSaida) {
+            if (lugaresDestino != null)
+                lugaresDestino.forEach(destino -> {
+                    var viagensResult = viagemRepository.findByEmpresaAndStartInInterval(idEmpresa, saida.getId(),
+                            destino.getId(), startDay, endDay);
+                    viagensDisponiveis.addAll(viagensResult);
+                });
+            else {
+                List<ViagemEmpresaDTOJPQ> viagensResult = viagemRepository.findByEmpresaAndStartInInterval(idEmpresa,
+                        saida.getId(), startDay, endDay);
+                viagensDisponiveis.addAll(viagensResult);
             }
         }
 
-        return viagensSelecionados;
-    }
-
-    public List<ViagemDTOListBuscaEmpresa> findViagensBySaida(UUID idEmpresa, ViagemDTOSolicitacaoEmpresa dto) {
-        List<LugarModel> lugaresSaida = lugarRepository.findByCidadeId(dto.idCidadeSaida());
-        if (lugaresSaida.isEmpty())
-            throw new EntityNotFoundException(dto.idCidadeSaida(), CidadeModel.class);
-
-        LocalDateTime inicioDia = dto.dataSaida().atTime(LocalTime.MIN);
-        LocalDateTime fimDia = dto.dataSaida().atTime(LocalTime.MAX);
-
-        List<ViagemDTOListBuscaEmpresa> viagensSelecionadas = new ArrayList<>();
-
-        for (LugarModel lugarSaida : lugaresSaida) {
-            List<ViagemEmpresaDTOJPQ> viagens = viagemRepository.findByEmpresaAndStartInInterval(idEmpresa,
-                    lugarSaida.getId(), inicioDia, fimDia);
-            for (ViagemEmpresaDTOJPQ viagem : viagens) {
-                var saida = new ParadaResponseDTO(viagem.saida());
-                var destino = new ParadaResponseDTO(viagem.destino());
-
-                if (!destino.dataHora().isAfter(saida.dataHora()))
-                    continue;
-
-                var precos = viagem.viagem().getPrecos();
-                var precosDTO = precos.stream().map(PrecoDTO::new).toList();
-                viagensSelecionadas
-                        .add(new ViagemDTOListBuscaEmpresa(viagem.viagem(), null, saida, destino, precosDTO));
-            }
-        }
-
-        return viagensSelecionadas;
+        return viagensDisponiveis.stream().map(viagem -> {
+            var saida = new ParadaResponseDTO(viagem.saida());
+            var destino = new ParadaResponseDTO(viagem.destino());
+            var precos = viagem.viagem().getPrecos();
+            var precosDTO = precos.stream().filter(p -> !p.getCheio()).map(PrecoDTO::new).toList();
+            return new ViagemDTOListBuscaEmpresa(viagem.viagem(), null, saida, destino, precosDTO);
+        }).toList();
     }
 
     public byte[] getPdfFromViagem(UUID id) {
         var model = this.findById(id);
-        List<PasajeItemListTHModel> passagensTh = model.getPrecos().stream().flatMap(p -> p.getPassagens().stream())
-                .map(PasajeItemListTHModel::new).toList();
+        List<PassagemItemListTHModel> passagensTh = model.getPrecos().stream().flatMap(p -> p.getPassagens().stream())
+                .map(PassagemItemListTHModel::new).toList();
 
         Context context = new Context();
         context.setVariable("passagens", passagensTh);
@@ -193,7 +174,11 @@ public class ViagemEmpresaService {
     }
 
     @Transactional
-    public ViagemDTOEmpresaResponse save(ViagemDTOCreate dto, OnibusModel onibus) {
+    public ViagemDTOEmpresaResponse save(ViagemDTOCreate dto) {
+
+        var onibus = onibusRepository.findByIdOrThr(dto.idOnibus());
+        userLogued.validIfIsMyEmpresa(onibus.getEmpresaId());
+
         ValidEnabledEntities.validOnibus(onibus);
         ValidEnabledEntities.validEmpresa(onibus.getEmpresa());
 
@@ -225,26 +210,27 @@ public class ViagemEmpresaService {
 
         var model = new ViagemModel(onibus, dataHoraSaidaAjustada);
 
-        var saida = new ParadaModel(dataHoraSaidaAjustada, dto.plataforma(), TipoParada.SAIDA, lugarSaida.get(),
-                model);
+        var saida = new ParadaModel(dataHoraSaidaAjustada, dto.plataforma(), TipoParada.SAIDA, lugarSaida.get(), model);
         var destino = new ParadaModel(dataHoraDestino, 0, TipoParada.DESTINO, lugarDestino.get(), model);
 
-        // Tratando los precios del viaje
-        List<PrecoModel> precos = new ArrayList<>();
         List<BigDecimal> precosDTO = List.of(dto.precoPiso1(), dto.precoPiso2());
 
         PisoModel aux;
         for (int i = 1; i <= onibus.getPisos().size(); i++) {
             aux = onibus.getPisoByNumero(i);
-            BigDecimal precioItemList = precosDTO.get(i - 1);
-            if (precioItemList == null)
-                precioItemList = precosDTO.get(i - 2);
-            precos.add(new PrecoModel(precioItemList, i, aux.getNAssentos()));
+            BigDecimal precoItemList = precosDTO.get(i - 1);
+            if (precoItemList == null)
+                precoItemList = precosDTO.get(i - 2);
+            var preco = new PrecoModel(precoItemList, i, aux.getNAssentos());
+            preco.setViagem(model);
+            preco.setEmpresa(preco.getEmpresa());
+            model.addPreco(preco);
         }
 
         viagemRepository.save(model);
-        // Guardando los precios
-        List<PrecoDTO> preciosSalvos = precoRepository.saveAll(precos, model);
+
+        List<PrecoDTO> precosSalvos = model.getPrecos().stream().map(preco -> new PrecoDTO(preco)).toList();
+
         model.addParada(saida);
         model.addParada(destino);
         viagemRepository.save(model);
@@ -252,12 +238,16 @@ public class ViagemEmpresaService {
         List<ParadaResponseDTO> paradas = new ArrayList<>();
         paradas.add(new ParadaResponseDTO(saida));
         paradas.add(new ParadaResponseDTO(destino));
-        return new ViagemDTOEmpresaResponse(model, paradas, preciosSalvos);
+        return new ViagemDTOEmpresaResponse(model, paradas, precosSalvos);
     }
 
     @Transactional
     // Verificar se se deseja replicar uma viagem futura em uma viagem menos futura
-    public ViagemModel saveOneCopy(ViagemDTOFormCopy dto, ViagemModel viagem) {
+    public ViagemModel saveOneCopy(ViagemDTOFormCopy dto) {
+
+        var viagem = viagemRepository.findByIdOrThr(dto.idViagem());
+        userLogued.validIfIsMyEmpresa(viagem.getEmpresaId());
+
         ValidEnabledEntities.validOnibus(viagem.getOnibus());
         ValidEnabledEntities.validEmpresa(viagem.getEmpresa());
 
@@ -298,7 +288,11 @@ public class ViagemEmpresaService {
         return viagemRepository.save(novaViagem);
     }
 
-    public ViagemDTOUpdate update(ViagemDTOUpdate dto) { // Validação para que a mudança seja feita
+    public ViagemDTOUpdate update(UUID id, ViagemDTOUpdate dto) { // Validação para que a mudança seja feita
+
+        var viagemModel = viagemRepository.findByIdOrThr(id);
+        userLogued.validIfIsMyEmpresa(viagemModel.getEmpresaId());
+
         var model = findById(dto.idViagem());
         ValidEnabledEntities.validEmpresa(model.getEmpresa());
         ValidEnabledEntities.validOnibus(model.getOnibus());
@@ -331,20 +325,22 @@ public class ViagemEmpresaService {
     }
 
     @Transactional
-    public void delete(ViagemModel model) {
+    public void delete(UUID id) {
+        var model = viagemRepository.findByIdOrThr(id);
+        userLogued.validIfIsMyEmpresa(model.getEmpresaId());
         ValidEnabledEntities.validEmpresa(model.getEmpresa());
-        if (this.hasPasajes(model.getPrecos()))
+        if (this.hasPassagens(model.getPrecos()))
             throw new RestRuntimeException("El viaje ya posse un pasaje registrado");
-        precioRepository.deleteAll(model.getPrecos());
+        precoRepository.deleteAll(model.getPrecos());
         paradaRepository.deleteAll(model.getParadas());
         viagemRepository.delete(model);
     }
 
-    public boolean hasPasajes(List<PrecoModel> precios) {
-        Integer nPasajes;
-        for (PrecoModel precio : precios) {
-            nPasajes = precioRepository.calcularNPassagens(precio.getId());
-            if (nPasajes != null && nPasajes > 0)
+    public boolean hasPassagens(List<PrecoModel> precos) {
+        Integer nPassagens;
+        for (PrecoModel preco : precos) {
+            nPassagens = precoRepository.calcularNPassagens(preco.getId());
+            if (nPassagens != null && nPassagens > 0)
                 return true;
         }
         return false;
