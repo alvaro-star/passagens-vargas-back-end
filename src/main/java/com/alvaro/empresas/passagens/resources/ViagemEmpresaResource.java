@@ -3,6 +3,8 @@ package com.alvaro.empresas.passagens.resources;
 import java.util.List;
 import java.util.UUID;
 
+import com.alvaro.empresas.passagens.dtos.viagens.ViagemSolicitacaoDTO;
+import com.alvaro.empresas.passagens.helpers.validations.groups.IEmpresaUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -11,6 +13,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,12 +25,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alvaro.empresas.passagens.dtos.PageOutput;
-import com.alvaro.empresas.passagens.dtos.viagens.ViagemDTOUpdate;
-import com.alvaro.empresas.passagens.dtos.viagens.busca.ViagemDTOSolicitacaoEmpresa;
-import com.alvaro.empresas.passagens.dtos.viagens.empresa.ViagemDTOCreate;
-import com.alvaro.empresas.passagens.dtos.viagens.empresa.ViagemDTOEmpresaResponse;
-import com.alvaro.empresas.passagens.dtos.viagens.empresa.ViagemDTOFormCopy;
-import com.alvaro.empresas.passagens.dtos.viagens.empresa.ViagemDTOListBuscaEmpresa;
+import com.alvaro.empresas.passagens.dtos.viagens.seller.ViagemUpdateDTO;
+import com.alvaro.empresas.passagens.dtos.viagens.seller.ViagemCreateDTO;
+import com.alvaro.empresas.passagens.dtos.viagens.seller.ViagemResponseDTO;
+import com.alvaro.empresas.passagens.dtos.viagens.seller.ViagemCreateCopyDTO;
 import com.alvaro.empresas.passagens.pagamentos.models.FaturaPassagemModel;
 import com.alvaro.empresas.passagens.pagamentos.services.FaturaPassagemService;
 import com.alvaro.empresas.passagens.services.ViagemEmpresaService;
@@ -45,7 +46,7 @@ public class ViagemEmpresaResource {
     private FaturaPassagemService faturaPassagemService;
 
     @GetMapping("{id}/pdf")
-    public ResponseEntity<Object> getPdfFromViagem(@PathVariable("id") UUID idViagem) {
+    public ResponseEntity<Object> getPdfFromViagem(@PathVariable UUID idViagem) {
         byte[] viajeRelatorio = viagemEmpresaService.getPdfFromViagem(idViagem);
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=viaje.pdf");
@@ -53,40 +54,40 @@ public class ViagemEmpresaResource {
         return new ResponseEntity<>(viajeRelatorio, headers, HttpStatus.OK);
     }
 
-    @GetMapping("{idViagem}/pagamentos")
+    @GetMapping("{id}/pagamentos")
     @ResponseStatus(HttpStatus.OK)
-    public PageOutput<FaturaPassagemModel> findAll(@PathVariable UUID idViagem,
+    public PageOutput<FaturaPassagemModel> findAll(@PathVariable UUID id,
                                                    @PageableDefault(sort = "created_at", direction = Sort.Direction.DESC) Pageable pageable) {
-        return faturaPassagemService.findAllFromViagem(idViagem, pageable);
+        return faturaPassagemService.findAllFromViagem(id, pageable);
     }
 
-    @PostMapping("{idEmpresa}")
+    @GetMapping("{idEmpresa}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
-    public List<ViagemDTOListBuscaEmpresa> getViagensByData(@PathVariable(value = "idEmpresa") UUID idEmpresa,
-                                                            @RequestBody @Valid ViagemDTOSolicitacaoEmpresa dto) {
+    public List<ViagemResponseDTO> getViagensByData(@PathVariable(value = "idEmpresa") UUID idEmpresa,
+                                                            @Validated(IEmpresaUser.class) ViagemSolicitacaoDTO dto) {
         return viagemEmpresaService.findViagensByDay(idEmpresa, dto);
     }
 
-    @PostMapping("create")
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
-    public ViagemDTOEmpresaResponse save(@Valid @RequestBody ViagemDTOCreate dto) {
+    public ViagemResponseDTO save(@Valid @RequestBody ViagemCreateDTO dto) {
         return viagemEmpresaService.save(dto);
     }
 
     @PostMapping("duplicate")
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
-    public void saveViagensCopyFromDay(@RequestBody @Valid ViagemDTOFormCopy dto) {
-        viagemEmpresaService.saveOneCopy(dto);
+    public void duplicateViagem(@RequestBody @Valid ViagemCreateCopyDTO dto) {
+        viagemEmpresaService.duplicateViagem(dto);
     }
 
     @PutMapping("{id}")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
-    public ViagemDTOUpdate update(@PathVariable UUID id, @RequestBody @Valid ViagemDTOUpdate dto) {
-        return viagemEmpresaService.update(id, dto);
+    public void update(@PathVariable UUID id, @RequestBody @Valid ViagemUpdateDTO dto) {
+        viagemEmpresaService.update(id, dto);
     }
 
     @DeleteMapping("{id}")

@@ -1,4 +1,4 @@
-package com.alvaro.empresas.passagens.services.validacao;
+package com.alvaro.empresas.passagens.helpers.validations.validacao;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,10 +9,13 @@ import java.util.HashMap;
 
 @Getter
 @AllArgsConstructor
-@NoArgsConstructor
 public class FieldMessageItemList {
-    Integer index;
-    HashMap<String, String> errors = new HashMap<>();
+    private Integer index;
+    private final HashMap<String, String> errors;
+
+    public FieldMessageItemList() {
+        this.errors = new HashMap<>();
+    }
 
     public void addError(FieldError erro) {
         this.errors.put(erro.getField(), erro.getDefaultMessage());

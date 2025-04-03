@@ -1,28 +1,27 @@
 package com.alvaro.empresas.passagens.services;
 
 
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationException;
-import com.alvaro.empresas.passagens.dtos.precos.PrecoDTO;
-import com.alvaro.empresas.passagens.dtos.viagens.ViagemDTOResponse;
-import com.alvaro.empresas.passagens.dtos.viagens.busca.ViagemDTOListBusca;
-import com.alvaro.empresas.passagens.dtos.viagens.busca.ViagemDTOSolicitacao;
+import com.alvaro.empresas.passagens.dtos.precos.PrecoResponseDTO;
+import com.alvaro.empresas.passagens.dtos.viagens.JPQL.ViagemWithLogoDTOJPQL;
+import com.alvaro.empresas.passagens.dtos.viagens.buyer.ViagemResponseDTO;
+import com.alvaro.empresas.passagens.dtos.viagens.ViagemSolicitacaoDTO;
+import com.alvaro.empresas.passagens.models.ViagemModel;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaResponseDTO;
-import com.alvaro.empresas.passagens.paradas.dtos.JPQL.ViagemBuscaDTOJPQL;
 import com.alvaro.empresas.passagens.paradas.models.CidadeModel;
 import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import com.alvaro.empresas.passagens.paradas.repositories.LugarRepository;
 import com.alvaro.empresas.passagens.repositories.PrecoRepository;
 import com.alvaro.empresas.passagens.repositories.ViagemRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 
 @Service
@@ -34,15 +33,16 @@ public class ViagemService {
     @Autowired
     private PrecoRepository precoRepository;
 
-    public ViagemDTOResponse findById(UUID id) {
-        var model = viagemRepository.findByIdOrThr(id);
-        var paradas = model.getParadas().stream().map(ParadaResponseDTO::new).toList();
-        var precos = model.getPrecos().stream().map(PrecoDTO::new).toList();
-        return new ViagemDTOResponse(model, paradas, precos);
+    public ViagemResponseDTO findById(UUID id) {
+        var optionalModel = viagemRepository.findByIdWithLogo(id)
+                .orElseThrow(() -> new EntityNotFoundException(id, ViagemModel.class));
+        var paradas = optionalModel.viagem().getParadas().stream().map(ParadaResponseDTO::new).toList();
+        var precos = optionalModel.viagem().getPrecos().stream().map(PrecoResponseDTO::new).toList();
+        return new ViagemResponseDTO(optionalModel.viagem(), optionalModel.logo(), paradas, precos);
     }
 
     //Inconcluso
-    public List<ViagemDTOListBusca> getViagensFromDia(ViagemDTOSolicitacao dto) {
+    public List<ViagemResponseDTO> getViagensFromDia(ViagemSolicitacaoDTO dto) {
         if (dto.idCidadeDestino().equals(dto.idCidadeSaida()))
             throw new ValidationException("idDestino", "O destino não pode ser o mesmo que a saida");
 
@@ -58,7 +58,7 @@ public class ViagemService {
         LocalDateTime startDay;
         LocalDateTime endDay = dto.dataSaida().atTime(LocalTime.MAX);
 
-        List<ViagemDTOListBusca> viagensSelecionados = new ArrayList<>();
+        List<ViagemResponseDTO> viagensSelecionados = new ArrayList<>();
 
         if (hj.toLocalDate().isEqual(dto.dataSaida())) {
             startDay = hj.plusMinutes(30);
@@ -67,15 +67,15 @@ public class ViagemService {
 
         for (LugarModel lugarSaida : lugaresSaida) {
             for (LugarModel lugarDestino : lugaresDestino) {
-                List<ViagemBuscaDTOJPQL> viagens = viagemRepository.findByStartInInterval(lugarSaida.getId(), lugarDestino.getId(), startDay, endDay);
-                for (ViagemBuscaDTOJPQL viagem : viagens) {
-                    var saidaDTO = new ParadaResponseDTO(viagem.saida());
-                    var destinoDTO = new ParadaResponseDTO(viagem.destino());
-                    if (!destinoDTO.dataHora().isAfter(saidaDTO.dataHora())) continue;
-                    var precosModels = precoRepository.findByViagemId(viagem.idViagem());
-                    var precosDTOs = precosModels.stream().map(PrecoDTO::new).toList();
+                List<ViagemWithLogoDTOJPQL> viagens = viagemRepository.findByStartInInterval(lugarSaida.getId(), lugarDestino.getId(), startDay, endDay);
+                for (ViagemWithLogoDTOJPQL viagem : viagens) {
+                    List<ParadaResponseDTO> paradasDTO = new ArrayList<>();
+                    paradasDTO.add(new ParadaResponseDTO(viagem.saida()));
+                    paradasDTO.add(new ParadaResponseDTO(viagem.destino()));
 
-                    viagensSelecionados.add(new ViagemDTOListBusca(viagem, saidaDTO, destinoDTO, precosDTOs));
+                    var precosDTOs = viagem.viagem().getPrecos().stream().map(PrecoResponseDTO::new).toList();
+
+                    viagensSelecionados.add(new ViagemResponseDTO(viagem.viagem(), viagem.logo(), paradasDTO, precosDTOs));
                 }
             }
         }

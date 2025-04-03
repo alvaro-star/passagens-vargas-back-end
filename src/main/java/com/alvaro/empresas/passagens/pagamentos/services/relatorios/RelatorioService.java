@@ -1,31 +1,27 @@
 package com.alvaro.empresas.passagens.pagamentos.services.relatorios;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
+import com.alvaro.empresas.passagens.models.PassagemModel;
+import com.alvaro.empresas.passagens.models.ViagemModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 
-import com.alvaro.empresas.passagens.dtos.viagens.JPQL.PassagemJPQLBusca;
-import com.alvaro.empresas.passagens.dtos.viagens.JPQL.ViagemDTOJPQLRelatorio;
 import com.alvaro.empresas.passagens.enums.TipoPagamento;
-import com.alvaro.empresas.passagens.helpers.DateAuxiliarFunctions;
-import com.alvaro.empresas.passagens.helpers.services.EmailService;
+import com.alvaro.empresas.passagens.helpers.DateTimeUtil;
+import com.alvaro.empresas.passagens.services.EmailService;
 import com.alvaro.empresas.passagens.helpers.thymeleaf.CidadeTHModel;
 import com.alvaro.empresas.passagens.helpers.thymeleaf.MetodoTHModel;
 import com.alvaro.empresas.passagens.helpers.thymeleaf.PDFThymeleaf;
 import com.alvaro.empresas.passagens.models.PrecoModel;
 import com.alvaro.empresas.passagens.paradas.models.LugarModel;
-import com.alvaro.empresas.passagens.paradas.services.LugarService;
+import com.alvaro.empresas.passagens.paradas.repositories.LugarRepository;
 import com.alvaro.empresas.passagens.repositories.EmpresaRepository;
 import com.alvaro.empresas.passagens.repositories.PassagemRepository;
-import com.alvaro.empresas.passagens.services.validacao.TempoViagemService;
+import com.alvaro.empresas.passagens.helpers.validations.validacao.TempoViagemService;
 import com.itextpdf.kernel.geom.PageSize;
 
 @Service
@@ -37,29 +33,24 @@ public class RelatorioService {
     @Autowired
     private EmailService emailService;
     @Autowired
-    private DateAuxiliarFunctions dateAuxiliarFunctions;
-    @Autowired
     private PDFThymeleaf pdfThymeleaf;
     @Autowired
-    private LugarService lugarService;
+    private LugarRepository lugarRepository;
     @Autowired
     private TempoViagemService tempoViagemService;
-
 
     @Value("${api.viaje.max-time-viaje-day}")
     private Integer tempoMaxViagemDias;
 
-    // Categorize cidades pelo número de passageiros indo para elas, não por ônibus
-    // Ordena as listas de cidades com base no número de passagens vendidas
     public byte[] makeRelatorioMensal(UUID empresaId, String mesAnalise) {
         var empresa = empresaRepository.findByIdOrThr(empresaId);
-        Integer[] anoMes = DateAuxiliarFunctions.splitAnoMonth(mesAnalise);
-        LocalDateTime inicio = dateAuxiliarFunctions.getFirstDayOfMonth(anoMes);
-        LocalDateTime fim = dateAuxiliarFunctions.getLastDayOfMonth(anoMes);
-        List<ViagemDTOJPQLRelatorio> viagens = tempoViagemService.findViagensFromEmpresa(empresa, inicio, fim);
+        Integer[] anoMes = DateTimeUtil.splitAnoMonth(mesAnalise);
+        LocalDateTime inicio = DateTimeUtil.getFirstDayOfMonth(anoMes);
+        LocalDateTime fim = DateTimeUtil.getLastDayOfMonth(anoMes);
+        List<ViagemModel> viagens = tempoViagemService.findViagensFromEmpresa(empresa, inicio, fim);
 
         HashMap<Integer, Integer> saidasIdNPassagens = new HashMap<>(), destinosIdNPassagens = new HashMap<>();
-        List<PassagemJPQLBusca> passagensBD;
+        List<PassagemModel> passagens;
         RelatorioModel relatorio = new RelatorioModel(empresa);
 
         HashMap<String, HashMetodoPagamentoValor> pagamentosWeb = new HashMap<>(), pagamentosNaoWeb = new HashMap<>();
@@ -68,20 +59,21 @@ public class RelatorioService {
             pagamentosNaoWeb.put(metodo.toString(), new HashMetodoPagamentoValor(metodo.toString(), 0.0));
         }
 
-        for (ViagemDTOJPQLRelatorio viagem : viagens) {
+
+        for (ViagemModel viagem : viagens) {
             relatorio.nViagens++;
-            if (viagem.viagem().isCancelado())
+            if (viagem.isCancelado())
                 relatorio.nViagensCanceladas++;
 
-            for (PrecoModel preco : viagem.viagem().getPrecos()) {
-                passagensBD = passagemRepository.getPassagensPagas(preco.getId());
-                classificarPassagemFromPreco(passagensBD, saidasIdNPassagens, destinosIdNPassagens, pagamentosWeb,
+            for (PrecoModel preco : viagem.getPrecos()) {
+                passagens = passagemRepository.getPassagensPagas(preco.getId());
+                classificarPassagemFromPreco(passagens, saidasIdNPassagens, destinosIdNPassagens, pagamentosWeb,
                         pagamentosNaoWeb, relatorio);
             }
         }
 
-        List<LugarModel> saidas = lugarService.findAllById(saidasIdNPassagens.keySet());
-        List<LugarModel> destinos = lugarService.findAllById(destinosIdNPassagens.keySet());
+        List<LugarModel> saidas = lugarRepository.findAllById(saidasIdNPassagens.keySet());
+        List<LugarModel> destinos = lugarRepository.findAllById(destinosIdNPassagens.keySet());
 
         ordenarLugares(saidas, saidasIdNPassagens);
         ordenarLugares(destinos, destinosIdNPassagens);
@@ -114,25 +106,25 @@ public class RelatorioService {
         lugares.sort(Comparator.comparingInt(l -> lugaresNPassagens.get(l.getId())));
     }
 
-    public void classificarPassagemFromPreco(List<PassagemJPQLBusca> passagens, HashMap<Integer, Integer> saidasId,
+    public void classificarPassagemFromPreco(List<PassagemModel> passagens, HashMap<Integer, Integer> saidasId,
                                              HashMap<Integer, Integer> destinosId, HashMap<String, HashMetodoPagamentoValor> pagamentosWeb,
                                              HashMap<String, HashMetodoPagamentoValor> pagamentosNaoWeb, RelatorioModel relatorio) {
 
         relatorio.nPassagensTotal += passagens.size();
-        for (PassagemJPQLBusca passagem : passagens) {
-            addValueInHashMap(saidasId, passagem.saidaLugarId());
-            addValueInHashMap(destinosId, passagem.destinoLugarId());
-            if (passagem.faturaReembolsoId() != null) {
+        for (PassagemModel passagem : passagens) {
+            addValueInHashMap(saidasId, passagem.getSaida().getId());
+            addValueInHashMap(destinosId, passagem.getDestino().getId());
+            if (passagem.getFaturaReembolsoId() != null) {
                 relatorio.nPassagensCanceladas++;
                 continue;
             }
-            if (passagem.isCompradoWeb()) {
-                pagamentosWeb.get(passagem.metodoPagamento().toString()).valor += passagem.precoPago().doubleValue();
-                if (passagem.emDinheiro())
+            if (passagem.getCompradoWeb()) {
+                pagamentosWeb.get(passagem.getMetodoPagamento().toString()).valor += passagem.getPrecoPago().doubleValue();
+                if (passagem.getEmDinheiro())
                     emailService.mandarEmail("vargasaveo248@gmail.com", "Web - Erro de Processamento",
                             "Existe uma passagem que foi comprada em dinheiro");
             } else {
-                pagamentosNaoWeb.get(passagem.metodoPagamento().toString()).valor += passagem.precoPago().doubleValue();
+                pagamentosNaoWeb.get(passagem.getMetodoPagamento().toString()).valor += passagem.getPrecoPago().doubleValue();
             }
         }
     }

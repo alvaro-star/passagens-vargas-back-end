@@ -1,4 +1,4 @@
-package com.alvaro.empresas.passagens.dtos.viagens.empresa;
+package com.alvaro.empresas.passagens.dtos.viagens.seller;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -9,10 +9,9 @@ import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
-public record ViagemDTOCreate(
+public record ViagemCreateDTO(
         @NotNull
         UUID idOnibus,
-
         @NotNull
         @Positive
         Integer plataforma,

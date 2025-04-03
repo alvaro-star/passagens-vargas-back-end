@@ -42,7 +42,7 @@ public class DadosPersist {
     }
 
     public OnibusModel cadastrarOnibus(String placa, EmpresaModel empresaModel) {
-        var dto = new OnibusCreateDTO(placa);
+        var dto = new OnibusCreateDTO(placa, null);
         var onibus = new OnibusModel(dto, empresaModel);
         em.persist(onibus);
         return onibus;

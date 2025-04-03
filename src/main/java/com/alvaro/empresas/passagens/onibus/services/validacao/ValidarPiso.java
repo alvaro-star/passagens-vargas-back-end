@@ -4,8 +4,8 @@ import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.V
 import com.alvaro.empresas.passagens.onibus.dtos.OnibusCreateDTO;
 import com.alvaro.empresas.passagens.onibus.dtos.PisoCreateDTO;
 import com.alvaro.empresas.passagens.onibus.enums.TipePosicao;
-import com.alvaro.empresas.passagens.services.validacao.FieldMessageItemList;
-import com.alvaro.empresas.passagens.services.validacao.FieldMessageList;
+import com.alvaro.empresas.passagens.helpers.validations.validacao.FieldMessageItemList;
+import com.alvaro.empresas.passagens.helpers.validations.validacao.FieldMessageList;
 import org.springframework.stereotype.Component;
 
 import java.util.*;

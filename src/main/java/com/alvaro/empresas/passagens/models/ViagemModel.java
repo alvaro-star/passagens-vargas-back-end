@@ -5,6 +5,7 @@ import com.alvaro.empresas.passagens.interfaces.IEntityStandart;
 import com.alvaro.empresas.passagens.onibus.models.OnibusModel;
 import com.alvaro.empresas.passagens.pagamentos.models.FaturaPassagemModel;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import lombok.Data;
@@ -49,12 +50,14 @@ public class ViagemModel extends IEntityStandart {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_onibus")
+    @JsonIgnore
     private OnibusModel onibus;
     @Column(name = "fk_idtb_onibus", updatable = false, insertable = false)
     private UUID onibusId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_empresa")
+    @JsonIgnore
     private EmpresaModel empresa;
     @Column(name = "fk_idtb_empresa", insertable = false, updatable = false)
     private UUID empresaId;
@@ -70,12 +73,15 @@ public class ViagemModel extends IEntityStandart {
     }
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "viagem")
+    @JsonIgnore
     private List<ParadaModel> paradas = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY, mappedBy = "viagem")
+    @JsonIgnore
     private List<FaturaPassagemModel> faturasPassagens = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "viagem")
+    @JsonIgnore
     private List<PrecoModel> precos = new ArrayList<>();
 
     public void addParada(ParadaModel parada) {

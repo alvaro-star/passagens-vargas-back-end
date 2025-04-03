@@ -1,10 +1,10 @@
 package com.alvaro.empresas.passagens.repositories;
 
-import com.alvaro.empresas.passagens.onibus.models.OnibusModel;
+import com.alvaro.empresas.passagens.dtos.viagens.JPQL.ViagemDTOJPQL;
 import com.alvaro.empresas.passagens.enums.TipoParada;
 import com.alvaro.empresas.passagens.helpers.DadosPersist;
 import com.alvaro.empresas.passagens.models.ViagemModel;
-import com.alvaro.empresas.passagens.paradas.dtos.JPQL.ViagemEmpresaDTOJPQ;
+import com.alvaro.empresas.passagens.onibus.models.OnibusModel;
 import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import jakarta.persistence.EntityManager;
@@ -39,13 +39,13 @@ class ViagemRepositoryTest {
     @Value("${api.viaje.max-time-viaje-day}")
     private Integer tempoMaxViagemDias;
 
-    private final String[] lugaresName = new String[] { "Santa Cruz", "La Paz", "Cochabamba", "Oruro", "Potosí",
-            "Tarija", "Chuquisaca", "Pando", "Beni" };
+    private final String[] lugaresName = new String[]{"Santa Cruz", "La Paz", "Cochabamba", "Oruro", "Potosí",
+            "Tarija", "Chuquisaca", "Pando", "Beni"};
 
     @Test
     @DisplayName("Dado 3 viagens registrados, verifica se o metodo foi capaz de detectar dos viagens de un onibus")
     void findViagemFromOnibusInIntervalo1() {
-        String[] empresasName = new String[] { "23 de Marzo", "15 de Abril" };
+        String[] empresasName = new String[]{"23 de Marzo", "15 de Abril"};
         var empresasModels = dadosPersist.loadEmpresas(empresasName);
 
         var onibusMarzo = dadosPersist.cadastrarOnibus("2023", empresasModels.get(empresasName[0]));
@@ -69,14 +69,14 @@ class ViagemRepositoryTest {
 
     @Test
     @DisplayName("Deveria mostrar un viaje que contenga un intervalo de tiempo")
-    /*
-     * Sabendo que un trayecto tiene un viaje, mas muchas paradas, si quiero
-     * realizar un viaje que pase por dos
-     * paradas mas no por la primera ni por la ultima necessáriamente, el metodo me
-     * debe retornar este viaje
-     */
+        /*
+         * Sabendo que un trayecto tiene un viaje, mas muchas paradas, si quiero
+         * realizar un viaje que pase por dos
+         * paradas mas no por la primera ni por la ultima necessáriamente, el metodo me
+         * debe retornar este viaje
+         */
     void findByEmpresaIdInInterval() {
-        String[] empresasName = new String[] { "23 de Marzo", "15 de Abril" };
+        String[] empresasName = new String[]{"23 de Marzo", "15 de Abril"};
         var empresasModels = dadosPersist.loadEmpresas(empresasName);
 
         var onibusMarzo = dadosPersist.cadastrarOnibus("2023", empresasModels.get(empresasName[0]));
@@ -91,7 +91,7 @@ class ViagemRepositoryTest {
 
         int idLugarSaida = lugares.get(1).getId();
         int idLugarDestino = lugares.get(2).getId();
-        List<ViagemEmpresaDTOJPQ> viagensEncontrados = viajeRepository.findByEmpresaAndStartInInterval(
+        List<ViagemDTOJPQL> viagensEncontrados = viajeRepository.findByEmpresaAndStartInInterval(
                 onibusAbril.getEmpresaId(),
                 idLugarSaida,
                 idLugarDestino,
@@ -102,7 +102,7 @@ class ViagemRepositoryTest {
     }
 
     private ViagemModel cadastrarViagem(LocalDateTime dataHoraSaida, OnibusModel onibusModel,
-            List<LugarModel> lugares) {
+                                        List<LugarModel> lugares) {
         var viaje = new ViagemModel(onibusModel, dataHoraSaida);
 
         int contador = 0;
@@ -132,7 +132,7 @@ class ViagemRepositoryTest {
      * );
      * List<ParadaModel> paradas1 = new ArrayList<>();
      * List<ParadaModel> paradas2 = new ArrayList<>();
-     * 
+     *
      * //Hay nueve lugares registrados
      * int contador = 0;
      * for (LugarModel lugar : lugares) {
@@ -142,17 +142,17 @@ class ViagemRepositoryTest {
      * trayecto2));
      * contador++;
      * }
-     * 
+     *
      * int size = paradas1.size();
      * cadastrarViagem(paradas1.get(0), paradas1.get(size - 1), trayecto1);
      * cadastrarViagem(paradas2.get(0), paradas2.get(size - 1), trayecto2);
-     * 
+     *
      * List<ViagemModel> viagensEncontrados =
      * viajeRepository.getFromTrayecto(trayecto1.getCodigo(),
      * paradas1.get(5).getDataHora(), paradas1.get(2).getDataHora());
      * assertThat(viagensEncontrados.size()).isEqualTo(0);
      * }
-     * 
+     *
      * @DisplayName("No deveria retornar ningun viaje, porque el intervalo dado no esta dentro del intervalo del viaje"
      * )
      * void getFromTrayectoCenario3() {
@@ -166,7 +166,7 @@ class ViagemRepositoryTest {
      * );
      * List<ParadaModel> paradas1 = new ArrayList<>();
      * List<ParadaModel> paradas2 = new ArrayList<>();
-     * 
+     *
      * //Hay nueve lugares registrados
      * int contador = 0;
      * for (LugarModel lugar : lugares) {
@@ -176,7 +176,7 @@ class ViagemRepositoryTest {
      * trayecto2));
      * contador++;
      * }
-     * 
+     *
      * int size = paradas1.size();
      * cadastrarViagem(paradas1.get(0), paradas1.get(size - 1), trayecto1);
      * cadastrarViagem(paradas2.get(0), paradas2.get(size - 1), trayecto2);

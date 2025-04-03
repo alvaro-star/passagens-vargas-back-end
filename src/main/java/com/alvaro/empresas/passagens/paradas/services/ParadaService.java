@@ -13,7 +13,7 @@ import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.V
 import com.alvaro.empresas.passagens.dtos.PageOutput;
 import com.alvaro.empresas.passagens.enums.TipoParada;
 import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
-import com.alvaro.empresas.passagens.helpers.validators.ValidEnabledEntities;
+import com.alvaro.empresas.passagens.helpers.validations.ValidEnabledEntities;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaCreateDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaResponseDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaUpdateDTO;
@@ -24,7 +24,7 @@ import com.alvaro.empresas.passagens.paradas.repositories.ParadaRepository;
 import com.alvaro.empresas.passagens.repositories.ViagemRepository;
 import com.alvaro.empresas.passagens.security.models.RoleList;
 import com.alvaro.empresas.passagens.services.RepositoryValidationService;
-import com.alvaro.empresas.passagens.services.validacao.TempoViagemService;
+import com.alvaro.empresas.passagens.helpers.validations.validacao.TempoViagemService;
 
 @Service
 public class ParadaService {
@@ -122,7 +122,8 @@ public class ParadaService {
             switch (model.getTipo()) {
                 case SAIDA -> {
                     viagem.getParadas().forEach(parada -> {
-                        if (!parada.getTipo().equals(TipoParada.SAIDA) && dataParadaAjustada.isAfter(parada.getDataHora()))
+                        if (!parada.getTipo().equals(TipoParada.SAIDA)
+                                && dataParadaAjustada.isAfter(parada.getDataHora()))
                             throw new ValidationException("dataHora",
                                     "Uma das paradas possui um horário anterior ao novo horário da SAIDA");
                     });
@@ -133,7 +134,8 @@ public class ParadaService {
                 }
                 case DESTINO -> {
                     viagem.getParadas().forEach(parada -> {
-                        if (!parada.getTipo().equals(TipoParada.DESTINO) && dataParadaAjustada.isBefore(parada.getDataHora()))
+                        if (!parada.getTipo().equals(TipoParada.DESTINO)
+                                && dataParadaAjustada.isBefore(parada.getDataHora()))
                             throw new ValidationException("dataHora",
                                     "O horário do destino é menor que o de uma parada do caminho");
                     });
@@ -162,7 +164,6 @@ public class ParadaService {
                 throw new ValidationException("idLugar", "O lugar não está disponível");
             model.setLugar(lugar);
         }
-
 
         paradaRepository.save(model);
         return new ParadaResponseDTO(model);
@@ -195,11 +196,11 @@ public class ParadaService {
         if (indice == -1)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A parada não está relacionada");
         if (validationService.viagemHasPassagem(model.getViagem()))
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Não é possível eliminar uma parada de uma viagem que já possui um passageiro");
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Não é possível eliminar uma parada de uma viagem que já possui um passageiro");
 
         model.getViagem().getParadas().remove(indice);
         paradaRepository.delete(model);
     }
-
 
 }

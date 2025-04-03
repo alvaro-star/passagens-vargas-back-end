@@ -18,9 +18,9 @@ public class OnibusRepositoryMock {
     }
 
     public OnibusModel generateOnibus(String placa, boolean enabled, EmpresaModel empresa) {
-        var onibusDTO = new OnibusCreateDTO(placa);
+        var onibusDTO = new OnibusCreateDTO(placa, null);
         var onibus = new OnibusModel(onibusDTO, empresa);
-        onibus.setHabilitado(enabled);
+        onibus.setEnabled(enabled);
         return onibus;
     }
 }

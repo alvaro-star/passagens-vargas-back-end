@@ -17,7 +17,7 @@ import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.V
 import com.alvaro.empresas.passagens.configuracoes.exceptions.dtos.EntityNotFoundError;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.dtos.StandardError;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.dtos.ValidationError;
-import com.alvaro.empresas.passagens.services.validacao.ValidationErrorsWithList;
+import com.alvaro.empresas.passagens.helpers.validations.validacao.ValidationErrorsWithList;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;

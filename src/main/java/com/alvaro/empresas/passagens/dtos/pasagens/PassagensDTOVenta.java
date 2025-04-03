@@ -13,7 +13,7 @@ public record PassagensDTOVenta(
         @NotNull
         UUID idViagem,
         @Valid
-        InputContatoDTO contato,
+        ContatoInputDTO contato,
         @NotNull
         @Positive
         Integer idLugarSaida,

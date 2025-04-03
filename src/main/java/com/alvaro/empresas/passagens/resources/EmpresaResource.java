@@ -2,6 +2,7 @@ package com.alvaro.empresas.passagens.resources;
 
 import java.util.UUID;
 
+import com.alvaro.empresas.passagens.dtos.viagens.seller.ViagemResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -23,7 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.alvaro.empresas.passagens.dtos.EmpresaInputDTO;
 import com.alvaro.empresas.passagens.dtos.PageOutput;
-import com.alvaro.empresas.passagens.dtos.viagens.empresa.ViagemDTOListBuscaEmpresa;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.onibus.dtos.OnibusDTOResponse;
 import com.alvaro.empresas.passagens.onibus.services.OnibusService;
@@ -55,30 +55,10 @@ public class EmpresaResource {
         empresaService.saveAdmin(empresaAdmin);
     }
 
-    @GetMapping("{id}/viagens")
-    @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
-    public PageOutput<ViagemDTOListBuscaEmpresa> findAllFromEmpresaBetweenMonth(
-            @PathVariable UUID id,
-            @RequestParam String mesAnalise,
-            @PageableDefault(sort = "dataHoraSaida") Pageable pageable) {
-        return viagemEmpresaService.findAllByEmpresaBetweenDates(id, mesAnalise, pageable);
-    }
-
-    @GetMapping("{id}/relatorio")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN')")
-    public ResponseEntity<byte[]> getRelatorioByEmpresa(@PathVariable UUID id, @RequestParam String mesAnalise) {
-        byte[] relatorioPDF = relatorioService.makeRelatorioMensal(id, mesAnalise);
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=relatorio.pdf");
-        headers.add(HttpHeaders.CONTENT_TYPE, "application/pdf");
-        return new ResponseEntity<>(relatorioPDF, headers, HttpStatus.OK);
-    }
-
     @DeleteMapping("admin/{email}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removerEmpresario(@PathVariable(value = "email") String email) {
+    public void removerEmpresario(@PathVariable String email) {
         empresaService.removerAdmin(email);
     }
 
@@ -103,6 +83,26 @@ public class EmpresaResource {
             @PathVariable UUID id,
             @PageableDefault(sort = {"createdAt"}, direction = Sort.Direction.DESC) Pageable pageable) {
         return onibusService.findByEmpresaId(id, pageable);
+    }
+
+    @GetMapping("{id}/viagens")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
+    public PageOutput<ViagemResponseDTO> findAllFromEmpresaBetweenMonth(
+            @PathVariable UUID id,
+            @RequestParam String mesAnalise,
+            @PageableDefault(sort = "dataHoraSaida") Pageable pageable) {
+        return viagemEmpresaService.findAllByEmpresaBetweenDates(id, mesAnalise, pageable);
+    }
+
+    @GetMapping("{id}/relatorio")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN')")
+    public ResponseEntity<byte[]> getRelatorioByEmpresa(@PathVariable UUID id, @RequestParam String mesAnalise) {
+        byte[] relatorioPDF = relatorioService.makeRelatorioMensal(id, mesAnalise);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=relatorio.pdf");
+        headers.add(HttpHeaders.CONTENT_TYPE, "application/pdf");
+        return new ResponseEntity<>(relatorioPDF, headers, HttpStatus.OK);
     }
 
     @PostMapping

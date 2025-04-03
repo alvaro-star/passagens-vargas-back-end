@@ -7,11 +7,11 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alvaro.empresas.passagens.dtos.precos.PrecoDTO;
+import com.alvaro.empresas.passagens.dtos.precos.PrecoResponseDTO;
 import com.alvaro.empresas.passagens.dtos.precos.PrecoDTOResponseViagem;
-import com.alvaro.empresas.passagens.dtos.precos.PrecoDTOUpdate;
+import com.alvaro.empresas.passagens.dtos.precos.PrecoUpdateDTO;
 import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
-import com.alvaro.empresas.passagens.helpers.validators.ValidEnabledEntities;
+import com.alvaro.empresas.passagens.helpers.validations.ValidEnabledEntities;
 import com.alvaro.empresas.passagens.models.PrecoModel;
 import com.alvaro.empresas.passagens.models.ViagemModel;
 import com.alvaro.empresas.passagens.onibus.dtos.PisoResponseDTO;
@@ -28,20 +28,20 @@ public class PrecoService {
     @Autowired
     private UserLoguedComponent userLogued;
 
-    public List<PrecoDTO> saveAll(List<PrecoModel> newModels, ViagemModel viagem) {
+    public List<PrecoResponseDTO> saveAll(List<PrecoModel> newModels, ViagemModel viagem) {
         for (PrecoModel newModel : newModels) {
             newModel.setViagem(viagem);
             newModel.setEmpresa(viagem.getEmpresa());
         }
         precoRepository.saveAll(newModels);
-        List<PrecoDTO> salvos = new ArrayList<>();
-        newModels.forEach(model -> salvos.add(new PrecoDTO(model)));
+        List<PrecoResponseDTO> salvos = new ArrayList<>();
+        newModels.forEach(model -> salvos.add(new PrecoResponseDTO(model)));
         return salvos;
     }
 
-    public PrecoDTO findById(UUID id) {
+    public PrecoResponseDTO findById(UUID id) {
         var model = precoRepository.findByIdOrThr(id);
-        return new PrecoDTO(model);
+        return new PrecoResponseDTO(model);
     }
 
     public PrecoDTOResponseViagem vender(UUID id) {
@@ -58,13 +58,13 @@ public class PrecoService {
         return new PrecoDTOResponseViagem(model, pisoDTO, ocupados);
     }
 
-    public PrecoDTO update(UUID id, PrecoDTOUpdate dto) {
+    public PrecoResponseDTO update(UUID id, PrecoUpdateDTO dto) {
         var model = precoRepository.findByIdOrThr(id);
         userLogued.validIfIsMyEmpresa(model.getEmpresaId());
         ValidEnabledEntities.validEmpresa(model.getEmpresa());
 
         model.updateValues(dto);
         precoRepository.save(model);
-        return new PrecoDTO(model);
+        return new PrecoResponseDTO(model);
     }
 }

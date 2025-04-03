@@ -14,7 +14,7 @@ import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.R
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationException;
 import com.alvaro.empresas.passagens.dtos.PageOutput;
 import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
-import com.alvaro.empresas.passagens.helpers.validators.ValidEnabledEntities;
+import com.alvaro.empresas.passagens.helpers.validations.ValidEnabledEntities;
 import com.alvaro.empresas.passagens.onibus.dtos.OnibusCreateDTO;
 import com.alvaro.empresas.passagens.onibus.dtos.OnibusDTOResponse;
 import com.alvaro.empresas.passagens.onibus.dtos.OnibusUpdateDTO;

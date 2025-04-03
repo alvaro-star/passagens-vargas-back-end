@@ -1,4 +1,4 @@
-package com.alvaro.empresas.passagens.helpers.services;
+package com.alvaro.empresas.passagens.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

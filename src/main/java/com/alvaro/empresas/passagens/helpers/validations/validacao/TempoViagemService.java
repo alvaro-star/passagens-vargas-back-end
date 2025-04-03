@@ -1,10 +1,9 @@
-package com.alvaro.empresas.passagens.services.validacao;
+package com.alvaro.empresas.passagens.helpers.validations.validacao;
 
-import com.alvaro.empresas.passagens.onibus.models.OnibusModel;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
-import com.alvaro.empresas.passagens.dtos.viagens.JPQL.ViagemDTOJPQLRelatorio;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.models.ViagemModel;
+import com.alvaro.empresas.passagens.onibus.models.OnibusModel;
 import com.alvaro.empresas.passagens.repositories.ViagemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,7 +25,7 @@ public class TempoViagemService {
             throw new RestRuntimeException("A viagem não pode ter mais de " + tempoMaximoViagemDias + " dias");
     }
 
-    public List<ViagemDTOJPQLRelatorio> findViagensFromEmpresa(
+    public List<ViagemModel> findViagensFromEmpresa(
             EmpresaModel empresa,
             LocalDateTime dataInicio,
             LocalDateTime dataFim) {
@@ -59,9 +58,9 @@ public class TempoViagemService {
     }
 
     private List<ViagemModel> buscarViagensDoOnibusNoIntervalo(UUID empresaId,
-            UUID onibusId,
-            LocalDateTime dataInicio,
-            LocalDateTime dataFim) {
+                                                               UUID onibusId,
+                                                               LocalDateTime dataInicio,
+                                                               LocalDateTime dataFim) {
         LocalDateTime dataInicioAlterado = dataInicio.minusDays(tempoMaximoViagemDias).minusSeconds(2);
         return viagemRepository.findByOnibusInIntervalo(empresaId, onibusId, dataInicio, dataInicioAlterado, dataFim);
     }

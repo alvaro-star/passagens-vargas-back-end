@@ -8,10 +8,10 @@ import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-public record PrecoDTO(
+public record PrecoResponseDTO(
         UUID id,
         @NotNull
-        @DecimalMin(value = "10.00")
+        @Positive
         BigDecimal preco,
         @NotNull
         @Positive
@@ -24,7 +24,7 @@ public record PrecoDTO(
         @NotNull
         UUID idViagem) {
 
-    public PrecoDTO(PrecoModel model) {
+    public PrecoResponseDTO(PrecoModel model) {
         this(model.getId(), model.getPreco(), model.getNPiso(), model.getCheio(), model.getNAssentosDisponiveis(),
                 model.getViagemId());
     }

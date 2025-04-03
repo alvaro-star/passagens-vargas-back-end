@@ -74,8 +74,8 @@ public class PassagensPDF {
         addRowBold(fluxoConteudo, "Empresa: " + nomeEmpresa, tamanhoFontePadrao + 1);
         addRowBold(fluxoConteudo, "Dados da Viagem", tamanhoFontePadrao + 1);
 
-        var dataHora = DateAuxiliarFunctions.getDataHoraFromDateTime(saida.getDataHora());
-        fluxoConteudo.showText("Data e Hora: " + dataHora.data() + " - " + dataHora.hora());
+        var dataHoraFormatada = DateTimeUtil.formatLocalDateTime(saida.getDataHora());
+        fluxoConteudo.showText("Data e Hora: " + dataHoraFormatada);
         fluxoConteudo.newLine();
         fluxoConteudo.showText("Corredor: " + saida.getPlataforma());
         fluxoConteudo.newLine();

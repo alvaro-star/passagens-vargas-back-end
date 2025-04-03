@@ -3,7 +3,7 @@ package com.alvaro.empresas.passagens.security.services;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationException;
 import com.alvaro.empresas.passagens.enums.TipoSolicitacao;
-import com.alvaro.empresas.passagens.helpers.services.EmailService;
+import com.alvaro.empresas.passagens.services.EmailService;
 import com.alvaro.empresas.passagens.security.dtos.LoginDTO;
 import com.alvaro.empresas.passagens.security.dtos.RegisterDTO;
 import com.alvaro.empresas.passagens.security.dtos.TokenDTO;

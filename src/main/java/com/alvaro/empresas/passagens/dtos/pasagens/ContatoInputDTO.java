@@ -2,7 +2,7 @@ package com.alvaro.empresas.passagens.dtos.pasagens;
 
 import jakarta.validation.constraints.*;
 
-public record InputContatoDTO(
+public record ContatoInputDTO(
         @NotBlank
         String nome,
         @Email

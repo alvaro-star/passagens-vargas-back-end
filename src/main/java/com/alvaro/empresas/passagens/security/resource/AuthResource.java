@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.security.resource;
 
-import com.alvaro.empresas.passagens.helpers.Mensagem;
+import com.alvaro.empresas.passagens.dtos.Mensagem;
 import com.alvaro.empresas.passagens.security.dtos.LoginDTO;
 import com.alvaro.empresas.passagens.security.dtos.RegisterDTO;
 import com.alvaro.empresas.passagens.security.dtos.TokenDTO;

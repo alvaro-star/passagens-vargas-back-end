@@ -1,5 +1,9 @@
 package com.alvaro.empresas.passagens.paradas.services;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
 import com.alvaro.empresas.passagens.dtos.PageOutput;
 import com.alvaro.empresas.passagens.paradas.dtos.LugarCreateDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.LugarUpdateDTO;
@@ -7,12 +11,6 @@ import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import com.alvaro.empresas.passagens.paradas.repositories.CidadeRepository;
 import com.alvaro.empresas.passagens.paradas.repositories.LugarRepository;
 import com.alvaro.empresas.passagens.paradas.repositories.ParadaRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Set;
 
 @Service
 public class LugarService {
@@ -25,10 +23,6 @@ public class LugarService {
 
     public LugarModel findById(Integer id) {
         return lugarRepository.findByIdOrThr(id);
-    }
-
-    public List<LugarModel> findAllById(Set<Integer> ids) {
-        return lugarRepository.findAllById(ids);
     }
 
     public PageOutput<LugarModel> findAll(Pageable pageable) {
@@ -57,7 +51,6 @@ public class LugarService {
         } else
             lugarRepository.delete(model);
     }
-
 
     public PageOutput<LugarModel> findByCidadeId(Integer id, Pageable pageable) {
         var page = lugarRepository.findByCidadeId(id, pageable);

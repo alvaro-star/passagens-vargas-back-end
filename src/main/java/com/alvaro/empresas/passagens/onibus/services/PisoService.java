@@ -2,7 +2,7 @@ package com.alvaro.empresas.passagens.onibus.services;
 
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
 import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
-import com.alvaro.empresas.passagens.helpers.validators.ValidEnabledEntities;
+import com.alvaro.empresas.passagens.helpers.validations.ValidEnabledEntities;
 import com.alvaro.empresas.passagens.onibus.dtos.PisoResponseDTO;
 import com.alvaro.empresas.passagens.onibus.dtos.PisoUpdateDTO;
 import com.alvaro.empresas.passagens.onibus.models.PisoModel;

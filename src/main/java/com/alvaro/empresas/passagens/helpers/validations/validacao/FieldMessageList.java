@@ -1,4 +1,4 @@
-package com.alvaro.empresas.passagens.services.validacao;
+package com.alvaro.empresas.passagens.helpers.validations.validacao;
 
 import java.util.List;
 
@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class FieldMessageList {
-    String name;
-    List<FieldMessageItemList> itens;
+    private String name;
+    private List<FieldMessageItemList> itens;
 
     public void addItemError(FieldMessageItemList item) {
         this.itens.add(item);

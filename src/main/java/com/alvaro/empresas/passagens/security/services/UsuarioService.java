@@ -4,7 +4,7 @@ import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.R
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationException;
 import com.alvaro.empresas.passagens.enums.TipoSolicitacao;
 import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
-import com.alvaro.empresas.passagens.helpers.services.EmailService;
+import com.alvaro.empresas.passagens.services.EmailService;
 import com.alvaro.empresas.passagens.security.dtos.UsuarioDTOUpdate;
 import com.alvaro.empresas.passagens.security.dtos.UsuarioDTOUpdateValidation;
 import com.alvaro.empresas.passagens.security.models.UsuarioModel;

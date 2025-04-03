@@ -1,4 +1,4 @@
-package com.alvaro.empresas.passagens.dtos.viagens.empresa;
+package com.alvaro.empresas.passagens.dtos.viagens.seller;
 
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.UUID;
 
-public record ViagemDTOFormCopy(
+public record ViagemCreateCopyDTO(
         @NotNull
         UUID idViagem,
         @NotNull

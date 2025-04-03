@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.models;
 
-import com.alvaro.empresas.passagens.dtos.pasagens.InputContatoDTO;
+import com.alvaro.empresas.passagens.dtos.pasagens.ContatoInputDTO;
 import com.alvaro.empresas.passagens.interfaces.IEntityStandart;
 import com.alvaro.empresas.passagens.pagamentos.models.FaturaPassagemModel;
 import jakarta.persistence.*;
@@ -23,10 +23,10 @@ public class ContatoModel extends IEntityStandart {
     @JoinColumn(name = "fk_idtb_fatura_pasaje")
     private FaturaPassagemModel faturaPassagem;
 
-    public ContatoModel(InputContatoDTO inputContatoDTO) {
-        this.nome = inputContatoDTO.nome();
-        this.email = inputContatoDTO.email();
-        this.numero = Integer.valueOf(inputContatoDTO.telefone());
+    public ContatoModel(ContatoInputDTO contatoInputDTO) {
+        this.nome = contatoInputDTO.nome();
+        this.email = contatoInputDTO.email();
+        this.numero = Integer.valueOf(contatoInputDTO.telefone());
     }
 
     public ContatoModel(String nome, String email, Integer numero) {

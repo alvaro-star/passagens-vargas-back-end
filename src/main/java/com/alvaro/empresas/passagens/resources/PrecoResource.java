@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alvaro.empresas.passagens.dtos.pasagens.PassagemDTOEmpresaResponse;
-import com.alvaro.empresas.passagens.dtos.precos.PrecoDTO;
+import com.alvaro.empresas.passagens.dtos.precos.PrecoResponseDTO;
 import com.alvaro.empresas.passagens.dtos.precos.PrecoDTOResponseViagem;
-import com.alvaro.empresas.passagens.dtos.precos.PrecoDTOUpdate;
+import com.alvaro.empresas.passagens.dtos.precos.PrecoUpdateDTO;
 import com.alvaro.empresas.passagens.services.PassagemService;
 import com.alvaro.empresas.passagens.services.PrecoService;
 
@@ -36,7 +36,7 @@ public class PrecoResource {
 
     @GetMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
-    public PrecoDTO findById(@PathVariable UUID id) {
+    public PrecoResponseDTO findById(@PathVariable UUID id) {
         return precoService.findById(id);
     }
 
@@ -49,7 +49,7 @@ public class PrecoResource {
     @PutMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
-    public PrecoDTO update(@PathVariable UUID id, @RequestBody @Valid PrecoDTOUpdate dto) {
+    public PrecoResponseDTO update(@PathVariable UUID id, @RequestBody @Valid PrecoUpdateDTO dto) {
         return precoService.update(id, dto);
     }
 
@@ -57,7 +57,6 @@ public class PrecoResource {
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_FUNCIONARIO', 'ROLE_EMPRESA_ADMIN', 'ROLE_ADMIN')")
     @ResponseStatus(HttpStatus.OK)
     public List<PassagemDTOEmpresaResponse> getPassagensFromPreco(@PathVariable UUID idPreco) {
-
         return passagemService.getPassagensByPreco(idPreco);
     }
 }

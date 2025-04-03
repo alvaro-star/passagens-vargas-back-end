@@ -2,6 +2,7 @@ package com.alvaro.empresas.passagens.onibus.resources;
 
 import java.util.UUID;
 
+import com.alvaro.empresas.passagens.dtos.viagens.seller.ViagemResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -19,7 +20,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alvaro.empresas.passagens.dtos.PageOutput;
-import com.alvaro.empresas.passagens.dtos.viagens.empresa.ViagemDTOListBuscaEmpresa;
 import com.alvaro.empresas.passagens.onibus.dtos.OnibusCreateDTO;
 import com.alvaro.empresas.passagens.onibus.dtos.OnibusDTOResponse;
 import com.alvaro.empresas.passagens.onibus.dtos.OnibusUpdateDTO;
@@ -35,7 +35,6 @@ import jakarta.validation.Valid;
 public class OnibusResource {
     @Autowired
     private OnibusService onibusService;
-
     @Autowired
     private ViagemEmpresaService viagemEmpresaService;
 
@@ -48,7 +47,7 @@ public class OnibusResource {
     @GetMapping("{id}/viagens")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN', 'ROLE_EMPRESA_FUNCIONARIO')")
-    public PageOutput<ViagemDTOListBuscaEmpresa> findAllFromOnibus(
+    public PageOutput<ViagemResponseDTO> findAllFromOnibus(
             @PathVariable UUID id,
             @RequestParam String mesAnalise,
             @PageableDefault(sort = "dataHoraSaida") Pageable pageable) {

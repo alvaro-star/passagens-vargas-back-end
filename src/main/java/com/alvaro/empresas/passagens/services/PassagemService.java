@@ -24,7 +24,7 @@ import com.alvaro.empresas.passagens.dtos.pasagens.PassagensDTOVenta;
 import com.alvaro.empresas.passagens.enums.TipoPagamento;
 import com.alvaro.empresas.passagens.helpers.PassagensPDF;
 import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
-import com.alvaro.empresas.passagens.helpers.validators.ValidEnabledEntities;
+import com.alvaro.empresas.passagens.helpers.validations.ValidEnabledEntities;
 import com.alvaro.empresas.passagens.models.PassagemModel;
 import com.alvaro.empresas.passagens.models.PrecoModel;
 import com.alvaro.empresas.passagens.models.ViagemModel;
@@ -36,7 +36,7 @@ import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.alvaro.empresas.passagens.repositories.PassagemRepository;
 import com.alvaro.empresas.passagens.repositories.PrecoRepository;
 import com.alvaro.empresas.passagens.repositories.ViagemRepository;
-import com.alvaro.empresas.passagens.services.validacao.ValidarCompraPassagens;
+import com.alvaro.empresas.passagens.helpers.validations.validacao.ValidarCompraPassagens;
 
 import lombok.extern.slf4j.Slf4j;
 

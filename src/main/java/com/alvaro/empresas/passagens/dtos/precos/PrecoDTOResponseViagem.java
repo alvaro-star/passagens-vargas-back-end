@@ -15,8 +15,19 @@ public record PrecoDTOResponseViagem(
         Integer nAssentosDisponiveis,
         PisoResponseDTO piso,
         List<Integer> assentosOcupados) {
-    public PrecoDTOResponseViagem(PrecoModel model, PisoResponseDTO piso, List<Integer> assentosOcupados) {
-        this(model.getId(), model.getPreco(), model.getNPiso(), model.getCheio(), model.getNAssentosDisponiveis(), piso,
-                assentosOcupados);
+    public PrecoDTOResponseViagem(
+            PrecoModel model,
+            PisoResponseDTO piso,
+            List<Integer> assentosOcupados
+    ) {
+        this(
+                model.getId(),
+                model.getPreco(),
+                model.getNPiso(),
+                model.getCheio(),
+                model.getNAssentosDisponiveis(),
+                piso,
+                assentosOcupados
+        );
     }
 }

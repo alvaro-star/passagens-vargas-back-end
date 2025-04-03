@@ -1,7 +1,7 @@
 package com.alvaro.empresas.passagens.models;
 
-import com.alvaro.empresas.passagens.dtos.precos.PrecoDTO;
-import com.alvaro.empresas.passagens.dtos.precos.PrecoDTOUpdate;
+import com.alvaro.empresas.passagens.dtos.precos.PrecoResponseDTO;
+import com.alvaro.empresas.passagens.dtos.precos.PrecoUpdateDTO;
 import com.alvaro.empresas.passagens.interfaces.IEntityStandart;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
@@ -57,7 +57,7 @@ public class PrecoModel extends IEntityStandart {
         empresaId = (empresa.getId() != null) ? empresa.getId() : null;
     }
 
-    public PrecoModel(PrecoDTO dto) {
+    public PrecoModel(PrecoResponseDTO dto) {
         preco = dto.preco();
         nPiso = dto.nPiso();
     }
@@ -77,7 +77,7 @@ public class PrecoModel extends IEntityStandart {
         this.empresa = viagem.getEmpresa();
     }
 
-    public void updateValues(PrecoDTOUpdate dto) {
+    public void updateValues(PrecoUpdateDTO dto) {
         preco = dto.preco();
     }
 }

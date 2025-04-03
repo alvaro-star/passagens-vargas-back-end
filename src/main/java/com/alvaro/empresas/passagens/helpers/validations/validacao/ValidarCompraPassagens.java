@@ -1,4 +1,4 @@
-package com.alvaro.empresas.passagens.services.validacao;
+package com.alvaro.empresas.passagens.helpers.validations.validacao;
 
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationWithErrorListExceptions;
 import com.alvaro.empresas.passagens.dtos.pasagens.PassagemDTO;
