@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.repositories;
 
-import com.alvaro.empresas.passagens.interfaces.ICustomRepository;
+import com.alvaro.empresas.passagens.configuracoes.jpa.ICustomRepository;
 import com.alvaro.empresas.passagens.models.PassagemModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

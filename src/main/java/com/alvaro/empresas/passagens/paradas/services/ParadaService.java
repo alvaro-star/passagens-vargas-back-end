@@ -13,7 +13,7 @@ import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.V
 import com.alvaro.empresas.passagens.dtos.PageOutput;
 import com.alvaro.empresas.passagens.enums.TipoParada;
 import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
-import com.alvaro.empresas.passagens.helpers.validations.ValidEnabledEntities;
+import com.alvaro.empresas.passagens.configuracoes.validations.services.ValidEnabledEntities;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaCreateDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaResponseDTO;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaUpdateDTO;
@@ -24,7 +24,7 @@ import com.alvaro.empresas.passagens.paradas.repositories.ParadaRepository;
 import com.alvaro.empresas.passagens.repositories.ViagemRepository;
 import com.alvaro.empresas.passagens.security.models.RoleList;
 import com.alvaro.empresas.passagens.services.RepositoryValidationService;
-import com.alvaro.empresas.passagens.helpers.validations.validacao.TempoViagemService;
+import com.alvaro.empresas.passagens.configuracoes.validations.services.TempoViagemService;
 
 @Service
 public class ParadaService {

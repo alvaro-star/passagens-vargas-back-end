@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.paradas.repositories;
 
-import com.alvaro.empresas.passagens.interfaces.ICustomRepository;
+import com.alvaro.empresas.passagens.configuracoes.jpa.ICustomRepository;
 import com.alvaro.empresas.passagens.paradas.models.CidadeModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

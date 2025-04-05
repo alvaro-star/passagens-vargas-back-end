@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.alvaro.empresas.passagens.models.EmpresaModel;
-import com.alvaro.empresas.passagens.interfaces.IEntityStandart;
+import com.alvaro.empresas.passagens.models.IEntityStandart;
 import com.alvaro.empresas.passagens.models.ViagemModel;
 import com.alvaro.empresas.passagens.onibus.dtos.OnibusCreateDTO;
 import com.alvaro.empresas.passagens.onibus.dtos.OnibusUpdateDTO;

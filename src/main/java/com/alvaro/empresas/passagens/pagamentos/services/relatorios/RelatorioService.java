@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 
 import com.alvaro.empresas.passagens.enums.TipoPagamento;
-import com.alvaro.empresas.passagens.helpers.DateTimeUtil;
+import com.alvaro.empresas.passagens.helpers.DateTimeUtils;
 import com.alvaro.empresas.passagens.services.EmailService;
 import com.alvaro.empresas.passagens.helpers.thymeleaf.CidadeTHModel;
 import com.alvaro.empresas.passagens.helpers.thymeleaf.MetodoTHModel;
@@ -21,7 +21,7 @@ import com.alvaro.empresas.passagens.paradas.models.LugarModel;
 import com.alvaro.empresas.passagens.paradas.repositories.LugarRepository;
 import com.alvaro.empresas.passagens.repositories.EmpresaRepository;
 import com.alvaro.empresas.passagens.repositories.PassagemRepository;
-import com.alvaro.empresas.passagens.helpers.validations.validacao.TempoViagemService;
+import com.alvaro.empresas.passagens.configuracoes.validations.services.TempoViagemService;
 import com.itextpdf.kernel.geom.PageSize;
 
 @Service
@@ -44,9 +44,9 @@ public class RelatorioService {
 
     public byte[] makeRelatorioMensal(UUID empresaId, String mesAnalise) {
         var empresa = empresaRepository.findByIdOrThr(empresaId);
-        Integer[] anoMes = DateTimeUtil.splitAnoMonth(mesAnalise);
-        LocalDateTime inicio = DateTimeUtil.getFirstDayOfMonth(anoMes);
-        LocalDateTime fim = DateTimeUtil.getLastDayOfMonth(anoMes);
+        Integer[] anoMes = DateTimeUtils.splitAnoMonth(mesAnalise);
+        LocalDateTime inicio = DateTimeUtils.getFirstDayOfMonth(anoMes);
+        LocalDateTime fim = DateTimeUtils.getLastDayOfMonth(anoMes);
         List<ViagemModel> viagens = tempoViagemService.findViagensFromEmpresa(empresa, inicio, fim);
 
         HashMap<Integer, Integer> saidasIdNPassagens = new HashMap<>(), destinosIdNPassagens = new HashMap<>();

@@ -1,4 +1,4 @@
-package com.alvaro.empresas.passagens.interfaces;
+package com.alvaro.empresas.passagens.models;
 
 import jakarta.persistence.*;
 import lombok.Data;

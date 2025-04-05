@@ -1,4 +1,4 @@
-package com.alvaro.empresas.passagens.helpers.validations;
+package com.alvaro.empresas.passagens.configuracoes.validations.services;
 
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
 import com.alvaro.empresas.passagens.models.EmpresaModel;

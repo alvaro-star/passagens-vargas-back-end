@@ -51,15 +51,15 @@ public class PasagemResource {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Object save(@RequestBody @Valid PassagensDTO dto, BindingResult bindingResult) { // Venta de pasajes al
+    public Object save(@RequestBody @Valid PassagensDTO dto) { // Venta de pasajes al
         // público
-        return passagemService.saveCliente(dto, bindingResult);
+        return passagemService.saveCliente(dto);
     }
 
     @PostMapping("vender")
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_FUNCIONARIO', 'ROLE_EMPRESA_ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
-    public CodigoPago vender(@RequestBody @Valid PassagensDTOVenta dto, BindingResult bindingResult) {
+    public CodigoPago vender(@RequestBody @Valid PassagensDTOVenta dto) {
         var idPago = passagemService.saveEmpresa(dto);
         return new CodigoPago(idPago);
     }

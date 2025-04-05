@@ -1,7 +1,6 @@
 package com.alvaro.empresas.passagens.models;
 
 import com.alvaro.empresas.passagens.dtos.pasagens.ContatoInputDTO;
-import com.alvaro.empresas.passagens.interfaces.IEntityStandart;
 import com.alvaro.empresas.passagens.pagamentos.models.FaturaPassagemModel;
 import jakarta.persistence.*;
 import lombok.*;

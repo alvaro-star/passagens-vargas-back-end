@@ -2,19 +2,19 @@ package com.alvaro.empresas.passagens.dtos.pasagens;
 
 import jakarta.validation.constraints.*;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public record PassagemDTO(
-        Integer id,
         @NotBlank
-        @Size(max = 7, min = 7)
-        String documento,
+        @Pattern(regexp = "^\\d{11}$", message = "Deve conter exatamente 11 dígitos")
+        String cpf,
         @NotBlank
         @Size(max = 50)
         String nome,
         @Past
         @NotNull
-        Date nascimento,
+        LocalDate nascimento,
         @NotNull
         @Positive
         Integer nAssento

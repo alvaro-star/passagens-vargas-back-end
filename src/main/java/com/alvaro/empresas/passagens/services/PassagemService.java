@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.BindingResult;
 
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationException;
@@ -24,7 +23,7 @@ import com.alvaro.empresas.passagens.dtos.pasagens.PassagensDTOVenta;
 import com.alvaro.empresas.passagens.enums.TipoPagamento;
 import com.alvaro.empresas.passagens.helpers.PassagensPDF;
 import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
-import com.alvaro.empresas.passagens.helpers.validations.ValidEnabledEntities;
+import com.alvaro.empresas.passagens.configuracoes.validations.services.ValidEnabledEntities;
 import com.alvaro.empresas.passagens.models.PassagemModel;
 import com.alvaro.empresas.passagens.models.PrecoModel;
 import com.alvaro.empresas.passagens.models.ViagemModel;
@@ -36,7 +35,6 @@ import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
 import com.alvaro.empresas.passagens.repositories.PassagemRepository;
 import com.alvaro.empresas.passagens.repositories.PrecoRepository;
 import com.alvaro.empresas.passagens.repositories.ViagemRepository;
-import com.alvaro.empresas.passagens.helpers.validations.validacao.ValidarCompraPassagens;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -51,8 +49,6 @@ public class PassagemService {
     private FaturaPassagemService faturaPassagemService;
     @Autowired
     private ViagemRepository viagemRepository;
-    @Autowired
-    private ValidarCompraPassagens validarCompraPassagens;
     @Autowired
     private PrecoRepository precoRepository;
     @Autowired
@@ -91,9 +87,8 @@ public class PassagemService {
     }
 
     @Transactional
-    public FaturaPassagemModel saveCliente(PassagensDTO dto, BindingResult bindingResult) {
+    public FaturaPassagemModel saveCliente(PassagensDTO dto) {
         var preco = precoRepository.findByIdOrThr(dto.idPreco());
-        validarCompraPassagens.validarPassagensDTO(bindingResult, dto, "/passagens");
         var viagem = preco.getViagem();
 
         validarParadasViagem(viagem, dto.idLugarSaida(), dto.idLugarDestino());
@@ -121,8 +116,6 @@ public class PassagemService {
         var viagem = viagemRepository.findByIdOrThr(dto.idViagem());
         userLogued.validIfIsMyEmpresa(viagem.getEmpresaId());
         ValidEnabledEntities.validEmpresa(viagem.getEmpresa());
-
-        validarCompraPassagens.validarPassagensDTOVenta(dto, "/passagens/vender");
 
         validarParadasViagem(viagem, dto.idLugarSaida(), dto.idLugarDestino());
 

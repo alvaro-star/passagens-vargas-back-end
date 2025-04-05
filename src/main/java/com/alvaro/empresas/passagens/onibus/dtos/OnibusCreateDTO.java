@@ -1,5 +1,6 @@
 package com.alvaro.empresas.passagens.onibus.dtos;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -14,7 +15,8 @@ public record OnibusCreateDTO(
         @NotNull(message = "Não pode ser nulo")
         UUID idEmpresa,
         @Size(min = 1, max = 2)
-        List<PisoCreateDTO> pisos
+        @Valid
+        List<PisoInputDTO> pisos
 ) {
     public OnibusCreateDTO(String placa, UUID idEmpresa) {
         this(placa, idEmpresa, new ArrayList<>());

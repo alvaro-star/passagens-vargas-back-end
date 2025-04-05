@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.alvaro.empresas.passagens.dtos.viagens.ViagemSolicitacaoDTO;
-import com.alvaro.empresas.passagens.helpers.validations.groups.IEmpresaUser;
+import com.alvaro.empresas.passagens.configuracoes.validations.groups.IEmpresaUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;

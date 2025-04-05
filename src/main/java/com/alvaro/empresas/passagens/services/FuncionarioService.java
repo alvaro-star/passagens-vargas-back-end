@@ -12,7 +12,7 @@ import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.R
 import com.alvaro.empresas.passagens.dtos.FuncionarioResponseDTO;
 import com.alvaro.empresas.passagens.dtos.PageOutput;
 import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
-import com.alvaro.empresas.passagens.helpers.validations.ValidEnabledEntities;
+import com.alvaro.empresas.passagens.configuracoes.validations.services.ValidEnabledEntities;
 import com.alvaro.empresas.passagens.security.dtos.RegisterDTOFuncionario;
 import com.alvaro.empresas.passagens.security.models.RoleList;
 import com.alvaro.empresas.passagens.security.models.RoleModel;

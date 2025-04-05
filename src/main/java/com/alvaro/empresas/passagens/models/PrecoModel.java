@@ -2,7 +2,6 @@ package com.alvaro.empresas.passagens.models;
 
 import com.alvaro.empresas.passagens.dtos.precos.PrecoResponseDTO;
 import com.alvaro.empresas.passagens.dtos.precos.PrecoUpdateDTO;
-import com.alvaro.empresas.passagens.interfaces.IEntityStandart;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import lombok.*;

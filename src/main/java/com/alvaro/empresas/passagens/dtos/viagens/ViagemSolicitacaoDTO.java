@@ -1,7 +1,7 @@
 package com.alvaro.empresas.passagens.dtos.viagens;
 
-import com.alvaro.empresas.passagens.helpers.validations.groups.IClientCommonUser;
-import com.alvaro.empresas.passagens.helpers.validations.groups.IEmpresaUser;
+import com.alvaro.empresas.passagens.configuracoes.validations.groups.IClientCommonUser;
+import com.alvaro.empresas.passagens.configuracoes.validations.groups.IEmpresaUser;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 

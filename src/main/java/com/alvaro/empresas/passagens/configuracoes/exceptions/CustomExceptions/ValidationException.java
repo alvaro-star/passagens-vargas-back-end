@@ -6,11 +6,10 @@ import java.util.HashMap;
 
 @Getter
 public class ValidationException extends RuntimeException {
-    private final HashMap<String, String> errors;
+    private final HashMap<String, Object> errors;
     private static final String defaultMessage = "Os dados enviados apresentam alguns erros";
 
-
-    public ValidationException(HashMap<String, String> errors) {
+    public ValidationException(HashMap<String, Object> errors) {
         super(defaultMessage);
         this.errors = errors;
     }

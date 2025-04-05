@@ -1,12 +1,12 @@
 package com.alvaro.empresas.passagens.dtos.precos;
 
-import com.alvaro.empresas.passagens.models.PrecoModel;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-
 import java.math.BigDecimal;
 import java.util.UUID;
+
+import com.alvaro.empresas.passagens.models.PrecoModel;
+
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 public record PrecoResponseDTO(
         UUID id,

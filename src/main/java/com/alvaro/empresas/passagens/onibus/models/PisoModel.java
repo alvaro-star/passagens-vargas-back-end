@@ -1,8 +1,7 @@
 package com.alvaro.empresas.passagens.onibus.models;
 
-import com.alvaro.empresas.passagens.interfaces.IEntityStandart;
-import com.alvaro.empresas.passagens.onibus.dtos.PisoCreateDTO;
-import com.alvaro.empresas.passagens.onibus.dtos.PisoUpdateDTO;
+import com.alvaro.empresas.passagens.models.IEntityStandart;
+import com.alvaro.empresas.passagens.onibus.dtos.PisoInputDTO;
 import com.alvaro.empresas.passagens.onibus.enums.TipePosicao;
 import jakarta.persistence.*;
 import lombok.*;
@@ -44,8 +43,8 @@ public class PisoModel extends IEntityStandart {
 
     private String posicoesBloquedas = "";
 
-    public PisoModel(PisoCreateDTO dto, Integer nPiso, Integer primeiroAssento) {
-        nAssentos = dto.nAssentosDisponiveis();
+    public PisoModel(PisoInputDTO dto, Integer nPiso, Integer primeiroAssento) {
+        nAssentos = dto.nAssentos();
         nLinhas = dto.nLinhas();
         nColunas = dto.nColunas();
         distribuicaoFileira = dto.distribuicaoFileira();
@@ -91,15 +90,15 @@ public class PisoModel extends IEntityStandart {
         this.onibus = onibus;
     }
 
-    public void updateValues(PisoUpdateDTO dto) {
-        nAssentos = dto.getNColunas() * dto.getNLinhas() - dto.getPosicoesIndisponiveis().size();
-        nLinhas = dto.getNLinhas();
-        nColunas = dto.getNColunas();
-        distribuicaoFileira = dto.getDistribuicaoFileira();
-        inicioContagem = dto.getInicioContagem();
+    public void updateValues(PisoInputDTO dto) {
+        nAssentos = dto.nAssentos();
+        nLinhas = dto.nLinhas();
+        nColunas = dto.nColunas();
+        distribuicaoFileira = dto.distribuicaoFileira();
+        inicioContagem = dto.distribuicaoFileira();
 
         String palavra = "";
-        for (Integer posicaoBloqueada : dto.getPosicoesIndisponiveis())
+        for (Integer posicaoBloqueada : dto.posicoesBloquedas())
             palavra = palavra.concat(posicaoBloqueada + ",");
         this.posicoesBloquedas = palavra;
     }

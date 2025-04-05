@@ -14,7 +14,7 @@ import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.R
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationException;
 import com.alvaro.empresas.passagens.dtos.PageOutput;
 import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
-import com.alvaro.empresas.passagens.helpers.validations.ValidEnabledEntities;
+import com.alvaro.empresas.passagens.configuracoes.validations.services.ValidEnabledEntities;
 import com.alvaro.empresas.passagens.onibus.dtos.OnibusCreateDTO;
 import com.alvaro.empresas.passagens.onibus.dtos.OnibusDTOResponse;
 import com.alvaro.empresas.passagens.onibus.dtos.OnibusUpdateDTO;
@@ -22,7 +22,6 @@ import com.alvaro.empresas.passagens.onibus.dtos.PisoResponseDTO;
 import com.alvaro.empresas.passagens.onibus.models.OnibusModel;
 import com.alvaro.empresas.passagens.onibus.models.PisoModel;
 import com.alvaro.empresas.passagens.onibus.repositories.OnibusRepository;
-import com.alvaro.empresas.passagens.onibus.services.validacao.ValidarPiso;
 import com.alvaro.empresas.passagens.repositories.EmpresaRepository;
 import com.alvaro.empresas.passagens.repositories.ViagemRepository;
 
@@ -35,8 +34,6 @@ public class OnibusService {
     private EmpresaRepository empresaRepository;
     @Autowired
     private ViagemRepository viagemRepository;
-    @Autowired
-    private ValidarPiso validarPiso;
     @Autowired
     private UserLoguedComponent userLogued;
 
@@ -64,7 +61,6 @@ public class OnibusService {
         var empresa = empresaRepository.findByIdOrThr(dto.idEmpresa());
         userLogued.validIfIsMyEmpresa(empresa.getId());
         ValidEnabledEntities.validEmpresa(empresa);
-        validarPiso.validarOnibusDTO(dto);
 
         var model = new OnibusModel(dto, empresa);
         validarPlaca(dto.placa());

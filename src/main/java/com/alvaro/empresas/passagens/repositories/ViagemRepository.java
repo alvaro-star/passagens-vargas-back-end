@@ -2,7 +2,7 @@ package com.alvaro.empresas.passagens.repositories;
 
 import com.alvaro.empresas.passagens.dtos.viagens.JPQL.ViagemDTOJPQL;
 import com.alvaro.empresas.passagens.dtos.viagens.JPQL.ViagemWithLogoDTOJPQL;
-import com.alvaro.empresas.passagens.interfaces.ICustomRepository;
+import com.alvaro.empresas.passagens.configuracoes.jpa.ICustomRepository;
 import com.alvaro.empresas.passagens.models.ViagemModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

@@ -1,7 +1,7 @@
 package com.alvaro.empresas.passagens.onibus.resources;
 
+import com.alvaro.empresas.passagens.onibus.dtos.PisoInputDTO;
 import com.alvaro.empresas.passagens.onibus.dtos.PisoResponseDTO;
-import com.alvaro.empresas.passagens.onibus.dtos.PisoUpdateDTO;
 import com.alvaro.empresas.passagens.onibus.services.PisoService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -28,7 +28,7 @@ public class PisoResource {
     @PutMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN')")
-    public Object update(@PathVariable UUID id, @RequestBody @Valid PisoUpdateDTO dto) {
+    public Object update(@PathVariable UUID id, @RequestBody @Valid PisoInputDTO dto) {
         return pisoService.update(id, dto);
     }
 }

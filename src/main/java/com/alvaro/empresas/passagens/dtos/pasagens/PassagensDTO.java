@@ -17,6 +17,8 @@ public record PassagensDTO(
         @NotNull
         Integer idLugarDestino,
         @Size(min = 1, max = 7)
+        @NotNull
+        @Valid
         List<PassagemDTO> passagens
 ) {
 }

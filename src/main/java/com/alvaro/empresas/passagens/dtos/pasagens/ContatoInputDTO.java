@@ -5,11 +5,11 @@ import jakarta.validation.constraints.*;
 public record ContatoInputDTO(
         @NotBlank
         String nome,
+        @NotBlank
         @Email
         String email,
         @NotBlank
         @Pattern(regexp = "^\\d{11}$", message = "O telefone precisa ter 11 digitos")
         String telefone
 ) {
-
 }

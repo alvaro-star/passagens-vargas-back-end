@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.services;
 
-import static com.alvaro.empresas.passagens.helpers.DateTimeUtil.copyLocalTimeInLocalDate;
+import static com.alvaro.empresas.passagens.helpers.DateTimeUtils.copyLocalTimeInLocalDate;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -29,11 +29,11 @@ import com.alvaro.empresas.passagens.dtos.viagens.seller.ViagemCreateDTO;
 import com.alvaro.empresas.passagens.dtos.viagens.seller.ViagemResponseDTO;
 import com.alvaro.empresas.passagens.dtos.viagens.seller.ViagemCreateCopyDTO;
 import com.alvaro.empresas.passagens.enums.TipoParada;
-import com.alvaro.empresas.passagens.helpers.DateTimeUtil;
+import com.alvaro.empresas.passagens.helpers.DateTimeUtils;
 import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
 import com.alvaro.empresas.passagens.helpers.thymeleaf.PDFThymeleaf;
 import com.alvaro.empresas.passagens.helpers.thymeleaf.PassagemItemListTHModel;
-import com.alvaro.empresas.passagens.helpers.validations.ValidEnabledEntities;
+import com.alvaro.empresas.passagens.configuracoes.validations.services.ValidEnabledEntities;
 import com.alvaro.empresas.passagens.models.PrecoModel;
 import com.alvaro.empresas.passagens.models.ViagemModel;
 import com.alvaro.empresas.passagens.onibus.models.PisoModel;
@@ -47,7 +47,7 @@ import com.alvaro.empresas.passagens.paradas.repositories.ParadaRepository;
 import com.alvaro.empresas.passagens.repositories.EmpresaRepository;
 import com.alvaro.empresas.passagens.repositories.PrecoRepository;
 import com.alvaro.empresas.passagens.repositories.ViagemRepository;
-import com.alvaro.empresas.passagens.helpers.validations.validacao.TempoViagemService;
+import com.alvaro.empresas.passagens.configuracoes.validations.services.TempoViagemService;
 import com.itextpdf.kernel.geom.PageSize;
 
 @Service
@@ -77,13 +77,13 @@ public class ViagemEmpresaService {
 
     public PageOutput<ViagemResponseDTO> findAllByEmpresaBetweenDates(UUID empresaId, String mesAnalise, Pageable pageable) {
 
-        Integer[] anoMes = DateTimeUtil.splitAnoMonth(mesAnalise);
+        Integer[] anoMes = DateTimeUtils.splitAnoMonth(mesAnalise);
 
         userLogued.validIfIsAdminOrOwnerEmpresa(empresaId);
         var empresa = empresaRepository.findByIdOrThr(empresaId);
 
-        LocalDateTime dataInicio = DateTimeUtil.getFirstDayOfMonth(anoMes);
-        LocalDateTime dataFim = DateTimeUtil.getLastDayOfMonth(anoMes);
+        LocalDateTime dataInicio = DateTimeUtils.getFirstDayOfMonth(anoMes);
+        LocalDateTime dataFim = DateTimeUtils.getLastDayOfMonth(anoMes);
 
         var page = viagemRepository.findByEmpresaAndStartInInterval(empresa.getId(), dataInicio, dataFim, pageable);
 
@@ -96,9 +96,9 @@ public class ViagemEmpresaService {
         var onibus = onibusRepository.findByIdOrThr(onibusId);
         userLogued.validIfIsAdminOrOwnerEmpresa(onibus.getEmpresaId());
 
-        Integer[] anoMes = DateTimeUtil.splitAnoMonth(mesAnalise);
-        LocalDateTime dataInicio = DateTimeUtil.getFirstDayOfMonth(anoMes);
-        LocalDateTime dataFim = DateTimeUtil.getLastDayOfMonth(anoMes);
+        Integer[] anoMes = DateTimeUtils.splitAnoMonth(mesAnalise);
+        LocalDateTime dataInicio = DateTimeUtils.getFirstDayOfMonth(anoMes);
+        LocalDateTime dataFim = DateTimeUtils.getLastDayOfMonth(anoMes);
 
         var models = viagemRepository.findByEmpresaAndOnibusAndStartInInterval(onibus.getEmpresa().getId(), onibus.getId(), dataInicio, dataFim, pageable);
 

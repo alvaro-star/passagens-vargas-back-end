@@ -5,13 +5,13 @@ import org.thymeleaf.context.Context;
 
 public record PassagemTHModel(
         String empresa,
-        String fechaHora,
+        String dataHora,
         Integer piso,
-        Integer nsilla,
-        Integer carril,
+        Integer nAssento,
+        Integer plataforma,
         String nome,
-        String carnet,
-        String nascimiento,
+        String cpf,
+        String nascimento,
         ParadaTHModel origen,
         ParadaTHModel destino,
         String preco,
@@ -25,7 +25,7 @@ public record PassagemTHModel(
                 model.getNAssento(),
                 model.getSaida().getPlataforma(),
                 model.getNome(),
-                model.getDocumento(),
+                model.getCpf(),
                 model.getNascimento().toString(),
                 new ParadaTHModel(model.getSaida()),
                 new ParadaTHModel(model.getDestino()),
@@ -37,13 +37,13 @@ public record PassagemTHModel(
     public Context toContextThymeleaf() {
         Context context = new Context();
         context.setVariable("empresa", this.empresa);
-        context.setVariable("fechaHora", this.fechaHora);
+        context.setVariable("fechaHora", this.dataHora);
         context.setVariable("piso", this.piso);
-        context.setVariable("nsilla", this.nsilla);
-        context.setVariable("carril", this.carril);
+        context.setVariable("nsilla", this.nAssento);
+        context.setVariable("carril", this.plataforma);
         context.setVariable("nome", this.nome);
-        context.setVariable("carnet", this.carnet);
-        context.setVariable("nascimiento", this.nascimiento);
+        context.setVariable("carnet", this.cpf);
+        context.setVariable("nascimiento", this.nascimento);
         context.setVariable("origen", this.origen);
         context.setVariable("destino", this.destino);
         context.setVariable("preco", this.preco);

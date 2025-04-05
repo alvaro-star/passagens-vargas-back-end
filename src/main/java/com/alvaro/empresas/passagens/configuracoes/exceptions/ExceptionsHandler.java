@@ -1,10 +1,13 @@
 package com.alvaro.empresas.passagens.configuracoes.exceptions;
 
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -13,11 +16,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationException;
-import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationWithErrorListExceptions;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.dtos.EntityNotFoundError;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.dtos.StandardError;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.dtos.ValidationError;
-import com.alvaro.empresas.passagens.helpers.validations.validacao.ValidationErrorsWithList;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +32,6 @@ public class ExceptionsHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public StandardError exception(Exception ex, HttpServletRequest request) {
         log.error(ex.getMessage());
-
         return new StandardError(
                 System.currentTimeMillis(),
                 HttpStatus.INTERNAL_SERVER_ERROR,
@@ -58,8 +58,7 @@ public class ExceptionsHandler {
                 request.getRequestURI(),
                 ex.getMessage(),
                 ex.getId(),
-                EntityNotFoundException.clearEntityName(ex.getEntityClass())
-        );
+                EntityNotFoundException.clearEntityName(ex.getEntityClass()));
     }
 
     @ExceptionHandler(ObjectNotFoundException.class)
@@ -75,26 +74,12 @@ public class ExceptionsHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public StandardError validation(MethodArgumentNotValidException e, HttpServletRequest request) {
-        ValidationError err = new ValidationError(
+        return new ValidationError(
                 System.currentTimeMillis(),
                 HttpStatus.UNPROCESSABLE_ENTITY,
-                e.getMessage(),
-                request.getRequestURI());
-        e.getBindingResult().getFieldErrors().forEach(err::addError);
-        return err;
-    }
-
-    @ExceptionHandler(ValidationWithErrorListExceptions.class)
-    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    public ValidationErrorsWithList validationWithErrorListExceptions(
-            ValidationWithErrorListExceptions ex, HttpServletRequest request) {
-        ValidationErrorsWithList err = new ValidationErrorsWithList(
-                System.currentTimeMillis(),
-                HttpStatus.UNPROCESSABLE_ENTITY,
-                "Erro durante a validacao",
-                null);
-        err.setErrorsList(ex.getErrorsList());
-        return err;
+                "Erro de validação",
+                request.getRequestURI(),
+                e.getBindingResult().getFieldErrors());
     }
 
     @ExceptionHandler(NullPointerException.class)

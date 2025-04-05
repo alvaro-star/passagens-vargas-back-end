@@ -2,7 +2,6 @@ package com.alvaro.empresas.passagens.models;
 
 import com.alvaro.empresas.passagens.dtos.pasagens.PassagemDTO;
 import com.alvaro.empresas.passagens.enums.TipoPagamento;
-import com.alvaro.empresas.passagens.interfaces.IEntityStandart;
 import com.alvaro.empresas.passagens.pagamentos.models.FaturaPassagemModel;
 import com.alvaro.empresas.passagens.pagamentos.models.FaturaReembolsoModel;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
@@ -13,6 +12,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.UUID;
 
@@ -50,11 +50,11 @@ public class PassagemModel extends IEntityStandart {
     private TipoPagamento metodoPagamento;
 
     @Column(nullable = false, length = 9)
-    private String documento;
+    private String cpf;
     @Column(nullable = false, length = 70)
     private String nome;
     @Column(nullable = false)
-    private Date nascimento;
+    private LocalDate nascimento;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "fk_id_saida")
@@ -93,7 +93,7 @@ public class PassagemModel extends IEntityStandart {
 
     public PassagemModel(PassagemDTO passagemDTO, Boolean compradoWeb, BigDecimal precoPago, Boolean estaPago, Boolean emDinheiro, ParadaModel saida, ParadaModel destino, PrecoModel preco, FaturaPassagemModel faturaPassagem) {
         this.nAssento = passagemDTO.nAssento();
-        this.documento = passagemDTO.documento();
+        this.cpf = passagemDTO.cpf();
         this.nome = passagemDTO.nome();
         this.nascimento = passagemDTO.nascimento();
 
@@ -108,12 +108,12 @@ public class PassagemModel extends IEntityStandart {
         this.preco = preco;
     }
 
-    public PassagemModel(Integer nAssento, Boolean compradoWeb, BigDecimal precoPago, Boolean estaPago, Boolean emDinheiro, String nome, String documento, Date nascimento, ParadaModel saida, ParadaModel destino, PrecoModel preco, FaturaPassagemModel faturaPassagem) {
+    public PassagemModel(Integer nAssento, Boolean compradoWeb, BigDecimal precoPago, Boolean estaPago, Boolean emDinheiro, String nome, String cpf, LocalDate nascimento, ParadaModel saida, ParadaModel destino, PrecoModel preco, FaturaPassagemModel faturaPassagem) {
         this.nAssento = nAssento;
         this.compradoWeb = compradoWeb;
         this.estaPago = estaPago;
         this.emDinheiro = emDinheiro;
-        this.documento = documento;
+        this.cpf = cpf;
         this.nome = nome.toUpperCase();
         this.nascimento = nascimento;
         this.precoPago = precoPago;

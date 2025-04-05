@@ -12,7 +12,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Service;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.alvaro.empresas.passagens.helpers.DateTimeUtil;
+import com.alvaro.empresas.passagens.helpers.DateTimeUtils;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.onibus.services.OnibusService;
 import com.alvaro.empresas.passagens.paradas.repositories.LugarRepository;
@@ -22,7 +22,7 @@ import com.alvaro.empresas.passagens.repositories.ViagemRepository;
 import com.alvaro.empresas.passagens.services.RepositoryMocks.LugarRepositoryMocker;
 import com.alvaro.empresas.passagens.services.RepositoryMocks.OnibusRepositoryMock;
 import com.alvaro.empresas.passagens.services.RepositoryMocks.ViagemRepositoryMock;
-import com.alvaro.empresas.passagens.helpers.validations.validacao.TempoViagemService;
+import com.alvaro.empresas.passagens.configuracoes.validations.services.TempoViagemService;
 
 @SpringBootTest
 @ComponentScan(basePackages = {
@@ -48,7 +48,7 @@ class ViagemEmpresaServiceTest {
     private LugarRepository lugarRepository;
 
     @Mock
-    private DateTimeUtil helperDate;
+    private DateTimeUtils helperDate;
 
     @Mock
     private PrecoRepository precoRepository;

@@ -3,16 +3,16 @@ package com.alvaro.empresas.passagens.helpers.thymeleaf;
 import com.alvaro.empresas.passagens.models.PassagemModel;
 
 public record PassagemItemListTHModel(
-        Integer nsilla,
-        String carnet,
+        Integer nAssento,
+        String cpf,
         String nome,
-        String nascimiento,
-        ParadaTHModel origen,
+        String nascimento,
+        ParadaTHModel saida,
         ParadaTHModel destino) {
     public PassagemItemListTHModel(PassagemModel model) {
         this(
                 model.getNAssento(),
-                model.getDocumento(),
+                model.getCpf(),
                 model.getNome(),
                 model.getNascimentoString(),
                 new ParadaTHModel(model.getSaida()),

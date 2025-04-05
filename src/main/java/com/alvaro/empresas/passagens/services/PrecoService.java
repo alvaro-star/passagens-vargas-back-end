@@ -11,7 +11,7 @@ import com.alvaro.empresas.passagens.dtos.precos.PrecoResponseDTO;
 import com.alvaro.empresas.passagens.dtos.precos.PrecoDTOResponseViagem;
 import com.alvaro.empresas.passagens.dtos.precos.PrecoUpdateDTO;
 import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
-import com.alvaro.empresas.passagens.helpers.validations.ValidEnabledEntities;
+import com.alvaro.empresas.passagens.configuracoes.validations.services.ValidEnabledEntities;
 import com.alvaro.empresas.passagens.models.PrecoModel;
 import com.alvaro.empresas.passagens.models.ViagemModel;
 import com.alvaro.empresas.passagens.onibus.dtos.PisoResponseDTO;

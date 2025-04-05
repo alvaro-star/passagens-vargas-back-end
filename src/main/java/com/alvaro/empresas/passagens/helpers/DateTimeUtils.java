@@ -11,7 +11,7 @@ import org.springframework.http.HttpStatus;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
 
 
-public class DateTimeUtil {
+public class DateTimeUtils {
     private static final String formatDate = "HH:mm - dd/MM/yyyy";
 
     public static LocalDateTime getFirstDayOfMonth(Integer[] anoMes) {

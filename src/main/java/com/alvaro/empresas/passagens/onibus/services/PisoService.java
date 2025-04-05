@@ -2,9 +2,9 @@ package com.alvaro.empresas.passagens.onibus.services;
 
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;
 import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
-import com.alvaro.empresas.passagens.helpers.validations.ValidEnabledEntities;
+import com.alvaro.empresas.passagens.configuracoes.validations.services.ValidEnabledEntities;
+import com.alvaro.empresas.passagens.onibus.dtos.PisoInputDTO;
 import com.alvaro.empresas.passagens.onibus.dtos.PisoResponseDTO;
-import com.alvaro.empresas.passagens.onibus.dtos.PisoUpdateDTO;
 import com.alvaro.empresas.passagens.onibus.models.PisoModel;
 import com.alvaro.empresas.passagens.onibus.repositories.PisoRepository;
 
@@ -33,7 +33,7 @@ public class PisoService {
     }
 
     @Transactional
-    public PisoResponseDTO update(UUID id, PisoUpdateDTO dto) {
+    public PisoResponseDTO update(UUID id, PisoInputDTO dto) {
         var model = pisoRepository.findByIdOrThr(id);
         var onibus = model.getOnibus();
         var empresa = onibus.getEmpresa();
@@ -43,11 +43,11 @@ public class PisoService {
         ValidEnabledEntities.validEmpresa(empresa);
 
         var viagem = viagemRepository.findFirst1ByOnibusId(model.getOnibus().getId());
-        int nAssentos = dto.getNAssentos();
+        int nPosicoes = dto.nPosicoes();
         if (viagem.isPresent())
             throw new RestRuntimeException(HttpStatus.CONFLICT, "O ônibus já tem uma viagem registrada");
-        for (Integer posicao : dto.getPosicoesIndisponiveis())
-            if (posicao > nAssentos)
+        for (Integer posicao : dto.posicoesBloquedas())
+            if (posicao > nPosicoes)
                 throw new RestRuntimeException(HttpStatus.CONFLICT, "Uma posição informada é inválida");
         List<PisoModel> pisos = new ArrayList<>();
         model.updateValues(dto);

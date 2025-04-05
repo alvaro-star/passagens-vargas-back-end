@@ -1,4 +1,4 @@
-package com.alvaro.empresas.passagens.interfaces;
+package com.alvaro.empresas.passagens.configuracoes.jpa;
 
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
 import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.RestRuntimeException;

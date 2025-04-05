@@ -1,7 +1,6 @@
 package com.alvaro.empresas.passagens.models;
 
 import com.alvaro.empresas.passagens.dtos.EmpresaInputDTO;
-import com.alvaro.empresas.passagens.interfaces.IEntityStandart;
 import com.alvaro.empresas.passagens.onibus.models.OnibusModel;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;

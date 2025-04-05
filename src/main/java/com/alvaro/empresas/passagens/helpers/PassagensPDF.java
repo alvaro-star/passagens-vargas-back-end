@@ -74,7 +74,7 @@ public class PassagensPDF {
         addRowBold(fluxoConteudo, "Empresa: " + nomeEmpresa, tamanhoFontePadrao + 1);
         addRowBold(fluxoConteudo, "Dados da Viagem", tamanhoFontePadrao + 1);
 
-        var dataHoraFormatada = DateTimeUtil.formatLocalDateTime(saida.getDataHora());
+        var dataHoraFormatada = DateTimeUtils.formatLocalDateTime(saida.getDataHora());
         fluxoConteudo.showText("Data e Hora: " + dataHoraFormatada);
         fluxoConteudo.newLine();
         fluxoConteudo.showText("Corredor: " + saida.getPlataforma());
@@ -89,7 +89,7 @@ public class PassagensPDF {
 
         addRowBold(fluxoConteudo, "Dados do Passageiro", tamanhoFontePadrao + 1);
         showLongTextAndNewLine(fluxoConteudo, "Nome: " + modelo.getNome());
-        showLongTextAndNewLine(fluxoConteudo, "Documento: " + modelo.getDocumento());
+        showLongTextAndNewLine(fluxoConteudo, "Documento: " + modelo.getCpf());
 
         addRowBold(fluxoConteudo, "Dados do Pagamento", tamanhoFontePadrao + 1);
         fluxoConteudo.showText("Preço: " + modelo.getPrecoPago().toString() + " Bs");

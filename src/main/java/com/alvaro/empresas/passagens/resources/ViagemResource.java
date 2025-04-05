@@ -2,7 +2,7 @@ package com.alvaro.empresas.passagens.resources;
 
 import com.alvaro.empresas.passagens.dtos.viagens.buyer.ViagemResponseDTO;
 import com.alvaro.empresas.passagens.dtos.viagens.ViagemSolicitacaoDTO;
-import com.alvaro.empresas.passagens.helpers.validations.groups.IClientCommonUser;
+import com.alvaro.empresas.passagens.configuracoes.validations.groups.IClientCommonUser;
 import com.alvaro.empresas.passagens.services.ViagemService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
