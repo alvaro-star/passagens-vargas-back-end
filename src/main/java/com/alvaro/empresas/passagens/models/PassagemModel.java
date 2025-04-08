@@ -1,20 +1,31 @@
 package com.alvaro.empresas.passagens.models;
 
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.util.UUID;
+
 import com.alvaro.empresas.passagens.dtos.pasagens.PassagemDTO;
 import com.alvaro.empresas.passagens.enums.TipoPagamento;
 import com.alvaro.empresas.passagens.pagamentos.models.FaturaPassagemModel;
 import com.alvaro.empresas.passagens.pagamentos.models.FaturaReembolsoModel;
 import com.alvaro.empresas.passagens.paradas.models.ParadaModel;
-import jakarta.persistence.*;
+
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.util.Date;
-import java.util.UUID;
 
 
 @Data

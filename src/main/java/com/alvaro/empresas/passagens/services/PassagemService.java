@@ -43,6 +43,8 @@ import lombok.extern.slf4j.Slf4j;
 public class PassagemService {
     @Value("${api.viaje.min-time-before-buy-pasaje-min}")
     private Integer tempoMinimoAntesCompraPassagem;
+    @Value("${api.passagens.taxa-rembolso}")
+    private Float taxaRembolso;
     @Autowired
     private PassagemRepository passagemRepository;
     @Autowired
@@ -63,7 +65,8 @@ public class PassagemService {
         var passagemModel = passagemRepository.findByIdOrThr(idPassagem);
         PassagensPDF passagemPDF = new PassagensPDF();
         try {
-            passagemPDF.addPassagem(passagemModel, passagemModel.getPreco().getEmpresa().getNome(), passagemModel.getFaturaPassagem().getMetodoPagamento());
+            passagemPDF.addPassagem(passagemModel, passagemModel.getPreco().getEmpresa().getNome(),
+                    passagemModel.getFaturaPassagem().getMetodoPagamento());
             return passagemPDF.closePdfAndToBytes();
         } catch (IOException exception) {
             throw new RestRuntimeException(HttpStatus.INTERNAL_SERVER_ERROR, "Houve um erro ao criar a passagem");
@@ -73,13 +76,15 @@ public class PassagemService {
     public List<PassagemDTOEmpresaResponse> getPassagensByPreco(UUID idPreco) {
         var preco = precoRepository.findByIdOrThr(idPreco);
         userLogued.validIfIsAdminOrOwnerEmpresa(preco.getEmpresaId());
-        return passagemRepository.findByPrecoIdAndEstaPago(idPreco, true).stream().map(PassagemDTOEmpresaResponse::new).toList();
+        return passagemRepository.findByPrecoIdAndEstaPago(idPreco, true).stream().map(PassagemDTOEmpresaResponse::new)
+                .toList();
     }
 
     private void validarParadasViagem(ViagemModel viagem, Integer idLugarSaida, Integer idLugarDestino) {
         var saida = viagem.getParadaByLugarId(idLugarSaida);
         var destino = viagem.getParadaByLugarId(idLugarDestino);
-        if (saida == null) throw new ValidationException("idLugarSaida", "A saída não faz parte da viagem");
+        if (saida == null)
+            throw new ValidationException("idLugarSaida", "A saída não faz parte da viagem");
         else if (saida.getDataHora().isBefore(LocalDateTime.now().minusMinutes(tempoMinimoAntesCompraPassagem)))
             throw new RestRuntimeException(HttpStatus.CONFLICT, "O ônibus já iniciou o viagem");
         if (destino == null)
@@ -100,13 +105,15 @@ public class PassagemService {
         validarAssentos(pisoEscolhido, preco, dto.passagens());
 
         BigDecimal valorTotal = preco.getPreco().multiply(BigDecimal.valueOf(dto.passagens().size()));
-        FaturaPassagemModel pago = faturaPassagemService.saveCliente(dto.contato(), valorTotal, null, TipoPagamento.QR, false);
+        FaturaPassagemModel pago = faturaPassagemService.saveCliente(dto.contato(), valorTotal, null, TipoPagamento.QR,
+                false);
 
         viagem.addValorArrecadadoWeb(pago.getValorTotal());
 
         viagemRepository.save(viagem);
 
-        var passagensModel = dto.passagens().stream().map(passagem -> new PassagemModel(passagem, true, preco.getPreco(), false, false, saida, destino, preco, pago)).collect(Collectors.toList());
+        var passagensModel = dto.passagens().stream().map(passagem -> new PassagemModel(passagem, true,
+                preco.getPreco(), false, false, saida, destino, preco, pago)).collect(Collectors.toList());
         passagemRepository.saveAll(passagensModel);
         return pago;
     }
@@ -127,11 +134,11 @@ public class PassagemService {
         PisoModel piso1 = viagem.getOnibus().getPisoByNumero(1);
         PisoModel piso2 = viagem.getOnibus().getPisoByNumero(2);
 
-
         for (PassagemDTO passagemFor : dto.passagens()) {
             if (passagemFor.nAssento() > 0 && passagemFor.nAssento() <= piso1.getNAssentos())
                 cadeirasPiso1.add(passagemFor);
-            else cadeirasPiso2.add(passagemFor);
+            else
+                cadeirasPiso2.add(passagemFor);
         }
 
         PrecoModel preco1 = viagem.getPrecoByNPiso(1);
@@ -157,7 +164,8 @@ public class PassagemService {
         boolean emDinheiro = false;
         boolean estaPago = true;
 
-        FaturaPassagemModel pago = faturaPassagemService.saveEmpresa(valorTotal, viagem, dto.metodoPagamento(), estaPago);
+        FaturaPassagemModel pago = faturaPassagemService.saveEmpresa(valorTotal, viagem, dto.metodoPagamento(),
+                estaPago);
 
         viagem.addValorArrecadadoNaoWeb(pago.getValorTotal());
         if (dto.metodoPagamento().equals(TipoPagamento.DINHEIRO)) {
@@ -179,14 +187,17 @@ public class PassagemService {
 
         List<PassagemModel> passagens = new ArrayList<>();
         for (PassagemDTO passagemDTO : cadeirasPiso1) {
-            var passagem = new PassagemModel(passagemDTO, false, preco1.getPreco(), estaPago, emDinheiro, saida, destino, preco1, pago);
+            var passagem = new PassagemModel(passagemDTO, false, preco1.getPreco(), estaPago, emDinheiro, saida,
+                    destino, preco1, pago);
             passagens.add(passagem);
         }
 
-        if (preco2 != null) for (PassagemDTO passagemDTO : cadeirasPiso2) {
-            var passagem = new PassagemModel(passagemDTO, false, preco2.getPreco(), estaPago, emDinheiro, saida, destino, preco2, pago);
-            passagens.add(passagem);
-        }
+        if (preco2 != null)
+            for (PassagemDTO passagemDTO : cadeirasPiso2) {
+                var passagem = new PassagemModel(passagemDTO, false, preco2.getPreco(), estaPago, emDinheiro, saida,
+                        destino, preco2, pago);
+                passagens.add(passagem);
+            }
 
         passagemRepository.saveAll(passagens);
 
@@ -214,8 +225,10 @@ public class PassagemService {
 
     private void atualizarNAssentosDisponiveis(PrecoModel preco, List<PassagemDTO> assentos) {
         int nAssentosDiposniveis = preco.getNAssentosDisponiveis() - assentos.size();
-        if (nAssentosDiposniveis < 0) throw new ValidationException("passagens", "Não há assentos disponíveis");
-        if (nAssentosDiposniveis == 0) preco.setCheio(true);
+        if (nAssentosDiposniveis < 0)
+            throw new ValidationException("passagens", "Não há assentos disponíveis");
+        if (nAssentosDiposniveis == 0)
+            preco.setCheio(true);
         preco.setNAssentosDisponiveis(nAssentosDiposniveis);
     }
 
@@ -231,17 +244,21 @@ public class PassagemService {
             throw new RestRuntimeException(HttpStatus.CONFLICT, "A passagem já foi rembolsado");
         var viagem = model.getPreco().getViagem();
         boolean resultado;
+        BigDecimal valorDevolvido = model.getPrecoPago().multiply(BigDecimal.valueOf(taxaRembolso));
         if (model.getEmDinheiro()) {
-            resultado = viagem.subtrairValorDinheiro(model.getPrecoPago());
-        } else if (!model.getCompradoWeb()) resultado = viagem.subtrairValorNaoWeb(model.getPrecoPago());
+            resultado = viagem.subtrairValorDinheiro(valorDevolvido);
+        } else if (!model.getCompradoWeb())
+            resultado = viagem.subtrairValorNaoWeb(valorDevolvido);
         else {
             log.warn("Se precisa configurar uma API para a operação");
             // Neste caso não se pode fazer um reembolso sem uma API
-            throw new RestRuntimeException(HttpStatus.CONFLICT, "A passagem foi comprado na web, o reembolso não esta disponível");
+            throw new RestRuntimeException(HttpStatus.CONFLICT,
+                    "A passagem foi comprado na web, o reembolso não esta disponível");
         }
         if (!resultado) {
             log.warn("Se tentou retirar um valor que não podia da caixa");
-            throw new RestRuntimeException(HttpStatus.CONFLICT, "O valor do dinheiro registrado é menor que o preço da passagem");
+            throw new RestRuntimeException(HttpStatus.CONFLICT,
+                    "O valor do dinheiro registrado é menor que o preço da passagem");
         }
 
         var faturaReembolsada = new FaturaReembolsoModel(model.getPrecoPago(), model.getFaturaPassagem(), model);

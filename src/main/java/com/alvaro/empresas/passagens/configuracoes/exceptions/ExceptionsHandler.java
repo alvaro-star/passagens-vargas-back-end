@@ -1,13 +1,10 @@
 package com.alvaro.empresas.passagens.configuracoes.exceptions;
 
 import java.sql.SQLIntegrityConstraintViolationException;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -77,7 +74,7 @@ public class ExceptionsHandler {
         return new ValidationError(
                 System.currentTimeMillis(),
                 HttpStatus.UNPROCESSABLE_ENTITY,
-                "Erro de validação",
+                "O formulario aprensenta alguns dados inconsistentes",
                 request.getRequestURI(),
                 e.getBindingResult().getFieldErrors());
     }
@@ -96,7 +93,7 @@ public class ExceptionsHandler {
     @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public StandardError erroAssociacao(SQLIntegrityConstraintViolationException e,
-                                        HttpServletRequest request) {
+            HttpServletRequest request) {
         log.error(e.getMessage());
         return new StandardError(
                 System.currentTimeMillis(),

@@ -1,4 +1,4 @@
-package com.alvaro.empresas.passagens.helpers;
+package com.alvaro.empresas.passagens.helpers.utils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

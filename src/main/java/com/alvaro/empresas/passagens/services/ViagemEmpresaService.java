@@ -1,6 +1,6 @@
 package com.alvaro.empresas.passagens.services;
 
-import static com.alvaro.empresas.passagens.helpers.DateTimeUtils.copyLocalTimeInLocalDate;
+import static com.alvaro.empresas.passagens.helpers.utils.DateTimeUtils.copyLocalTimeInLocalDate;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -29,7 +29,7 @@ import com.alvaro.empresas.passagens.dtos.viagens.seller.ViagemCreateDTO;
 import com.alvaro.empresas.passagens.dtos.viagens.seller.ViagemResponseDTO;
 import com.alvaro.empresas.passagens.dtos.viagens.seller.ViagemCreateCopyDTO;
 import com.alvaro.empresas.passagens.enums.TipoParada;
-import com.alvaro.empresas.passagens.helpers.DateTimeUtils;
+import com.alvaro.empresas.passagens.helpers.utils.DateTimeUtils;
 import com.alvaro.empresas.passagens.helpers.beans.UserLoguedComponent;
 import com.alvaro.empresas.passagens.helpers.thymeleaf.PDFThymeleaf;
 import com.alvaro.empresas.passagens.helpers.thymeleaf.PassagemItemListTHModel;

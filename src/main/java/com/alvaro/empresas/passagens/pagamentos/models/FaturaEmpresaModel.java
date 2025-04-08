@@ -13,10 +13,9 @@ import java.time.LocalDateTime;
 @Table(name = "tb_fatura_empresa", indexes = @Index(
         name = "idxtb_fatura_empresa_fk_idtb_empresa_inicio_contagem",
         columnList = "fk_idtb_empresa, inicio_contagem"))
-@DiscriminatorValue("EMPRESA")
 @NoArgsConstructor
+@AttributeOverride(name = "id", column = @Column(name = "idtb_fatura_empresa"))
 public class FaturaEmpresaModel extends IFaturaStandart {
-
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "fk_idtb_empresa")
     private EmpresaModel empresa;

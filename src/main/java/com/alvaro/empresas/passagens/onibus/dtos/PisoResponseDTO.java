@@ -1,8 +1,10 @@
 package com.alvaro.empresas.passagens.onibus.dtos;
 
-import com.alvaro.empresas.passagens.onibus.models.PisoModel;
-
+import java.util.List;
 import java.util.UUID;
+
+import com.alvaro.empresas.passagens.helpers.utils.IntegerListStringUtil;
+import com.alvaro.empresas.passagens.onibus.models.PisoModel;
 
 public record PisoResponseDTO(
         UUID id,
@@ -14,8 +16,7 @@ public record PisoResponseDTO(
         Integer nAssentos,
         Integer primeiroAssento,
         UUID idOnibus,
-        int[] posicoesBloqueadas
-) {
+        List<Integer> posicoesBloqueadas) {
     public PisoResponseDTO(PisoModel modelo) {
         this(
                 modelo.getId(),
@@ -27,7 +28,6 @@ public record PisoResponseDTO(
                 modelo.getNAssentos(),
                 modelo.getPrimeiroAssento(),
                 modelo.getOnibusId(),
-                modelo.getPosicionesBloqueadasIntegerList()
-        );
+                IntegerListStringUtil.convertStringToIntegerList(modelo.getPosicoesBloquedas()));
     }
 }

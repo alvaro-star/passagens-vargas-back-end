@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,8 +38,10 @@ public class CidadeResource {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public PageOutput<CidadeModel> findAll(@PageableDefault(size = 20) Pageable pageable) {
-        return cidadeService.findAll(pageable);
+    public PageOutput<CidadeModel> findAll(
+            @RequestParam(value = "nome", defaultValue = "", required = false) String nome,
+            @PageableDefault(size = 20) Pageable pageable) {
+        return cidadeService.findAll(nome, pageable);
     }
 
     @GetMapping("{id}")
@@ -51,12 +54,6 @@ public class CidadeResource {
     @ResponseStatus(HttpStatus.OK)
     public PageOutput<LugarModel> findLugares(@PathVariable Integer id, Pageable pageable) {
         return lugarService.findByCidadeId(id, pageable);
-    }
-
-    @GetMapping("{nome}/like")
-    @ResponseStatus(HttpStatus.OK)
-    public PageOutput<CidadeModel> findAllLike(@PathVariable(value = "nome") String nome, @PageableDefault(size = 8, sort = "nome") Pageable pageable) {
-        return cidadeService.findByNomeContaining(nome.toUpperCase(), pageable);
     }
 
     @PostMapping

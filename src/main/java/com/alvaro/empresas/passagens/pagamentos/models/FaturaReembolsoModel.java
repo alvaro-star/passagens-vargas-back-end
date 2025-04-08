@@ -7,12 +7,13 @@ import lombok.*;
 
 import java.math.BigDecimal;
 
-@Table
-@Entity(name = "tb_fatura_reembolso")
+
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
-@DiscriminatorValue("REEMBOLSO")
+@Table
+@Entity(name = "tb_fatura_reembolso")
+@AttributeOverride(name = "id", column = @Column(name = "idtb_fatura_reembolso"))
 public class FaturaReembolsoModel extends IFaturaStandart {
     @ManyToOne
     @JoinColumn(name = "fk_idtb_fatura_passagem")

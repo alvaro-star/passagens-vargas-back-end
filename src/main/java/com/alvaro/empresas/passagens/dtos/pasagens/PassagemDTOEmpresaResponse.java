@@ -1,11 +1,10 @@
 package com.alvaro.empresas.passagens.dtos.pasagens;
 
+import java.time.LocalDate;
+import java.util.UUID;
+
 import com.alvaro.empresas.passagens.models.PassagemModel;
 import com.alvaro.empresas.passagens.paradas.dtos.ParadaResponseDTO;
-
-import java.time.LocalDate;
-import java.util.Date;
-import java.util.UUID;
 
 public record PassagemDTOEmpresaResponse(
         UUID id,

@@ -1,14 +1,25 @@
 package com.alvaro.empresas.passagens.onibus.models;
 
+import java.util.UUID;
+
+import com.alvaro.empresas.passagens.helpers.utils.IntegerListStringUtil;
 import com.alvaro.empresas.passagens.models.IEntityStandart;
 import com.alvaro.empresas.passagens.onibus.dtos.PisoInputDTO;
 import com.alvaro.empresas.passagens.onibus.enums.TipePosicao;
-import jakarta.persistence.*;
-import lombok.*;
 
-import java.util.List;
-import java.util.UUID;
-
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "tb_piso", indexes = @Index(name = "idxtb_piso_fk_idtb_onibus", columnList = "fk_idtb_onibus"))
@@ -51,24 +62,7 @@ public class PisoModel extends IEntityStandart {
         inicioContagem = dto.inicioContagem();
         this.nPiso = nPiso;
         this.primeiroAssento = primeiroAssento;
-        this.posicoesBloquedas = joinString(",", dto.posicoesBloquedas());
-    }
-
-    private String joinString(String delimiter, List<Integer> numbers) {
-        StringBuilder str = new StringBuilder();
-        numbers.forEach(number -> str.append(number).append(delimiter));
-        if (numbers.size() > 1) str.deleteCharAt(str.length() - 1);
-        return str.toString();
-    }
-
-    public int[] getPosicionesBloqueadasIntegerList() {
-        if (posicoesBloquedas.isBlank()) return new int[0];
-        String[] posicoes = this.posicoesBloquedas.split(",");
-        int[] posicoesConvertidas = new int[posicoes.length];
-        for (int i = 0; i < posicoes.length; i++) {
-            posicoesConvertidas[i] = Integer.parseInt(posicoes[i]);
-        }
-        return posicoesConvertidas;
+        this.posicoesBloquedas = IntegerListStringUtil.convertListToString(",", dto.posicoesBloquedas());
     }
 
     public boolean hasNAssento(Integer nAssento) {
@@ -79,7 +73,8 @@ public class PisoModel extends IEntityStandart {
         return nAssentos + primeiroAssento - 1;
     }
 
-    public PisoModel(Integer nLinhas, Integer nColunas, TipePosicao distribuicaoFileira, Integer nPiso, TipePosicao inicioContagem, Integer nAssentos, Integer primeiroAssento, OnibusModel onibus) {
+    public PisoModel(Integer nLinhas, Integer nColunas, TipePosicao distribuicaoFileira, Integer nPiso,
+            TipePosicao inicioContagem, Integer nAssentos, Integer primeiroAssento, OnibusModel onibus) {
         this.nLinhas = nLinhas;
         this.nColunas = nColunas;
         this.distribuicaoFileira = distribuicaoFileira;
@@ -96,10 +91,6 @@ public class PisoModel extends IEntityStandart {
         nColunas = dto.nColunas();
         distribuicaoFileira = dto.distribuicaoFileira();
         inicioContagem = dto.distribuicaoFileira();
-
-        String palavra = "";
-        for (Integer posicaoBloqueada : dto.posicoesBloquedas())
-            palavra = palavra.concat(posicaoBloqueada + ",");
-        this.posicoesBloquedas = palavra;
+        this.posicoesBloquedas = IntegerListStringUtil.convertListToString(",", dto.posicoesBloquedas());
     }
 }

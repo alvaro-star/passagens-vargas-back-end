@@ -1,47 +1,63 @@
 package com.alvaro.empresas.passagens.services;
 
-
-import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
-import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationException;
-import com.alvaro.empresas.passagens.dtos.precos.PrecoResponseDTO;
-import com.alvaro.empresas.passagens.dtos.viagens.JPQL.ViagemWithLogoDTOJPQL;
-import com.alvaro.empresas.passagens.dtos.viagens.buyer.ViagemResponseDTO;
-import com.alvaro.empresas.passagens.dtos.viagens.ViagemSolicitacaoDTO;
-import com.alvaro.empresas.passagens.models.ViagemModel;
-import com.alvaro.empresas.passagens.paradas.dtos.ParadaResponseDTO;
-import com.alvaro.empresas.passagens.paradas.models.CidadeModel;
-import com.alvaro.empresas.passagens.paradas.models.LugarModel;
-import com.alvaro.empresas.passagens.paradas.repositories.LugarRepository;
-import com.alvaro.empresas.passagens.repositories.PrecoRepository;
-import com.alvaro.empresas.passagens.repositories.ViagemRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.EntityNotFoundException;
+import com.alvaro.empresas.passagens.configuracoes.exceptions.CustomExceptions.ValidationException;
+import com.alvaro.empresas.passagens.dtos.precos.PrecoResponseDTO;
+import com.alvaro.empresas.passagens.dtos.precos.PrecoResponseVendaDTO;
+import com.alvaro.empresas.passagens.dtos.viagens.ViagemSolicitacaoDTO;
+import com.alvaro.empresas.passagens.dtos.viagens.JPQL.ViagemWithLogoDTOJPQL;
+import com.alvaro.empresas.passagens.dtos.viagens.buyer.ViagemResponseDTO;
+import com.alvaro.empresas.passagens.dtos.viagens.buyer.ViagemResponseVendaDTO;
+import com.alvaro.empresas.passagens.models.ViagemModel;
+import com.alvaro.empresas.passagens.onibus.dtos.PisoResponseDTO;
+import com.alvaro.empresas.passagens.paradas.dtos.ParadaResponseDTO;
+import com.alvaro.empresas.passagens.paradas.models.CidadeModel;
+import com.alvaro.empresas.passagens.paradas.models.LugarModel;
+import com.alvaro.empresas.passagens.paradas.repositories.LugarRepository;
+import com.alvaro.empresas.passagens.repositories.PassagemRepository;
+import com.alvaro.empresas.passagens.repositories.ViagemRepository;
 
 @Service
 public class ViagemService {
     @Autowired
     private ViagemRepository viagemRepository;
     @Autowired
-    private LugarRepository lugarRepository;
+    private PassagemRepository passagemRepository;
     @Autowired
-    private PrecoRepository precoRepository;
+    private LugarRepository lugarRepository;
 
     public ViagemResponseDTO findById(UUID id) {
-        var optionalModel = viagemRepository.findByIdWithLogo(id)
+        var model = viagemRepository.findByIdWithLogo(id)
                 .orElseThrow(() -> new EntityNotFoundException(id, ViagemModel.class));
-        var paradas = optionalModel.viagem().getParadas().stream().map(ParadaResponseDTO::new).toList();
-        var precos = optionalModel.viagem().getPrecos().stream().map(PrecoResponseDTO::new).toList();
-        return new ViagemResponseDTO(optionalModel.viagem(), optionalModel.logo(), paradas, precos);
+        var paradas = model.viagem().getParadas().stream().map(ParadaResponseDTO::new).toList();
+        var precos = model.viagem().getPrecos().stream().map(PrecoResponseDTO::new).toList();
+        return new ViagemResponseDTO(model.viagem(), model.logo(), paradas, precos);
     }
 
-    //Inconcluso
+    public ViagemResponseVendaDTO findByIdToVenda(UUID id) {
+        var model = viagemRepository.findByIdOrThr(id);
+        var onibus = model.getOnibus();
+
+        List<PrecoResponseVendaDTO> precos = model.getPrecos().stream().map(preco -> {
+            var piso = onibus.getPisoByNumero(preco.getNPiso());
+            var pisoDTO = new PisoResponseDTO(piso);
+            List<Integer> ocupados = passagemRepository.getPassagensVendidasENaoReembolsadas(preco.getId());
+            return new PrecoResponseVendaDTO(preco, pisoDTO, ocupados);
+        }).toList();
+
+        var paradas = model.getParadas().stream().map(ParadaResponseDTO::new).toList();
+        return new ViagemResponseVendaDTO(model, paradas, precos);
+    }
+
     public List<ViagemResponseDTO> getViagensFromDia(ViagemSolicitacaoDTO dto) {
         if (dto.idCidadeDestino().equals(dto.idCidadeSaida()))
             throw new ValidationException("idDestino", "O destino não pode ser o mesmo que a saida");
@@ -62,12 +78,15 @@ public class ViagemService {
 
         if (hj.toLocalDate().isEqual(dto.dataSaida())) {
             startDay = hj.plusMinutes(30);
-            if (hj.toLocalTime().isAfter(LocalTime.of(23, 30))) return new ArrayList<>();
-        } else startDay = dto.dataSaida().atTime(LocalTime.MIN);
+            if (hj.toLocalTime().isAfter(LocalTime.of(23, 30)))
+                return new ArrayList<>();
+        } else
+            startDay = dto.dataSaida().atTime(LocalTime.MIN);
 
         for (LugarModel lugarSaida : lugaresSaida) {
             for (LugarModel lugarDestino : lugaresDestino) {
-                List<ViagemWithLogoDTOJPQL> viagens = viagemRepository.findByStartInInterval(lugarSaida.getId(), lugarDestino.getId(), startDay, endDay);
+                List<ViagemWithLogoDTOJPQL> viagens = viagemRepository.findByStartInInterval(lugarSaida.getId(),
+                        lugarDestino.getId(), startDay, endDay);
                 for (ViagemWithLogoDTOJPQL viagem : viagens) {
                     List<ParadaResponseDTO> paradasDTO = new ArrayList<>();
                     paradasDTO.add(new ParadaResponseDTO(viagem.saida()));
@@ -75,7 +94,8 @@ public class ViagemService {
 
                     var precosDTOs = viagem.viagem().getPrecos().stream().map(PrecoResponseDTO::new).toList();
 
-                    viagensSelecionados.add(new ViagemResponseDTO(viagem.viagem(), viagem.logo(), paradasDTO, precosDTOs));
+                    viagensSelecionados
+                            .add(new ViagemResponseDTO(viagem.viagem(), viagem.logo(), paradasDTO, precosDTOs));
                 }
             }
         }

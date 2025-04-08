@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
-public record PrecoDTOResponseViagem(
+public record PrecoResponseVendaDTO(
         UUID id,
         BigDecimal preco,
         Integer nPiso,
@@ -15,7 +15,7 @@ public record PrecoDTOResponseViagem(
         Integer nAssentosDisponiveis,
         PisoResponseDTO piso,
         List<Integer> assentosOcupados) {
-    public PrecoDTOResponseViagem(
+    public PrecoResponseVendaDTO(
             PrecoModel model,
             PisoResponseDTO piso,
             List<Integer> assentosOcupados

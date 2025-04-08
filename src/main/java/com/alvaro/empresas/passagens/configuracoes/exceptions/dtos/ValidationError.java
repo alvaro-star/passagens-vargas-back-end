@@ -3,12 +3,10 @@ package com.alvaro.empresas.passagens.configuracoes.exceptions.dtos;
 import java.util.HashMap;
 import java.util.List;
 
-import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 @Getter
 public class ValidationError extends StandardError {
@@ -20,17 +18,13 @@ public class ValidationError extends StandardError {
     }
 
     public ValidationError(Long timestamp, HttpStatus status, String message, String path,
-                           HashMap<String, Object> errors) {
+            HashMap<String, Object> errors) {
         super(timestamp, status, message, path);
         this.errors = errors;
     }
 
     private void setErrors(List<FieldError> errors) {
         this.errors = groupErrorsByFieldName(errors);
-    }
-
-    private void setErrors(HashMap<String, Object> errors) {
-        this.errors = errors;
     }
 
     private HashMap<String, Object> groupErrorsByFieldName(List<FieldError> fieldErrors) {
@@ -43,12 +37,12 @@ public class ValidationError extends StandardError {
                 String key = fieldPath[i];
 
                 @SuppressWarnings("unchecked")
-                HashMap<String, Object> nestedMap = (HashMap<String, Object>) current.computeIfAbsent(key, k -> new HashMap<String, Object>());
-
+                HashMap<String, Object> nestedMap = (HashMap<String, Object>) current.computeIfAbsent(key,
+                        k -> new HashMap<String, Object>());
 
                 if (!(nestedMap instanceof HashMap<String, Object>)) {
                     breaked = true;
-                    break;  // Não podemos continuar se não for um Map
+                    break; // Não podemos continuar se não for um Map
                 }
                 current = nestedMap;
             }

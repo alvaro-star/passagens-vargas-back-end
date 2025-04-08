@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 
 import com.alvaro.empresas.passagens.enums.TipoPagamento;
-import com.alvaro.empresas.passagens.helpers.DateTimeUtils;
+import com.alvaro.empresas.passagens.helpers.utils.DateTimeUtils;
 import com.alvaro.empresas.passagens.services.EmailService;
 import com.alvaro.empresas.passagens.helpers.thymeleaf.CidadeTHModel;
 import com.alvaro.empresas.passagens.helpers.thymeleaf.MetodoTHModel;

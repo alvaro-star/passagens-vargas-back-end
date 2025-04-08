@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.alvaro.empresas.passagens.dtos.pasagens.PassagemDTOEmpresaResponse;
 import com.alvaro.empresas.passagens.dtos.precos.PrecoResponseDTO;
-import com.alvaro.empresas.passagens.dtos.precos.PrecoDTOResponseViagem;
 import com.alvaro.empresas.passagens.dtos.precos.PrecoUpdateDTO;
 import com.alvaro.empresas.passagens.services.PassagemService;
 import com.alvaro.empresas.passagens.services.PrecoService;
@@ -38,12 +37,6 @@ public class PrecoResource {
     @ResponseStatus(HttpStatus.OK)
     public PrecoResponseDTO findById(@PathVariable UUID id) {
         return precoService.findById(id);
-    }
-
-    @GetMapping("{id}/vender")
-    @ResponseStatus(HttpStatus.OK)
-    public PrecoDTOResponseViagem vender(@PathVariable UUID id) {
-        return precoService.vender(id);
     }
 
     @PutMapping("{id}")

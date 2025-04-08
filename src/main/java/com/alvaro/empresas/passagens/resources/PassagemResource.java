@@ -7,7 +7,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,7 +28,7 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("passagens")
 @SecurityRequirement(name = "bearer-key")
-public class PasagemResource {
+public class PassagemResource {
     @Autowired
     private PassagemService passagemService;
 
@@ -49,10 +48,10 @@ public class PasagemResource {
         return new ResponseEntity<>(pasajePdf, headers, HttpStatus.OK);
     }
 
-    @PostMapping
+    // Venta de pasajes al público
+    @PostMapping("comprar")
     @ResponseStatus(HttpStatus.CREATED)
-    public Object save(@RequestBody @Valid PassagensDTO dto) { // Venta de pasajes al
-        // público
+    public Object save(@RequestBody @Valid PassagensDTO dto) {
         return passagemService.saveCliente(dto);
     }
 
@@ -64,7 +63,7 @@ public class PasagemResource {
         return new CodigoPago(idPago);
     }
 
-    @DeleteMapping("{id}") // Habilitado solo para el reembolso fijo
+    @DeleteMapping("{id}")
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_FUNCIONARIO', 'ROLE_EMPRESA_ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void rembolso(@PathVariable UUID id) {

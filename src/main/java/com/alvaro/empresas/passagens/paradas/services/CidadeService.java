@@ -1,6 +1,7 @@
 package com.alvaro.empresas.passagens.paradas.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -28,13 +29,12 @@ public class CidadeService {
         return cidadeRepository.findByIdOrThr(id);
     }
 
-    public PageOutput<CidadeModel> findAll(Pageable pageable) {
-        var models = cidadeRepository.findAll(pageable);
-        return new PageOutput<>(models);
-    }
-
-    public PageOutput<CidadeModel> findByNomeContaining(String nome, Pageable pageable) {
-        var models = cidadeRepository.findByNomeContaining(nome, pageable);
+    public PageOutput<CidadeModel> findAll(String nome, Pageable pageable) {
+        Page<CidadeModel> models;
+        if (nome.isBlank())
+            models = cidadeRepository.findAll(pageable);
+        else
+            models = cidadeRepository.findByNomeContaining(nome, pageable);
         return new PageOutput<>(models);
     }
 

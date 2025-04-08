@@ -1,6 +1,7 @@
 package com.alvaro.empresas.passagens.resources;
 
 import com.alvaro.empresas.passagens.dtos.viagens.buyer.ViagemResponseDTO;
+import com.alvaro.empresas.passagens.dtos.viagens.buyer.ViagemResponseVendaDTO;
 import com.alvaro.empresas.passagens.dtos.viagens.ViagemSolicitacaoDTO;
 import com.alvaro.empresas.passagens.configuracoes.validations.groups.IClientCommonUser;
 import com.alvaro.empresas.passagens.services.ViagemService;
@@ -24,6 +25,12 @@ public class ViagemResource {
     @ResponseStatus(HttpStatus.OK)
     public ViagemResponseDTO findById(@PathVariable UUID id) {
         return viagemService.findById(id);
+    }
+
+    @GetMapping("{id}/vender")
+    @ResponseStatus(HttpStatus.OK)
+    public ViagemResponseVendaDTO findByIdVender(@PathVariable UUID id) {
+        return viagemService.findByIdToVenda(id);
     }
 
     @GetMapping

@@ -12,7 +12,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Service;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.alvaro.empresas.passagens.helpers.DateTimeUtils;
+import com.alvaro.empresas.passagens.helpers.utils.DateTimeUtils;
 import com.alvaro.empresas.passagens.models.EmpresaModel;
 import com.alvaro.empresas.passagens.onibus.services.OnibusService;
 import com.alvaro.empresas.passagens.paradas.repositories.LugarRepository;

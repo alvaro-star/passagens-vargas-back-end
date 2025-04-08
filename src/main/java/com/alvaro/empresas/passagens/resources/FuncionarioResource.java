@@ -8,10 +8,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,24 +30,26 @@ public class FuncionarioResource {
     @Autowired
     private FuncionarioService funcionarioService;
 
-    @GetMapping("{idEmpresa}")
+    @GetMapping
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPRESA_ADMIN')")
     @ResponseStatus(HttpStatus.OK)
-    public PageOutput<FuncionarioResponseDTO> findAll(@PathVariable UUID idEmpresa, Pageable pageable) {
+    public PageOutput<FuncionarioResponseDTO> findAll(@RequestParam(required = true) UUID idEmpresa,
+            Pageable pageable) {
         return funcionarioService.findAllFromEmpresa(idEmpresa, pageable);
     }
 
-    @PostMapping("{idEmpresa}")
+    @PostMapping
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void save(@RequestBody @Valid RegisterDTOFuncionario registerDTO, @PathVariable UUID idEmpresa) {
+    public void save(@RequestParam(required = true) UUID idEmpresa,
+            @RequestBody @Valid RegisterDTOFuncionario registerDTO) {
         funcionarioService.save(registerDTO, idEmpresa);
     }
 
-    @DeleteMapping("{idEmpresa}/{email}")
+    @DeleteMapping
     @PreAuthorize("hasAnyRole('ROLE_EMPRESA_ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable(value = "idEmpresa") UUID idEmpresa, @PathVariable(value = "email") String email) {
+    public void delete(@RequestParam(required = true) UUID idEmpresa, @RequestParam(required = true) String email) {
         funcionarioService.delete(email, idEmpresa);
     }
 }

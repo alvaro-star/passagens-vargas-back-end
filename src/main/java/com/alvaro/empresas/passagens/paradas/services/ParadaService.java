@@ -114,35 +114,38 @@ public class ParadaService {
 
         var horarioSaida = viagem.getSaida().getDataHora();
         var horarioDestino = viagem.getDestino().getDataHora();
-        if (model.getTipo().equals(TipoParada.CAMINHO)) {
-            if (!viagem.getSaida().getDataHora().isAfter(model.getDataHora())
-                    || !viagem.getDestino().getDataHora().isBefore(model.getDataHora()))
-                throw new ValidationException("dataHora", "O horário da parada não esta no intervalo da viagem");
-        } else {
-            switch (model.getTipo()) {
-                case SAIDA -> {
-                    viagem.getParadas().forEach(parada -> {
-                        if (!parada.getTipo().equals(TipoParada.SAIDA)
-                                && dataParadaAjustada.isAfter(parada.getDataHora()))
-                            throw new ValidationException("dataHora",
-                                    "Uma das paradas possui um horário anterior ao novo horário da SAIDA");
-                    });
-                    horarioSaida = dataParadaAjustada;
+        switch (model.getTipo()) {
+            case SAIDA -> {
+                viagem.getParadas().forEach(parada -> {
+                    if (!parada.getTipo().equals(TipoParada.SAIDA)
+                            && dataParadaAjustada.isAfter(parada.getDataHora()))
+                        throw new ValidationException("dataHora",
+                                "Uma das paradas possui um horário anterior ao novo horário da SAIDA");
+                });
+                horarioSaida = dataParadaAjustada;
 
-                    viagem.setDataHoraSaida(dataParadaAjustada);
-                    viagemRepository.save(viagem);
-                }
-                case DESTINO -> {
-                    viagem.getParadas().forEach(parada -> {
-                        if (!parada.getTipo().equals(TipoParada.DESTINO)
-                                && dataParadaAjustada.isBefore(parada.getDataHora()))
-                            throw new ValidationException("dataHora",
-                                    "O horário do destino é menor que o de uma parada do caminho");
-                    });
-                    horarioDestino = dataParadaAjustada;
-                }
+                viagem.setDataHoraSaida(dataParadaAjustada);
+                viagemRepository.save(viagem);
+            }
+            case CAMINHO -> {
+                if (!viagem.getSaida().getDataHora().isAfter(model.getDataHora())
+                        || !viagem.getDestino().getDataHora().isBefore(model.getDataHora()))
+                    throw new ValidationException("dataHora",
+                            "O horário da parada não esta no intervalo da viagem");
+            }
+            case DESTINO -> {
+                viagem.getParadas().forEach(parada -> {
+                    if (!parada.getTipo().equals(TipoParada.DESTINO)
+                            && dataParadaAjustada.isBefore(parada.getDataHora()))
+                        throw new ValidationException("dataHora",
+                                "O horário do destino é menor que o de uma parada do caminho");
+                });
+                horarioDestino = dataParadaAjustada;
             }
 
+        }
+
+        if (!model.getTipo().equals(TipoParada.CAMINHO)) {
             var existe = tempoViagemService.existsViagensActiveFromOnibus(viagem.getOnibus(),
                     horarioSaida,
                     horarioDestino,

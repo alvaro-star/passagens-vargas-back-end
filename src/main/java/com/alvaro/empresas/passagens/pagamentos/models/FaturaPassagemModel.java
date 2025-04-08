@@ -16,16 +16,19 @@ import java.util.UUID;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-@Entity
 @NoArgsConstructor
-@Table(name = "tb_fatura_passagem", indexes = @Index(name = "idxtb_viagem_fk_idtb_viagem_criado_em", columnList = "fk_idtb_viagem, created_at"))
-@DiscriminatorValue("PASSAGEM")
+@Entity
+@Table(
+        name = "tb_fatura_passagem",
+        indexes = @Index(name = "idxtb_viagem_fk_idtb_viagem_criado_em", columnList = "fk_idtb_viagem, created_at")
+)
+@AttributeOverride(name = "id", column = @Column(name = "idtb_fatura_passagem"))
 public class FaturaPassagemModel extends IFaturaStandart {
     @Column(nullable = false)
     private BigDecimal desconto;
     @Column(nullable = false)
     private BigDecimal taxaServico;
-    @Column(nullable = false, name = "pagamento?")
+    @Column(nullable = false, name = "esta_pago")
     private Boolean estaPago;
     @Column(nullable = false, name = "metodo_pagamento")
     @Enumerated(EnumType.STRING)

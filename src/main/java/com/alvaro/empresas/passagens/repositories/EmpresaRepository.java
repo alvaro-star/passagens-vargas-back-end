@@ -10,5 +10,6 @@ import com.alvaro.empresas.passagens.models.EmpresaModel;
 
 @Repository
 public interface EmpresaRepository extends JpaRepository<EmpresaModel, UUID>, ICustomRepository<EmpresaModel, UUID> {
+    @SuppressWarnings("null")
     boolean existsById(UUID id);
 }

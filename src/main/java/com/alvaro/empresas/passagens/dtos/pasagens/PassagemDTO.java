@@ -1,9 +1,13 @@
 package com.alvaro.empresas.passagens.dtos.pasagens;
 
-import jakarta.validation.constraints.*;
-
 import java.time.LocalDate;
-import java.util.Date;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 
 public record PassagemDTO(
         @NotBlank
